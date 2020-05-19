@@ -38,6 +38,7 @@
     "debug": "4.1.1",
     "lodash": "^4.17.15",
     "needle": "2.4.1",
+    "p-map": "4.0.0",
     "sleep-promise": "8.0.1",
     "snyk-config": "^3.0.0",
     "source-map-support": "^0.5.16",

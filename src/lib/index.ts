@@ -2,6 +2,7 @@ import 'source-map-support/register';
 import * as needle from 'needle';
 import * as sleep from 'sleep-promise';
 import { Url } from 'url';
+import * as pMap from 'p-map';
 
 interface Target {
   name?: string; // Gitlab, GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos, Bitbucket Server, Azure Container Registry, Elastic Container Registry, Artifactory Container Registry, Docker Hub
@@ -67,6 +68,8 @@ export async function importTarget(
         'No import location url returned. Please re-try the import.',
       );
     }
+    // TODO: log any failed projects for re-processing later
+    console.log(`pollingUrl for ${target.name}: ${pollingUrl}`);
     return { pollingUrl };
   } catch (error) {
     const err: {
@@ -76,6 +79,44 @@ export async function importTarget(
     err.innerError = error;
     throw err;
   }
+}
+
+interface ImportTarget {
+  orgId: string;
+  integrationId: string;
+  target: Target;
+  files?: FilePath[];
+}
+
+export async function importTargets(
+  targets: ImportTarget[],
+): Promise<string[]> {
+  const apiToken = process.env.SNYK_API_TOKEN;
+  if (!apiToken) {
+    throw new Error(
+      `Please set the SNYK_API_TOKEN e.g. export SNYK_API_TOKEN='*****'`,
+    );
+  }
+  const pollingUrls: string[] = [];
+  // TODO: filter out previously processed
+
+  await pMap(
+    targets,
+    async (t) => {
+      try {
+        const { orgId, integrationId, target, files } = t;
+        const {pollingUrl} = await importTarget(orgId, integrationId, target, files);
+        // TODO: log all succeeded into a file
+
+        pollingUrls.push(pollingUrl);
+      } catch (error) {
+        // TODO: log all failed into a file
+        console.log('Failed to process:', JSON.stringify(t));
+      }
+    },
+    { concurrency: 5 },
+  );
+  return pollingUrls;
 }
 
 interface Status {
