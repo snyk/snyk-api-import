@@ -34,11 +34,7 @@ export async function importTarget(
       `Please set the SNYK_API_TOKEN e.g. export SNYK_API_TOKEN='*****'`,
     );
   }
-  console.log(
-    'Importing target:',
-    { orgId, integrationId, target },
-    Object.keys(target).length,
-  );
+  console.log('Importing target:', { orgId, integrationId, target });
 
   if (!orgId || !integrationId || Object.keys(target).length === 0) {
     throw new Error(
@@ -71,7 +67,6 @@ export async function importTarget(
         'No import location url returned. Please re-try the import.',
       );
     }
-    console.log('** res', res.body, pollingUrl);
     return { pollingUrl };
   } catch (error) {
     const err: {
@@ -94,8 +89,8 @@ interface Project {
 }
 
 interface Log {
-  name: 'org2/repo2';
-  created: '2018-07-23T15:21:10.644Z';
+  name: string;
+  created: string;
   status: Status;
   projects: Project[];
 }
@@ -111,7 +106,7 @@ export async function pollImportUrl(
   locationUrl: string,
   retryCount = MAX_RETRY_COUNT,
   retryWaitTime = MIN_RETRY_WAIT_TIME,
-): Promise<object> {
+): Promise<PollImportResponse> {
   const apiToken = process.env.SNYK_API_TOKEN;
   // const apiToken = process.env.SNYK_API_TOKEN_LOCAL;
 
@@ -146,7 +141,9 @@ export async function pollImportUrl(
       await sleep(retryWaitTime);
       const increasedRetryWaitTime =
         retryWaitTime + retryWaitTime * 0.1 * (MAX_RETRY_COUNT - retryCount);
-        console.log(`Will re-check import task in |${increasedRetryWaitTime}| ms`);
+      console.log(
+        `Will re-check import task in |${increasedRetryWaitTime}| ms`,
+      );
       return await pollImportUrl(
         locationUrl,
         --retryCount,

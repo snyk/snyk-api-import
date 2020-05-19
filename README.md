@@ -2,9 +2,9 @@
 
 ***
 
-[![Known Vulnerabilities](https://snyk.io/test/github/snyk/walmart-import/badge.svg)](https://snyk.io/test/github/snyk/walmart-import)
+[![Known Vulnerabilities](https://snyk.io/test/github/snyk/snyk-api-import/badge.svg)](https://snyk.io/test/github/snyk/snyk-api-import)
 
 Snyk helps you find, fix and monitor for known vulnerabilities in your dependencies, both on an ad hoc basis and as part of your CI (Build) system.
 
-## Snyk walmart-import
-Walmart import for 20k+ repos
+## Snyk api import
+Snyk API project importer

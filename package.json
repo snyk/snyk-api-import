@@ -1,5 +1,5 @@
 {
-  "name": "walmart-import",
+  "name": "snyk-api-import",
   "description": "Walmart import for 20k+ repos",
   "main": "dist/index.js",
   "scripts": {
@@ -20,7 +20,7 @@
   "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/snyk-tech-services/walmart-import"
+    "url": "https://github.com/snyk-tech-services/snyk-api-import"
   },
   "author": "Snyk Tech Services",
   "license": "Apache-2.0",
@@ -31,7 +31,7 @@
     "bin",
     "dist"
   ],
-  "homepage": "https://github.com/snyk-tech-services/walmart-import#readme",
+  "homepage": "https://github.com/snyk-tech-services/snyk-api-import#readme",
   "dependencies": {
     "@snyk/configstore": "^3.2.0-rc1",
     "axios": "^0.19.2",

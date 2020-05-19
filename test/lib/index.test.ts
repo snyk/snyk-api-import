@@ -13,6 +13,20 @@ test('Import a repo', async () => {
   expect(pollingUrl).not.toBeNull();
   const importLog = await pollImportUrl(pollingUrl);
   expect(importLog).toMatchObject({
+    id: expect.any(String),
     status: 'complete',
+    created: expect.any(String),
+  });
+  expect(importLog.logs[0]).toMatchObject({
+    name: 'lili2311/vulnerable-nextjs',
+    created: expect.any(String),
+    status: 'complete',
+    projects: [
+      {
+        projectUrl: expect.any(String),
+        success: true,
+        targetFile: expect.any(String),
+      },
+    ],
   });
 }, 30000000);
