@@ -1,0 +1,101 @@
+version: 2.1
+orbs:
+  snyk: snyk/snyk@0.0.8
+
+jobs:
+  build-test-monitor:
+      docker:
+        # specify the version
+        - image: circleci/node:10.16.3
+
+      steps:
+        - checkout
+        - run:
+            name: "Install deps"
+            command: |
+              npm install
+        - run:
+            name: "Run Tests"
+            command: |
+              npm test
+        - snyk/scan:
+            fail-on-issues: true
+            monitor-on-build: true
+            token-variable: SNYK_TOKEN
+        - run: ./generate-binaries.sh
+        - persist_to_workspace:
+            root: .
+            paths:
+              - dist/*
+
+  build-test:
+      docker:
+        # specify the version
+        - image: circleci/node:10.16.3
+
+      steps:
+        - checkout
+        - run:
+            name: "Install deps"
+            command: |
+              npm install
+        - run:
+            name: "Run Tests"
+            command: |
+              npm test
+        - snyk/scan:
+            fail-on-issues: true
+            monitor-on-build: false
+            token-variable: SNYK_TOKEN
+
+  publish-github-release:
+    docker:
+      - image: gcr.io/snyk-technical-services/cicd-github
+        auth:
+          username: _json_key
+          password: $GCLOUD_GCR_SNYK_TS_READER
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: "Publish Release on GitHub"
+          command: |    
+            VERSIONJUMP=$(git log --oneline -1 --pretty=%B | cat | grep -E 'minor|major|patch' | awk -F ':' '{print $1}')   
+            VERSION=$(/workdir/nextver.sh "$VERSIONJUMP")
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${VERSION} dist/
+
+workflows:
+  version: 2.1
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build-test-monitor
+  build-test-monitor-publish:
+    jobs:
+      - build-test-monitor:
+          filters:
+            branches:
+              only:
+                  - master
+      - publish-github-release:
+          requires:
+            - build-test-monitor
+          filters:
+            branches:
+              only:
+                - master
+  build-test:
+      jobs:
+        - build-test:
+            filters:
+              branches:
+                ignore:
+                  - master
+
