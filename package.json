@@ -9,7 +9,7 @@
     "lint:eslint": "eslint --cache '{lib,test}/**/*.ts'",
     "test": "npm run lint && npm run build && npm run test:unit",
     "test:unit": "jest",
-    "test:unit:debug": "DEBUG='snyk:api-import'",
+    "test:unit:debug": "DEBUG='snyk:api-import' jest",
     "test:coverage": "npm run test:unit -- --coverage",
     "test:watch": "tsc-watch --onSuccess 'npm run test:unit'",
     "build": "tsc",
