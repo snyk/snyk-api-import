@@ -43,13 +43,19 @@ export async function importTarget(
         },
       },
     );
+    if (res.statusCode && res.statusCode !== 201) {
+      debug('ERROR:', res.body);
+      throw new Error(
+        'Expected a 201 response, instead received: ' + JSON.stringify(res.body),
+      );
+    }
     const locationUrl = res.headers['location'];
     if (!locationUrl) {
       throw new Error(
         'No import location url returned. Please re-try the import.',
       );
     }
-    // TODO: log success?
+    // TODO: log success
     debug(`Received locationUrl for ${target.name}: ${locationUrl}`);
     return { pollingUrl: locationUrl };
   } catch (error) {
@@ -59,6 +65,7 @@ export async function importTarget(
       innerError?: string;
     } = new Error('Could not complete API import');
     err.innerError = error;
+    debug(`Could not complete API import: ${error}`);
     throw err;
   }
 }
