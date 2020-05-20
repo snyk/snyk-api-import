@@ -14,9 +14,10 @@
     "test:watch": "tsc-watch --onSuccess 'npm run test:unit'",
     "build": "tsc",
     "build-watch": "tsc -w",
-    "prepare": "npm run build",
+    "prepare": "npm run snyk-protect && npm run build",
     "snyk-test": "snyk test",
-    "pkg-binaries": "npx pkg . -t node12-linux-x64,node12-macos-x64,node12-win-x64 --out-path ./dist/binaries"
+    "pkg-binaries": "npx pkg . -t node12-linux-x64,node12-macos-x64,node12-win-x64 --out-path ./dist/binaries",
+    "snyk-protect": "snyk protect"
   },
   "types": "./dist/index.d.ts",
   "repository": {
@@ -43,7 +44,8 @@
     "sleep-promise": "8.0.1",
     "snyk-config": "^3.0.0",
     "source-map-support": "^0.5.16",
-    "tslib": "^1.10.0"
+    "tslib": "^1.10.0",
+    "snyk": "^1.211.0"
   },
   "devDependencies": {
     "@types/debug": "4.1.5",
@@ -70,5 +72,6 @@
     "branches": [
       "master"
     ]
-  }
+  },
+  "snyk": true
 }
