@@ -8,3 +8,17 @@ Snyk helps you find, fix and monitor for known vulnerabilities in your dependenc
 
 ## Snyk api import
 Snyk API project importer
+
+
+### Setup
+`npm i && npm run build`
+
+### Running the test locally
+You will need to set the following environment variable:
+  - `SNYK_API_TOKEN` - check 1 Password (search for "snyk-api-import")
+  - `SNYK_HOST='https://dev.snyk.io'`
+
+Run the tests with `npm test`
+
+
+
