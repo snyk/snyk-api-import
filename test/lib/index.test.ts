@@ -9,8 +9,8 @@ import { Status } from '../../src/lib/types';
 // TODO: afterEach delete the new projects
 test('Import & Poll a repo', async () => {
   const { pollingUrl } = await importTarget(
-    '71a1561a-5a08-4d7e-80e4-699a12d73d4c',
-    '6f2644e2-ac86-4701-b0c3-0c8f07fa7fc3',
+    'f0125d9b-271a-4b50-ad23-80e12575a1bf',
+    'c4de291b-e083-4c43-a72c-113463e0d268',
     {
       name: 'shallow-goof-policy',
       owner: 'snyk-fixtures',
@@ -42,8 +42,8 @@ test('Import & Poll a repo', async () => {
 test('importTargets &  pollImportUrls multiple repos', async () => {
   const pollingUrls = await importTargets([
     {
-      orgId: '71a1561a-5a08-4d7e-80e4-699a12d73d4c',
-      integrationId: '6f2644e2-ac86-4701-b0c3-0c8f07fa7fc3',
+      orgId: 'f0125d9b-271a-4b50-ad23-80e12575a1bf',
+      integrationId: 'c4de291b-e083-4c43-a72c-113463e0d268',
       target: {
         name: 'shallow-goof-policy',
         owner: 'snyk-fixtures',
@@ -51,8 +51,8 @@ test('importTargets &  pollImportUrls multiple repos', async () => {
       },
     },
     {
-      orgId: '71a1561a-5a08-4d7e-80e4-699a12d73d4c',
-      integrationId: '6f2644e2-ac86-4701-b0c3-0c8f07fa7fc3',
+      orgId: 'f0125d9b-271a-4b50-ad23-80e12575a1bf',
+      integrationId: 'c4de291b-e083-4c43-a72c-113463e0d268',
       target: {
         name: 'ruby-with-versions',
         owner: 'snyk-fixtures',
@@ -60,8 +60,8 @@ test('importTargets &  pollImportUrls multiple repos', async () => {
       },
     },
     {
-      orgId: '71a1561a-5a08-4d7e-80e4-699a12d73d4c',
-      integrationId: '6f2644e2-ac86-4701-b0c3-0c8f07fa7fc3',
+      orgId: 'f0125d9b-271a-4b50-ad23-80e12575a1bf',
+      integrationId: 'c4de291b-e083-4c43-a72c-113463e0d268',
       target: {
         name: 'composer-with-vulns',
         owner: 'snyk-fixtures',
