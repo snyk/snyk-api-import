@@ -1,101 +1,102 @@
 version: 2.1
-orbs:
-  snyk: snyk/snyk@0.0.8
 
-jobs:
-  build-test-monitor:
-      docker:
-        # specify the version
-        - image: circleci/node:10.16.3
+defaults: &defaults
+  docker:
+    - image: node:12
+  working_directory: ~/snyk-api-import
 
-      steps:
-        - checkout
-        - run:
-            name: "Install deps"
-            command: |
-              npm install
-        - run:
-            name: "Run Tests"
-            command: |
-              npm test
-        - snyk/scan:
-            fail-on-issues: true
-            monitor-on-build: true
-            token-variable: SNYK_TOKEN
-        - run: ./generate-binaries.sh
-        - persist_to_workspace:
-            root: .
-            paths:
-              - dist/*
-
-  build-test:
-      docker:
-        # specify the version
-        - image: circleci/node:10.16.3
-
-      steps:
-        - checkout
-        - run:
-            name: "Install deps"
-            command: |
-              npm install
-        - run:
-            name: "Run Tests"
-            command: |
-              npm test
-        - snyk/scan:
-            fail-on-issues: true
-            monitor-on-build: false
-            token-variable: SNYK_TOKEN
-
-  publish-github-release:
-    docker:
-      - image: gcr.io/snyk-technical-services/cicd-github
-        auth:
-          username: _json_key
-          password: $GCLOUD_GCR_SNYK_TS_READER
+commands:
+  show_node_version:
+    description: Log Node and npm version
     steps:
-      - checkout
-      - attach_workspace:
-          at: .
       - run:
-          name: "Publish Release on GitHub"
-          command: |    
-            VERSIONJUMP=$(git log --oneline -1 --pretty=%B | cat | grep -E 'minor|major|patch' | awk -F ':' '{print $1}')   
-            VERSION=$(/workdir/nextver.sh "$VERSIONJUMP")
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${VERSION} dist/
-
+          name: Node version
+          command: node --version
+      - run:
+          name: NPM version
+          command: npm --version
+jobs:
+  release:
+    <<: *defaults
+    docker:
+      - image: circleci/node:<< parameters.node_version >>
+    resource_class: small
+    steps:
+      - install_deps
+      - run: sudo npm i -g semantic-release @semantic-release/exec pkg
+      - run:
+          name: Publish to GitHub
+          command: semantic-release
+    test:
+      <<: *defaults
+      steps:
+        - show_node_version
+        - checkout
+        - attach_workspace:
+            at: ~/snyk-api-import
+        - run:
+            name: Install
+            command: npm i
+        - run:
+            name: Build
+            command: npm run build
+        - run:
+            name: Run tests
+            command: npm test
+    lint:
+      <<: *defaults
+      steps:
+        - checkout_and_merge
+        - run:
+            name: Run linting tasks
+            command: npm run lint
 workflows:
-  version: 2.1
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - build-test-monitor
-  build-test-monitor-publish:
-    jobs:
-      - build-test-monitor:
-          filters:
-            branches:
-              only:
-                  - master
-      - publish-github-release:
-          requires:
-            - build-test-monitor
-          filters:
-            branches:
-              only:
-                - master
-  build-test:
+    version: 2
+    nightly:
+        triggers:
+          - schedule:
+              cron: "0 0 * * *"
+              filters:
+                branches:
+                  only:
+                    - master
+        jobs:
+            - build-test-monitor:
+                context: SNYK
+
+    test:
       jobs:
-        - build-test:
+        - common:
+            name: Common
+            context: nodejs-install
+            node_version: "12"
             filters:
               branches:
                 ignore:
                   - master
+        - test:
+            name: Tests for Node v12 support
+            context: nodejs-install
+            node_version: "12"
+            requires:
+              - Common
+            filters:
+              branches:
+                ignore:
+                  - master
+        - release:
+            name: Release
+            context: nodejs-app-release
+            node_version: "12"
+            filters:
+              branches:
+                only:
+                  - master
 
+                        - release:
+          name: Release
+          context: nodejs-lib-release
+          filters:
+            branches:
+              only:
+                - master
