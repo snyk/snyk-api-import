@@ -25,11 +25,15 @@ async function deleteTestProjects(
 describe('Single target', () => {
   const discoveredProjects: Project[] = [];
   it('Import & poll a repo', async () => {
-    const { pollingUrl } = await importTarget(ORG_ID, GITHUB_INTEGRATION_ID, {
-      name: 'shallow-goof-policy',
-      owner: 'snyk-fixtures',
-      branch: 'master',
-    });
+    const { pollingUrl } = await importTarget(
+      ORG_ID,
+      GITHUB_INTEGRATION_ID,
+      {
+        name: 'shallow-goof-policy',
+        owner: 'snyk-fixtures',
+        branch: 'master',
+      },
+    );
     expect(pollingUrl).not.toBeNull();
     const projects = await pollImportUrl(pollingUrl);
     expect(projects[0]).toMatchObject({
@@ -95,4 +99,3 @@ describe('Multiple targets', () => {
 
 test.todo('Failed import 100%');
 test.todo('Only 1 import fails out of a few + logs created');
-test.todo('If we stopped half way, restarted from where we left');

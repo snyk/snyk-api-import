@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Import projects script Skips any badly formatted targets 1`] = `"f0125d9b-271a-4b50-ad23-80e12575a1bf:c4de291b-e083-4c43-a72c-113463e0d268:shallow-goof-policy:snyk-fixtures:master:https://dev.snyk.io/api/v1/org/f0125d9b-271a-4b50-ad23-80e12575a1bf/integrations/c4de291b-e083-4c43-a72c-113463e0d268/import/63f06690-1485-40cf-b81f-218104cfb277,f0125d9b-271a-4b50-ad23-80e12575a1bf:c4de291b-e083-4c43-a72c-113463e0d268:ruby-with-versions:snyk-fixtures:master:https://dev.snyk.io/api/v1/org/f0125d9b-271a-4b50-ad23-80e12575a1bf/integrations/c4de291b-e083-4c43-a72c-113463e0d268/import/63f06690-1485-40cf-b81f-218104cfb277,f0125d9b-271a-4b50-ad23-80e12575a1bf:c4de291b-e083-4c43-a72c-113463e0d268:composer-with-vulns:snyk-fixtures:master:https://dev.snyk.io/api/v1/org/f0125d9b-271a-4b50-ad23-80e12575a1bf/integrations/c4de291b-e083-4c43-a72c-113463e0d268/import/63f06690-1485-40cf-b81f-218104cfb277,f0125d9b-271a-4b50-ad23-80e12575a1bf:c4de291b-e083-4c43-a72c-113463e0d268:shallow-goof-policy:snyk-fixtures:master:https://dev.snyk.io/api/v1/org/f0125d9b-271a-4b50-ad23-80e12575a1bf/integrations/c4de291b-e083-4c43-a72c-113463e0d268/import/8ba73ea5-e1ff-4513-ad5a-8931ba3bb4d1,"`;
+
+exports[`Import projects script succeeds to import targets from file 1`] = `"f0125d9b-271a-4b50-ad23-80e12575a1bf:c4de291b-e083-4c43-a72c-113463e0d268:ruby-with-versions:snyk-fixtures:master,f0125d9b-271a-4b50-ad23-80e12575a1bf:c4de291b-e083-4c43-a72c-113463e0d268:composer-with-vulns:snyk-fixtures:master,f0125d9b-271a-4b50-ad23-80e12575a1bf:c4de291b-e083-4c43-a72c-113463e0d268:shallow-goof-policy:snyk-fixtures:master,"`;
+
+exports[`Import skips previously imported succeeds to import targets from file 1`] = `
+"f0125d9b-271a-4b50-ad23-80e12575a1bf:c4de291b-e083-4c43-a72c-113463e0d268:composer-with-vulns:snyk-fixtures:master,
+"
+`;
