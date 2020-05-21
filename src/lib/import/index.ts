@@ -5,9 +5,9 @@ import * as debugLib from 'debug';
 import * as _ from 'lodash';
 import { Target, FilePath, ImportTarget } from '../types';
 import { getApiToken } from '../get-api-token';
+import { getSnykHost } from '../get-snyk-host';
 
-const debug = debugLib('snyk:import');
-const SNYK_HOST = process.env.SNYK_HOST || 'https://snyk.io';
+const debug = debugLib('snyk:api-import');
 
 export async function importTarget(
   orgId: string,
@@ -29,6 +29,7 @@ export async function importTarget(
       target,
       files,
     };
+    const SNYK_HOST = getSnykHost();
 
     const res = await needle(
       'post',
@@ -44,7 +45,6 @@ export async function importTarget(
       },
     );
     if (res.statusCode && res.statusCode !== 201) {
-      debug('ERROR:', res.body);
       throw new Error(
         'Expected a 201 response, instead received: ' + JSON.stringify(res.body),
       );
@@ -65,7 +65,7 @@ export async function importTarget(
       innerError?: string;
     } = new Error('Could not complete API import');
     err.innerError = error;
-    debug(`Could not complete API import: ${error}`);
+    debug(`Could not complete API import: ${error.message}`);
     throw err;
   }
 }

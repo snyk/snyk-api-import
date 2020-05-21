@@ -6,8 +6,9 @@ import * as _ from 'lodash';
 import * as pMap from 'p-map';
 import { PollImportResponse } from '../types';
 import { getApiToken } from '../get-api-token';
+
 const debug = debugLib('snyk:poll-import');
-const MIN_RETRY_WAIT_TIME = 30000;
+const MIN_RETRY_WAIT_TIME = 3000;
 const MAX_RETRY_COUNT = 1000;
 
 export async function pollImportUrl(
