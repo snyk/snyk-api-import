@@ -19,15 +19,6 @@ export async function ImportProjects(
   debug(`Loaded ${targets.length} targets to import`);
   //TODO: validation?
   const pollingUrls = await importTargets(targets);
-  const importJobs = await pollImportUrls(pollingUrls);
-
-  const projects: Project[] = [];
-  importJobs.forEach((job) => {
-    job.logs.forEach(log => {
-      projects.push(...log.projects);
-    })
-  });
-
-
+  const projects = await pollImportUrls(pollingUrls);
   return projects;
 }

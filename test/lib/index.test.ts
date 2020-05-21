@@ -31,29 +31,14 @@ describe('Single target', () => {
       branch: 'master',
     });
     expect(pollingUrl).not.toBeNull();
-    const importLog = await pollImportUrl(pollingUrl);
-    expect(importLog).toMatchObject({
-      id: expect.any(String),
-      status: 'complete',
-      created: expect.any(String),
-    });
-    expect(importLog.logs.length > 1).toBeTruthy();
-    expect(importLog.logs[0]).toMatchObject({
-      name: expect.any(String),
-      created: expect.any(String),
-      status: 'complete',
-      projects: [
-        {
-          projectUrl: expect.any(String),
-          success: true,
-          targetFile: expect.any(String),
-        },
-      ],
+    const projects = await pollImportUrl(pollingUrl);
+    expect(projects[0]).toMatchObject({
+      projectUrl: expect.any(String),
+      success: true,
+      targetFile: expect.any(String),
     });
     // cleanup
-    importLog.logs.forEach((log) => {
-      discoveredProjects.push(...log.projects);
-    });
+    discoveredProjects.push(...projects);
   }, 30000000);
   afterAll(async () => {
     await deleteTestProjects(discoveredProjects);
@@ -93,39 +78,21 @@ describe('Multiple targets', () => {
       },
     ]);
     expect(pollingUrls.length >= 1).toBeTruthy();
-    const importLog = await pollImportUrls(pollingUrls);
-    expect(importLog[0]).toMatchObject({
-      id: expect.any(String),
-      status: 'complete',
-      created: expect.any(String),
-    });
+    const projects = await pollImportUrls(pollingUrls);
     // at least one job successfully finished
-    expect(importLog[0].logs[0]).toMatchObject({
-      name: expect.any(String),
-      created: expect.any(String),
-      status: 'complete',
-      projects: [
-        {
-          projectUrl: expect.any(String),
-          success: true,
-          targetFile: expect.any(String),
-        },
-      ],
+    expect(projects[0]).toMatchObject({
+      projectUrl: expect.any(String),
+      success: true,
+      targetFile: expect.any(String),
     });
-    expect(
-      importLog[0].logs.every((job) => job.status === Status.COMPLETE),
-    ).toBeTruthy();
     // cleanup
-    importLog[0].logs.forEach((log) => {
-      discoveredProjects.push(...log.projects);
-    });
+    discoveredProjects.push(...projects);
   }, 30000000);
   afterAll(async () => {
     await deleteTestProjects(discoveredProjects);
   });
 });
 
-test.todo('Import & poll in one');
 test.todo('Failed import 100%');
 test.todo('Only 1 import fails out of a few + logs created');
 test.todo('If we stopped half way, restarted from where we left');
