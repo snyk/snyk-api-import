@@ -24,7 +24,7 @@ test('Import & Poll a repo', async () => {
     status: 'complete',
     created: expect.any(String),
   });
-  expect(importLog.logs.length).toBe(1);
+  expect(importLog.logs.length > 1).toBeTruthy();
   expect(importLog.logs[0]).toMatchObject({
     name: 'snyk-fixtures/shallow-goof-policy',
     created: expect.any(String),

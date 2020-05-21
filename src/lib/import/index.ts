@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { Target, FilePath, ImportTarget } from '../types';
 import { getApiToken } from '../get-api-token';
 
-const debug = debugLib('snyk:api-import');
+const debug = debugLib('snyk:import');
 const SNYK_HOST = process.env.SNYK_HOST || 'https://snyk.io';
 
 export async function importTarget(
