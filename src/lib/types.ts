@@ -32,7 +32,9 @@ export enum Status {
 export interface Project {
   targetFile?: string;
   success: boolean;
-  projectUrl: Url;
+  projectUrl: string;
+  // TODO: would be nice to add?
+  // projectId: string;
 }
 
 export interface Log {
