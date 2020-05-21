@@ -1,5 +1,3 @@
-import { Url } from 'url';
-
 export interface ImportTarget {
   orgId: string;
   integrationId: string;
