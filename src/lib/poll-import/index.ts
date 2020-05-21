@@ -4,7 +4,7 @@ import * as sleep from 'sleep-promise';
 import * as debugLib from 'debug';
 import * as _ from 'lodash';
 import * as pMap from 'p-map';
-import { PollImportResponse } from '../types';
+import { PollImportResponse, Project } from '../types';
 import { getApiToken } from '../get-api-token';
 
 const debug = debugLib('snyk:poll-import');
@@ -15,7 +15,7 @@ export async function pollImportUrl(
   locationUrl: string,
   retryCount = MAX_RETRY_COUNT,
   retryWaitTime = MIN_RETRY_WAIT_TIME,
-): Promise<PollImportResponse> {
+): Promise<Project[]> {
   const apiToken = getApiToken();
   debug(`Polling locationUrl=${locationUrl}`);
 
@@ -51,7 +51,11 @@ export async function pollImportUrl(
         increasedRetryWaitTime,
       );
     }
-    return res.body;
+    const projects: Project[] = [];
+    importStatus.logs.forEach((log) => {
+      projects.push(...log.projects);
+    });
+    return projects;
   } catch (error) {
     debug('Could not complete API import:', error);
     const err: {
@@ -65,21 +69,21 @@ export async function pollImportUrl(
 
 export async function pollImportUrls(
   locationUrls: string[],
-): Promise<PollImportResponse[]> {
+): Promise<Project[]> {
   if (!locationUrls) {
     throw new Error(
       'Missing required parameters. Please ensure you have provided: locationUrls.',
     );
   }
   const uniqueLocationUrls = _.uniq(locationUrls);
-  const resArray: PollImportResponse[] = [];
+  const projectsArray: Project[] = [];
   await pMap(
     uniqueLocationUrls,
     async (locationUrl) => {
       try {
-        const res = await pollImportUrl(locationUrl);
+        const projects = await pollImportUrl(locationUrl);
         // TODO: log all succeeded into a file
-        resArray.push(res);
+        projectsArray.push(...projects);
       } catch (error) {
         // TODO: log all failed into a file
         debug('Failed to poll:', locationUrl);
@@ -88,5 +92,5 @@ export async function pollImportUrls(
     { concurrency: 10 },
   );
 
-  return resArray;
+  return projectsArray;
 }

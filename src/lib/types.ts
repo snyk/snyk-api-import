@@ -13,8 +13,9 @@ export interface Target {
   projectKey?: string; // Bitbucket Server
   repoSlug?: string; // Bitbucket Server
   id?: number; // Gitlab
-  owner: string; // Gitlab, GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos
-  branch: string; // Gitlab, GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos
+  owner?: string; // Gitlab, GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos
+  // if not set default branch will be picked
+  branch?: string; // Gitlab, GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos
 }
 
 export interface FilePath {
