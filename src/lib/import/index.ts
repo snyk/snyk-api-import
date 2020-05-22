@@ -6,6 +6,9 @@ import * as _ from 'lodash';
 import { Target, FilePath, ImportTarget } from '../types';
 import { getApiToken } from '../get-api-token';
 import { getSnykHost } from '../get-snyk-host';
+import { logImportedTarget } from '../../log-imported-targets';
+import { getLoggingPath } from '../get-logging-path';
+import { getConcurrentImportsNumber } from '../get-concurrent-imports-number';
 
 const debug = debugLib('snyk:api-import');
 
@@ -13,7 +16,8 @@ export async function importTarget(
   orgId: string,
   integrationId: string,
   target: Target,
-  files?: FilePath[],
+  files?: FilePath[] | undefined,
+  loggingPath?: string,
 ): Promise<{ pollingUrl: string }> {
   const apiToken = getApiToken();
   debug('Importing:', JSON.stringify({ orgId, integrationId, target }));
@@ -46,7 +50,8 @@ export async function importTarget(
     );
     if (res.statusCode && res.statusCode !== 201) {
       throw new Error(
-        'Expected a 201 response, instead received: ' + JSON.stringify(res.body),
+        'Expected a 201 response, instead received: ' +
+          JSON.stringify(res.body),
       );
     }
     const locationUrl = res.headers['location'];
@@ -57,6 +62,7 @@ export async function importTarget(
     }
     // TODO: log success
     debug(`Received locationUrl for ${target.name}: ${locationUrl}`);
+    logImportedTarget(orgId, integrationId, target, locationUrl, loggingPath);
     return { pollingUrl: locationUrl };
   } catch (error) {
     // TODO: log failure
@@ -72,6 +78,7 @@ export async function importTarget(
 
 export async function importTargets(
   targets: ImportTarget[],
+  loggingPath = getLoggingPath(),
 ): Promise<string[]> {
   const pollingUrls: string[] = [];
   // TODO: filter out previously processed
@@ -86,6 +93,7 @@ export async function importTargets(
           integrationId,
           target,
           files,
+          loggingPath,
         );
         // TODO: log all succeeded into a file
         pollingUrls.push(pollingUrl);
@@ -94,7 +102,7 @@ export async function importTargets(
         debug('Failed to process:', JSON.stringify(t));
       }
     },
-    { concurrency: 5 },
+    { concurrency: getConcurrentImportsNumber() },
   );
   return _.uniq(pollingUrls);
 }

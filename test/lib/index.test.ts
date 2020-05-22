@@ -5,7 +5,7 @@ import {
   pollImportUrls,
   deleteProjects,
 } from '../../src/lib';
-import { Status, Project } from '../../src/lib/types';
+import { Project } from '../../src/lib/types';
 const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
 const GITHUB_INTEGRATION_ID = 'c4de291b-e083-4c43-a72c-113463e0d268';
 
@@ -95,4 +95,3 @@ describe('Multiple targets', () => {
 
 test.todo('Failed import 100%');
 test.todo('Only 1 import fails out of a few + logs created');
-test.todo('If we stopped half way, restarted from where we left');
