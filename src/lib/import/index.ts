@@ -8,6 +8,7 @@ import { getApiToken } from '../get-api-token';
 import { getSnykHost } from '../get-snyk-host';
 import { logImportedTarget } from '../../log-imported-targets';
 import { getLoggingPath } from '../get-logging-path';
+import { logFailedImports } from '../../log-failed-imports';
 import { getConcurrentImportsNumber } from '../get-concurrent-imports-number';
 
 const debug = debugLib('snyk:api-import');
@@ -60,12 +61,11 @@ export async function importTarget(
         'No import location url returned. Please re-try the import.',
       );
     }
-    // TODO: log success
     debug(`Received locationUrl for ${target.name}: ${locationUrl}`);
     logImportedTarget(orgId, integrationId, target, locationUrl, loggingPath);
     return { pollingUrl: locationUrl };
   } catch (error) {
-    // TODO: log failure
+    logFailedImports(orgId, integrationId, target, loggingPath);
     const err: {
       message?: string | undefined;
       innerError?: string;
@@ -99,7 +99,9 @@ export async function importTargets(
         pollingUrls.push(pollingUrl);
       } catch (error) {
         // TODO: log all failed into a file
-        debug('Failed to process:', JSON.stringify(t));
+        const { orgId, integrationId, target } = t;
+        logFailedImports(orgId, integrationId, target, loggingPath);
+        debug('Failed to process:', JSON.stringify(t), error.message);
       }
     },
     { concurrency: getConcurrentImportsNumber() },

@@ -1,7 +1,12 @@
 import * as path from 'path';
 import * as fs from 'fs';
+
 import { ImportProjects } from '../../src/scripts/import-projects';
-import { IMPORT_PROJECTS_FILE_NAME, IMPORT_LOG_NAME } from '../../src/common';
+import {
+  IMPORT_PROJECTS_FILE_NAME,
+  IMPORT_LOG_NAME,
+  FAILED_LOG_NAME,
+} from '../../src/common';
 
 describe('Import projects script', () => {
   const logPath = path.resolve(__dirname, IMPORT_LOG_NAME);
@@ -44,13 +49,41 @@ describe('Import skips previously imported', () => {
   }, 30000000);
 });
 
-describe('Skips issues', () => {
-  const logPath = path.resolve(__dirname, IMPORT_LOG_NAME);
+describe('Skips & logs issues', () => {
+  const OLD_ENV = process.env;
+
+  afterEach(() => {
+    const logPath = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      IMPORT_LOG_NAME,
+    );
+    const failedLogPath = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      FAILED_LOG_NAME,
+    );
+    jest.clearAllMocks();
+    try {
+      fs.unlinkSync(failedLogPath);
+      fs.unlinkSync(logPath);
+    } catch (e) {
+      // do nothing
+    }
+    process.env = { ...OLD_ENV };
+  });
+
   it('Skips any badly formatted targets', async () => {
-    // TODO: ensure all failures are logged & assert it is present in the log
+    const logRoot = __dirname + '/fixtures/invalid-target/';
+    process.env.SNYK_LOG_PATH = logRoot;
+    const logPath = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      IMPORT_LOG_NAME,
+    );
+    const failedLogPath = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      FAILED_LOG_NAME,
+    );
     const projects = await ImportProjects(
-      path.resolve(__dirname + '/fixtures/import-projects-invalid-target.json'),
-      __dirname,
+      path.resolve(__dirname + '/fixtures/invalid-target/import-projects-invalid-target.json'),
     );
     expect(projects.length === 0).toBeTruthy();
     let logFile = null;
@@ -59,6 +92,34 @@ describe('Skips issues', () => {
     } catch (e) {
       expect(logFile).toBeNull();
     }
+    const failedLog = fs.readFileSync(failedLogPath, 'utf8');
+    expect(failedLog).toMatch('shallow-goof-policy');
+  }, 300);
+
+  it('Logs failed when API errors', async () => {
+    const logRoot = __dirname + '/fixtures/single-project/';
+    process.env.SNYK_LOG_PATH = logRoot;
+    const logPath = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      IMPORT_LOG_NAME,
+    );
+    const failedLogPath = path.resolve(process.env.SNYK_LOG_PATH as string, FAILED_LOG_NAME);
+    process.env.SNYK_HOST = 'https://do-not-exist.com';
+    // TODO: ensure all failures are logged & assert it is present in the log
+    const projects = await ImportProjects(
+      path.resolve(
+        __dirname + '/fixtures/single-project/import-projects-single.json',
+      ),
+    );
+    let logFile = null;
+    try {
+      logFile = fs.readFileSync(logPath, 'utf8');
+    } catch (e) {
+      expect(logFile).toBeNull();
+    }
+    expect(projects.length === 0).toBeTruthy();
+    const failedLog = fs.readFileSync(failedLogPath, 'utf8');
+    expect(failedLog).toMatch('ruby-with-versions');
   }, 300);
 });
 
