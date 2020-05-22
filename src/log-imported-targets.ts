@@ -10,7 +10,7 @@ export async function logImportedTarget(
   loggingPath: string = getLoggingPath(),
 ): Promise<void> {
   try {
-    const log = `${orgId}:${integrationId}:${Object.values(target).join(':')},`;
+    const log = `${orgId}:${integrationId}:${Object.values(target).join(':')}:${locationUrl},`;
     fs.appendFileSync(`${loggingPath}/imported-targets.log`, log);
   } catch (e) {
     // do nothing
