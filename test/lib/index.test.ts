@@ -5,7 +5,7 @@ import {
   pollImportUrls,
   deleteProjects,
 } from '../../src/lib';
-import { Status, Project } from '../../src/lib/types';
+import { Project } from '../../src/lib/types';
 const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
 const GITHUB_INTEGRATION_ID = 'c4de291b-e083-4c43-a72c-113463e0d268';
 
@@ -25,15 +25,11 @@ async function deleteTestProjects(
 describe('Single target', () => {
   const discoveredProjects: Project[] = [];
   it('Import & poll a repo', async () => {
-    const { pollingUrl } = await importTarget(
-      ORG_ID,
-      GITHUB_INTEGRATION_ID,
-      {
-        name: 'shallow-goof-policy',
-        owner: 'snyk-fixtures',
-        branch: 'master',
-      },
-    );
+    const { pollingUrl } = await importTarget(ORG_ID, GITHUB_INTEGRATION_ID, {
+      name: 'shallow-goof-policy',
+      owner: 'snyk-fixtures',
+      branch: 'master',
+    });
     expect(pollingUrl).not.toBeNull();
     const projects = await pollImportUrl(pollingUrl);
     expect(projects[0]).toMatchObject({

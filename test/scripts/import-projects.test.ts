@@ -8,7 +8,7 @@ describe('Import projects script', () => {
   afterEach(() => {
     fs.unlinkSync(logPath);
   });
-  it('succeeds to import targets from file', async () => {
+  it.only('succeeds to import targets from file', async () => {
     const projects = await ImportProjects(
       path.resolve(__dirname + `/fixtures/${IMPORT_PROJECTS_FILE_NAME}`),
       __dirname,

@@ -4,6 +4,7 @@ import { loadFile } from '../load-file';
 import { importTargets, pollImportUrls } from '../lib';
 import { Project, ImportTarget } from '../lib/types';
 import { getLoggingPath } from '../lib/get-logging-path';
+import { getConcurrentImportsNumber } from '../lib/get-concurrent-imports-number';
 
 const debug = debugLib('snyk:import-projects-script');
 
@@ -48,10 +49,25 @@ export async function ImportProjects(
     throw new Error(`Failed to parse targets from ${fileName}`);
   }
   debug(`Loaded ${targets.length} targets to import`);
+  const concurrentTargets = getConcurrentImportsNumber();
+  const projects: Project[] = [];
   //TODO: validation?
   const filteredTargets = await filterOutImportedTargets(targets, loggingPath);
-  const pollingUrls = await importTargets(filteredTargets, loggingPath);
-  const projects = await pollImportUrls(pollingUrls);
+  if (filteredTargets.length === 0) {
+    return [];
+  }
+  for (
+    let targetIndex = 0;
+    targetIndex < filteredTargets.length;
+    targetIndex = targetIndex + concurrentTargets
+  ) {
+    const batch = filteredTargets.slice(
+      targetIndex,
+      targetIndex + concurrentTargets,
+    );
+    const pollingUrls = await importTargets(batch, loggingPath);
+    projects.push(...(await pollImportUrls(pollingUrls)));
+  }
 
   return projects;
 }
