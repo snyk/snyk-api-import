@@ -106,7 +106,6 @@ export async function importTargets(
         );
         pollingUrls.push(pollingUrl);
       } catch (error) {
-        // TODO: log all failed into a file
         const { orgId, integrationId, target } = t;
         logFailedImports(orgId, integrationId, target, loggingPath);
         debug('Failed to process:', JSON.stringify(t), error.message);
