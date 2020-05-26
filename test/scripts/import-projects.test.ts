@@ -6,6 +6,7 @@ import {
   IMPORT_PROJECTS_FILE_NAME,
   IMPORT_LOG_NAME,
   FAILED_LOG_NAME,
+  FAILED_PROJECTS_LOG_NAME,
 } from '../../src/common';
 
 describe('Import projects script', () => {
@@ -53,21 +54,29 @@ describe('Skips & logs issues', () => {
   const OLD_ENV = process.env;
 
   afterEach(() => {
-    const logPath = path.resolve(
+    const importsInitiatedLog = path.resolve(
       process.env.SNYK_LOG_PATH as string,
       IMPORT_LOG_NAME,
     );
-    const failedLogPath = path.resolve(
+    const importsFailedLog = path.resolve(
       process.env.SNYK_LOG_PATH as string,
       FAILED_LOG_NAME,
     );
+    const projectsFailedLog = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      FAILED_PROJECTS_LOG_NAME,
+    );
     jest.clearAllMocks();
-    try {
-      fs.unlinkSync(failedLogPath);
-      fs.unlinkSync(logPath);
-    } catch (e) {
-      // do nothing
-    }
+    [importsFailedLog, importsInitiatedLog, projectsFailedLog].forEach(
+      (path) => {
+        try {
+          fs.unlinkSync(path);
+        } catch (e) {
+          // do nothing
+        }
+      },
+    );
+
     process.env = { ...OLD_ENV };
   });
 
@@ -83,7 +92,10 @@ describe('Skips & logs issues', () => {
       FAILED_LOG_NAME,
     );
     const projects = await ImportProjects(
-      path.resolve(__dirname + '/fixtures/invalid-target/import-projects-invalid-target.json'),
+      path.resolve(
+        __dirname +
+          '/fixtures/invalid-target/import-projects-invalid-target.json',
+      ),
     );
     expect(projects.length === 0).toBeTruthy();
     let logFile = null;
@@ -103,7 +115,10 @@ describe('Skips & logs issues', () => {
       process.env.SNYK_LOG_PATH as string,
       IMPORT_LOG_NAME,
     );
-    const failedLogPath = path.resolve(process.env.SNYK_LOG_PATH as string, FAILED_LOG_NAME);
+    const failedLogPath = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      FAILED_LOG_NAME,
+    );
     process.env.SNYK_HOST = 'https://do-not-exist.com';
     // TODO: ensure all failures are logged & assert it is present in the log
     const projects = await ImportProjects(
@@ -121,6 +136,42 @@ describe('Skips & logs issues', () => {
     const failedLog = fs.readFileSync(failedLogPath, 'utf8');
     expect(failedLog).toMatch('ruby-with-versions');
   }, 300);
+  it('Logs failed projects', async () => {
+    const logRoot = __dirname + '/fixtures/projects-with-errors/';
+    process.env.SNYK_LOG_PATH = logRoot;
+    const logPath = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      IMPORT_LOG_NAME,
+    );
+    const failedImportLogPath = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      FAILED_LOG_NAME,
+    );
+    const failedProjectsLogPath = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      FAILED_PROJECTS_LOG_NAME,
+    );
+    const projects = await ImportProjects(
+      path.resolve(
+        __dirname + '/fixtures/projects-with-errors/import-projects.json',
+      ),
+    );
+    const logFile = fs.readFileSync(logPath, 'utf8');
+    expect(logFile).not.toBeNull();
+    const failedProjectsLog = fs.readFileSync(failedProjectsLogPath, 'utf-8');
+    expect(failedProjectsLog).not.toBeNull();
+    expect(failedProjectsLog).toMatch(
+      'ruby-app-cyclic-lockfile-master/Gemfile.lock',
+    );
+
+    let failedImportLog = null;
+    try {
+      failedImportLog = fs.readFileSync(failedImportLogPath, 'utf8');
+    } catch (e) {
+      expect(failedImportLog).toBeNull();
+    }
+    expect(projects.length >= 1).toBeTruthy();
+  }, 50000);
 });
 
 describe('Error handling', () => {
