@@ -19,7 +19,12 @@ export async function importTarget(
   target: Target,
   files?: FilePath[] | undefined,
   loggingPath?: string,
-): Promise<{ pollingUrl: string }> {
+): Promise<{
+  pollingUrl: string;
+  target: Target;
+  orgId: string;
+  integrationId: string;
+}> {
   const apiToken = getApiToken();
   debug('Importing:', JSON.stringify({ orgId, integrationId, target }));
 
@@ -63,7 +68,12 @@ export async function importTarget(
     }
     debug(`Received locationUrl for ${target.name}: ${locationUrl}`);
     logImportedTarget(orgId, integrationId, target, locationUrl, loggingPath);
-    return { pollingUrl: locationUrl };
+    return {
+      pollingUrl: locationUrl,
+      integrationId,
+      target,
+      orgId,
+    };
   } catch (error) {
     logFailedImports(orgId, integrationId, target, loggingPath);
     const err: {
@@ -81,7 +91,6 @@ export async function importTargets(
   loggingPath = getLoggingPath(),
 ): Promise<string[]> {
   const pollingUrls: string[] = [];
-  // TODO: filter out previously processed
   // TODO: validate targets
   await pMap(
     targets,
@@ -95,7 +104,6 @@ export async function importTargets(
           files,
           loggingPath,
         );
-        // TODO: log all succeeded into a file
         pollingUrls.push(pollingUrl);
       } catch (error) {
         // TODO: log all failed into a file

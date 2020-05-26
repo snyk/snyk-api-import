@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import * as pMap from 'p-map';
 import { PollImportResponse, Project } from '../types';
 import { getApiToken } from '../get-api-token';
+import { logFailedProjects } from '../../log-failed-projects';
 
 const debug = debugLib('snyk:poll-import');
 const MIN_RETRY_WAIT_TIME = 3000;
@@ -81,10 +82,17 @@ export async function pollImportUrls(
     uniqueLocationUrls,
     async (locationUrl) => {
       try {
-        const projects = await pollImportUrl(locationUrl);
+        const allProjects = await pollImportUrl(locationUrl);
+        const [failedProjects, projects] = _.partition(
+          allProjects,
+          (p: Project) => !p.success,
+        );
+        logFailedProjects(locationUrl, failedProjects);
         // TODO: log all succeeded into a file
         projectsArray.push(...projects);
       } catch (error) {
+        // logFailedProjects(locationUrl, failedProjects);
+
         // TODO: log all failed into a file
         debug('Failed to poll:', locationUrl);
       }

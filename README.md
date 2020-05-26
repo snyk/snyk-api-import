@@ -11,7 +11,7 @@ Snyk API project importer
 
 
 ### Setup
-`npm i && npm run build`
+`npm i`
 
 ### Running the test locally
 You will need to set the following environment variable:
@@ -20,5 +20,11 @@ You will need to set the following environment variable:
 
 Run the tests with `npm test`
 
+
+### Running the script
+- `SNYK_HOST`
+- `SNYK_API_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
+- `SNYK_LOG_PATH` - the path to folder where all logs should be saved
+- `CONCURRENT_IMPORTS` (optional) defaults to 5 which is the recommended amount to import at once as a max.
 
 

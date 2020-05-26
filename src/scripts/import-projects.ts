@@ -65,8 +65,8 @@ export async function ImportProjects(
       targetIndex,
       targetIndex + concurrentTargets,
     );
-    const pollingUrls = await importTargets(batch, loggingPath);
-    projects.push(...(await pollImportUrls(pollingUrls)));
+    const pollingUrlsAndContext = await importTargets(batch, loggingPath);
+    projects.push(...(await pollImportUrls(pollingUrlsAndContext)));
   }
 
   return projects;
