@@ -66,11 +66,13 @@ describe('Skips & logs issues', () => {
       process.env.SNYK_LOG_PATH as string,
       FAILED_PROJECTS_LOG_NAME,
     );
-    jest.clearAllMocks();
     [importsFailedLog, importsInitiatedLog, projectsFailedLog].forEach(
       (path) => {
         try {
           fs.unlinkSync(path);
+          fs.unlinkSync(path);
+          fs.unlinkSync(path);
+
         } catch (e) {
           // do nothing
         }
@@ -78,7 +80,7 @@ describe('Skips & logs issues', () => {
     );
 
     process.env = { ...OLD_ENV };
-  });
+  }, 1000);
 
   it('Skips any badly formatted targets', async () => {
     const logRoot = __dirname + '/fixtures/invalid-target/';
@@ -87,7 +89,7 @@ describe('Skips & logs issues', () => {
       process.env.SNYK_LOG_PATH as string,
       IMPORT_LOG_NAME,
     );
-    const failedLogPath = path.resolve(
+    const failedImportsLogPath = path.resolve(
       process.env.SNYK_LOG_PATH as string,
       FAILED_LOG_NAME,
     );
@@ -104,7 +106,7 @@ describe('Skips & logs issues', () => {
     } catch (e) {
       expect(logFile).toBeNull();
     }
-    const failedLog = fs.readFileSync(failedLogPath, 'utf8');
+    const failedLog = fs.readFileSync(failedImportsLogPath, 'utf8');
     expect(failedLog).toMatch('shallow-goof-policy');
   }, 300);
 
@@ -115,12 +117,11 @@ describe('Skips & logs issues', () => {
       process.env.SNYK_LOG_PATH as string,
       IMPORT_LOG_NAME,
     );
-    const failedLogPath = path.resolve(
+    const failedImportsLogPath = path.resolve(
       process.env.SNYK_LOG_PATH as string,
       FAILED_LOG_NAME,
     );
     process.env.SNYK_HOST = 'https://do-not-exist.com';
-    // TODO: ensure all failures are logged & assert it is present in the log
     const projects = await ImportProjects(
       path.resolve(
         __dirname + '/fixtures/single-project/import-projects-single.json',
@@ -133,7 +134,7 @@ describe('Skips & logs issues', () => {
       expect(logFile).toBeNull();
     }
     expect(projects.length === 0).toBeTruthy();
-    const failedLog = fs.readFileSync(failedLogPath, 'utf8');
+    const failedLog = fs.readFileSync(failedImportsLogPath, 'utf8');
     expect(failedLog).toMatch('ruby-with-versions');
   }, 300);
   it('Logs failed projects', async () => {

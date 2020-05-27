@@ -5,6 +5,5 @@ export function getLoggingPath(): string {
       `Please set the SNYK_LOG_PATH e.g. export SNYK_LOG_PATH='~/my/path'`,
     );
   }
-  // TODO: what if path is not real?
   return snykLogPath;
 }

@@ -7,6 +7,7 @@ import * as pMap from 'p-map';
 import { PollImportResponse, Project } from '../types';
 import { getApiToken } from '../get-api-token';
 import { logFailedProjects } from '../../log-failed-projects';
+import { logFailedPollUrls } from '../../log-failed-polls';
 
 const debug = debugLib('snyk:poll-import');
 const MIN_RETRY_WAIT_TIME = 3000;
@@ -19,7 +20,6 @@ export async function pollImportUrl(
 ): Promise<Project[]> {
   const apiToken = getApiToken();
   debug(`Polling locationUrl=${locationUrl}`);
-
   if (!locationUrl) {
     throw new Error(
       `Missing required parameters. Please ensure you have provided: location url.
@@ -58,11 +58,11 @@ export async function pollImportUrl(
     });
     return projects;
   } catch (error) {
-    debug('Could not complete API import:', error);
+    debug('Could not poll Url:', locationUrl, error.message);
     const err: {
       message?: string | undefined;
       innerError?: string;
-    } = new Error('Could not complete API import');
+    } = new Error('Could not poll Url');
     err.innerError = error;
     throw err;
   }
@@ -88,12 +88,9 @@ export async function pollImportUrls(
           (p: Project) => !p.success,
         );
         logFailedProjects(locationUrl, failedProjects);
-        // TODO: log all succeeded into a file
         projectsArray.push(...projects);
       } catch (error) {
-        // logFailedProjects(locationUrl, failedProjects);
-
-        // TODO: log all failed into a file
+        logFailedPollUrls(locationUrl, error.message || error);
         debug('Failed to poll:', locationUrl);
       }
     },
