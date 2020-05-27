@@ -48,7 +48,7 @@ export async function ImportProjects(
   } catch (e) {
     throw new Error(`Failed to parse targets from ${fileName}`);
   }
-  debug(`Loaded ${targets.length} targets to import`);
+  debug(`Loaded ${targets.length} targets to import ${Date.now()}`);
   const concurrentTargets = getConcurrentImportsNumber();
   const projects: Project[] = [];
   //TODO: validation?
@@ -64,6 +64,10 @@ export async function ImportProjects(
     const batch = filteredTargets.slice(
       targetIndex,
       targetIndex + concurrentTargets,
+    );
+    debug(
+      `Importing batch ${targetIndex} - ${targetIndex +
+        concurrentTargets} out of ${filteredTargets.length}`,
     );
     const pollingUrlsAndContext = await importTargets(batch, loggingPath);
     projects.push(...(await pollImportUrls(pollingUrlsAndContext)));
