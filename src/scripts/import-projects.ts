@@ -1,7 +1,10 @@
 import * as debugLib from 'debug';
 import * as path from 'path';
 import { loadFile } from '../load-file';
-import { importTargets, pollImportUrls } from '../lib';
+import {
+  importTargets,
+  pollImportUrls,
+} from '../lib';
 import { Project, ImportTarget } from '../lib/types';
 import { getLoggingPath } from '../lib/get-logging-path';
 import { getConcurrentImportsNumber } from '../lib/get-concurrent-imports-number';
