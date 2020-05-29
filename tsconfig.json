@@ -9,5 +9,5 @@
     "importHelpers": true,
     "strict": true
   },
-  "include": ["./src/lib/**/*"]
+  "include": ["./src/**/**/*"]
 }
