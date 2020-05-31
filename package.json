@@ -2,7 +2,9 @@
   "name": "snyk-api-import",
   "description": "Walmart import for 20k+ repos",
   "main": "dist/index.js",
-  "bin": "dist/index.js",
+  "bin": {
+    "snyk-import": "dist/index.js"
+  },
   "scripts": {
     "format:check": "prettier --check '{''{lib,test}/!(test/**/fixtures)/**/*,*}.{js,ts,json,yml}'",
     "format": "prettier --write '{''{lib,test}/!(test/**/fixtures)/**/*,*}.{js,ts,json,yml}'",
