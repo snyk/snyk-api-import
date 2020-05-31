@@ -37,7 +37,7 @@ This script is intended to help import projects into Snyk with a controlled pace
       "target": {
         "name": "shallow-goof-policy",
         "owner": "snyk-fixtures",
-        "branch": "master" // optional!
+        "branch": "master"
       }
     },
     {
@@ -53,9 +53,10 @@ This script is intended to help import projects into Snyk with a controlled pace
 }
 ```
 2. Set the env vars mentioned:
+- `SNYK_IMPORT_PATH`- the path to the import file
 - `SNYK_API_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
 - `SNYK_LOG_PATH` - the path to folder where all logs should be saved
 - `CONCURRENT_IMPORTS` (optional) defaults to 5 repos at a time, which is the recommended amount to import at once as a max. Just 1 repo may have many projects inside. (10 may also be okay if all repos are small)
 - `SNYK_HOST` (optional) defaults to `https://snyk.io`
 
-3. `npm run build` and then `DEBUG=snyk* node dist/index.js`
+1. `npm run build` and then `DEBUG=snyk* node dist/index.js`

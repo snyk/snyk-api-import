@@ -1,0 +1,63 @@
+{
+  "prepare": [
+    "@semantic-release/npm",
+    {
+      "//": "adds a file to identify a build as a standalone binary",
+      "path": "@semantic-release/exec",
+      "cmd": "echo '' > dist/STANDALONE"
+    },
+    {
+      "//": "build the alpine, macos, linux and windows binaries",
+      "path": "@semantic-release/exec",
+      "cmd": "npx pkg . -t node12-linux-x64,node12-macos-x64,node12-win-x64",
+    },
+    {
+      "//": "shasum all binaries",
+      "path": "@semantic-release/exec",
+      "cmd": "shasum -a 256 snyk-import-linux > snyk-import-linux.sha256 && shasum -a 256 snyk-import-macos > snyk-import-macos.sha256 && shasum -a 256 snyk-import-win.exe > snyk-import-win.exe.sha256"
+    },
+    {
+      "//": "removes the file we use to identify a build as a standalone binary",
+      "path": "@semantic-release/exec",
+      "cmd": "rm dist/STANDALONE"
+    }
+  ],
+  "publish": [
+    "@semantic-release/npm",
+    {
+      "path": "@semantic-release/github",
+      "assets": [
+        {
+          "path": "./snyk-linux",
+          "name": "snyk-import-linux",
+          "label": "snyk-import-linux"
+        },
+        {
+          "path": "./snyk-import-linux.sha256",
+          "name": "snyk-import-linux.sha256",
+          "label": "snyk-import-linux.sha256"
+        },
+        {
+          "path": "./snyk-import-macos",
+          "name": "snyk-import-macos",
+          "label": "snyk-import-macos"
+        },
+        {
+          "path": "./snyk-import-macos.sha256",
+          "name": "snyk-import-macos.sha256",
+          "label": "snyk-import-macos.sha256"
+        },
+        {
+          "path": "./snyk-import-win.exe",
+          "name": "snyk-import-win.exe",
+          "label": "snyk-import-win.exe"
+        },
+        {
+          "path": "./snyk-import-win.exe.sha256",
+          "name": "snyk-import-win.exe.sha256",
+          "label": "snyk-import-win.exe.sha256"
+        }
+      ]
+    }
+  ]
+}
