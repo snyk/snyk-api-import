@@ -59,6 +59,8 @@ export async function ImportProjects(
   if (filteredTargets.length === 0) {
     return [];
   }
+  const skippedTargets = targets.length - filteredTargets.length;
+  debug(`Skipped previously imported ${skippedTargets}/${targets.length} targets`)
   for (
     let targetIndex = 0;
     targetIndex < filteredTargets.length;
@@ -68,8 +70,9 @@ export async function ImportProjects(
       targetIndex,
       targetIndex + concurrentTargets,
     );
+    const currentTargets = skippedTargets + targetIndex;
     debug(
-      `Importing batch ${targetIndex} - ${targetIndex +
+      `Importing batch ${currentTargets} - ${currentTargets +
         concurrentTargets} out of ${filteredTargets.length}`,
     );
     const pollingUrlsAndContext = await importTargets(batch, loggingPath);
