@@ -1,7 +1,7 @@
 import 'source-map-support/register';
-import * as needle from 'needle';
 import * as pMap from 'p-map';
 import * as debugLib from 'debug';
+import { requestsManager } from 'snyk-request-manager';
 import * as _ from 'lodash';
 import { Target, FilePath, ImportTarget } from '../types';
 import { getApiToken } from '../get-api-token';
@@ -15,6 +15,7 @@ import { getConcurrentImportsNumber } from '../get-concurrent-imports-number';
 const debug = debugLib('snyk:api-import');
 
 export async function importTarget(
+  requestManager: requestsManager,
   orgId: string,
   integrationId: string,
   target: Target,
@@ -26,7 +27,7 @@ export async function importTarget(
   orgId: string;
   integrationId: string;
 }> {
-  const apiToken = getApiToken();
+  getApiToken();
   debug('Importing:', JSON.stringify({ orgId, integrationId, target }));
 
   if (!orgId || !integrationId || Object.keys(target).length === 0) {
@@ -40,20 +41,13 @@ export async function importTarget(
       target,
       files,
     };
-    const SNYK_API = getSnykHost();
-    const res = await needle(
-      'post',
-      `${SNYK_API}/org/${orgId}/integrations/${integrationId}/import`,
-      body,
-      {
-        json: true,
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        read_timeout: 30000,
-        headers: {
-          Authorization: `token ${apiToken}`,
-        },
-      },
-    );
+    getSnykHost();
+
+    const res = await requestManager.request({
+      verb: 'post',
+      url: `/org/${orgId}/integrations/${integrationId}/import`,
+      body: JSON.stringify(body),
+    });
     if (res.statusCode && res.statusCode !== 201) {
       throw new Error(
         'Expected a 201 response, instead received: ' +
@@ -67,7 +61,13 @@ export async function importTarget(
       );
     }
     debug(`Received locationUrl for ${target.name}: ${locationUrl}`);
-    await logImportedTarget(orgId, integrationId, target, locationUrl, loggingPath);
+    await logImportedTarget(
+      orgId,
+      integrationId,
+      target,
+      locationUrl,
+      loggingPath,
+    );
     return {
       pollingUrl: locationUrl,
       integrationId,
@@ -91,6 +91,7 @@ export async function importTargets(
   loggingPath = getLoggingPath(),
 ): Promise<string[]> {
   const pollingUrls: string[] = [];
+  const requestManager = new requestsManager();
   // TODO: validate targets
   await pMap(
     targets,
@@ -98,6 +99,7 @@ export async function importTargets(
       try {
         const { orgId, integrationId, target, files } = t;
         const { pollingUrl } = await importTarget(
+          requestManager,
           orgId,
           integrationId,
           target,
