@@ -10,7 +10,7 @@ import { logFailedProjects } from '../../log-failed-projects';
 import { logFailedPollUrls } from '../../log-failed-polls';
 
 const debug = debugLib('snyk:poll-import');
-const MIN_RETRY_WAIT_TIME = 3000;
+const MIN_RETRY_WAIT_TIME = 30000;
 const MAX_RETRY_COUNT = 1000;
 
 export async function pollImportUrl(
@@ -43,13 +43,10 @@ export async function pollImportUrl(
       retryCount > 0
     ) {
       await sleep(retryWaitTime);
-      const increasedRetryWaitTime =
-        retryWaitTime + retryWaitTime * 0.1 * (MAX_RETRY_COUNT - retryCount);
-      debug(`Will re-check import task in "${increasedRetryWaitTime}ms"`);
+      debug(`Will re-check import task in "${retryWaitTime} ms"`);
       return await pollImportUrl(
         locationUrl,
         --retryCount,
-        increasedRetryWaitTime,
       );
     }
     const projects: Project[] = [];
