@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as debugLib from 'debug';
 const debug = debugLib('snyk:import-projects-script');
 
