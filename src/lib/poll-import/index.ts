@@ -84,7 +84,7 @@ export async function pollImportUrls(
           allProjects,
           (p: Project) => !p.success,
         );
-        logFailedProjects(locationUrl, failedProjects);
+        await logFailedProjects(locationUrl, failedProjects);
         projectsArray.push(...projects);
       } catch (error) {
         logFailedPollUrls(locationUrl, error.message || error);

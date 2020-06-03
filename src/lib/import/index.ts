@@ -67,7 +67,7 @@ export async function importTarget(
       );
     }
     debug(`Received locationUrl for ${target.name}: ${locationUrl}`);
-    logImportedTarget(orgId, integrationId, target, locationUrl, loggingPath);
+    await logImportedTarget(orgId, integrationId, target, locationUrl, loggingPath);
     return {
       pollingUrl: locationUrl,
       integrationId,
@@ -75,7 +75,7 @@ export async function importTarget(
       orgId,
     };
   } catch (error) {
-    logFailedImports(orgId, integrationId, target, loggingPath);
+    await logFailedImports(orgId, integrationId, target, loggingPath);
     const err: {
       message?: string | undefined;
       innerError?: string;
@@ -107,7 +107,7 @@ export async function importTargets(
         pollingUrls.push(pollingUrl);
       } catch (error) {
         const { orgId, integrationId, target } = t;
-        logFailedImports(orgId, integrationId, target, loggingPath);
+        await logFailedImports(orgId, integrationId, target, loggingPath);
         debug('Failed to process:', JSON.stringify(t), error.message);
       }
     },
