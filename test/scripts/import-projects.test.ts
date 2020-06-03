@@ -10,6 +10,7 @@ import {
 } from '../../src/common';
 import { deleteTestProjects } from '../delete-test-projects';
 import { Project } from '../../src/lib/types';
+import { generateLogsPaths } from '../generate-log-file-names';
 
 const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
 
@@ -96,15 +97,7 @@ describe('Skips & logs issues', () => {
   });
   it('Skips any badly formatted targets', async () => {
     const logRoot = __dirname + '/fixtures/invalid-target/';
-    process.env.SNYK_LOG_PATH = logRoot;
-    const logPath = path.resolve(
-      process.env.SNYK_LOG_PATH as string,
-      IMPORT_LOG_NAME,
-    );
-    const failedImportsLogPath = path.resolve(
-      process.env.SNYK_LOG_PATH as string,
-      FAILED_LOG_NAME,
-    );
+    const logs = generateLogsPaths(logRoot)
     const projects = await ImportProjects(
       path.resolve(
         __dirname +
@@ -114,11 +107,11 @@ describe('Skips & logs issues', () => {
     expect(projects.length === 0).toBeTruthy();
     let logFile = null;
     try {
-      logFile = fs.readFileSync(logPath, 'utf8');
+      logFile = fs.readFileSync(logs.importLogPath, 'utf8');
     } catch (e) {
       expect(logFile).toBeNull();
     }
-    const failedLog = fs.readFileSync(failedImportsLogPath, 'utf8');
+    const failedLog = fs.readFileSync(logs.failedImportLogPath, 'utf8');
     expect(failedLog).toMatch('shallow-goof-policy');
   }, 300);
 
