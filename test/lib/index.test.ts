@@ -6,12 +6,17 @@ import {
 } from '../../src/lib';
 import { Project } from '../../src/lib/types';
 import { deleteTestProjects } from '../delete-test-projects';
+import { generateLogsPaths } from '../generate-log-file-names';
+import { deleteLogs } from '../delete-logs';
+
 const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
 const GITHUB_INTEGRATION_ID = 'c4de291b-e083-4c43-a72c-113463e0d268';
 
 describe('Single target', () => {
   const discoveredProjects: Project[] = [];
+  let logs: string[];
   it('Import & poll a repo', async () => {
+    logs = Object.values(generateLogsPaths(__dirname));
     const { pollingUrl } = await importTarget(ORG_ID, GITHUB_INTEGRATION_ID, {
       name: 'shallow-goof-policy',
       owner: 'snyk-fixtures',
@@ -29,12 +34,15 @@ describe('Single target', () => {
   }, 30000000);
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
+    await deleteLogs(logs)
   });
 });
 
 describe('Multiple targets', () => {
   const discoveredProjects: Project[] = [];
+  let logs: string[];
   it('importTargets &  pollImportUrls multiple repos', async () => {
+    logs = Object.values(generateLogsPaths(__dirname));
     const pollingUrls = await importTargets([
       {
         orgId: ORG_ID,
@@ -77,6 +85,7 @@ describe('Multiple targets', () => {
   }, 30000000);
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
+    await deleteLogs(logs)
   });
 });
 
