@@ -8,11 +8,20 @@ import {
   FAILED_LOG_NAME,
   FAILED_PROJECTS_LOG_NAME,
 } from '../../src/common';
+import { deleteTestProjects } from '../delete-test-projects';
+import { Project } from '../../src/lib/types';
+
+const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
 
 describe('Import projects script', () => {
   const logPath = path.resolve(__dirname, IMPORT_LOG_NAME);
+  const discoveredProjects: Project[] = [];
+
   afterEach(() => {
     fs.unlinkSync(logPath);
+  });
+  afterAll(async () => {
+    await deleteTestProjects(ORG_ID, discoveredProjects);
   });
   it('succeeds to import targets from file', async () => {
     const projects = await ImportProjects(
@@ -29,6 +38,7 @@ describe('Import projects script', () => {
     expect(logFile).toMatch('shallow-goof-policy');
     expect(logFile).toMatch('composer-with-vulns');
     expect(logFile).toMatch('ruby-with-versions:');
+    discoveredProjects.push(...projects);
   }, 30000000);
 });
 
@@ -52,6 +62,7 @@ describe('Import skips previously imported', () => {
 
 describe('Skips & logs issues', () => {
   const OLD_ENV = process.env;
+  const discoveredProjects: Project[] = [];
 
   afterEach(() => {
     const importsInitiatedLog = path.resolve(
@@ -72,7 +83,6 @@ describe('Skips & logs issues', () => {
           fs.unlinkSync(path);
           fs.unlinkSync(path);
           fs.unlinkSync(path);
-
         } catch (e) {
           // do nothing
         }
@@ -81,7 +91,9 @@ describe('Skips & logs issues', () => {
 
     process.env = { ...OLD_ENV };
   }, 1000);
-
+  afterAll(async () => {
+    await deleteTestProjects(ORG_ID, discoveredProjects);
+  });
   it('Skips any badly formatted targets', async () => {
     const logRoot = __dirname + '/fixtures/invalid-target/';
     process.env.SNYK_LOG_PATH = logRoot;
@@ -172,6 +184,7 @@ describe('Skips & logs issues', () => {
       expect(failedImportLog).toBeNull();
     }
     expect(projects.length >= 1).toBeTruthy();
+    discoveredProjects.push(...projects);
   }, 50000);
 });
 

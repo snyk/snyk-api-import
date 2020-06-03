@@ -3,24 +3,11 @@ import {
   pollImportUrl,
   importTargets,
   pollImportUrls,
-  deleteProjects,
 } from '../../src/lib';
 import { Project } from '../../src/lib/types';
+import { deleteTestProjects } from '../delete-test-projects';
 const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
 const GITHUB_INTEGRATION_ID = 'c4de291b-e083-4c43-a72c-113463e0d268';
-
-async function deleteTestProjects(
-  discoveredProjects: Project[],
-): Promise<void> {
-  const projectIds: string[] = [];
-  discoveredProjects.forEach(async (project) => {
-    if (project.projectUrl) {
-      const projectId = project.projectUrl.split('/').slice(-1)[0];
-      projectIds.push(projectId);
-    }
-  });
-  await deleteProjects(ORG_ID, projectIds);
-}
 
 describe('Single target', () => {
   const discoveredProjects: Project[] = [];
@@ -41,7 +28,7 @@ describe('Single target', () => {
     discoveredProjects.push(...projects);
   }, 30000000);
   afterAll(async () => {
-    await deleteTestProjects(discoveredProjects);
+    await deleteTestProjects(ORG_ID, discoveredProjects);
   });
 });
 
@@ -89,7 +76,7 @@ describe('Multiple targets', () => {
     discoveredProjects.push(...projects);
   }, 30000000);
   afterAll(async () => {
-    await deleteTestProjects(discoveredProjects);
+    await deleteTestProjects(ORG_ID, discoveredProjects);
   });
 });
 
@@ -97,5 +84,5 @@ test.todo('Failed import 100%');
 test.todo('Only 1 import fails out of a few + logs created');
 
 describe('Polling', () => {
-  it.todo('Logs failed polls')
+  it.todo('Logs failed polls');
 });
