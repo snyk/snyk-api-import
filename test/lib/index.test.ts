@@ -81,9 +81,6 @@ describe('Single target', () => {
 
     const pollingUrlLogContent = fs.readFileSync(logsFiles.pollingUrlsLogPath, 'utf-8');
     expect(pollingUrlLogContent).not.toBeNull();
-    expect(pollingUrlLogContent).toMatch(
-      'ruby-app-cyclic-lockfile-master/Gemfile.lock',
-    );
     // cleanup
     discoveredProjects.push(...projects);
   }, 30000000);

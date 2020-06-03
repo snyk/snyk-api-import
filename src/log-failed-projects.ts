@@ -4,11 +4,11 @@ import { FAILED_PROJECTS_LOG_NAME } from './common';
 import { Project } from './lib/types';
 import { getLoggingPath } from './lib/get-logging-path';
 
-export async function logFailedProjects(
+export function logFailedProjects(
   locationUrl: string,
   projects: Project[],
   loggingPath: string = getLoggingPath(),
-): Promise<void> {
+): void {
   try {
     projects.forEach((project) => {
       const log = `${locationUrl}:${Object.values(_.omit(project)).join(':')},`;

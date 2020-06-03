@@ -105,7 +105,7 @@ export async function importTargets(
           files,
           loggingPath,
         );
-        await logImportIdsPerOrg(orgId, pollingUrl);
+        logImportIdsPerOrg(orgId, pollingUrl);
         pollingUrls.push(pollingUrl);
       } catch (error) {
         const { orgId, integrationId, target } = t;
