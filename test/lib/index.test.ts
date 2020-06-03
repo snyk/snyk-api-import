@@ -1,3 +1,6 @@
+import * as path from 'path';
+import * as fs from 'fs';
+
 import {
   importTarget,
   pollImportUrl,
@@ -24,12 +27,31 @@ async function deleteTestProjects(
 
 describe('Single target', () => {
   const discoveredProjects: Project[] = [];
+  const OLD_ENV = process.env;
+
+  afterEach(() => {
+    const pollingUrlsLog = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      ORG_ID,
+    );
+    try {
+      fs.unlinkSync(pollingUrlsLog);
+    } catch (e) {
+      // do nothing
+    }
+    process.env = { ...OLD_ENV };
+  }, 1000);
   it('Import & poll a repo', async () => {
-    const { pollingUrl } = await importTarget(ORG_ID, GITHUB_INTEGRATION_ID, {
-      name: 'shallow-goof-policy',
-      owner: 'snyk-fixtures',
-      branch: 'master',
-    });
+    process.env.SNYK_LOG_PATH = __dirname;
+    const { pollingUrl } = await importTarget(
+      ORG_ID,
+      GITHUB_INTEGRATION_ID,
+      {
+        name: 'shallow-goof-policy',
+        owner: 'snyk-fixtures',
+        branch: 'master',
+      },
+    );
     expect(pollingUrl).not.toBeNull();
     const projects = await pollImportUrl(pollingUrl);
     expect(projects[0]).toMatchObject({
@@ -37,6 +59,13 @@ describe('Single target', () => {
       success: true,
       targetFile: expect.any(String),
     });
+    // check the log is present
+    const pollingUrlsLog = path.resolve(
+      process.env.SNYK_LOG_PATH as string,
+      ORG_ID,
+    );
+    const failedLog = fs.readFileSync(pollingUrlsLog, 'utf8');
+    expect(failedLog).toMatch('shallow-goof-policy');
     // cleanup
     discoveredProjects.push(...projects);
   }, 30000000);
@@ -97,5 +126,5 @@ test.todo('Failed import 100%');
 test.todo('Only 1 import fails out of a few + logs created');
 
 describe('Polling', () => {
-  it.todo('Logs failed polls')
+  it.todo('Logs failed polls');
 });
