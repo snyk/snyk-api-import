@@ -55,7 +55,6 @@ describe('Import skips previously imported', () => {
       )
     );
     expect(projects.length === 0).toBeTruthy();
-    console.log()
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
     expect(logFile).toMatchSnapshot();
   }, 30000000);
@@ -146,6 +145,8 @@ describe('Skips & logs issues', () => {
     expect(projects.length >= 1).toBeTruthy();
     const importedJobIdsLog = fs.readFileSync(logFiles.importJobIdsLogsPath, 'utf8');
     expect(importedJobIdsLog).not.toBeNull();
+    const importedProjectsLog = fs.readFileSync(logFiles.importedProjectsLogPath, 'utf8');
+    expect(importedProjectsLog).not.toBeNull();
     discoveredProjects.push(...projects);
   }, 50000);
 });

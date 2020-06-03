@@ -1,13 +1,11 @@
 import * as debugLib from 'debug';
 import * as path from 'path';
 import { loadFile } from '../load-file';
-import {
-  importTargets,
-  pollImportUrls,
-} from '../lib';
+import { importTargets, pollImportUrls } from '../lib';
 import { Project, ImportTarget } from '../lib/types';
 import { getLoggingPath } from '../lib/get-logging-path';
 import { getConcurrentImportsNumber } from '../lib/get-concurrent-imports-number';
+import { IMPORT_LOG_NAME } from '../common';
 
 const debug = debugLib('snyk:import-projects-script');
 
@@ -20,14 +18,17 @@ async function filterOutImportedTargets(
 ): Promise<ImportTarget[]> {
   let logFile: string;
   const filterOutImportedTargets: ImportTarget[] = [];
-  try {
-    logFile = await loadFile(path.resolve(loggingPath, 'imported-targets.log'));
-  } catch (e) {
-    return targets;
-  }
-  targets.forEach((targetItem) => {
+
+  targets.forEach(async (targetItem) => {
     const { orgId, integrationId, target } = targetItem;
-    const data = `${orgId}:${integrationId}:${Object.values(target).join(':')}`;
+    try {
+      logFile = await loadFile(
+        path.resolve(loggingPath, `${orgId}.${IMPORT_LOG_NAME}`),
+      );
+    } catch (e) {
+      return targets;
+    }
+    const data = `${integrationId}:${Object.values(target).join(':')}`;
     const targetRegExp = regexForTarget(data);
     const match = logFile.match(targetRegExp);
     if (!match) {
@@ -60,7 +61,9 @@ export async function ImportProjects(
     return [];
   }
   const skippedTargets = targets.length - filteredTargets.length;
-  debug(`Skipped previously imported ${skippedTargets}/${targets.length} targets`)
+  debug(
+    `Skipped previously imported ${skippedTargets}/${targets.length} targets`,
+  );
   for (
     let targetIndex = 0;
     targetIndex < filteredTargets.length;

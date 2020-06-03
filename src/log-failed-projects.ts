@@ -11,8 +11,9 @@ export async function logFailedProjects(
 ): Promise<void> {
   try {
     projects.forEach((project) => {
+      const orgId = locationUrl.split('/').slice(-5)[0];
       const log = `${locationUrl}:${Object.values(_.omit(project)).join(':')},`;
-      fs.appendFileSync(`${loggingPath}/${FAILED_PROJECTS_LOG_NAME}`, log);
+      fs.appendFileSync(`${loggingPath}/${orgId}.${FAILED_PROJECTS_LOG_NAME}`, log);
     });
   } catch (e) {
     // do nothing

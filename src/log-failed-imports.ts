@@ -11,10 +11,10 @@ export async function logFailedImports(
   locationUrl?: string,
 ): Promise<void> {
   try {
-    const log = `${orgId}:${integrationId}:${Object.values(target).join(
+    const log = `${integrationId}:${Object.values(target).join(
       ':',
     )}:${locationUrl},`;
-    fs.appendFileSync(`${loggingPath}/${FAILED_LOG_NAME}`, log);
+    fs.appendFileSync(`${loggingPath}/${orgId}.${FAILED_LOG_NAME}`, log);
   } catch (e) {
     // do nothing
   }

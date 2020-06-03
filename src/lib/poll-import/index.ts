@@ -8,6 +8,7 @@ import { PollImportResponse, Project } from '../types';
 import { getApiToken } from '../get-api-token';
 import { logFailedProjects } from '../../log-failed-projects';
 import { logFailedPollUrls } from '../../log-failed-polls';
+import { logImportedProjects } from '../../log-imported-projects';
 
 const debug = debugLib('snyk:poll-import');
 const MIN_RETRY_WAIT_TIME = 30000;
@@ -85,6 +86,7 @@ export async function pollImportUrls(
           (p: Project) => !p.success,
         );
         await logFailedProjects(locationUrl, failedProjects);
+        await logImportedProjects(locationUrl, projects);
         projectsArray.push(...projects);
       } catch (error) {
         logFailedPollUrls(locationUrl, error.message || error);
