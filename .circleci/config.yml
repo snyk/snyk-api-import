@@ -13,7 +13,7 @@ jobs:
             - snyk/scan:
                 fail-on-issues: true
                 monitor-on-build: true
-                token-variable: SNYK_TOKEN
+                token-variable: SNYK_TOKEN_PROD
             - run: npx semantic-release
     build-test:
         docker:
@@ -25,7 +25,7 @@ jobs:
             - snyk/scan:
                 fail-on-issues: true
                 monitor-on-build: false
-                token-variable: SNYK_TOKEN
+                token-variable: SNYK_TOKEN_PROD
             - run: npx tsc
     build-test-from-fork:
         docker:
