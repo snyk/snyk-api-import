@@ -70,8 +70,6 @@ describe('Skips & logs issues', () => {
       (path) => {
         try {
           fs.unlinkSync(path);
-          fs.unlinkSync(path);
-          fs.unlinkSync(path);
 
         } catch (e) {
           // do nothing
