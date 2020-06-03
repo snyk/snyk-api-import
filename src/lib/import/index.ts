@@ -9,6 +9,7 @@ import { getSnykHost } from '../get-snyk-host';
 import { logImportedTarget } from '../../log-imported-targets';
 import { getLoggingPath } from '../get-logging-path';
 import { logFailedImports } from '../../log-failed-imports';
+import { logImportJobsPerOrg } from '../../log-import-jobs';
 import { getConcurrentImportsNumber } from '../get-concurrent-imports-number';
 
 const debug = debugLib('snyk:api-import');
@@ -104,6 +105,7 @@ export async function importTargets(
           files,
           loggingPath,
         );
+        await logImportJobsPerOrg(orgId, pollingUrl);
         pollingUrls.push(pollingUrl);
       } catch (error) {
         const { orgId, integrationId, target } = t;
