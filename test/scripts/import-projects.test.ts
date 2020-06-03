@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import { ImportProjects } from '../../src/scripts/import-projects';
-import { IMPORT_PROJECTS_FILE_NAME, IMPORT_LOG_NAME } from '../../src/common';
+import { IMPORT_PROJECTS_FILE_NAME } from '../../src/common';
 import { deleteTestProjects } from '../delete-test-projects';
 import { Project } from '../../src/lib/types';
 import { generateLogsPaths } from '../generate-log-file-names';
@@ -19,7 +19,7 @@ describe('Import projects script', () => {
     await deleteLogs(logs);
   });
   it('succeeds to import targets from file', async () => {
-    const logFiles = generateLogsPaths(__dirname);
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
 
     const projects = await ImportProjects(
@@ -47,7 +47,7 @@ describe('Import skips previously imported', () => {
   }, 1000);
   it('succeeds to import targets from file', async () => {
     const logPath = path.resolve(__dirname + '/fixtures/with-import-log');
-    const logFiles = generateLogsPaths(logPath);
+    const logFiles = generateLogsPaths(logPath, ORG_ID);
 
     const projects = await ImportProjects(
       path.resolve(
@@ -76,7 +76,7 @@ describe('Skips & logs issues', () => {
   });
   it('Skips any badly formatted targets', async () => {
     const logRoot = __dirname + '/fixtures/invalid-target/';
-    const logFiles = generateLogsPaths(logRoot);
+    const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
 
     const projects = await ImportProjects(
@@ -98,7 +98,7 @@ describe('Skips & logs issues', () => {
 
   it('Logs failed when API errors', async () => {
     const logRoot = __dirname + '/fixtures/single-project/';
-    const logFiles = generateLogsPaths(logRoot);
+    const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
 
     process.env.SNYK_HOST = 'https://do-not-exist.com';
@@ -119,7 +119,7 @@ describe('Skips & logs issues', () => {
   }, 300);
   it('Logs failed projects', async () => {
     const logRoot = __dirname + '/fixtures/projects-with-errors/';
-    const logFiles = generateLogsPaths(logRoot);
+    const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
     const projects = await ImportProjects(
       path.resolve(
@@ -144,6 +144,8 @@ describe('Skips & logs issues', () => {
       expect(failedImportLog).toBeNull();
     }
     expect(projects.length >= 1).toBeTruthy();
+    const importedJobIdsLog = fs.readFileSync(logFiles.importJobIdsLogsPath, 'utf8');
+    expect(importedJobIdsLog).not.toBeNull();
     discoveredProjects.push(...projects);
   }, 50000);
 });
