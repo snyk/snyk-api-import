@@ -45,7 +45,7 @@ describe('Import skips previously imported', () => {
   afterEach(async () => {
     process.env = { ...OLD_ENV };
   }, 1000);
-  it('succeeds to import targets from file', async () => {
+  it.only('succeeds to import targets from file', async () => {
     const logPath = path.resolve(__dirname + '/fixtures/with-import-log');
     const logFiles = generateLogsPaths(logPath, ORG_ID);
 
