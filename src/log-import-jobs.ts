@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { getLoggingPath } from './lib/get-logging-path';
+import { IMPORT_JOBS_LOG_NAME } from './common';
 
 export async function logImportJobsPerOrg(
   orgId: string,
@@ -7,8 +8,7 @@ export async function logImportJobsPerOrg(
   loggingPath: string = getLoggingPath(),
 ): Promise<void> {
   try {
-    const jobId = pollingUrl.split('/').slice(-1)[0];
-    fs.appendFileSync(`${loggingPath}/${orgId}.import-jobs.log`, `${jobId},`);
+    fs.appendFileSync(`${loggingPath}/${orgId}.${IMPORT_JOBS_LOG_NAME}`, `${pollingUrl},`);
   } catch (e) {
     // do nothing
   }
