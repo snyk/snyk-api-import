@@ -18,7 +18,7 @@ describe('Single target', () => {
   it('Import & poll a repo', async () => {
     logs = Object.values(generateLogsPaths(__dirname, ORG_ID));
     const { pollingUrl } = await importTarget(ORG_ID, GITHUB_INTEGRATION_ID, {
-      name: 'shallow-goof-policy',
+      name: 'ruby-with-versions',
       owner: 'snyk-fixtures',
       branch: 'master',
     });
@@ -44,15 +44,6 @@ describe('Multiple targets', () => {
   it('importTargets &  pollImportUrls multiple repos', async () => {
     logs = Object.values(generateLogsPaths(__dirname, ORG_ID));
     const pollingUrls = await importTargets([
-      {
-        orgId: ORG_ID,
-        integrationId: GITHUB_INTEGRATION_ID,
-        target: {
-          name: 'shallow-goof-policy',
-          owner: 'snyk-fixtures',
-          branch: 'master',
-        },
-      },
       {
         orgId: ORG_ID,
         integrationId: GITHUB_INTEGRATION_ID,

@@ -3,7 +3,7 @@
     {
       "orgId": "f0125d9b-271a-4b50-ad23-80e12575a1bf",
       "target": {
-        "name": "shallow-goof-policy",
+        "name": "ruby-with-versions",
         "owner": "snyk-fixtures",
         "branch": "master"
       }
