@@ -45,10 +45,7 @@ export async function pollImportUrl(
     ) {
       await sleep(retryWaitTime);
       debug(`Will re-check import task in "${retryWaitTime} ms"`);
-      return await pollImportUrl(
-        locationUrl,
-        --retryCount,
-      );
+      return await pollImportUrl(locationUrl, --retryCount);
     }
     const projects: Project[] = [];
     importStatus.logs.forEach((log) => {

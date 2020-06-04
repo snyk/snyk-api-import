@@ -33,8 +33,6 @@ describe('Import projects script', () => {
       targetFile: expect.any(String),
     });
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
-    expect(logFile).toMatch('shallow-goof-policy');
-    expect(logFile).toMatch('composer-with-vulns');
     expect(logFile).toMatch('ruby-with-versions:');
     discoveredProjects.push(...projects);
   }, 30000000);
@@ -92,7 +90,7 @@ describe('Skips & logs issues', () => {
       expect(logFile).toBeNull();
     }
     const failedLog = fs.readFileSync(logFiles.failedImportLogPath, 'utf8');
-    expect(failedLog).toMatch('shallow-goof-policy');
+    expect(failedLog).toMatch('ruby-with-version');
   }, 300);
 
   it('Logs failed when API errors', async () => {
@@ -133,7 +131,7 @@ describe('Skips & logs issues', () => {
     );
     expect(failedProjectsLog).not.toBeNull();
     expect(failedProjectsLog).toMatch(
-      'ruby-app-cyclic-lockfile-master/Gemfile.lock',
+      'dotnet/invalid.csproj',
     );
 
     let failedImportLog = null;
