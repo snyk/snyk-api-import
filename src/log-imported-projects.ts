@@ -15,7 +15,7 @@ export async function logImportedProjects(
       projectIds.push(projectId);
     });
     const orgId = pollingUrl.split('/').slice(-5)[0];
-    fs.appendFileSync(`${loggingPath}/${orgId}.${IMPORTED_PROJECTS_LOG_NAME}`, projectIds.join(','));
+    fs.appendFileSync(`${loggingPath}/${orgId}.${IMPORTED_PROJECTS_LOG_NAME}`, `,${projectIds.join(',')}`);
   } catch (e) {
     // do nothing
   }
