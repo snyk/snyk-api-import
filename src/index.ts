@@ -12,4 +12,5 @@ try {
   ImportProjects(importFile);
 } catch (e) {
   debug('Failed to kick off import.\n' + e);
+  console.error('ERROR! Try running with `DEBUG=snyk* snyk-import`')
 }
