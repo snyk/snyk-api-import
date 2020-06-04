@@ -71,10 +71,5 @@
       "dist/**/*.js"
     ]
   },
-  "release": {
-    "branches": [
-      "master"
-    ]
-  },
   "snyk": true
 }
