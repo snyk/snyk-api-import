@@ -14,7 +14,7 @@
     {
       "//": "shasum all binaries",
       "path": "@semantic-release/exec",
-      "cmd": "shasum -a 256 snyk-import-linux > snyk-import-linux.sha256 && shasum -a 256 snyk-import-macos > snyk-import-macos.sha256 && shasum -a 256 snyk-import-win.exe > snyk-import-win.exe.sha256"
+      "cmd": "shasum -a 256 snyk-api-import-linux > snyk-api-import-linux.sha256 && shasum -a 256 snyk-api-import-macos > snyk-api-import-macos.sha256 && shasum -a 256 snyk-api-import-win.exe > snyk-api-import-win.exe.sha256"
     },
     {
       "//": "removes the file we use to identify a build as a standalone binary",
@@ -28,34 +28,34 @@
       "path": "@semantic-release/github",
       "assets": [
         {
-          "path": "./snyk-import-linux",
-          "name": "snyk-import-linux",
-          "label": "snyk-import-linux"
+          "path": "./snyk-api-import-linux",
+          "name": "snyk-api-import-linux",
+          "label": "snyk-api-import-linux"
         },
         {
-          "path": "./snyk-import-linux.sha256",
-          "name": "snyk-import-linux.sha256",
-          "label": "snyk-import-linux.sha256"
+          "path": "./snyk-api-import-linux.sha256",
+          "name": "snyk-api-import-linux.sha256",
+          "label": "snyk-api-import-linux.sha256"
         },
         {
-          "path": "./snyk-import-macos",
-          "name": "snyk-import-macos",
-          "label": "snyk-import-macos"
+          "path": "./snyk-api-import-macos",
+          "name": "snyk-api-import-macos",
+          "label": "snyk-api-import-macos"
         },
         {
-          "path": "./snyk-import-macos.sha256",
-          "name": "snyk-import-macos.sha256",
-          "label": "snyk-import-macos.sha256"
+          "path": "./snyk-api-import-macos.sha256",
+          "name": "snyk-api-import-macos.sha256",
+          "label": "snyk-api-import-macos.sha256"
         },
         {
-          "path": "./snyk-import-win.exe",
-          "name": "snyk-import-win.exe",
-          "label": "snyk-import-win.exe"
+          "path": "./snyk-api-import-win.exe",
+          "name": "snyk-api-import-win.exe",
+          "label": "snyk-api-import-win.exe"
         },
         {
-          "path": "./snyk-import-win.exe.sha256",
-          "name": "snyk-import-win.exe.sha256",
-          "label": "snyk-import-win.exe.sha256"
+          "path": "./snyk-api-import-win.exe.sha256",
+          "name": "snyk-api-import-win.exe.sha256",
+          "label": "snyk-api-import-win.exe.sha256"
         }
       ]
     }
