@@ -10,7 +10,7 @@
     "format": "prettier --write '{''{lib,test}/!(test/**/fixtures)/**/*,*}.{js,ts,json,yml}'",
     "lint": "npm run format:check && npm run lint:eslint",
     "lint:eslint": "eslint --cache '{lib,test}/**/*.ts'",
-    "test": "npm run lint && npm run build && npm run test:unit:debug",
+    "test": "npm run lint && npm run build && npm run test:unit",
     "test:unit": "jest",
     "test:unit:debug": "npm run build && DEBUG=* jest",
     "test:coverage": "npm run test:unit -- --coverage",

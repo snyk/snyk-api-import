@@ -18,6 +18,8 @@ describe('Single target', () => {
   let logs: string[];
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;
+  process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+
   it('Import & poll a repo', async () => {
     logs = Object.values(generateLogsPaths(__dirname, ORG_ID));
     const { pollingUrl } = await importTarget(ORG_ID, GITHUB_INTEGRATION_ID, {
@@ -47,6 +49,8 @@ describe('Multiple targets', () => {
   let logs: string[];
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;
+  process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+
   it('importTargets &  pollImportUrls multiple repos', async () => {
     logs = Object.values(generateLogsPaths(__dirname, ORG_ID));
     const pollingUrls = await importTargets([

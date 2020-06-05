@@ -16,11 +16,14 @@ describe('Import projects script', () => {
   let logs: string[];
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;
+  process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
     await deleteLogs(logs);
     process.env = { ...OLD_ENV };
   });
+
   it('succeeds to import targets from file', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
@@ -44,6 +47,8 @@ describe('Import projects script', () => {
 describe('Import skips previously imported', () => {
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;
+  process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+
   afterEach(async () => {
     process.env = { ...OLD_ENV };
   }, 1000);
@@ -65,6 +70,8 @@ describe('Import skips previously imported', () => {
 describe('Skips & logs issues', () => {
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;
+  process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+
   const discoveredProjects: Project[] = [];
   let logs: string[];
 
@@ -161,6 +168,8 @@ describe('Skips & logs issues', () => {
 describe('Error handling', () => {
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;
+  process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+
   afterAll(async () => {
     process.env = { ...OLD_ENV };
   }, 1000);
