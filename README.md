@@ -23,40 +23,41 @@ Run the tests with `npm test`
 
 ## To kick off an import
 This script is intended to help import projects into Snyk with a controlled pace via API. The script will kick off an import in batches, wait for completion and then keep going. Failure logs will be generated at `SNYK_LOG_PATH` directory.
-1. Create the `import-projects.json` file:
-`orgId` - Can be found in https://app.snyk.io/org/YOUR_ORG/manage/settings
-`integrationId` - Can be found in Integrations menu for each SCM https://app.snyk.io/org/YOUR_ORG/manage/settings
+### 1. Create the `import-projects.json` file:
+  `orgId` - Can be found in https://app.snyk.io/org/YOUR_ORG/manage/settings
+  `integrationId` - Can be found in Integrations menu for each SCM https://app.snyk.io/org/YOUR_ORG/manage/settings
 
 
-```
-{
-  "targets": [
-    {
-      "orgId": "******,
-      "integrationId": "******",
-      "target": {
-        "name": "shallow-goof-policy",
-        "owner": "snyk-fixtures",
-        "branch": "master"
-      }
-    },
-    {
-      "orgId": "******,
-      "integrationId": "******",
-      "target": {
-        "name": "shallow-goof-policy",
-        "owner": "snyk-fixtures",
-        "branch": "master"
-      }
-    },
-  ]
-}
-```
-2. Set the env vars mentioned:
-- `SNYK_IMPORT_PATH`- the path to the import file
-- `SNYK_API_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
-- `SNYK_LOG_PATH` - the path to folder where all logs should be saved
-- `CONCURRENT_IMPORTS` (optional) defaults to 5 repos at a time, which is the recommended amount to import at once as a max. Just 1 repo may have many projects inside. (10 may also be okay if all repos are small)
-- `SNYK_API` (optional) defaults to `https://snyk.io/api/v1`
+  ```
+  {
+    "targets": [
+      {
+        "orgId": "******,
+        "integrationId": "******",
+        "target": {
+          "name": "shallow-goof-policy",
+          "owner": "snyk-fixtures",
+          "branch": "master"
+        }
+      },
+      {
+        "orgId": "******,
+        "integrationId": "******",
+        "target": {
+          "name": "shallow-goof-policy",
+          "owner": "snyk-fixtures",
+          "branch": "master"
+        }
+      },
+    ]
+  }
+  ```
+### 2. Set the env vars mentioned:
+  - `SNYK_IMPORT_PATH`- the path to the import file
+  - `SNYK_API_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
+  - `SNYK_LOG_PATH` - the path to folder where all logs should be saved
+  - `CONCURRENT_IMPORTS` (optional) defaults to 5 repos at a time, which is the recommended amount to import at once as a max.  Just 1 repo may have many projects inside. (10 may also be okay if all repos are small)
+  - `SNYK_API` (optional) defaults to `https://snyk.io/api/v1`
 
-1. `npm run build` and then `DEBUG=snyk* node dist/index.js`
+### 3. Install & run
+`npm i -g DEBUG=snyk* snyk-api-import && DEBUG=snyk* snyk-api-import` or use one of the binaries
