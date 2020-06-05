@@ -60,4 +60,4 @@ This script is intended to help import projects into Snyk with a controlled pace
   - `SNYK_API` (optional) defaults to `https://snyk.io/api/v1`
 
 ### 3. Install & run
-`npm i -g DEBUG=snyk* snyk-api-import && DEBUG=snyk* snyk-api-import` or use one of the binaries
+`npm i -g snyk-api-import && DEBUG=snyk* snyk-api-import` or use one of the binaries
