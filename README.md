@@ -15,8 +15,9 @@ Snyk API project importer
 
 ### Running the test locally
 You will need to set the following environment variable:
-  - `SNYK_API_TOKEN` - check 1 Password (search for "snyk-api-import")
+  - `SNYK_TOKEN_TEST` - snyk/orb (aka snyk/scan task in circle) uses `SNYK_TOKEN` and so does this lib, so overriding it in tests to avoid clash.
   - `SNYK_API='https://dev.snyk.io/api/v1'`
+  - `SNYK_TOKEN` - check 1 Password (search for "snyk-api-import")
 
 Run the tests with `npm test`
 
@@ -54,7 +55,7 @@ This script is intended to help import projects into Snyk with a controlled pace
   ```
 ### 2. Set the env vars mentioned:
   - `SNYK_IMPORT_PATH`- the path to the import file
-  - `SNYK_API_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
+  - `SNYK_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
   - `SNYK_LOG_PATH` - the path to folder where all logs should be saved
   - `CONCURRENT_IMPORTS` (optional) defaults to 5 repos at a time, which is the recommended amount to import at once as a max.  Just 1 repo may have many projects inside. (10 may also be okay if all repos are small)
   - `SNYK_API` (optional) defaults to `https://snyk.io/api/v1`
