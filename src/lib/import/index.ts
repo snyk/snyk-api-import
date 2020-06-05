@@ -40,11 +40,10 @@ export async function importTarget(
       target,
       files,
     };
-    const SNYK_HOST = getSnykHost();
-
+    const SNYK_API = getSnykHost();
     const res = await needle(
       'post',
-      `${SNYK_HOST}/api/v1/org/${orgId}/integrations/${integrationId}/import`,
+      `${SNYK_API}/org/${orgId}/integrations/${integrationId}/import`,
       body,
       {
         json: true,

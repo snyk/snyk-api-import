@@ -11,10 +11,13 @@ import { deleteLogs } from '../delete-logs';
 
 const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
 const GITHUB_INTEGRATION_ID = 'c4de291b-e083-4c43-a72c-113463e0d268';
+const SNYK_API_TEST = 'https://dev.snyk.io/api/v1';
 
 describe('Single target', () => {
   const discoveredProjects: Project[] = [];
   let logs: string[];
+  const OLD_ENV = process.env;
+  process.env.SNYK_API = SNYK_API_TEST;
   it('Import & poll a repo', async () => {
     logs = Object.values(generateLogsPaths(__dirname, ORG_ID));
     const { pollingUrl } = await importTarget(ORG_ID, GITHUB_INTEGRATION_ID, {
@@ -34,13 +37,16 @@ describe('Single target', () => {
   }, 30000000);
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
-    await deleteLogs(logs)
+    await deleteLogs(logs);
+    process.env = { ...OLD_ENV };
   });
 });
 
 describe('Multiple targets', () => {
   const discoveredProjects: Project[] = [];
   let logs: string[];
+  const OLD_ENV = process.env;
+  process.env.SNYK_API = SNYK_API_TEST;
   it('importTargets &  pollImportUrls multiple repos', async () => {
     logs = Object.values(generateLogsPaths(__dirname, ORG_ID));
     const pollingUrls = await importTargets([
@@ -76,11 +82,15 @@ describe('Multiple targets', () => {
   }, 30000000);
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
-    await deleteLogs(logs)
+    await deleteLogs(logs);
+    process.env = { ...OLD_ENV };
   });
 });
 
 test.todo('Failed import 100%');
+
+test.todo('Import stops after 1 100% failed batch');
+
 test.todo('Only 1 import fails out of a few + logs created');
 
 describe('Polling', () => {

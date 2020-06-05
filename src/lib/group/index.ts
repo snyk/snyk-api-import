@@ -32,11 +32,11 @@ export async function createOrg(
     name,
     sourceOrgId,
   };
-  const SNYK_HOST = getSnykHost();
+  const SNYK_API = getSnykHost();
 
   const res = await needle(
     'post',
-    `${SNYK_HOST}/api/v1/group/${groupId}/org`,
+    `${SNYK_API}/group/${groupId}/org`,
     body,
     {
       json: true,

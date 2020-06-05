@@ -18,13 +18,13 @@ export async function deleteProjects(
   debug('Deleting projectIds:', projects.join(', '));
 
   try {
-    const SNYK_HOST = getSnykHost();
+    const SNYK_API = getSnykHost();
     const body = {
       projects,
     };
     const res = await needle(
       'post',
-      `${SNYK_HOST}/api/v1/org/${orgId}/projects/bulk-delete`,
+      `${SNYK_API}/org/${orgId}/projects/bulk-delete`,
       body,
       {
         json: true,
