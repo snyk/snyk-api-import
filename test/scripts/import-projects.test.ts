@@ -9,14 +9,17 @@ import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteLogs } from '../delete-logs';
 
 const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
+const SNYK_API_TEST = 'https://dev.snyk.io/api/v1';
 
 describe('Import projects script', () => {
   const discoveredProjects: Project[] = [];
   let logs: string[];
-
+  const OLD_ENV = process.env;
+  process.env.SNYK_API = SNYK_API_TEST;
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
     await deleteLogs(logs);
+    process.env = { ...OLD_ENV };
   });
   it('succeeds to import targets from file', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
@@ -40,6 +43,7 @@ describe('Import projects script', () => {
 
 describe('Import skips previously imported', () => {
   const OLD_ENV = process.env;
+  process.env.SNYK_API = SNYK_API_TEST;
   afterEach(async () => {
     process.env = { ...OLD_ENV };
   }, 1000);
@@ -50,7 +54,7 @@ describe('Import skips previously imported', () => {
     const projects = await ImportProjects(
       path.resolve(
         __dirname + `/fixtures/with-import-log/${IMPORT_PROJECTS_FILE_NAME}`,
-      )
+      ),
     );
     expect(projects.length === 0).toBeTruthy();
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
@@ -60,6 +64,7 @@ describe('Import skips previously imported', () => {
 
 describe('Skips & logs issues', () => {
   const OLD_ENV = process.env;
+  process.env.SNYK_API = SNYK_API_TEST;
   const discoveredProjects: Project[] = [];
   let logs: string[];
 
@@ -98,7 +103,7 @@ describe('Skips & logs issues', () => {
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
 
-    process.env.SNYK_HOST = 'https://do-not-exist.com';
+    process.env.SNYK_API = 'https://do-not-exist.com';
     const projects = await ImportProjects(
       path.resolve(
         __dirname + '/fixtures/single-project/import-projects-single.json',
@@ -130,9 +135,7 @@ describe('Skips & logs issues', () => {
       'utf-8',
     );
     expect(failedProjectsLog).not.toBeNull();
-    expect(failedProjectsLog).toMatch(
-      'dotnet/invalid.csproj',
-    );
+    expect(failedProjectsLog).toMatch('dotnet/invalid.csproj');
 
     let failedImportLog = null;
     try {
@@ -141,15 +144,27 @@ describe('Skips & logs issues', () => {
       expect(failedImportLog).toBeNull();
     }
     expect(projects.length >= 1).toBeTruthy();
-    const importedJobIdsLog = fs.readFileSync(logFiles.importJobIdsLogsPath, 'utf8');
+    const importedJobIdsLog = fs.readFileSync(
+      logFiles.importJobIdsLogsPath,
+      'utf8',
+    );
     expect(importedJobIdsLog).not.toBeNull();
-    const importedProjectsLog = fs.readFileSync(logFiles.importedProjectsLogPath, 'utf8');
+    const importedProjectsLog = fs.readFileSync(
+      logFiles.importedProjectsLogPath,
+      'utf8',
+    );
     expect(importedProjectsLog).not.toBeNull();
     discoveredProjects.push(...projects);
   }, 50000);
 });
 
 describe('Error handling', () => {
+  const OLD_ENV = process.env;
+  process.env.SNYK_API = SNYK_API_TEST;
+  afterAll(async () => {
+    process.env = { ...OLD_ENV };
+  }, 1000);
+
   it('shows correct error when input can not be loaded', async () => {
     expect(
       ImportProjects(`do-not-exist/${IMPORT_PROJECTS_FILE_NAME}`),

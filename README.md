@@ -16,7 +16,7 @@ Snyk API project importer
 ### Running the test locally
 You will need to set the following environment variable:
   - `SNYK_API_TOKEN` - check 1 Password (search for "snyk-api-import")
-  - `SNYK_HOST='https://dev.snyk.io'`
+  - `SNYK_API='https://dev.snyk.io/api/v1'`
 
 Run the tests with `npm test`
 
@@ -57,6 +57,6 @@ This script is intended to help import projects into Snyk with a controlled pace
 - `SNYK_API_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
 - `SNYK_LOG_PATH` - the path to folder where all logs should be saved
 - `CONCURRENT_IMPORTS` (optional) defaults to 5 repos at a time, which is the recommended amount to import at once as a max. Just 1 repo may have many projects inside. (10 may also be okay if all repos are small)
-- `SNYK_HOST` (optional) defaults to `https://snyk.io`
+- `SNYK_API` (optional) defaults to `https://snyk.io/api/v1`
 
 1. `npm run build` and then `DEBUG=snyk* node dist/index.js`
