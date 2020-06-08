@@ -9,3 +9,7 @@ patch:
   SNYK-JS-LODASH-567746:
     - lodash:
         patched: '2020-05-20T15:08:23.395Z'
+      snyk-request-manager > lodash:
+        patched: '2020-06-08T10:45:57.656Z'
+    - lodash:
+        patched: '2020-06-08T10:45:57.656Z'
