@@ -93,6 +93,8 @@ export async function importTargets(
   const pollingUrls: string[] = [];
   const requestManager = new requestsManager();
   // TODO: validate targets
+  let failed = 0;
+  const concurrentImports = getConcurrentImportsNumber();
   await pMap(
     targets,
     async (t) => {
@@ -109,9 +111,17 @@ export async function importTargets(
         await logImportJobsPerOrg(orgId, pollingUrl);
         pollingUrls.push(pollingUrl);
       } catch (error) {
+        failed++;
         const { orgId, integrationId, target } = t;
         await logFailedImports(orgId, integrationId, target, loggingPath);
         debug('Failed to process:', JSON.stringify(t), error.message);
+        if (failed % concurrentImports === 0) {
+          console.error(
+            'Failed too many times in a row, please check if everything is configured correctly and try again.',
+          );
+          // die immediately
+          return process.exit(1);
+        }
       }
     },
     { concurrency: getConcurrentImportsNumber() },

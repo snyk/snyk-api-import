@@ -7,6 +7,7 @@ import { deleteTestProjects } from '../delete-test-projects';
 import { Project } from '../../src/lib/types';
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteLogs } from '../delete-logs';
+import { createHmac } from 'crypto';
 
 const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
 const SNYK_API_TEST = 'https://dev.snyk.io/api/v1';
@@ -71,6 +72,7 @@ describe('Skips & logs issues', () => {
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+  process.env.CONCURRENT_IMPORTS = '3';
 
   const discoveredProjects: Project[] = [];
   let logs: string[];
@@ -87,7 +89,6 @@ describe('Skips & logs issues', () => {
     const logRoot = __dirname + '/fixtures/invalid-target/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
-
     const projects = await ImportProjects(
       path.resolve(
         __dirname +
@@ -106,23 +107,28 @@ describe('Skips & logs issues', () => {
   }, 300);
 
   it('Logs failed when API errors', async () => {
-    const logRoot = __dirname + '/fixtures/single-project/';
+    const logRoot = __dirname + '/fixtures/failed-batch/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
-
-    process.env.SNYK_API = 'https://do-not-exist.com';
-    const projects = await ImportProjects(
+    const exit = jest.spyOn(process, 'exit').mockImplementationOnce(() => {
+      throw new Error('process.exit() was called.')
+    });
+    try {
+      await ImportProjects(
       path.resolve(
-        __dirname + '/fixtures/single-project/import-projects-single.json',
-      ),
-    );
+        __dirname + '/fixtures/failed-batch/import-projects.json',
+      ));
+      } catch (e) {
+        expect(e.message).toMatch('')
+      }
+    expect(exit).toHaveBeenCalledWith(1);
+
     let logFile = null;
     try {
       logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
     } catch (e) {
       expect(logFile).toBeNull();
     }
-    expect(projects.length === 0).toBeTruthy();
     const failedLog = fs.readFileSync(logFiles.failedImportLogPath, 'utf8');
     expect(failedLog).toMatch('ruby-with-versions');
   }, 3000);
@@ -186,4 +192,9 @@ describe('Error handling', () => {
       ),
     ).rejects.toThrow('Failed to parse targets from');
   }, 300);
+});
+
+
+describe('Polling', () => {
+  it.todo('Logs failed polls');
 });
