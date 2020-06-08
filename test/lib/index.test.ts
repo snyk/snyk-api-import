@@ -1,3 +1,4 @@
+import { requestsManager } from 'snyk-request-manager';
 import {
   importTarget,
   pollImportUrl,
@@ -22,11 +23,17 @@ describe('Single target', () => {
 
   it('Import & poll a repo', async () => {
     logs = Object.values(generateLogsPaths(__dirname, ORG_ID));
-    const { pollingUrl } = await importTarget(ORG_ID, GITHUB_INTEGRATION_ID, {
-      name: 'ruby-with-versions',
-      owner: 'snyk-fixtures',
-      branch: 'master',
-    });
+    const requestManager = new requestsManager();
+    const { pollingUrl } = await importTarget(
+      requestManager,
+      ORG_ID,
+      GITHUB_INTEGRATION_ID,
+      {
+        name: 'ruby-with-versions',
+        owner: 'snyk-fixtures',
+        branch: 'master',
+      },
+    );
     expect(pollingUrl).not.toBeNull();
     const projects = await pollImportUrl(pollingUrl);
     expect(projects[0]).toMatchObject({
