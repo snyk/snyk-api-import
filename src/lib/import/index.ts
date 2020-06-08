@@ -67,7 +67,13 @@ export async function importTarget(
       );
     }
     debug(`Received locationUrl for ${target.name}: ${locationUrl}`);
-    await logImportedTarget(orgId, integrationId, target, locationUrl, loggingPath);
+    await logImportedTarget(
+      orgId,
+      integrationId,
+      target,
+      locationUrl,
+      loggingPath,
+    );
     return {
       pollingUrl: locationUrl,
       integrationId,
@@ -92,6 +98,8 @@ export async function importTargets(
 ): Promise<string[]> {
   const pollingUrls: string[] = [];
   // TODO: validate targets
+  let failed = 0;
+  const concurrentImports = getConcurrentImportsNumber();
   await pMap(
     targets,
     async (t) => {
@@ -107,9 +115,17 @@ export async function importTargets(
         await logImportJobsPerOrg(orgId, pollingUrl);
         pollingUrls.push(pollingUrl);
       } catch (error) {
+        failed++;
         const { orgId, integrationId, target } = t;
         await logFailedImports(orgId, integrationId, target, loggingPath);
         debug('Failed to process:', JSON.stringify(t), error.message);
+        if (failed % concurrentImports === 0) {
+          console.error(
+            'Failed too many times in a row, please check if everything is configured correctly and try again.',
+          );
+          // die immediately
+          return process.exit(1);
+        }
       }
     },
     { concurrency: getConcurrentImportsNumber() },

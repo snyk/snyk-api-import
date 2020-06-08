@@ -1,0 +1,31 @@
+{
+  "targets": [
+    {
+      "orgId": "f0125d9b-271a-4b50-ad23-80e12575a1bf",
+      "integrationId": "c4de291b-e083-4c43-a72c-113463e0d268",
+      "target": {
+        "name": "ruby-with-versions-new",
+        "owner": "snyk-fixtures",
+        "branch": "master"
+      }
+    },
+    {
+      "orgId": "f0125d9b-271a-4b50-ad23-80e12575a1bf",
+      "integrationId": "c4de291b-e083-4c43-a72c-113463e0d268",
+      "target": {
+        "name": "ruby-with-versions-new",
+        "owner": "snyk-fixtures",
+        "branch": "master"
+      }
+    },
+    {
+      "orgId": "f0125d9b-271a-4b50-ad23-80e12575a1bf",
+      "integrationId": "c4de291b-e083-4c43-a72c-113463e0d268",
+      "target": {
+        "name": "ruby-with-versions-new",
+        "owner": "snyk-fixtures",
+        "branch": "master"
+      }
+    }
+  ]
+}
