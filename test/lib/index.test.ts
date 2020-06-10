@@ -10,15 +10,15 @@ import { deleteTestProjects } from '../delete-test-projects';
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteLogs } from '../delete-logs';
 
-const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
-const GITHUB_INTEGRATION_ID = 'c4de291b-e083-4c43-a72c-113463e0d268';
-const SNYK_API_TEST = 'https://dev.snyk.io/api/v1';
+const ORG_ID = process.env.TEST_ORG_ID as string;
+const INTEGRATION_ID = process.env.TEST_INTEGRATION_ID as string;
+const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 
 describe('Single target', () => {
   const discoveredProjects: Project[] = [];
   let logs: string[];
   const OLD_ENV = process.env;
-  process.env.SNYK_API = SNYK_API_TEST;
+  process.env.SNYK_API = process.env.SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
 
   it('Import & poll a repo', async () => {
@@ -27,7 +27,7 @@ describe('Single target', () => {
     const { pollingUrl } = await importTarget(
       requestManager,
       ORG_ID,
-      GITHUB_INTEGRATION_ID,
+      INTEGRATION_ID,
       {
         name: 'ruby-with-versions',
         owner: 'snyk-fixtures',
@@ -63,7 +63,7 @@ describe('Multiple targets', () => {
     const pollingUrls = await importTargets([
       {
         orgId: ORG_ID,
-        integrationId: GITHUB_INTEGRATION_ID,
+        integrationId: INTEGRATION_ID,
         target: {
           name: 'ruby-with-versions',
           owner: 'snyk-fixtures',
@@ -72,7 +72,7 @@ describe('Multiple targets', () => {
       },
       {
         orgId: ORG_ID,
-        integrationId: GITHUB_INTEGRATION_ID,
+        integrationId: INTEGRATION_ID,
         target: {
           name: 'composer-with-vulns',
           owner: 'snyk-fixtures',
