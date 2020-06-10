@@ -7,7 +7,6 @@ import { deleteTestProjects } from '../delete-test-projects';
 import { Project } from '../../src/lib/types';
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteLogs } from '../delete-logs';
-import { createHmac } from 'crypto';
 
 const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
 const SNYK_API_TEST = 'https://dev.snyk.io/api/v1';
