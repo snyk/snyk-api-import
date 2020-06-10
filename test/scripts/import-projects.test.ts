@@ -8,8 +8,8 @@ import { Project } from '../../src/lib/types';
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteLogs } from '../delete-logs';
 
-const ORG_ID = 'f0125d9b-271a-4b50-ad23-80e12575a1bf';
-const SNYK_API_TEST = 'https://dev.snyk.io/api/v1';
+const ORG_ID = process.env.TEST_ORG_ID as string;
+const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 
 describe('Import projects script', () => {
   const discoveredProjects: Project[] = [];
@@ -110,16 +110,15 @@ describe('Skips & logs issues', () => {
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
     const exit = jest.spyOn(process, 'exit').mockImplementationOnce(() => {
-      throw new Error('process.exit() was called.')
+      throw new Error('process.exit() was called.');
     });
     try {
       await ImportProjects(
-      path.resolve(
-        __dirname + '/fixtures/failed-batch/import-projects.json',
-      ));
-      } catch (e) {
-        expect(e.message).toMatch('')
-      }
+        path.resolve(__dirname + '/fixtures/failed-batch/import-projects.json'),
+      );
+    } catch (e) {
+      expect(e.message).toMatch('');
+    }
     expect(exit).toHaveBeenCalledWith(1);
 
     let logFile = null;
@@ -192,7 +191,6 @@ describe('Error handling', () => {
     ).rejects.toThrow('Failed to parse targets from');
   }, 300);
 });
-
 
 describe('Polling', () => {
   it.todo('Logs failed polls');
