@@ -1,6 +1,6 @@
 {
   "name": "snyk-api-import",
-  "description": "Walmart import for 20k+ repos",
+  "description": "Snyk import via API",
   "main": "dist/index.js",
   "bin": {
     "snyk-api-import": "dist/index.js"
