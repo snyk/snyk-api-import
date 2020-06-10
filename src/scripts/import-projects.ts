@@ -27,13 +27,17 @@ async function filterOutImportedTargets(
   }
   targets.forEach((targetItem) => {
     const { orgId, integrationId, target } = targetItem;
-    const data = `${orgId}:${integrationId}:${Object.values(target).join(':')}`;
-    const targetRegExp = regexForTarget(data);
-    const match = logFile.match(targetRegExp);
-    if (!match) {
-      filterOutImportedTargets.push(targetItem);
-    } else {
-      debug('Dropped previously imported target: ', JSON.stringify(targetItem));
+    try {
+      const data = `${orgId}:${integrationId}:${Object.values(target).join(':')}`;
+      const targetRegExp = regexForTarget(data);
+      const match = logFile.match(targetRegExp);
+      if (!match) {
+        filterOutImportedTargets.push(targetItem);
+      } else {
+        debug('Dropped previously imported target: ', JSON.stringify(targetItem));
+      }
+    } catch (e) {
+      debug('failed to process target', JSON.stringify(targetItem))
     }
   });
 
