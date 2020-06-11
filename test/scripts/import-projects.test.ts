@@ -129,7 +129,7 @@ describe('Skips & logs issues', () => {
     }
     const failedLog = fs.readFileSync(logFiles.failedImportLogPath, 'utf8');
     expect(failedLog).toMatch('ruby-with-versions');
-  }, 5000);
+  }, 30000000);
   it('Logs failed projects', async () => {
     const logRoot = __dirname + '/fixtures/projects-with-errors/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);

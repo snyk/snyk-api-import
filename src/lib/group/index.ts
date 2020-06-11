@@ -1,8 +1,8 @@
 import 'source-map-support/register';
-import * as needle from 'needle';
 import * as debugLib from 'debug';
 import { getApiToken } from '../get-api-token';
 import { getSnykHost } from '../get-snyk-host';
+import { requestsManager } from 'snyk-request-manager';
 
 const debug = debugLib('snyk:api-group');
 
@@ -12,11 +12,13 @@ export interface CreatedOrgResponse {
   created: string;
 }
 export async function createOrg(
+  requestManager: requestsManager,
   groupId: string,
   name: string,
   sourceOrgId?: string,
 ): Promise<CreatedOrgResponse> {
-  const apiToken = getApiToken();
+  getApiToken();
+  getSnykHost();
   debug('Creating a new org:' + name);
 
   if (!groupId || !name) {
@@ -32,25 +34,15 @@ export async function createOrg(
     name,
     sourceOrgId,
   };
-  const SNYK_API = getSnykHost();
-
-  const res = await needle(
-    'post',
-    `${SNYK_API}/group/${groupId}/org`,
-    body,
-    {
-      json: true,
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      read_timeout: 30000,
-      headers: {
-        Authorization: `token ${apiToken}`,
-      },
-    },
-  );
+  const res = await requestManager.request({
+    verb: 'post',
+    url: `/group/${groupId}/org`,
+    body: JSON.stringify(body),
+  });
   if (res.statusCode && res.statusCode !== 200) {
     throw new Error(
-      'Expected a 200 response, instead received: ' + JSON.stringify(res.body),
+      'Expected a 200 response, instead received: ' + JSON.stringify(res.data),
     );
   }
-  return res.body;
+  return res.data;
 }

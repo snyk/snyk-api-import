@@ -68,7 +68,7 @@ export async function createOrgs(
   orgsData.forEach(async (orgData) => {
     try {
       const { groupId, name, sourceOrgId } = orgData;
-      const org = await createOrg(groupId, name, sourceOrgId);
+      const org = await createOrg(requestManager, groupId, name, sourceOrgId);
       const integrations =
         (await listIntegrations(requestManager, org.id)) || {};
       await setNotificationPreferences(requestManager, org.id);
