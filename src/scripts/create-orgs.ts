@@ -4,8 +4,9 @@ import * as fs from 'fs';
 import { loadFile } from '../load-file';
 import { CreatedOrgResponse, createOrg } from '../lib';
 import { getLoggingPath } from '../lib/get-logging-path';
-import { listIntegrations } from '../lib/org';
+import { listIntegrations, setNotificationPreferences } from '../lib/org';
 import { requestsManager } from 'snyk-request-manager';
+import { getImportProjectsFile } from '../lib/get-import-path';
 
 const debug = debugLib('snyk:create-orgs-script');
 
@@ -70,6 +71,7 @@ export async function createOrgs(
       const org = await createOrg(groupId, name, sourceOrgId);
       const integrations =
         (await listIntegrations(requestManager, org.id)) || {};
+      await setNotificationPreferences(requestManager, org.id);
       createdOrgs.push({ ...org, integrations });
       logCreatedOrg(groupId, name, org, integrations, loggingPath);
     } catch (e) {
@@ -77,4 +79,12 @@ export async function createOrgs(
     }
   });
   return createdOrgs;
+}
+
+try {
+  const importFile = getImportProjectsFile();
+  createOrgs(importFile);
+} catch (e) {
+  debug('Failed to kick off orgs creation.\n' + e);
+  console.error('ERROR! Try running with `DEBUG=snyk*`');
 }
