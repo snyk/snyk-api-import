@@ -4,31 +4,54 @@ import * as fs from 'fs';
 import { loadFile } from '../load-file';
 import { CreatedOrgResponse, createOrg } from '../lib';
 import { getLoggingPath } from '../lib/get-logging-path';
+import { listIntegrations } from '../lib/org';
+import { requestsManager } from 'snyk-request-manager';
 
-const debug = debugLib('snyk:import-projects-script');
+const debug = debugLib('snyk:create-orgs-script');
 
 interface CreateOrgData {
   groupId: string;
   name: string;
   sourceOrgId?: string;
+  integrations: {
+    [name: string]: string;
+  };
 }
 
 export async function logCreatedOrg(
+  groupId: string,
   origName: string,
   orgData: CreatedOrgResponse,
-  loggingPath: string = getLoggingPath(),
+  integrationsData: {
+    [name: string]: string;
+  },
+  loggingPath = getLoggingPath(),
 ): Promise<void> {
+  const logPath = `${loggingPath}/${groupId}.created-orgs.csv`;
   try {
+    const integrations = Object.keys(integrationsData).map(
+      (i) => `${i}:${integrationsData[i]}`,
+    );
     const { id, name, created } = orgData;
-    const log = `${origName},${name},${id},${created}\n`;
-    fs.appendFileSync(`${loggingPath}/created-orgs.csv`, log);
+    const log = `${origName},${name},${id},${created},${integrations.join(
+      ',',
+    )}\n`;
+    fs.appendFileSync(logPath, log);
   } catch (e) {
+    debug('Failed to log created orgs at location: ', logPath, e);
     // do nothing
   }
 }
-export async function CreateOrgs(
+
+interface CreatedOrg extends CreatedOrgResponse {
+  integrations: {
+    [name: string]: string;
+  };
+}
+
+export async function createOrgs(
   fileName: string,
-  loggingPath: string,
+  loggingPath = getLoggingPath(),
 ): Promise<CreatedOrgResponse[]> {
   const content = await loadFile(fileName);
   const orgsData: CreateOrgData[] = [];
@@ -37,18 +60,21 @@ export async function CreateOrgs(
   } catch (e) {
     throw new Error(`Failed to parse orgs from ${fileName}`);
   }
+  const requestManager = new requestsManager();
+
   debug(`Loaded ${orgsData.length} orgs to create ${Date.now()}`);
-  const createdOrgs: CreatedOrgResponse[] = [];
+  const createdOrgs: CreatedOrg[] = [];
   orgsData.forEach(async (orgData) => {
     try {
       const { groupId, name, sourceOrgId } = orgData;
       const org = await createOrg(groupId, name, sourceOrgId);
-      createdOrgs.push(org);
-      logCreatedOrg(name, org, loggingPath);
+      const integrations =
+        (await listIntegrations(requestManager, org.id)) || {};
+      createdOrgs.push({ ...org, integrations });
+      logCreatedOrg(groupId, name, org, integrations, loggingPath);
     } catch (e) {
-      debug(`Failed to create org with data: ${JSON.stringify(orgsData)}`);
+      debug(`Failed to create org with data: ${JSON.stringify(orgsData)}`, e);
     }
   });
-
   return createdOrgs;
 }
