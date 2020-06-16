@@ -6,8 +6,10 @@ const debug = debugLib('snyk:import-projects-script');
 export * from './lib';
 import { ImportProjects } from './scripts/import-projects';
 import { getImportProjectsFile } from './lib/get-import-path';
+import { getLoggingPath } from './lib/get-logging-path';
 
 try {
+  getLoggingPath()
   const importFile = getImportProjectsFile();
   ImportProjects(importFile);
 } catch (e) {

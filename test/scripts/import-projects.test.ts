@@ -190,6 +190,18 @@ describe('Error handling', () => {
       ),
     ).rejects.toThrow('Failed to parse targets from');
   }, 300);
+
+  it('shows correct error when SNYK_LOG_PATH is not set', async () => {
+    delete process.env.SNYK_LOG_PATH;
+    expect(
+      ImportProjects(
+        path.resolve(
+          __dirname +
+            '/fixtures/invalid-target/import-projects-invalid-target.json',
+        ),
+      ),
+    ).rejects.toThrow('Please set the SNYK_LOG_PATH e.g. export SNYK_LOG_PATH');
+  }, 300);
 });
 
 describe('Polling', () => {
