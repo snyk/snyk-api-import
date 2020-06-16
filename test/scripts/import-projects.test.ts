@@ -141,6 +141,11 @@ describe('Skips & logs issues', () => {
     );
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
     expect(logFile).not.toBeNull();
+    const batchesLogFile = fs.readFileSync(
+      logFiles.importedBatchesLogPath,
+      'utf8',
+    );
+    expect(batchesLogFile).not.toBeNull();
     const failedProjectsLog = fs.readFileSync(
       logFiles.failedProjectsLogPath,
       'utf-8',
