@@ -60,5 +60,5 @@ This script is intended to help import projects into Snyk with a controlled pace
   - `CONCURRENT_IMPORTS` (optional) defaults to 5 repos at a time, which is the recommended amount to import at once as a max.  Just 1 repo may have many projects inside. (10 may also be okay if all repos are small)
   - `SNYK_API` (optional) defaults to `https://snyk.io/api/v1`
 
-### 3. Install & run
-`npm i -g snyk-api-import && DEBUG=snyk* snyk-api-import` or use one of the binaries
+### 3. Download & run
+Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos`
