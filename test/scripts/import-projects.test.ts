@@ -106,7 +106,8 @@ describe('Skips & logs issues', () => {
   }, 300);
 
   it('Logs failed when API errors', async () => {
-    const logRoot = __dirname + '/fixtures/failed-batch/';
+    // this folder does not exist and will be created on run
+    const logRoot = __dirname + '/fixtures/failed-batch-log/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
     const exit = jest.spyOn(process, 'exit').mockImplementationOnce(() => {
@@ -129,6 +130,12 @@ describe('Skips & logs issues', () => {
     }
     const failedLog = fs.readFileSync(logFiles.failedImportLogPath, 'utf8');
     expect(failedLog).toMatch('ruby-with-versions');
+    // delete auto generated folder
+    try {
+      fs.unlinkSync(logRoot);
+    } catch (e) {
+      // ignore
+    }
   }, 30000000);
   it('Logs failed projects', async () => {
     const logRoot = __dirname + '/fixtures/projects-with-errors/';
