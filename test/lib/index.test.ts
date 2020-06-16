@@ -58,7 +58,7 @@ describe('Multiple targets', () => {
   process.env.SNYK_API = SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
 
-  it('importTargets &  pollImportUrls multiple repos', async () => {
+  it('importTargets & pollImportUrls multiple repos', async () => {
     logs = Object.values(generateLogsPaths(__dirname, ORG_ID));
     const pollingUrls = await importTargets([
       {
