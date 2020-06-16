@@ -1,13 +1,11 @@
 import * as debugLib from 'debug';
 import * as path from 'path';
 import { loadFile } from '../load-file';
-import {
-  importTargets,
-  pollImportUrls,
-} from '../lib';
+import { importTargets, pollImportUrls } from '../lib';
 import { Project, ImportTarget } from '../lib/types';
 import { getLoggingPath } from '../lib/get-logging-path';
 import { getConcurrentImportsNumber } from '../lib/get-concurrent-imports-number';
+import { logImportedBatch } from '../log-imported-batch';
 
 const debug = debugLib('snyk:import-projects-script');
 
@@ -28,16 +26,21 @@ async function filterOutImportedTargets(
   targets.forEach((targetItem) => {
     const { orgId, integrationId, target } = targetItem;
     try {
-      const data = `${orgId}:${integrationId}:${Object.values(target).join(':')}`;
+      const data = `${orgId}:${integrationId}:${Object.values(target).join(
+        ':',
+      )}`;
       const targetRegExp = regexForTarget(data);
       const match = logFile.match(targetRegExp);
       if (!match) {
         filterOutImportedTargets.push(targetItem);
       } else {
-        debug('Dropped previously imported target: ', JSON.stringify(targetItem));
+        debug(
+          'Dropped previously imported target: ',
+          JSON.stringify(targetItem),
+        );
       }
     } catch (e) {
-      debug('failed to process target', JSON.stringify(targetItem))
+      debug('failed to process target', JSON.stringify(targetItem));
     }
   });
 
@@ -64,7 +67,11 @@ export async function ImportProjects(
     return [];
   }
   const skippedTargets = targets.length - filteredTargets.length;
-  debug(`Skipped previously imported ${skippedTargets}/${targets.length} targets`)
+  if (skippedTargets > 0) {
+    debug(
+      `Skipped previously imported ${skippedTargets}/${targets.length} targets`,
+    );
+  }
   for (
     let targetIndex = 0;
     targetIndex < filteredTargets.length;
@@ -74,11 +81,16 @@ export async function ImportProjects(
       targetIndex,
       targetIndex + concurrentTargets,
     );
-    const currentTargets = skippedTargets + targetIndex;
-    debug(
-      `Importing batch ${currentTargets} - ${currentTargets +
-        concurrentTargets} out of ${filteredTargets.length}`,
-    );
+    const currentTargets = skippedTargets + targetIndex + 1;
+    let currentBatchEnd = currentTargets + concurrentTargets - 1;
+    if (currentBatchEnd > filteredTargets.length) {
+      currentBatchEnd = currentTargets;
+    }
+    const batchProgressMessages = `Importing batch ${currentTargets} - ${currentBatchEnd} out of ${
+      filteredTargets.length
+    } ${skippedTargets > 0 ? `(skipped ${skippedTargets})` : ''}`;
+    debug(batchProgressMessages);
+    logImportedBatch(batchProgressMessages);
     const pollingUrlsAndContext = await importTargets(batch, loggingPath);
     projects.push(...(await pollImportUrls(pollingUrlsAndContext)));
   }
