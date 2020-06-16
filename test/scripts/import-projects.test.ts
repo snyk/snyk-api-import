@@ -71,7 +71,7 @@ describe('Skips & logs issues', () => {
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
-  process.env.CONCURRENT_IMPORTS = '3';
+  process.env.CONCURRENT_IMPORTS = '1';
 
   const discoveredProjects: Project[] = [];
   let logs: string[];
