@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { Target } from './lib/types';
 import { getLoggingPath } from './lib/get-logging-path';
+import { IMPORT_LOG_NAME } from './common';
 
 export async function logImportedTarget(
   orgId: string,
@@ -11,7 +12,7 @@ export async function logImportedTarget(
 ): Promise<void> {
   try {
     const log = `${orgId}:${integrationId}:${Object.values(target).join(':')}:${locationUrl},`;
-    fs.appendFileSync(`${loggingPath}/imported-targets.log`, log);
+    fs.appendFileSync(`${loggingPath}/${IMPORT_LOG_NAME}`, log);
   } catch (e) {
     // do nothing
   }

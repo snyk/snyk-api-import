@@ -58,7 +58,8 @@ export async function ImportProjects(
   } catch (e) {
     throw new Error(`Failed to parse targets from ${fileName}`);
   }
-  debug(`Loaded ${targets.length} targets to import ${Date.now()}`);
+  const dateNow = new Date(Date.now());
+  debug(`Loaded ${targets.length} targets to import ${dateNow.toUTCString()}`);
   const concurrentTargets = getConcurrentImportsNumber();
   const projects: Project[] = [];
   //TODO: validation?
