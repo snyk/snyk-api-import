@@ -75,7 +75,7 @@ export async function importTarget(
       orgId,
     };
   } catch (error) {
-    await logFailedImports(orgId, integrationId, target, loggingPath);
+    await logFailedImports(orgId, integrationId, target, error.message || error, loggingPath);
     const err: {
       message?: string | undefined;
       innerError?: string;
