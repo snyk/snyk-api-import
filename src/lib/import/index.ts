@@ -75,7 +75,13 @@ export async function importTarget(
       orgId,
     };
   } catch (error) {
-    await logFailedImports(orgId, integrationId, target, loggingPath);
+    await logFailedImports(
+      orgId,
+      integrationId,
+      target,
+      error.message || error,
+      loggingPath,
+    );
     const err: {
       message?: string | undefined;
       innerError?: string;
@@ -91,7 +97,7 @@ export async function importTargets(
   loggingPath = getLoggingPath(),
 ): Promise<string[]> {
   const pollingUrls: string[] = [];
-  const requestManager = new requestsManager();
+  const requestManager = new requestsManager({ period: 15000 });
   // TODO: validate targets
   let failed = 0;
   const concurrentImports = getConcurrentImportsNumber();
