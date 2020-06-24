@@ -83,13 +83,14 @@ export async function ImportProjects(
       targetIndex + concurrentTargets,
     );
     const currentTargets = skippedTargets + targetIndex + 1;
+    const fullTargetsNumber = filteredTargets.length + skippedTargets;
     let currentBatchEnd = currentTargets + concurrentTargets - 1;
-    if (currentBatchEnd > filteredTargets.length) {
+    if (currentBatchEnd > fullTargetsNumber) {
       currentBatchEnd = currentTargets;
     }
-    const batchProgressMessages = `Importing batch ${currentTargets} - ${currentBatchEnd} out of ${
-      filteredTargets.length
-    } ${skippedTargets > 0 ? `(skipped ${skippedTargets})` : ''}`;
+    const batchProgressMessages = `Importing batch ${currentTargets} - ${currentBatchEnd} out of ${fullTargetsNumber} ${
+      skippedTargets > 0 ? `(skipped ${skippedTargets})` : ''
+    }`;
     debug(batchProgressMessages);
     logImportedBatch(batchProgressMessages);
     const pollingUrlsAndContext = await importTargets(batch, loggingPath);
