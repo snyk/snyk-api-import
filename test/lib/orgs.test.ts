@@ -8,8 +8,9 @@ describe('Single target', () => {
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
-  const requestManager = new requestsManager();
-
+  const requestManager = new requestsManager({
+    userAgentPrefix: 'snyk-api-import:tests',
+  });
   afterAll(async () => {
     process.env = { ...OLD_ENV };
   });

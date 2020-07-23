@@ -23,7 +23,9 @@ describe('Single target', () => {
 
   it('Import & poll a repo', async () => {
     logs = Object.values(generateLogsPaths(__dirname, ORG_ID));
-    const requestManager = new requestsManager();
+    const requestManager = new requestsManager({
+      userAgentPrefix: 'snyk-api-import:tests',
+    });
     const { pollingUrl } = await importTarget(
       requestManager,
       ORG_ID,

@@ -61,8 +61,9 @@ export async function createOrgs(
   } catch (e) {
     throw new Error(`Failed to parse orgs from ${fileName}`);
   }
-  const requestManager = new requestsManager();
-
+  const requestManager = new requestsManager({
+    userAgentPrefix: 'snyk-api-import',
+  });
   debug(`Loaded ${orgsData.length} orgs to create ${Date.now()}`);
   const createdOrgs: CreatedOrg[] = [];
   orgsData.forEach(async (orgData) => {
