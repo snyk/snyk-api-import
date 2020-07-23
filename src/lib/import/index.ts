@@ -97,7 +97,9 @@ export async function importTargets(
   loggingPath = getLoggingPath(),
 ): Promise<string[]> {
   const pollingUrls: string[] = [];
-  const requestManager = new requestsManager({ period: 15000 });
+  const requestManager = new requestsManager({
+    userAgentPrefix: 'snyk-api-import',
+  });
   // TODO: validate targets
   let failed = 0;
   const concurrentImports = getConcurrentImportsNumber();
