@@ -45,7 +45,7 @@
     "needle": "2.5.0",
     "p-map": "4.0.0",
     "sleep-promise": "8.0.1",
-    "snyk": "1.360.0",
+    "snyk": "1.361.3",
     "snyk-config": "^3.0.0",
     "snyk-request-manager": "1.2.1",
     "source-map-support": "^0.5.16",
