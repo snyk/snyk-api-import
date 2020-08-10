@@ -41,7 +41,7 @@
     "@snyk/configstore": "^3.2.0-rc1",
     "axios": "^0.19.2",
     "debug": "4.2.0",
-    "lodash": "4.17.15",
+    "lodash": "4.17.19",
     "needle": "2.5.0",
     "p-map": "4.0.0",
     "sleep-promise": "8.0.1",
