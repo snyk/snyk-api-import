@@ -29,6 +29,12 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
 ### 1. Create the `import-projects.json` file:
   `orgId` - Can be found in https://app.snyk.io/org/YOUR_ORG/manage/settings
   `integrationId` - Can be found in Integrations menu for each SCM https://app.snyk.io/org/YOUR_ORG/manage/settings
+  `target`, `files`, `exclusionGlobs` - see our [Import API documentation](https://snyk.docs.apiary.io/#reference/integrations/import-projects/import) for more info.
+
+  Note: For a repo that may have 200+ manifest files it is recommended to split this import into multiple by targeting specific files. Importing hundreds of files at once from 1 repo can cause the import to result in some errors/failures. Splitting it into to target some files, or some folders only will benefit from the re-tries and yield a smaller load on the source control management system being used. use the `files` property to accomplish this.
+
+  If you have any tests ot fixtures that should be ignored, please set the `exclusionGLobs` property:
+  > a comma-separated list of up to 10 folder names to exclude from scanning. If not specified, it will default to "fixtures, tests, __tests__, node_modules". If an empty string is provided - no folders will be excluded
 
 
   ```
@@ -41,7 +47,8 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
           "name": "shallow-goof-policy",
           "owner": "snyk-fixtures",
           "branch": "master"
-        }
+        },
+        "files": ["package.json", "package/package.json", "Gemfile.lock"]
       },
       {
         "orgId": "******,
@@ -50,7 +57,8 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
           "name": "shallow-goof-policy",
           "owner": "snyk-fixtures",
           "branch": "master"
-        }
+        },
+        exclusionGlobs: "fixtures, test"
       },
     ]
   }

@@ -3,6 +3,7 @@ export interface ImportTarget {
   integrationId: string;
   target: Target;
   files?: FilePath[];
+  exclusionGlobs?: string;
 }
 
 export interface Target {
