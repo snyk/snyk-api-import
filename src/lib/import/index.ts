@@ -20,6 +20,7 @@ export async function importTarget(
   integrationId: string,
   target: Target,
   files?: FilePath[] | undefined,
+  exclusionGlobs?: string | undefined,
   loggingPath?: string,
 ): Promise<{
   pollingUrl: string;
@@ -40,6 +41,7 @@ export async function importTarget(
     const body = {
       target,
       files,
+      exclusionGlobs,
     };
     getSnykHost();
 
@@ -107,13 +109,14 @@ export async function importTargets(
     targets,
     async (t) => {
       try {
-        const { orgId, integrationId, target, files } = t;
+        const { orgId, integrationId, target, files, exclusionGlobs } = t;
         const { pollingUrl } = await importTarget(
           requestManager,
           orgId,
           integrationId,
           target,
           files,
+          exclusionGlobs,
           loggingPath,
         );
         await logImportJobsPerOrg(orgId, pollingUrl);
