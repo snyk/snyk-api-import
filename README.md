@@ -37,10 +37,11 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
   > a comma-separated list of up to 10 folder names to exclude from scanning. If not specified, it will default to "fixtures, tests, __tests__, node_modules". If an empty string is provided - no folders will be excluded
 
 
-  ```
+#### Example:  Bitbucket Server
+
+```
 {
   "targets": [
-    // Bitbucket Server
     {
       "orgId": "******",
       "integrationId": "******",
@@ -59,9 +60,17 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
         {
           "path": "Gemfile.lock"
         }
-      ]
+      ],
+      "exclusionGlobs": "fixtures, test"
     },
-    // Github.com | Github Enterprise
+  ]
+}
+```
+
+#### Example: Github.com | Github Enterprise
+```
+{
+  "targets": [
     {
       "orgId": "******",
       "integrationId": "******",
@@ -74,7 +83,7 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
     }
   ]
 }
-  ```
+```
 ### 2. Set the env vars mentioned:
   - `SNYK_IMPORT_PATH`- the path to the import file
   - `SNYK_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
