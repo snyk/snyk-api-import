@@ -38,30 +38,42 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
 
 
   ```
-  {
-    "targets": [
-      {
-        "orgId": "******,
-        "integrationId": "******",
-        "target": {
-          "name": "shallow-goof-policy",
-          "owner": "snyk-fixtures",
-          "branch": "master"
-        },
-        "files": ["package.json", "package/package.json", "Gemfile.lock"]
+{
+  "targets": [
+    // Bitbucket Server
+    {
+      "orgId": "******",
+      "integrationId": "******",
+      "target": {
+        "repoSlug": "snyk-fixtures",
+        "name": "Snyk snyk-fixtures",
+        "projectKey": "PROJECT"
       },
-      {
-        "orgId": "******,
-        "integrationId": "******",
-        "target": {
-          "name": "shallow-goof-policy",
-          "owner": "snyk-fixtures",
-          "branch": "master"
+      "files": [
+        {
+          "path": "package.json"
         },
-        exclusionGlobs: "fixtures, test"
+        {
+          "path": "package/package.json"
+        },
+        {
+          "path": "Gemfile.lock"
+        }
+      ]
+    },
+    // Github.com | Github Enterprise
+    {
+      "orgId": "******",
+      "integrationId": "******",
+      "target": {
+        "name": "shallow-goof-policy",
+        "owner": "snyk-fixtures",
+        "branch": "master"
       },
-    ]
-  }
+      "exclusionGlobs": "fixtures, test"
+    }
+  ]
+}
   ```
 ### 2. Set the env vars mentioned:
   - `SNYK_IMPORT_PATH`- the path to the import file
