@@ -20,7 +20,7 @@
     "prepare": "npm run snyk-protect && npm run build",
     "snyk-test": "snyk test",
     "pkg-binaries": "npx pkg . -t node12-linux-x64,node12-macos-x64,node12-win-x64 --out-path ./dist/binaries",
-    "snyk-protect": "snyk protect"
+    "snyk-protect": "npx snyk protect"
   },
   "types": "./dist/index.d.ts",
   "repository": {
