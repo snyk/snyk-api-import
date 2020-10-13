@@ -1,6 +1,7 @@
-- [ ] Tests written and linted [ℹ︎](https://github.com/snyk/general/wiki/Tests)
-- [ ] Documentation written [ℹ︎](https://github.com/snyk/general/wiki/Documentation)
-- [ ] Commit history is tidy [ℹ︎](https://github.com/snyk/general/wiki/Git)
+- [ ] Tests written and linted [ℹ︎](https://github.com/snyk-tech-services/general/wiki/Tests)
+- [ ] Documentation written in Wiki/[README](../README.md)
+- [ ] Commit history is tidy & follows Contributing guidelines [ℹ︎](./CONTRIBUTING.md#commit-messages)
+
 
 ### What this does
 
@@ -12,8 +13,7 @@ _Instructions on how to run this locally, background context, what to review, qu
 
 ### More information
 
-- [Jira ticket SC-0000](https://snyksec.atlassian.net/browse/SC-0000)
-- [Link to documentation](https://github.com/snyk/snyk-api-import/wiki/)
+- [Link to documentation]()
 
 ### Screenshots
 
