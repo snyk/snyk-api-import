@@ -86,7 +86,7 @@ export async function pollImportUrls(
         await logImportedProjects(locationUrl, projects);
         projectsArray.push(...projects);
       } catch (error) {
-        logFailedPollUrls(locationUrl, error.message || error);
+        logFailedPollUrls(locationUrl, _.get(error, 'innerError.message') || error.innerError || error.message || error);
         debug('Failed to poll:', locationUrl);
       }
     },
