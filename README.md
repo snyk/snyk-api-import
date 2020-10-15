@@ -18,10 +18,10 @@ WHat you will need to have setup in advance:
 - Recommended: have notifications disabled for emails etc to avoid receiving import notifications
 - Recommended: have the fix PRs and PR checks disabled until import is complete to avoid sending extra requests to SCMs (Github/Gitlab/Bitbucket etc)
 
-
-
-### Setup
-`npm i`
+### Basic CLI commands
+By default the `import` command
+- `help` - show help & all available commands and their options
+- `import` - kick off a an API powered import of repos/targets into existing Snyk orgs defined in [import configuration file](#to-kick-off-an-import).
 
 ## To kick off an import
 Any logs will be generated at `SNYK_LOG_PATH` directory.
@@ -93,3 +93,7 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
 
 ### 3. Download & run
 Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos`
+
+
+### Development Setup
+`npm i`

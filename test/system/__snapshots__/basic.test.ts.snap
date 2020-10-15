@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`\`snyk-api-import help <...>\` Shows help text as expected 1`] = `
+"index.js
+
+Kick off API powered import
+
+Commands:
+  index.js import  Kick off API powered import            [default] [aliases: i]
+
+Options:
+  --version  Show version number                                       [boolean]
+  --help     Show help                                                 [boolean]"
+`;
