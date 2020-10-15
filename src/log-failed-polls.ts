@@ -1,4 +1,5 @@
-import * as fs from 'fs';
+import * as bunyan from 'bunyan';
+
 import { getLoggingPath } from './lib/get-logging-path';
 import { FAILED_POLLS_LOG_NAME } from './common';
 
@@ -8,9 +9,16 @@ export async function logFailedPollUrls(
   loggingPath: string = getLoggingPath(),
 ): Promise<void> {
   try {
-    const log = `${locationUrl}:${message},`;
     const orgId = locationUrl.split('/').slice(-5)[0];
-    fs.appendFileSync(`${loggingPath}/${orgId}.${FAILED_POLLS_LOG_NAME}`, log);
+    const log = bunyan.createLogger({
+      name: 'snyk:import-projects-script',
+      level: 'error',
+      streams: [{
+        level: 'error',
+        path: `${loggingPath}/${orgId}.${FAILED_POLLS_LOG_NAME}`,
+      }],
+    });
+    log.error({ orgId, locationUrl, message }, 'Failed to poll url');
   } catch (e) {
     // do nothing
   }

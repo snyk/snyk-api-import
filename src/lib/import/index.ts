@@ -77,11 +77,13 @@ export async function importTarget(
       orgId,
     };
   } catch (error) {
+    const errorBody = error.data || error;
+    const errorMessage = errorBody.message;
     await logFailedImports(
       orgId,
       integrationId,
       target,
-      error.message || error,
+      { errorMessage: errorBody.message, name: error.name, code: errorBody.code, requestId: error.requestId },
       loggingPath,
     );
     const err: {
@@ -89,7 +91,7 @@ export async function importTarget(
       innerError?: string;
     } = new Error('Could not complete API import');
     err.innerError = error;
-    debug(`Could not complete API import: ${error.message}`);
+    debug(`Could not complete API import: ${errorMessage}`);
     throw err;
   }
 }
@@ -122,8 +124,7 @@ export async function importTargets(
       } catch (error) {
         failed++;
         const { orgId, integrationId, target } = t;
-        await logFailedImports(orgId, integrationId, target, loggingPath);
-        debug('Failed to process:', JSON.stringify(t), error.message);
+        await logFailedImports(orgId, integrationId, target, { errorMessage: error.message}, loggingPath);
         if (failed % concurrentImports === 0) {
           console.error(
             'Failed too many times in a row, please check if everything is configured correctly and try again.',
