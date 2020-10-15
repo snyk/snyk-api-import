@@ -47,10 +47,15 @@ async function filterOutImportedTargets(
   return filterOutImportedTargets;
 }
 
-export async function ImportProjects(
+export async function importProjects(
   fileName: string,
   loggingPath: string = getLoggingPath(),
-): Promise<Project[]> {
+): Promise<{
+  projects: Project[];
+  skippedTargets: number;
+  filteredTargets: ImportTarget[];
+  targets: ImportTarget[];
+}> {
   const content = await loadFile(fileName);
   const targets: ImportTarget[] = [];
   try {
@@ -65,7 +70,7 @@ export async function ImportProjects(
   //TODO: validation?
   const filteredTargets = await filterOutImportedTargets(targets, loggingPath);
   if (filteredTargets.length === 0) {
-    return [];
+    return { projects: [], targets, filteredTargets, skippedTargets: 0 };
   }
   const skippedTargets = targets.length - filteredTargets.length;
   if (skippedTargets > 0) {
@@ -96,6 +101,5 @@ export async function ImportProjects(
     const pollingUrlsAndContext = await importTargets(batch, loggingPath);
     projects.push(...(await pollImportUrls(pollingUrlsAndContext)));
   }
-
-  return projects;
+  return { projects, skippedTargets, filteredTargets, targets };
 }

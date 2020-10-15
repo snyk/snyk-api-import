@@ -1,15 +1,15 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
-import { ImportProjects } from '../../src/scripts/import-projects';
+import { importProjects } from '../../src/scripts/import-projects';
 import { deleteTestProjects } from '../delete-test-projects';
 import { Project } from '../../src/lib/types';
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteLogs } from '../delete-logs';
 
-const IMPORT_PROJECTS_FILE_NAME='import-projects.json';
 const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
+const IMPORT_PROJECTS_FILE_NAME= 'import-projects.json';
 
 describe('Import projects script', () => {
   const discoveredProjects: Project[] = [];
@@ -28,7 +28,7 @@ describe('Import projects script', () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
 
-    const projects = await ImportProjects(
+    const { projects } = await importProjects(
       path.resolve(__dirname + `/fixtures/${IMPORT_PROJECTS_FILE_NAME}`),
       __dirname,
     );
@@ -56,7 +56,7 @@ describe('Import skips previously imported', () => {
     const logPath = path.resolve(__dirname + '/fixtures/with-import-log');
     const logFiles = generateLogsPaths(logPath, ORG_ID);
 
-    const projects = await ImportProjects(
+    const { projects } = await importProjects(
       path.resolve(
         __dirname + `/fixtures/with-import-log/${IMPORT_PROJECTS_FILE_NAME}`,
       ),
@@ -88,7 +88,7 @@ describe('Skips & logs issues', () => {
     const logRoot = __dirname + '/fixtures/invalid-target/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
-    const projects = await ImportProjects(
+    const { projects } = await importProjects(
       path.resolve(
         __dirname +
           '/fixtures/invalid-target/import-projects-invalid-target.json',
@@ -114,7 +114,7 @@ describe('Skips & logs issues', () => {
       throw new Error('process.exit() was called.');
     });
     try {
-      await ImportProjects(
+      await importProjects(
         path.resolve(__dirname + '/fixtures/failed-batch/import-projects.json'),
       );
     } catch (e) {
@@ -141,7 +141,7 @@ describe('Skips & logs issues', () => {
     const logRoot = __dirname + '/fixtures/projects-with-errors/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
-    const projects = await ImportProjects(
+    const { projects } = await importProjects(
       path.resolve(
         __dirname + '/fixtures/projects-with-errors/import-projects.json',
       ),
@@ -192,12 +192,12 @@ describe('Error handling', () => {
 
   it('shows correct error when input can not be loaded', async () => {
     expect(
-      ImportProjects(`do-not-exist/${IMPORT_PROJECTS_FILE_NAME}`),
+      importProjects(`do-not-exist/${IMPORT_PROJECTS_FILE_NAME}`),
     ).rejects.toThrow('File can not be found at location');
   }, 300);
   it('shows correct error when input is invalid json', async () => {
     expect(
-      ImportProjects(
+      importProjects(
         path.resolve(__dirname + '/fixtures/import-projects-invalid.json'),
       ),
     ).rejects.toThrow('Failed to parse targets from');
@@ -206,7 +206,7 @@ describe('Error handling', () => {
   it('shows correct error when SNYK_LOG_PATH is not set', async () => {
     delete process.env.SNYK_LOG_PATH;
     expect(
-      ImportProjects(
+      importProjects(
         path.resolve(
           __dirname +
             '/fixtures/invalid-target/import-projects-invalid-target.json',
