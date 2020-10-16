@@ -27,7 +27,7 @@ export async function listIntegrations(
 
   const res = await requestManager.request({
     verb: 'get',
-    url: `/org/${orgId}/integrations`,
+    url: `/org/${orgId.trim()}/integrations`,
     body: JSON.stringify({}),
   });
 
@@ -89,7 +89,7 @@ export async function setNotificationPreferences(
   try {
     const res = await requestManager.request({
       verb: 'put',
-      url: `/org/${orgId}/notification-settings`,
+      url: `/org/${orgId.trim()}/notification-settings`,
       body: JSON.stringify(settings),
     });
 
