@@ -47,7 +47,7 @@ export async function importTarget(
 
     const res = await requestManager.request({
       verb: 'post',
-      url: `/org/${orgId}/integrations/${integrationId}/import`,
+      url: `/org/${orgId.trim()}/integrations/${integrationId}/import`,
       body: JSON.stringify(body),
     });
     if (res.statusCode && res.statusCode !== 201) {

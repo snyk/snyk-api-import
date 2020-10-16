@@ -24,7 +24,7 @@ export async function deleteProjects(
     };
     const res = await needle(
       'post',
-      `${SNYK_API}/org/${orgId}/projects/bulk-delete`,
+      `${SNYK_API}/org/${orgId.trim()}/projects/bulk-delete`,
       body,
       {
         json: true,
