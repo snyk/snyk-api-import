@@ -1,13 +1,10 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "pretty": true,
-    "target": "esnext",
+    "target": "ES6",
     "module": "commonjs",
     "sourceMap": true,
-    "declaration": true,
-    "importHelpers": true,
-    "strict": true
+    "declaration": true
   },
   "include": ["./src/**/**/*"]
 }
