@@ -1,7 +1,7 @@
 import * as debugLib from 'debug';
 const debug = debugLib('snyk:import-projects-script');
 
-import { ImportProjects } from '../scripts/import-projects';
+import { importProjects } from '../scripts/import-projects';
 import { getImportProjectsFile } from '../lib/get-import-path';
 import { getLoggingPath } from '../lib/get-logging-path';
 
@@ -12,9 +12,32 @@ export const aliases = ['i'];
 
 export async function handler(): Promise<void> {
   try {
-    getLoggingPath();
+    const logsPath = getLoggingPath();
     const importFile = getImportProjectsFile();
-    ImportProjects(importFile);
+    const {
+      projects,
+      filteredTargets,
+      targets,
+      skippedTargets,
+    } = await importProjects(importFile);
+    const projectsMessage =
+      projects.length > 0
+        ? `Imported ${projects.length} project(s)`
+        : '⚠ No projects imported!';
+
+    const targetsMessage = `\nProcessed ${filteredTargets.length} out of a total of ${
+      targets.length
+    } targets${
+      skippedTargets
+        ? ` (${skippedTargets} were skipped as they have been previously imported).`
+        : ''
+    }`;
+
+    console.log(
+      projectsMessage +
+        targetsMessage +
+        `\nCheck the logs for any failures located at: ${logsPath}/*`,
+    );
   } catch (e) {
     debug('Failed to kick off import.\n' + e);
     console.error('ERROR! Try running with `DEBUG=snyk* snyk-import`');
