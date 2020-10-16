@@ -2,12 +2,12 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import { ImportProjects } from '../../src/scripts/import-projects';
-import { IMPORT_PROJECTS_FILE_NAME } from '../../src/common';
 import { deleteTestProjects } from '../delete-test-projects';
 import { Project } from '../../src/lib/types';
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteLogs } from '../delete-logs';
 
+const IMPORT_PROJECTS_FILE_NAME='import-projects.json';
 const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 
