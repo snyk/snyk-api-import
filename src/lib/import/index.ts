@@ -11,6 +11,7 @@ import { getLoggingPath } from '../get-logging-path';
 import { logFailedImports } from '../../log-failed-imports';
 import { logImportJobsPerOrg } from '../../log-import-jobs';
 import { getConcurrentImportsNumber } from '../get-concurrent-imports-number';
+import { FAILED_LOG_NAME } from '../../common';
 
 const debug = debugLib('snyk:api-import');
 
@@ -62,7 +63,9 @@ export async function importTarget(
         'No import location url returned. Please re-try the import.',
       );
     }
-    debug(`Received locationUrl for ${target.name || 'target'}: ${locationUrl}`);
+    debug(
+      `Received locationUrl for ${target.name || 'target'}: ${locationUrl}`,
+    );
     await logImportedTarget(
       orgId,
       integrationId,
@@ -83,7 +86,12 @@ export async function importTarget(
       orgId,
       integrationId,
       target,
-      { errorMessage: errorBody.message, name: error.name, code: errorBody.code, requestId: error.requestId },
+      {
+        errorMessage: errorBody.message,
+        name: error.name,
+        code: errorBody.code,
+        requestId: error.requestId,
+      },
       loggingPath,
     );
     const err: {
@@ -91,7 +99,13 @@ export async function importTarget(
       innerError?: string;
     } = new Error('Could not complete API import');
     err.innerError = error;
-    console.error(`Failed to kick off import for target ${JSON.stringify(target)}. ERROR: ${errorMessage}`);
+    console.error(
+      `Failed to kick off import for target: ${JSON.stringify(
+        target,
+      )}.\nERROR name: ${
+        error.name
+      } msg: ${errorMessage}. See more information in logs located at ${loggingPath}/${orgId}/*.${FAILED_LOG_NAME} or re-start in DEBUG mode.`,
+    );
     throw err;
   }
 }
@@ -123,10 +137,16 @@ export async function importTargets(
       } catch (error) {
         failed++;
         const { orgId, integrationId, target } = t;
-        await logFailedImports(orgId, integrationId, target, { errorMessage: error.message}, loggingPath);
+        await logFailedImports(
+          orgId,
+          integrationId,
+          target,
+          { errorMessage: error.message },
+          loggingPath,
+        );
         if (failed % concurrentImports === 0) {
           console.error(
-            'Every import in this batch failed, stopping the import as this is unexpected. Please check if everything is configured correctly and try again.',
+            `Every import in this batch failed, stopping as this is unexpected! Please check if everything is configured ok and review the logs located at ${loggingPath}. If everything looks OK re-start the import, previously imported targets will be skipped.`,
           );
           // die immediately
           return process.exit(1);
