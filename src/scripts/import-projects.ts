@@ -69,7 +69,6 @@ export async function importProjects(
   debug(`Loaded ${targets.length} targets to import ${dateNow.toUTCString()}`);
   const concurrentTargets = getConcurrentImportsNumber();
   const projects: Project[] = [];
-  //TODO: validation?
   const filteredTargets = await filterOutImportedTargets(targets, loggingPath);
   if (filteredTargets.length === 0) {
     return { projects: [], targets, filteredTargets, skippedTargets: 0 };
@@ -104,7 +103,7 @@ export async function importProjects(
     debug(batchProgressMessages);
     logImportedBatch(batchProgressMessages);
     const pollingUrlsAndContext = await importTargets(requestManager, batch, loggingPath);
-    projects.push(...(await pollImportUrls(requestManager,pollingUrlsAndContext)));
+    projects.push(...(await pollImportUrls(requestManager, pollingUrlsAndContext)));
   }
   return { projects, skippedTargets, filteredTargets, targets };
 }

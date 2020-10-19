@@ -11,6 +11,9 @@ const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 const IMPORT_PROJECTS_FILE_NAME= 'import-projects.json';
 
+jest.unmock('snyk-request-manager');
+jest.requireActual('snyk-request-manager');
+
 describe('Import projects script', () => {
   const discoveredProjects: Project[] = [];
   let logs: string[];
@@ -215,8 +218,4 @@ describe('Error handling', () => {
       ),
     ).rejects.toThrow('Please set the SNYK_LOG_PATH e.g. export SNYK_LOG_PATH');
   }, 300);
-});
-
-describe('Polling', () => {
-  it.todo('Logs failed polls');
 });

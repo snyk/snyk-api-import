@@ -53,7 +53,7 @@ export async function importTarget(
     if (res.statusCode && res.statusCode !== 201) {
       throw new Error(
         'Expected a 201 response, instead received: ' +
-          JSON.stringify(res.body),
+          JSON.stringify(res.data),
       );
     }
     const locationUrl = res.headers['location'];
@@ -102,7 +102,6 @@ export async function importTargets(
   loggingPath = getLoggingPath(),
 ): Promise<string[]> {
   const pollingUrls: string[] = [];
-  // TODO: validate targets
   let failed = 0;
   const concurrentImports = getConcurrentImportsNumber();
   await pMap(

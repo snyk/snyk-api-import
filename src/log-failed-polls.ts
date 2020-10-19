@@ -5,7 +5,10 @@ import { FAILED_POLLS_LOG_NAME } from './common';
 
 export async function logFailedPollUrls(
   locationUrl: string,
-  message: string,
+  errorData: {
+    errorMessage: string,
+    [name: string]: any;
+  },
   loggingPath: string = getLoggingPath(),
 ): Promise<void> {
   try {
@@ -18,7 +21,7 @@ export async function logFailedPollUrls(
         path: `${loggingPath}/${orgId}.${FAILED_POLLS_LOG_NAME}`,
       }],
     });
-    log.error({ orgId, locationUrl, message }, 'Failed to poll url');
+    log.error({ orgId, locationUrl, ...errorData }, 'Failed to poll url');
   } catch (e) {
     // do nothing
   }

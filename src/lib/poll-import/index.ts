@@ -40,7 +40,7 @@ export async function pollImportUrl(
     if (res.statusCode && res.statusCode !== 200) {
       throw new Error(
         'Expected a 200 response, instead received: ' +
-          JSON.stringify(res.body),
+          JSON.stringify(res.data),
       );
     }
     // TODO: use logger to show what we got
@@ -94,7 +94,7 @@ export async function pollImportUrls(
         await logImportedProjects(locationUrl, projects);
         projectsArray.push(...projects);
       } catch (error) {
-        logFailedPollUrls(locationUrl, _.get(error, 'innerError.message') || error.innerError || error.message || error);
+        logFailedPollUrls(locationUrl,{ errorMessage: _.get(error, 'innerError.message') || error.innerError || error.message || error});
         debug('Failed to poll:', locationUrl);
       }
     },
