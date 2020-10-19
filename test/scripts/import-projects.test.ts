@@ -104,7 +104,7 @@ describe('Skips & logs issues', () => {
     } catch (e) {
       expect(logFile).toBeNull();
     }
-    await new Promise((r) => setTimeout(r, 300));
+    await new Promise((r) => setTimeout(r, 500));
     const failedLog = fs.readFileSync(logFiles.failedImportLogPath, 'utf8');
     expect(failedLog).toMatch('ruby-with-versions');
   }, 3000);
@@ -157,7 +157,7 @@ describe('Skips & logs issues', () => {
       'utf8',
     );
     expect(batchesLogFile).not.toBeNull();
-    await new Promise((r) => setTimeout(r, 300));
+    await new Promise((r) => setTimeout(r, 500));
     const failedProjectsLog = fs.readFileSync(
       logFiles.failedProjectsLogPath,
       'utf-8',

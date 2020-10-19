@@ -100,7 +100,6 @@ export async function importProjects(
     const batchProgressMessages = `Importing batch ${currentTargets} - ${currentBatchEnd} out of ${fullTargetsNumber} ${
       skippedTargets > 0 ? `(skipped ${skippedTargets})` : ''
     }`;
-    debug(batchProgressMessages);
     logImportedBatch(batchProgressMessages);
     const pollingUrlsAndContext = await importTargets(requestManager, batch, loggingPath);
     projects.push(...(await pollImportUrls(requestManager, pollingUrlsAndContext)));
