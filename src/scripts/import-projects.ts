@@ -66,7 +66,7 @@ export async function importProjects(
     throw new Error(`Failed to parse targets from ${fileName}`);
   }
   const dateNow = new Date(Date.now());
-  console.log(`Loaded ${targets.length} targets to import ${dateNow.toUTCString()}`);
+  console.log(`Loaded ${targets.length} target(s) to import ${dateNow.toUTCString()}`);
   const concurrentTargets = getConcurrentImportsNumber();
   const projects: Project[] = [];
   const filteredTargets = await filterOutImportedTargets(targets, loggingPath);
