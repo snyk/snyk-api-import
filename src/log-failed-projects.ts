@@ -1,8 +1,11 @@
-import * as fs from 'fs';
-import * as _ from 'lodash';
+import * as bunyan from 'bunyan';
+import * as debugLib from 'debug';
+
 import { FAILED_PROJECTS_LOG_NAME } from './common';
 import { Project } from './lib/types';
 import { getLoggingPath } from './lib/get-logging-path';
+
+const debug = debugLib('snyk:import-projects-script');
 
 // TODO: convert this but think about easily scannable? we need target! and error
 export async function logFailedProjects(
@@ -13,8 +16,16 @@ export async function logFailedProjects(
   try {
     projects.forEach((project) => {
       const orgId = locationUrl.split('/').slice(-5)[0];
-      const log = `${locationUrl}:${Object.values(_.omit(project)).join(':')},`;
-      fs.appendFileSync(`${loggingPath}/${orgId}.${FAILED_PROJECTS_LOG_NAME}`, log);
+      const log = bunyan.createLogger({
+        name: 'snyk:import-projects-script',
+        level: 'error',
+        streams: [{
+          level: 'error',
+          path: `${loggingPath}/${orgId}.${FAILED_PROJECTS_LOG_NAME}`,
+        }],
+      });
+      debug({ orgId, locationUrl, ...project }, 'Error importing project')
+      log.error({ orgId, locationUrl, ...project }, 'Error importing project');
     });
   } catch (e) {
     // do nothing

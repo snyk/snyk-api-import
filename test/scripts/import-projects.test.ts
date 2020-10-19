@@ -157,12 +157,13 @@ describe('Skips & logs issues', () => {
       'utf8',
     );
     expect(batchesLogFile).not.toBeNull();
+    await new Promise((r) => setTimeout(r, 300));
     const failedProjectsLog = fs.readFileSync(
       logFiles.failedProjectsLogPath,
       'utf-8',
     );
     expect(failedProjectsLog).not.toBeNull();
-    expect(failedProjectsLog).toMatch('dotnet/invalid.csproj');
+    expect(failedProjectsLog).toMatch(`"targetFile":"dotnet/invalid.csproj","success":false,"projectUrl":"","msg":"Error importing project"`);
 
     let failedImportLog = null;
     try {

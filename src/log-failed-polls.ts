@@ -1,7 +1,10 @@
 import * as bunyan from 'bunyan';
+import * as debugLib from 'debug';
 
 import { getLoggingPath } from './lib/get-logging-path';
 import { FAILED_POLLS_LOG_NAME } from './common';
+
+const debug = debugLib('snyk:import-projects-script');
 
 export async function logFailedPollUrls(
   locationUrl: string,
@@ -21,6 +24,7 @@ export async function logFailedPollUrls(
         path: `${loggingPath}/${orgId}.${FAILED_POLLS_LOG_NAME}`,
       }],
     });
+    debug({ orgId, locationUrl, ...errorData }, 'Failed to poll url');
     log.error({ orgId, locationUrl, ...errorData }, 'Failed to poll url');
   } catch (e) {
     // do nothing
