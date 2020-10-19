@@ -42,7 +42,7 @@ async function filterOutImportedTargets(
         );
       }
     } catch (e) {
-      debug('failed to process target', JSON.stringify(targetItem));
+      debug('Failed to process target', targetItem);
     }
   });
 
@@ -66,17 +66,16 @@ export async function importProjects(
     throw new Error(`Failed to parse targets from ${fileName}`);
   }
   const dateNow = new Date(Date.now());
-  debug(`Loaded ${targets.length} targets to import ${dateNow.toUTCString()}`);
+  console.log(`Loaded ${targets.length} targets to import ${dateNow.toUTCString()}`);
   const concurrentTargets = getConcurrentImportsNumber();
   const projects: Project[] = [];
-  //TODO: validation?
   const filteredTargets = await filterOutImportedTargets(targets, loggingPath);
   if (filteredTargets.length === 0) {
     return { projects: [], targets, filteredTargets, skippedTargets: 0 };
   }
   const skippedTargets = targets.length - filteredTargets.length;
   if (skippedTargets > 0) {
-    debug(
+    console.warn(
       `Skipped previously imported ${skippedTargets}/${targets.length} targets`,
     );
   }
@@ -101,10 +100,9 @@ export async function importProjects(
     const batchProgressMessages = `Importing batch ${currentTargets} - ${currentBatchEnd} out of ${fullTargetsNumber} ${
       skippedTargets > 0 ? `(skipped ${skippedTargets})` : ''
     }`;
-    debug(batchProgressMessages);
     logImportedBatch(batchProgressMessages);
     const pollingUrlsAndContext = await importTargets(requestManager, batch, loggingPath);
-    projects.push(...(await pollImportUrls(requestManager,pollingUrlsAndContext)));
+    projects.push(...(await pollImportUrls(requestManager, pollingUrlsAndContext)));
   }
   return { projects, skippedTargets, filteredTargets, targets };
 }

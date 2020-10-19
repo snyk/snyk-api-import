@@ -53,7 +53,7 @@ export async function importTarget(
     if (res.statusCode && res.statusCode !== 201) {
       throw new Error(
         'Expected a 201 response, instead received: ' +
-          JSON.stringify(res.body),
+          JSON.stringify(res.data),
       );
     }
     const locationUrl = res.headers['location'];
@@ -62,7 +62,7 @@ export async function importTarget(
         'No import location url returned. Please re-try the import.',
       );
     }
-    debug(`Received locationUrl for ${target.name}: ${locationUrl}`);
+    debug(`Received locationUrl for ${target.name || 'target'}: ${locationUrl}`);
     await logImportedTarget(
       orgId,
       integrationId,
@@ -77,11 +77,13 @@ export async function importTarget(
       orgId,
     };
   } catch (error) {
+    const errorBody = error.data || error;
+    const errorMessage = errorBody.message;
     await logFailedImports(
       orgId,
       integrationId,
       target,
-      error.message || error,
+      { errorMessage: errorBody.message, name: error.name, code: errorBody.code, requestId: error.requestId },
       loggingPath,
     );
     const err: {
@@ -89,7 +91,7 @@ export async function importTarget(
       innerError?: string;
     } = new Error('Could not complete API import');
     err.innerError = error;
-    debug(`Could not complete API import: ${error.message}`);
+    console.error(`Failed to kick off import for target ${JSON.stringify(target)}. ERROR: ${errorMessage}`);
     throw err;
   }
 }
@@ -100,7 +102,6 @@ export async function importTargets(
   loggingPath = getLoggingPath(),
 ): Promise<string[]> {
   const pollingUrls: string[] = [];
-  // TODO: validate targets
   let failed = 0;
   const concurrentImports = getConcurrentImportsNumber();
   await pMap(
@@ -122,11 +123,10 @@ export async function importTargets(
       } catch (error) {
         failed++;
         const { orgId, integrationId, target } = t;
-        await logFailedImports(orgId, integrationId, target, loggingPath);
-        debug('Failed to process:', JSON.stringify(t), error.message);
+        await logFailedImports(orgId, integrationId, target, { errorMessage: error.message}, loggingPath);
         if (failed % concurrentImports === 0) {
           console.error(
-            'Failed too many times in a row, please check if everything is configured correctly and try again.',
+            'Every import in this batch failed, stopping the import as this is unexpected. Please check if everything is configured correctly and try again.',
           );
           // die immediately
           return process.exit(1);

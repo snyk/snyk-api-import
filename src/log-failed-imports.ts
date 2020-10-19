@@ -1,5 +1,5 @@
-import * as fs from 'fs';
 import * as debugLib from 'debug';
+import * as bunyan from 'bunyan';
 
 import { Target } from './lib/types';
 import { getLoggingPath } from './lib/get-logging-path';
@@ -7,20 +7,31 @@ import { FAILED_LOG_NAME } from './common';
 
 const debug = debugLib('snyk:import-projects-script');
 
+
 export async function logFailedImports(
   orgId: string,
   integrationId: string,
   target: Target,
-  message: string,
+  errorData: {
+    errorMessage: string;
+    [name: string]: string;
+  },
   loggingPath: string = getLoggingPath(),
   locationUrl?: string,
 ): Promise<void> {
+  const log = bunyan.createLogger({
+    name: 'snyk:import-projects-script',
+    level: 'error',
+    streams: [{
+      level: 'error',
+      path: `${loggingPath}/${orgId}.${FAILED_LOG_NAME}`,
+    }],
+  });
   try {
-    const log = `${integrationId}:${Object.values(target).join(
-      ':',
-    )}:${locationUrl}:${message},`;
-    fs.appendFileSync(`${loggingPath}/${orgId}.${FAILED_LOG_NAME}`, log);
+    debug({ integrationId, locationUrl, target, errorData: {...errorData} }, 'Failed to import target');
+    log.error({ integrationId, locationUrl, target, errorData: {...errorData} }, 'Failed to import target');
   } catch (e) {
+    log.error({ integrationId, locationUrl, target, errorData: {...errorData} }, 'Failed to log failed imports at location');
     debug('Failed to log failed imports at location: ', loggingPath);
     // do nothing
   }

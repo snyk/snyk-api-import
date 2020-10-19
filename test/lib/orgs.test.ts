@@ -4,6 +4,9 @@ import { setNotificationPreferences } from '../../src/lib/org';
 const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 
+jest.unmock('snyk-request-manager');
+jest.requireActual('snyk-request-manager');
+
 describe('Single target', () => {
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;

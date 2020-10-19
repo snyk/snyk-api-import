@@ -14,6 +14,9 @@ const ORG_ID = process.env.TEST_ORG_ID as string;
 const INTEGRATION_ID = process.env.TEST_INTEGRATION_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 
+jest.unmock('snyk-request-manager');
+jest.requireActual('snyk-request-manager');
+
 describe('Single target', () => {
   const discoveredProjects: Project[] = [];
   let logs: string[];
