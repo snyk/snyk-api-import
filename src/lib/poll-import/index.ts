@@ -1,5 +1,6 @@
 import 'source-map-support/register';
-import * as needle from 'needle';
+import * as url from 'url';
+import {requestsManager} from 'snyk-request-manager';
 import * as sleep from 'sleep-promise';
 import * as debugLib from 'debug';
 import * as _ from 'lodash';
@@ -15,11 +16,12 @@ const MIN_RETRY_WAIT_TIME = 20000;
 const MAX_RETRY_COUNT = 1000;
 
 export async function pollImportUrl(
+  requestManager: requestsManager,
   locationUrl: string,
   retryCount = MAX_RETRY_COUNT,
   retryWaitTime = MIN_RETRY_WAIT_TIME,
 ): Promise<Project[]> {
-  const apiToken = getApiToken();
+  getApiToken();
   debug(`Polling locationUrl=${locationUrl}`);
   if (!locationUrl) {
     throw new Error(
@@ -28,15 +30,20 @@ export async function pollImportUrl(
     );
   }
   try {
-    const res = await needle('get', `${locationUrl}`, {
-      json: true,
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      read_timeout: 30000,
-      headers: {
-        Authorization: `token ${apiToken}`,
-      },
+    const {pathname=''} = url.parse(locationUrl);
+    const res = await requestManager.request({
+      verb: 'get',
+      url: (pathname as string).split('/api/v1/')[1],
+      body: JSON.stringify({}),
     });
-    const importStatus: PollImportResponse = res.body;
+    const importStatus: PollImportResponse = res.data;
+    if (res.statusCode && res.statusCode !== 200) {
+      throw new Error(
+        'Expected a 200 response, instead received: ' +
+          JSON.stringify(res.body),
+      );
+    }
+    // TODO: use logger to show what we got
     debug(`Import task status is "${importStatus.status}"`);
     if (
       importStatus.status &&
@@ -45,7 +52,7 @@ export async function pollImportUrl(
     ) {
       await sleep(retryWaitTime);
       debug(`Will re-check import task in "${retryWaitTime} ms"`);
-      return await pollImportUrl(locationUrl, --retryCount);
+      return await pollImportUrl(requestManager, locationUrl, --retryCount);
     }
     const projects: Project[] = [];
     importStatus.logs.forEach((log) => {
@@ -64,6 +71,7 @@ export async function pollImportUrl(
 }
 
 export async function pollImportUrls(
+  requestManager: requestsManager,
   locationUrls: string[],
 ): Promise<Project[]> {
   if (!locationUrls) {
@@ -77,7 +85,7 @@ export async function pollImportUrls(
     uniqueLocationUrls,
     async (locationUrl) => {
       try {
-        const allProjects = await pollImportUrl(locationUrl);
+        const allProjects = await pollImportUrl(requestManager, locationUrl);
         const [failedProjects, projects] = _.partition(
           allProjects,
           (p: Project) => !p.success,
