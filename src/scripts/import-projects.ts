@@ -1,5 +1,7 @@
 import * as debugLib from 'debug';
 import * as path from 'path';
+import { requestsManager } from 'snyk-request-manager';
+
 import { loadFile } from '../load-file';
 import { importTargets, pollImportUrls } from '../lib';
 import { Project, ImportTarget } from '../lib/types';
@@ -78,6 +80,9 @@ export async function importProjects(
       `Skipped previously imported ${skippedTargets}/${targets.length} targets`,
     );
   }
+  const requestManager = new requestsManager({
+    userAgentPrefix: 'snyk-api-import',
+  });
   for (
     let targetIndex = 0;
     targetIndex < filteredTargets.length;
@@ -98,8 +103,8 @@ export async function importProjects(
     }`;
     debug(batchProgressMessages);
     logImportedBatch(batchProgressMessages);
-    const pollingUrlsAndContext = await importTargets(batch, loggingPath);
-    projects.push(...(await pollImportUrls(pollingUrlsAndContext)));
+    const pollingUrlsAndContext = await importTargets(requestManager, batch, loggingPath);
+    projects.push(...(await pollImportUrls(requestManager,pollingUrlsAndContext)));
   }
   return { projects, skippedTargets, filteredTargets, targets };
 }

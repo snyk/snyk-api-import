@@ -95,13 +95,11 @@ export async function importTarget(
 }
 
 export async function importTargets(
+  requestManager: requestsManager,
   targets: ImportTarget[],
   loggingPath = getLoggingPath(),
 ): Promise<string[]> {
   const pollingUrls: string[] = [];
-  const requestManager = new requestsManager({
-    userAgentPrefix: 'snyk-api-import',
-  });
   // TODO: validate targets
   let failed = 0;
   const concurrentImports = getConcurrentImportsNumber();

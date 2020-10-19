@@ -37,7 +37,7 @@ describe('Single target', () => {
       },
     );
     expect(pollingUrl).not.toBeNull();
-    const projects = await pollImportUrl(pollingUrl);
+    const projects = await pollImportUrl(requestManager, pollingUrl);
     expect(projects[0]).toMatchObject({
       projectUrl: expect.any(String),
       success: true,
@@ -62,7 +62,10 @@ describe('Multiple targets', () => {
 
   it('importTargets & pollImportUrls multiple repos', async () => {
     logs = Object.values(generateLogsPaths(__dirname, ORG_ID));
-    const pollingUrls = await importTargets([
+    const requestManager = new requestsManager({
+      userAgentPrefix: 'snyk-api-import:tests',
+    });
+    const pollingUrls = await importTargets(requestManager, [
       {
         orgId: ORG_ID,
         integrationId: INTEGRATION_ID,
@@ -83,7 +86,7 @@ describe('Multiple targets', () => {
       },
     ]);
     expect(pollingUrls.length >= 1).toBeTruthy();
-    const projects = await pollImportUrls(pollingUrls);
+    const projects = await pollImportUrls(requestManager, pollingUrls);
     // at least one job successfully finished
     expect(projects[0]).toMatchObject({
       projectUrl: expect.any(String),
