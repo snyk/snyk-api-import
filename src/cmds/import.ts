@@ -40,6 +40,6 @@ export async function handler(): Promise<void> {
     );
   } catch (e) {
     debug('Failed to kick off import.\n' + e);
-    console.error('ERROR! Try running with `DEBUG=snyk* snyk-import`');
+    console.error('ERROR! Failed to kick off import. Try running with `DEBUG=snyk* snyk-import`');
   }
 }

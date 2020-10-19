@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import * as url from 'url';
-import {requestsManager} from 'snyk-request-manager';
+import { requestsManager } from 'snyk-request-manager';
 import * as sleep from 'sleep-promise';
 import * as debugLib from 'debug';
 import * as _ from 'lodash';
@@ -30,7 +30,7 @@ export async function pollImportUrl(
     );
   }
   try {
-    const {pathname=''} = url.parse(locationUrl);
+    const { pathname = '' } = url.parse(locationUrl);
     const res = await requestManager.request({
       verb: 'get',
       url: (pathname as string).split('/api/v1/')[1],
@@ -60,7 +60,9 @@ export async function pollImportUrl(
     });
     return projects;
   } catch (error) {
-    debug('Could not poll Url:', locationUrl, error.message);
+    console.error(
+      `Could not get status update from import job: ${locationUrl}\n ERROR: ${error.message}`,
+    );
     const err: {
       message?: string | undefined;
       innerError?: string;
@@ -85,17 +87,31 @@ export async function pollImportUrls(
     uniqueLocationUrls,
     async (locationUrl) => {
       try {
+        const importJobId = locationUrl.split('import/')[1];
+        console.log(`Checking status for import job id: ${importJobId}`);
         const allProjects = await pollImportUrl(requestManager, locationUrl);
         const [failedProjects, projects] = _.partition(
           allProjects,
           (p: Project) => !p.success,
         );
+        console.log(
+          `Discovered ${
+            projects.length
+          } projects from import job id: ${importJobId} ${
+            failedProjects.length ? `. ${failedProjects.length} project(s) failed to finish importing.` : ''
+          }`,
+        );
         await logFailedProjects(locationUrl, failedProjects);
         await logImportedProjects(locationUrl, projects);
         projectsArray.push(...projects);
       } catch (error) {
-        logFailedPollUrls(locationUrl,{ errorMessage: _.get(error, 'innerError.message') || error.innerError || error.message || error});
-        debug('Failed to poll:', locationUrl);
+        logFailedPollUrls(locationUrl, {
+          errorMessage:
+            _.get(error, 'innerError.message') ||
+            error.innerError ||
+            error.message ||
+            error,
+        });
       }
     },
     { concurrency: 10 },

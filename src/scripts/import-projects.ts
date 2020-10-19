@@ -42,7 +42,7 @@ async function filterOutImportedTargets(
         );
       }
     } catch (e) {
-      debug('failed to process target', JSON.stringify(targetItem));
+      debug('Failed to process target', targetItem);
     }
   });
 
@@ -66,7 +66,7 @@ export async function importProjects(
     throw new Error(`Failed to parse targets from ${fileName}`);
   }
   const dateNow = new Date(Date.now());
-  debug(`Loaded ${targets.length} targets to import ${dateNow.toUTCString()}`);
+  console.log(`Loaded ${targets.length} targets to import ${dateNow.toUTCString()}`);
   const concurrentTargets = getConcurrentImportsNumber();
   const projects: Project[] = [];
   const filteredTargets = await filterOutImportedTargets(targets, loggingPath);
@@ -75,7 +75,7 @@ export async function importProjects(
   }
   const skippedTargets = targets.length - filteredTargets.length;
   if (skippedTargets > 0) {
-    debug(
+    console.warn(
       `Skipped previously imported ${skippedTargets}/${targets.length} targets`,
     );
   }

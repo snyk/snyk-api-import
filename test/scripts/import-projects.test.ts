@@ -42,7 +42,7 @@ describe('Import projects script', () => {
       targetFile: expect.any(String),
     });
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
-    expect(logFile).toMatch('ruby-with-versions:');
+    expect(logFile).toMatch(`"target":{"name":"ruby-with-versions","owner":"snyk-fixtures","branch":"master"}`);
     discoveredProjects.push(...projects);
   }, 30000000);
 });
