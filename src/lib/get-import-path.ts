@@ -1,4 +1,4 @@
-export function getImportProjectsFile(): string {
+export function getImportConfigFile(): string {
   const snykImportPath = process.env.SNYK_IMPORT_PATH;
   if (!snykImportPath) {
     throw new Error(

@@ -6,7 +6,6 @@ import { CreatedOrgResponse, createOrg } from '../lib';
 import { getLoggingPath } from '../lib/get-logging-path';
 import { listIntegrations, setNotificationPreferences } from '../lib/org';
 import { requestsManager } from 'snyk-request-manager';
-import { getImportProjectsFile } from '../lib/get-import-path';
 import { CreateOrgData } from '../lib/types';
 
 const debug = debugLib('snyk:create-orgs-script');
@@ -72,12 +71,4 @@ export async function createOrgs(
     }
   });
   return createdOrgs;
-}
-
-try {
-  const importFile = getImportProjectsFile();
-  createOrgs(importFile);
-} catch (e) {
-  debug('Failed to kick off orgs creation.\n' + e);
-  console.error('ERROR! Try running with `DEBUG=snyk*`');
 }
