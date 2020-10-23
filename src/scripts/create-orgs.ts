@@ -7,17 +7,9 @@ import { getLoggingPath } from '../lib/get-logging-path';
 import { listIntegrations, setNotificationPreferences } from '../lib/org';
 import { requestsManager } from 'snyk-request-manager';
 import { getImportProjectsFile } from '../lib/get-import-path';
+import { CreateOrgData } from '../lib/types';
 
 const debug = debugLib('snyk:create-orgs-script');
-
-interface CreateOrgData {
-  groupId: string;
-  name: string;
-  sourceOrgId?: string;
-  integrations: {
-    [name: string]: string;
-  };
-}
 
 export async function logCreatedOrg(
   groupId: string,

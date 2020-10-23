@@ -5,6 +5,6 @@ export * from './lib';
 
 yargs
   .commandDir('cmds')
-  .demandCommand()
   .help()
+  .demandCommand()
   .argv

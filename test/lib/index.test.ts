@@ -8,7 +8,7 @@ import {
 import { Project } from '../../src/lib/types';
 import { deleteTestProjects } from '../delete-test-projects';
 import { generateLogsPaths } from '../generate-log-file-names';
-import { deleteLogs } from '../delete-logs';
+import { deleteFiles } from '../delete-files';
 
 const ORG_ID = process.env.TEST_ORG_ID as string;
 const INTEGRATION_ID = process.env.TEST_INTEGRATION_ID as string;
@@ -51,7 +51,7 @@ describe('Single target', () => {
   }, 30000000);
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
-    await deleteLogs(logs);
+    await deleteFiles(logs);
     process.env = { ...OLD_ENV };
   });
 });
@@ -101,7 +101,7 @@ describe('Multiple targets', () => {
   }, 30000000);
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
-    await deleteLogs(logs);
+    await deleteFiles(logs);
     process.env = { ...OLD_ENV };
   });
 });

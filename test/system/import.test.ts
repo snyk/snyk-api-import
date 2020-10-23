@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import * as path from 'path';
-import { deleteLogs } from '../delete-logs';
+import { deleteFiles } from '../delete-files';
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteTestProjects } from '../delete-test-projects';
 import { Project } from '../../src/lib/types';
@@ -15,7 +15,7 @@ describe('`snyk-api-import import`', () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
   });
   afterEach(async () => {
-    deleteLogs(logs);
+    deleteFiles(logs);
   });
   it('Import is default command', async (done) => {
     const testRoot = __dirname + '/fixtures/single-project';
