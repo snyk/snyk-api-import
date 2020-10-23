@@ -23,6 +23,12 @@ export interface FilePath {
   path: string;
 }
 
+export interface CreateOrgData {
+  groupId: string;
+  name: string;
+  sourceOrgId?: string;
+}
+
 export enum Status {
   PENDING = 'pending',
   FAILED = 'failed',

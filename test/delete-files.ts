@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-export function deleteLogs(logs: string[]): void {
+export function deleteFiles(logs: string[]): void {
   logs.forEach((path) => {
     try {
       fs.unlinkSync(path);

@@ -7,7 +7,7 @@ import { importProjects } from '../../src/scripts/import-projects';
 import { deleteTestProjects } from '../delete-test-projects';
 import { Project } from '../../src/lib/types';
 import { generateLogsPaths } from '../generate-log-file-names';
-import { deleteLogs } from '../delete-logs';
+import { deleteFiles } from '../delete-files';
 
 const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
@@ -22,7 +22,7 @@ describe('Logs failed polls', () => {
 
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
-    await deleteLogs(logs);
+    await deleteFiles(logs);
     process.env = { ...OLD_ENV };
   });
 
