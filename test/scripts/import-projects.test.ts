@@ -9,7 +9,7 @@ import { deleteFiles } from '../delete-files';
 
 const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
-const IMPORT_PROJECTS_FILE_NAME= 'import-projects.json';
+const IMPORT_PROJECTS_FILE_NAME = 'import-projects.json';
 
 jest.unmock('snyk-request-manager');
 jest.requireActual('snyk-request-manager');
@@ -42,7 +42,9 @@ describe('Import projects script', () => {
       targetFile: expect.any(String),
     });
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
-    expect(logFile).toMatch(`"target":{"name":"ruby-with-versions","owner":"snyk-fixtures","branch":"master"}`);
+    expect(logFile).toMatch(
+      `"target":{"name":"ruby-with-versions","owner":"snyk-fixtures","branch":"master"}`,
+    );
     discoveredProjects.push(...projects);
   }, 30000000);
 });
@@ -104,6 +106,7 @@ describe('Skips & logs issues', () => {
     } catch (e) {
       expect(logFile).toBeNull();
     }
+    // give file a little time to be finished to be written
     await new Promise((r) => setTimeout(r, 500));
     const failedLog = fs.readFileSync(logFiles.failedImportLogPath, 'utf8');
     expect(failedLog).toMatch('ruby-with-versions');
@@ -157,13 +160,16 @@ describe('Skips & logs issues', () => {
       'utf8',
     );
     expect(batchesLogFile).not.toBeNull();
+    // give file a little time to be finished to be written
     await new Promise((r) => setTimeout(r, 500));
     const failedProjectsLog = fs.readFileSync(
       logFiles.failedProjectsLogPath,
       'utf-8',
     );
     expect(failedProjectsLog).not.toBeNull();
-    expect(failedProjectsLog).toMatch(`"targetFile":"dotnet/invalid.csproj","success":false,"projectUrl":"","msg":"Error importing project"`);
+    expect(failedProjectsLog).toMatch(
+      `"targetFile":"dotnet/invalid.csproj","success":false,"projectUrl":"","msg":"Error importing project"`,
+    );
 
     let failedImportLog = null;
     try {
@@ -219,4 +225,60 @@ describe('Error handling', () => {
       ),
     ).rejects.toThrow('Please set the SNYK_LOG_PATH e.g. export SNYK_LOG_PATH');
   }, 300);
+});
+
+describe('No projects scenarios', () => {
+  const discoveredProjects: Project[] = [];
+  let logs: string[];
+  const OLD_ENV = process.env;
+  process.env.SNYK_API = SNYK_API_TEST;
+  process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+
+  afterAll(async () => {
+    await deleteTestProjects(ORG_ID, discoveredProjects);
+    await deleteFiles(logs);
+    process.env = { ...OLD_ENV };
+  });
+  it('succeeds to complete import targets from empty repo', async () => {
+    const testName = 'empty-target';
+    const logPath = path.resolve(__dirname + '/fixtures/' + testName);
+    const logFiles = generateLogsPaths(logPath, ORG_ID);
+    logs = Object.values(logFiles);
+    process.env.SNYK_LOG_PATH = logPath;
+
+    const { projects } = await importProjects(
+      path.resolve(
+        __dirname + `/fixtures/${testName}/${IMPORT_PROJECTS_FILE_NAME}`,
+      ),
+    );
+    expect(projects.length === 0).toBeTruthy();
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 1000));
+    const logFile = fs.readFileSync(logFiles.importJobsLogPath, 'utf8');
+    expect(logFile).toMatch(`"status":"complete","projects":[]}`);
+    expect(logFile).toMatch(`"logs":[{"name":"snyk-fixtures/empty-repo"`);
+  }, 30000);
+
+  it('succeeds to complete import from repo with no supported manifests', async () => {
+    const testName = 'no-supported-manifests';
+    const logPath = path.resolve(__dirname + '/fixtures/' + testName);
+    const logFiles = generateLogsPaths(logPath, ORG_ID);
+    logs = Object.values(logFiles);
+    process.env.SNYK_LOG_PATH = logPath;
+
+    const { projects } = await importProjects(
+      path.resolve(
+        __dirname + `/fixtures/${testName}/${IMPORT_PROJECTS_FILE_NAME}`,
+      ),
+    );
+    expect(projects.length === 0).toBeTruthy();
+
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 1000));
+    const logFile = fs.readFileSync(logFiles.importJobsLogPath, 'utf8');
+    expect(logFile).toMatch(`"status":"complete","projects":[]}`);
+    expect(logFile).toMatch(
+      `"logs":[{"name":"snyk-fixtures/no-supported-manifests"`,
+    );
+  }, 30000);
 });
