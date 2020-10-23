@@ -23,7 +23,7 @@ By default the `import` command will run if no command specified.
 - `orgs:data` - generate data required to create Orgs via API.
 - `import` - kick off a an API powered import of repos/targets into existing Snyk orgs defined in [import configuration file](#to-kick-off-an-import).
 
-# Table of Contents
+# Table of Contents
 - Utilities
   - [Generating orgs in Snyk](docs/orgs.md)
 - [Kicking off an import](docs/import.md)
