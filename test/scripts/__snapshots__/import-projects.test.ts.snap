@@ -1,6 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Import skips previously imported succeeds to import targets from file 1`] = `
-"f0125d9b-271a-4b50-ad23-80e12575a1bf:c4de291b-e083-4c43-a72c-113463e0d268:composer-with-vulns:snyk-fixtures:master,
-"
-`;

@@ -53,13 +53,15 @@ describe('Import skips previously imported', () => {
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+  process.env.INTEGRATION_ID = 'INTEGRATION_ID';
+  process.env.ORG_ID = 'ORG_ID';
 
-  afterEach(async () => {
+  afterAll(async () => {
     process.env = { ...OLD_ENV };
   }, 1000);
-  it('succeeds to import targets from file', async () => {
+  it('succeeds to import targets from file with import log', async () => {
     const logPath = path.resolve(__dirname + '/fixtures/with-import-log');
-    const logFiles = generateLogsPaths(logPath, ORG_ID);
+    const logFiles = generateLogsPaths(logPath, 'ORG_ID');
 
     const { projects } = await importProjects(
       path.resolve(
@@ -67,8 +69,10 @@ describe('Import skips previously imported', () => {
       ),
     );
     expect(projects.length === 0).toBeTruthy();
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 1000));
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
-    expect(logFile).toMatchSnapshot();
+    expect(logFile).toMatch('composer-with-vulns:snyk-fixtures:master');
   }, 30000000);
 });
 
@@ -234,7 +238,7 @@ describe('No projects scenarios', () => {
   process.env.SNYK_API = SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
 
-  afterAll(async () => {
+  afterEach(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
     await deleteFiles(logs);
     process.env = { ...OLD_ENV };

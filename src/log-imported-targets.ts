@@ -7,6 +7,14 @@ import { IMPORT_LOG_NAME } from './common';
 
 const debug = debugLib('snyk:import-projects-script');
 
+export function generateImportedTargetData(
+  orgId: string,
+  integrationId: string,
+  target: Target,
+): string {
+  return `${orgId}:${integrationId}:${Object.values(target).join(':')}`;
+}
+
 export async function logImportedTarget(
   orgId: string,
   integrationId: string,
@@ -26,11 +34,23 @@ export async function logImportedTarget(
       ],
     });
     debug(
-      { target, locationUrl, orgId, integrationId },
+      {
+        target,
+        locationUrl,
+        orgId,
+        integrationId,
+        targetId: generateImportedTargetData(orgId, integrationId, target),
+      },
       'Target requested for import',
     );
     log.info(
-      { target, locationUrl, orgId, integrationId },
+      {
+        target,
+        locationUrl,
+        orgId,
+        integrationId,
+        targetId: generateImportedTargetData(orgId, integrationId, target),
+      },
       'Target requested for import',
     );
   } catch (e) {

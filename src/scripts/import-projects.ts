@@ -8,6 +8,7 @@ import { Project, ImportTarget } from '../lib/types';
 import { getLoggingPath } from '../lib/get-logging-path';
 import { getConcurrentImportsNumber } from '../lib/get-concurrent-imports-number';
 import { logImportedBatch } from '../log-imported-batch';
+import { generateImportedTargetData } from '../log-imported-targets';
 
 const debug = debugLib('snyk:import-projects-script');
 
@@ -28,9 +29,7 @@ async function filterOutImportedTargets(
   targets.forEach((targetItem) => {
     const { orgId, integrationId, target } = targetItem;
     try {
-      const data = `${orgId}:${integrationId}:${Object.values(target).join(
-        ':',
-      )}`;
+      const data = generateImportedTargetData(orgId, integrationId, target);
       const targetRegExp = regexForTarget(data);
       const match = logFile.match(targetRegExp);
       if (!match) {
@@ -72,14 +71,14 @@ export async function importProjects(
   const concurrentTargets = getConcurrentImportsNumber();
   const projects: Project[] = [];
   const filteredTargets = await filterOutImportedTargets(targets, loggingPath);
-  if (filteredTargets.length === 0) {
-    return { projects: [], targets, filteredTargets, skippedTargets: 0 };
-  }
   const skippedTargets = targets.length - filteredTargets.length;
   if (skippedTargets > 0) {
     console.warn(
-      `Skipped previously imported ${skippedTargets}/${targets.length} targets`,
+      `Skipped previously imported ${skippedTargets}/${targets.length} target(s)`,
     );
+  }
+  if (filteredTargets.length === 0) {
+    return { projects: [], targets, filteredTargets, skippedTargets: 0 };
   }
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import',
