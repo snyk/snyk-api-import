@@ -1,8 +1,8 @@
 {
   "targets": [
     {
-      "orgId": "f0125d9b-271a-4b50-ad23-80e12575a1bf",
-      "integrationId": "c4de291b-e083-4c43-a72c-113463e0d268",
+      "orgId": "ORG_ID",
+      "integrationId": "INTEGRATION_ID",
       "target": {
         "name": "composer-with-vulns",
         "owner": "snyk-fixtures",
