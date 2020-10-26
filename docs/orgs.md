@@ -12,7 +12,8 @@ It is recommended to have as many Organizations in Snyk as you have in the sourc
  - **Github.com:** `snyk-api-import orgs:data --source=github --groupId=<snyk_group_id>`
  - **Github Enterprise:** `snyk-api-import orgs:data --source=github-enterprise --groupId=<snyk_group_id> -- sourceUrl=https://ghe.custom.github.com/`
 
-3. Use the generated data to feed into Snyk [Orgs API](https://snyk.docs.apiary.io/#reference/groups/organizations-in-a-group/create-a-new-organization-in-a-group) to generate the organizations within a group.
+This will create the org data in a file `group-<snyk_group_id>-github-<com|enterprise>-orgs.json`
+1. Use the generated data to feed into Snyk [Orgs API](https://snyk.docs.apiary.io/#reference/groups/organizations-in-a-group/create-a-new-organization-in-a-group) to generate the organizations within a group.
 
 
 ## Recommendations
