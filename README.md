@@ -22,6 +22,7 @@ By default the `import` command will run if no command specified.
 - `help` - show help & all available commands and their options
 - `orgs:data` - generate data required to create Orgs via API.
 - `import` - kick off a an API powered import of repos/targets into existing Snyk orgs defined in [import configuration file](#to-kick-off-an-import).
+The logs can be explored using [Bunyan CLI](http://trentm.com/node-bunyan/bunyan.1.html)
 
 # Table of Contents
 - Utilities

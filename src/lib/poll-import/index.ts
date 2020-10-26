@@ -10,6 +10,7 @@ import { getApiToken } from '../get-api-token';
 import { logFailedProjects } from '../../log-failed-projects';
 import { logFailedPollUrls } from '../../log-failed-polls';
 import { logImportedProjects } from '../../log-imported-projects';
+import { logJobResult } from '../../log-job-result';
 
 const debug = debugLib('snyk:poll-import');
 const MIN_RETRY_WAIT_TIME = 20000;
@@ -20,7 +21,7 @@ export async function pollImportUrl(
   locationUrl: string,
   retryCount = MAX_RETRY_COUNT,
   retryWaitTime = MIN_RETRY_WAIT_TIME,
-): Promise<Project[]> {
+): Promise<{ projects: Project[] }> {
   getApiToken();
   debug(`Polling locationUrl=${locationUrl}`);
   if (!locationUrl) {
@@ -58,7 +59,8 @@ export async function pollImportUrl(
     importStatus.logs.forEach((log) => {
       projects.push(...log.projects);
     });
-    return projects;
+    await logJobResult(locationUrl, importStatus);
+    return { projects };
   } catch (error) {
     console.error(
       `Could not get status update from import job: ${locationUrl}\n ERROR: ${error.message}`,
@@ -75,7 +77,7 @@ export async function pollImportUrl(
 export async function pollImportUrls(
   requestManager: requestsManager,
   locationUrls: string[],
-): Promise<Project[]> {
+): Promise<{ projects: Project[] }> {
   if (!locationUrls) {
     throw new Error(
       'Missing required parameters. Please ensure you have provided: locationUrls.',
@@ -89,16 +91,18 @@ export async function pollImportUrls(
       try {
         const importJobId = locationUrl.split('import/')[1];
         console.log(`Checking status for import job id: ${importJobId}`);
-        const allProjects = await pollImportUrl(requestManager, locationUrl);
+        const res = await pollImportUrl(requestManager, locationUrl);
         const [failedProjects, projects] = _.partition(
-          allProjects,
+          res.projects,
           (p: Project) => !p.success,
         );
         console.log(
           `Discovered ${
             projects.length
-          } projects from import job id: ${importJobId} ${
-            failedProjects.length ? `. ${failedProjects.length} project(s) failed to finish importing.` : ''
+          } projects from import job id: ${importJobId}${
+            failedProjects.length
+              ? `. ${failedProjects.length} project(s) failed to finish importing.`
+              : ''
           }`,
         );
         await logFailedProjects(locationUrl, failedProjects);
@@ -117,5 +121,5 @@ export async function pollImportUrls(
     { concurrency: 10 },
   );
 
-  return projectsArray;
+  return { projects: projectsArray };
 }

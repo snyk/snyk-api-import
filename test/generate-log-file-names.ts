@@ -7,6 +7,7 @@ import {
   IMPORT_JOBS_LOG_NAME,
   IMPORTED_PROJECTS_LOG_NAME,
   IMPORTED_BATCHES_LOG_NAME,
+  IMPORT_JOB_RESULTS,
 } from '../src/common';
 
 export function generateLogsPaths(
@@ -19,15 +20,31 @@ export function generateLogsPaths(
   importJobIdsLogsPath: string;
   importedProjectsLogPath: string;
   importedBatchesLogPath: string;
+  importJobsLogPath: string;
 } {
   process.env.SNYK_LOG_PATH = logPath;
   const importLogPath = path.resolve(logPath, IMPORT_LOG_NAME);
-  const failedImportLogPath = path.resolve(logPath, `${orgId}.${FAILED_LOG_NAME}`);
-  const failedProjectsLogPath = path.resolve(logPath, `${orgId}.${FAILED_PROJECTS_LOG_NAME}`);
-  const importJobIdsLogsPath = path.resolve(logPath, `${orgId}.${IMPORT_JOBS_LOG_NAME}`);
-  const importedProjectsLogPath = path.resolve(logPath, `${orgId}.${IMPORTED_PROJECTS_LOG_NAME}`);
-  const importedBatchesLogPath = path.resolve(logPath, IMPORTED_BATCHES_LOG_NAME);
-
+  const failedImportLogPath = path.resolve(
+    logPath,
+    `${orgId}.${FAILED_LOG_NAME}`,
+  );
+  const failedProjectsLogPath = path.resolve(
+    logPath,
+    `${orgId}.${FAILED_PROJECTS_LOG_NAME}`,
+  );
+  const importJobIdsLogsPath = path.resolve(
+    logPath,
+    `${orgId}.${IMPORT_JOBS_LOG_NAME}`,
+  );
+  const importedProjectsLogPath = path.resolve(
+    logPath,
+    `${orgId}.${IMPORTED_PROJECTS_LOG_NAME}`,
+  );
+  const importedBatchesLogPath = path.resolve(
+    logPath,
+    IMPORTED_BATCHES_LOG_NAME,
+  );
+  const importJobsLogPath = path.resolve(logPath, IMPORT_JOB_RESULTS);
   return {
     importLogPath,
     failedImportLogPath,
@@ -35,5 +52,6 @@ export function generateLogsPaths(
     importJobIdsLogsPath,
     importedProjectsLogPath,
     importedBatchesLogPath,
+    importJobsLogPath,
   };
 }

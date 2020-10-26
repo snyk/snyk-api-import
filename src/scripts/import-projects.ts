@@ -66,7 +66,9 @@ export async function importProjects(
     throw new Error(`Failed to parse targets from ${fileName}`);
   }
   const dateNow = new Date(Date.now());
-  console.log(`Loaded ${targets.length} target(s) to import ${dateNow.toUTCString()}`);
+  console.log(
+    `Loaded ${targets.length} target(s) to import ${dateNow.toUTCString()}`,
+  );
   const concurrentTargets = getConcurrentImportsNumber();
   const projects: Project[] = [];
   const filteredTargets = await filterOutImportedTargets(targets, loggingPath);
@@ -101,8 +103,13 @@ export async function importProjects(
       skippedTargets > 0 ? `(skipped ${skippedTargets})` : ''
     }`;
     logImportedBatch(batchProgressMessages);
-    const pollingUrlsAndContext = await importTargets(requestManager, batch, loggingPath);
-    projects.push(...(await pollImportUrls(requestManager, pollingUrlsAndContext)));
+    const pollingUrlsAndContext = await importTargets(
+      requestManager,
+      batch,
+      loggingPath,
+    );
+    const res = await pollImportUrls(requestManager, pollingUrlsAndContext);
+    projects.push(...res.projects);
   }
   return { projects, skippedTargets, filteredTargets, targets };
 }

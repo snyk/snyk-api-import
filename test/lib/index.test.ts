@@ -40,7 +40,7 @@ describe('Single target', () => {
       },
     );
     expect(pollingUrl).not.toBeNull();
-    const projects = await pollImportUrl(requestManager, pollingUrl);
+    const { projects } = await pollImportUrl(requestManager, pollingUrl);
     expect(projects[0]).toMatchObject({
       projectUrl: expect.any(String),
       success: true,
@@ -89,7 +89,7 @@ describe('Multiple targets', () => {
       },
     ]);
     expect(pollingUrls.length >= 1).toBeTruthy();
-    const projects = await pollImportUrls(requestManager, pollingUrls);
+    const { projects } = await pollImportUrls(requestManager, pollingUrls);
     // at least one job successfully finished
     expect(projects[0]).toMatchObject({
       projectUrl: expect.any(String),

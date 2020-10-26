@@ -1,5 +1,6 @@
 import 'source-map-support/register';
 import * as pMap from 'p-map';
+import * as path from 'path';
 import * as debugLib from 'debug';
 import { requestsManager } from 'snyk-request-manager';
 import * as _ from 'lodash';
@@ -29,6 +30,7 @@ export async function importTarget(
   orgId: string;
   integrationId: string;
 }> {
+  const logPath = loggingPath || getLoggingPath();
   getApiToken();
   debug('Importing:', JSON.stringify({ orgId, integrationId, target }));
 
@@ -104,7 +106,10 @@ export async function importTarget(
         target,
       )}.\nERROR name: ${
         error.name
-      } msg: ${errorMessage}. See more information in logs located at ${loggingPath}/${orgId}/*.${FAILED_LOG_NAME} or re-start in DEBUG mode.`,
+      } msg: ${errorMessage}. See more information in logs located at ${path.join(
+        logPath,
+        orgId,
+      )}.${FAILED_LOG_NAME} or re-start in DEBUG mode.`,
     );
     throw err;
   }
@@ -146,7 +151,7 @@ export async function importTargets(
         );
         if (failed % concurrentImports === 0) {
           console.error(
-            `Every import in this batch failed, stopping as this is unexpected! Please check if everything is configured ok and review the logs located at ${loggingPath}. If everything looks OK re-start the import, previously imported targets will be skipped.`,
+            `Every import in this batch failed, stopping as this is unexpected! Please check if everything is configured ok and review the logs located at ${loggingPath}/*. If everything looks OK re-start the import, previously imported targets will be skipped.`,
           );
           // die immediately
           return process.exit(1);
