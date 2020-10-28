@@ -48,7 +48,7 @@ describe('Single target', () => {
     });
     // cleanup
     discoveredProjects.push(...projects);
-  }, 30000000);
+  }, 240000);
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
     await deleteFiles(logs);
@@ -98,7 +98,7 @@ describe('Multiple targets', () => {
     });
     // cleanup
     discoveredProjects.push(...projects);
-  }, 30000000);
+  }, 240000);
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
     await deleteFiles(logs);

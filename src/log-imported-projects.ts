@@ -28,11 +28,11 @@ export async function logImportedProjects(
       });
       debug(
         { orgId, locationUrl, projectId, ...project },
-        'Error importing project',
+        'Imported project',
       );
       log.info(
         { orgId, locationUrl, projectId, ...project },
-        'Error importing project',
+        'Imported project',
       );
     });
   } catch (e) {
