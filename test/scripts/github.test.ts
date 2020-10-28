@@ -1,23 +1,35 @@
-import { listGithubOrgs } from "../../src/scripts/github/list-orgs";
-import { listGithubRepos } from "../../src/scripts/github/list-repos";
+import { listGithubOrgs } from '../../src/scripts/github/list-orgs';
+import { listGithubRepos } from '../../src/scripts/github/list-repos';
 
 describe('listGithubOrgs script', () => {
   const OLD_ENV = process.env;
-  const GITHUB_ORG_NAME = process.env.TEST_GH_ORG_NAME;
-  process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
 
-  afterAll(async () => {
+  afterEach(async () => {
     process.env = { ...OLD_ENV };
   });
   it('list orgs', async () => {
+    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     const orgs = await listGithubOrgs();
     expect(orgs[0]).toEqual({
       name: expect.any(String),
       id: expect.any(Number),
-      url: expect.any(String)
+      url: expect.any(String),
+    });
+  });
+  it('list orgs GHE', async () => {
+    process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
+    const GHE_URL = process.env.TEST_GHE_URL;
+    const orgs = await listGithubOrgs(GHE_URL);
+    expect(orgs[0]).toEqual({
+      name: expect.any(String),
+      id: expect.any(Number),
+      url: expect.any(String),
     });
   });
   it('list repos', async () => {
+    const GITHUB_ORG_NAME = process.env.TEST_GH_ORG_NAME;
+    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
+
     const orgs = await listGithubRepos(GITHUB_ORG_NAME as string);
     expect(orgs[0]).toEqual({
       name: expect.any(String),

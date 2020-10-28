@@ -16,6 +16,8 @@ Options:
   --sourceOrgPublicId
   --groupId            Public id of the group in Snyk (available on group
                        settings)                                      [required]
+  --sourceUrl          Custom base url for the source API that can list
+                       organizations (e.g. Github Enterprise url)
   --source             The source of the targets to be imported e.g. Github
                               [required] [choices: "github"] [default: "github"]
 
@@ -36,6 +38,8 @@ Options:
   --sourceOrgPublicId
   --groupId            Public id of the group in Snyk (available on group
                        settings)                                      [required]
+  --sourceUrl          Custom base url for the source API that can list
+                       organizations (e.g. Github Enterprise url)
   --source             The source of the targets to be imported e.g. Github
                               [required] [choices: \\"github\\"] [default: \\"github\\"]"
 `;
