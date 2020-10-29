@@ -6,8 +6,8 @@ export enum Sources {
   GITHUB = 'github',
 }
 
-async function githubOrganizations(): Promise<{ name: string }[]> {
-  const ghOrgs: GithubOrgData[] = await listGithubOrgs();
+async function githubOrganizations(sourceUrl?: string): Promise<{ name: string }[]> {
+  const ghOrgs: GithubOrgData[] = await listGithubOrgs(sourceUrl);
   return ghOrgs;
 }
 
@@ -19,14 +19,15 @@ export async function generateOrgImportDataFile(
   source: Sources,
   groupId: string,
   sourceOrgId?: string,
+  sourceUrl?: string,
 ): Promise<{ orgs: CreateOrgData[]; fileName: string }> {
   const orgData: CreateOrgData[] = [];
 
-  const toplevelEntities = await sourceGenerators[source]();
+  const topLevelEntities = await sourceGenerators[source](sourceUrl);
 
-  for (const org in toplevelEntities) {
+  for (const org in topLevelEntities) {
     const data: CreateOrgData = {
-      name: toplevelEntities[org].name,
+      name: topLevelEntities[org].name,
       groupId,
     };
     if (sourceOrgId) {
@@ -34,7 +35,7 @@ export async function generateOrgImportDataFile(
     }
     orgData.push(data);
   }
-  const fileName = `group-${groupId}-github-com-orgs.json`;
+  const fileName = `group-${groupId}-${sourceUrl? 'github-enterprise' : 'github-com'}-orgs.json`;
   await writeFile(fileName, ({
     orgs: orgData,
   } as unknown) as JSON);

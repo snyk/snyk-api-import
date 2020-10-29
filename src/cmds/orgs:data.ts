@@ -20,6 +20,11 @@ export const builder = {
     default: undefined,
     desc: 'Public id of the group in Snyk (available on group settings)',
   },
+  sourceUrl: {
+    required: false,
+    default: undefined,
+    desc: 'Custom base url for the source API that can list organizations (e.g. Github Enterprise url)',
+  },
   source: {
     required: true,
     default: Sources.GITHUB,
@@ -36,16 +41,18 @@ export async function handler(argv: {
   source: Sources;
   groupId: string;
   sourceOrgPublicId?: string;
+  sourceUrl?: string;
 }): Promise<void> {
   try {
     getLoggingPath();
-    const { source, sourceOrgPublicId, groupId } = argv;
+    const { source, sourceOrgPublicId, groupId, sourceUrl } = argv;
     debug('ℹ️  Options: ' + JSON.stringify(argv));
 
     const res = await generateOrgImportDataFile(
       source,
       groupId,
       sourceOrgPublicId,
+      sourceUrl,
     );
     const orgsMessage =
       res.orgs.length > 0
