@@ -38,4 +38,18 @@ describe('listGithubOrgs script', () => {
       fork: expect.any(Boolean),
     });
   });
+
+  it('list GHE repos', async () => {
+    const GITHUB_ORG_NAME = process.env.TEST_GH_ORG_NAME;
+    const GHE_URL = process.env.TEST_GHE_URL;
+    process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
+
+    const orgs = await listGithubRepos(GITHUB_ORG_NAME as string, GHE_URL);
+    expect(orgs[0]).toEqual({
+      name: expect.any(String),
+      owner: expect.any(String),
+      branch: expect.any(String),
+      fork: expect.any(Boolean),
+    });
+  });
 });

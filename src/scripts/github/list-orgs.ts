@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { url } from 'inspector';
+import { getGithubBaseUrl } from './github-base-url';
 
 export interface GithubOrgData {
   name: string;
@@ -13,9 +14,7 @@ export async function listGithubOrgs(host?: string): Promise<GithubOrgData[]> {
       `Please set the GITHUB_TOKEN e.g. export GITHUB_TOKEN='mypersonalaccesstoken123'`,
     );
   }
-  const baseUrl = host
-    ? new URL('/api/v3', host).toString()
-    : 'https://api.github.com';
+  const baseUrl = getGithubBaseUrl(host);
   const octokit = new Octokit({ baseUrl, auth: githubToken });
   const res = await octokit.orgs.listForAuthenticatedUser();
   const orgsData = res && res.data;
