@@ -6,6 +6,17 @@ export interface ImportTarget {
   exclusionGlobs?: string;
 }
 
+export interface CreatedOrg {
+  name: string;
+  created?: string;
+  integrations: {
+    [name: string]: string;
+  };
+  orgId: string;
+  groupId: string;
+  origName: string; // name requested to be created
+  sourceOrgId?: string;
+}
 export interface Target {
   name?: string; // Gitlab, GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos, Bitbucket Server, Azure Container Registry, Elastic Container Registry, Artifactory Container Registry, Docker Hub
   appId?: string; // Heroku, CloudFoundry, Pivotal & IBM Cloud

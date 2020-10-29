@@ -36,7 +36,7 @@ export async function logCreatedOrg(
   }
 }
 
-interface CreatedOrg extends CreatedOrgResponse {
+interface SnykOrgData extends CreatedOrgResponse {
   integrations: {
     [name: string]: string;
   };
@@ -57,7 +57,7 @@ export async function createOrgs(
     userAgentPrefix: 'snyk-api-import',
   });
   debug(`Loaded ${orgsData.length} orgs to create ${Date.now()}`);
-  const createdOrgs: CreatedOrg[] = [];
+  const createdOrgs: SnykOrgData[] = [];
   orgsData.forEach(async (orgData) => {
     try {
       const { groupId, name, sourceOrgId } = orgData;

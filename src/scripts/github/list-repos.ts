@@ -1,13 +1,16 @@
 import { Octokit } from '@octokit/rest';
 import { getGithubBaseUrl } from './github-base-url';
 
-interface RepoData {
+export interface GithubRepoData {
   fork: boolean;
   branch: string;
   owner: string;
   name: string;
 }
-export async function listGithubRepos(orgName: string, host?: string): Promise<RepoData[]> {
+export async function listGithubRepos(
+  orgName: string,
+  host?: string,
+): Promise<GithubRepoData[]> {
   const githubToken = process.env.GITHUB_TOKEN;
   if (!githubToken) {
     throw new Error(
@@ -24,7 +27,7 @@ export async function listGithubRepos(orgName: string, host?: string): Promise<R
   if (!repoData.length) {
     return [];
   }
-  const repos: RepoData[] = repoData
+  const repos: GithubRepoData[] = repoData
     .filter((repo) => !repo.archived)
     .map((repo) => ({
       fork: repo.fork,
