@@ -46,7 +46,7 @@ describe('Import projects script', () => {
       `"target":{"name":"ruby-with-versions","owner":"snyk-fixtures","branch":"master"}`,
     );
     discoveredProjects.push(...projects);
-  }, 30000000);
+  }, 240000);
 });
 
 describe('Import skips previously imported', () => {
@@ -73,7 +73,7 @@ describe('Import skips previously imported', () => {
     await new Promise((r) => setTimeout(r, 1000));
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
     expect(logFile).toMatch('composer-with-vulns:snyk-fixtures:master');
-  }, 30000000);
+  }, 240000);
 });
 
 describe('Skips & logs issues', () => {
@@ -147,7 +147,7 @@ describe('Skips & logs issues', () => {
     } catch (e) {
       // ignore
     }
-  }, 30000000);
+  }, 240000);
   it('Logs failed projects', async () => {
     const logRoot = __dirname + '/fixtures/projects-with-errors/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);

@@ -47,7 +47,7 @@ Check the logs for any failures located at:`);
         done();
       },
     );
-  }, 30000000);
+  }, 240000);
   it('import triggers the API import', async (done) => {
     const testRoot = __dirname + '/fixtures';
     const logFiles = generateLogsPaths(testRoot, ORG_ID);
@@ -79,5 +79,5 @@ Check the logs for any failures located at:`);
         done();
       },
     );
-  }, 30000000);
+  }, 240000);
 });
