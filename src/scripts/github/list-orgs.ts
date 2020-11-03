@@ -1,5 +1,4 @@
 import { Octokit } from '@octokit/rest';
-import { url } from 'inspector';
 import { getGithubBaseUrl } from './github-base-url';
 
 export interface GithubOrgData {

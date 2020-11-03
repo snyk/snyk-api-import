@@ -23,18 +23,23 @@ export const builder = {
   sourceUrl: {
     required: false,
     default: undefined,
-    desc: 'Custom base url for the source API that can list organizations (e.g. Github Enterprise url)',
+    desc:
+      'Custom base url for the source API that can list organizations (e.g. Github Enterprise url)',
   },
   source: {
     required: true,
     default: Sources.GITHUB,
-    choices: [Sources.GITHUB],
-    desc: 'The source of the targets to be imported e.g. Github',
+    choices: [...Object.values(Sources)],
+    desc:
+      'The source of the targets to be imported e.g. Github, Github Enterprise',
   },
 };
 
-const entityName = {
+const entityName: {
+  [source in Sources]: string;
+} = {
   github: 'org',
+  'github-enterprise': 'org',
 };
 
 export async function handler(argv: {

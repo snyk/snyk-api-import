@@ -4,15 +4,25 @@ import { GithubOrgData, listGithubOrgs } from './github';
 
 export enum Sources {
   GITHUB = 'github',
+  GHE = 'github-enterprise',
+}
+
+async function githubEnterpriseOrganizations(sourceUrl?: string): Promise<{ name: string }[]> {
+  if (!sourceUrl) {
+    throw new Error('Please provide required `sourceUrl` for Github Enterprise source')
+  }
+  const ghOrgs: GithubOrgData[] = await listGithubOrgs(sourceUrl);
+  return ghOrgs;
 }
 
 async function githubOrganizations(sourceUrl?: string): Promise<{ name: string }[]> {
-  const ghOrgs: GithubOrgData[] = await listGithubOrgs(sourceUrl);
+  const ghOrgs: GithubOrgData[] = await listGithubOrgs();
   return ghOrgs;
 }
 
 const sourceGenerators = {
   [Sources.GITHUB]: githubOrganizations,
+  [Sources.GHE]: githubEnterpriseOrganizations,
 };
 
 export async function generateOrgImportDataFile(
