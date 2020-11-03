@@ -18,8 +18,9 @@ Options:
                        settings)                                      [required]
   --sourceUrl          Custom base url for the source API that can list
                        organizations (e.g. Github Enterprise url)
-  --source             The source of the targets to be imported e.g. Github
-                              [required] [choices: "github"] [default: "github"]
+  --source             The source of the targets to be imported e.g. Github,
+                       Github Enterprise
+         [required] [choices: "github", "github-enterprise"] [default: "github"]
 
 Missing required argument: groupId
 ]
@@ -40,6 +41,7 @@ Options:
                        settings)                                      [required]
   --sourceUrl          Custom base url for the source API that can list
                        organizations (e.g. Github Enterprise url)
-  --source             The source of the targets to be imported e.g. Github
-                              [required] [choices: \\"github\\"] [default: \\"github\\"]"
+  --source             The source of the targets to be imported e.g. Github,
+                       Github Enterprise
+         [required] [choices: \\"github\\", \\"github-enterprise\\"] [default: \\"github\\"]"
 `;
