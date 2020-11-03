@@ -6,6 +6,7 @@ import { GithubRepoData, listGithubRepos } from './github';
 
 export enum Sources {
   GITHUB = 'github',
+  GHE = 'github-enterprise',
 }
 
 async function githubRepos(orgName: string): Promise<GithubRepoData[]> {
@@ -13,14 +14,26 @@ async function githubRepos(orgName: string): Promise<GithubRepoData[]> {
   return ghRepos;
 }
 
-const sourceGenerators = {
-  [Sources.GITHUB]: githubRepos,
-};
+async function githubEnterpriseRepos(
+  orgName: string,
+  sourceUrl?: string,
+): Promise<GithubRepoData[]> {
+  if (!sourceUrl) {
+    throw new Error('Please provide required `sourceUrl` for Github Enterprise source')
+  }
+  const ghRepos: GithubRepoData[] = await listGithubRepos(orgName, sourceUrl);
+  return ghRepos;
+}
 
 export enum SupportedIntegrationTypes {
   GITHUB = 'github',
   GHE = 'github-enterprise',
 }
+
+const sourceGenerators = {
+  [Sources.GITHUB]: githubRepos,
+  [Sources.GHE]: githubEnterpriseRepos,
+};
 
 function validateRequiredOrgData(
   name: string,
@@ -30,7 +43,7 @@ function validateRequiredOrgData(
   orgId: string,
 ): void {
   if (!name) {
-    throw new Error('Org field:`name` is required');
+    throw new Error('Org field: `name` is required');
   }
   if (!orgId) {
     throw new Error('Org field: `orgId` is required');
@@ -60,6 +73,7 @@ export async function generateTargetsImportDataFile(
   source: Sources,
   orgsData: CreatedOrg[],
   integrationType: SupportedIntegrationTypes,
+  sourceUrl?: string,
 ): Promise<{ targets: ImportTarget[]; fileName: string }> {
   const targetsData: ImportTarget[] = [];
 
@@ -68,7 +82,7 @@ export async function generateTargetsImportDataFile(
     const { name, integrations, orgId } = topLevelEntity;
     try {
       validateRequiredOrgData(name, integrations, orgId);
-      const entities = await sourceGenerators[source](topLevelEntity.name);
+      const entities = await sourceGenerators[source](topLevelEntity.name, sourceUrl);
       entities.forEach((entity) => {
         targetsData.push({
           target: entity,

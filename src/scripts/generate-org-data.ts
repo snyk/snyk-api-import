@@ -15,7 +15,7 @@ async function githubEnterpriseOrganizations(sourceUrl?: string): Promise<{ name
   return ghOrgs;
 }
 
-async function githubOrganizations(sourceUrl?: string): Promise<{ name: string }[]> {
+async function githubOrganizations(): Promise<{ name: string }[]> {
   const ghOrgs: GithubOrgData[] = await listGithubOrgs();
   return ghOrgs;
 }
