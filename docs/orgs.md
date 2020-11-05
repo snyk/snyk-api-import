@@ -7,7 +7,7 @@ It is recommended to have as many Organizations in Snyk as you have in the sourc
 ## `orgs:data`
 
 ### Github.com / Github Enterprise
-1. set the [Github.com personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) as an environment variable: `export GH_TOKEN=your_personal_access_token`
+1. set the [Github.com personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) as an environment variable: `export GITHUB_TOKEN=your_personal_access_token`
 2. Run the command to generate Org data:
  - **Github.com:** `snyk-api-import orgs:data --source=github --groupId=<snyk_group_id>`
  - **Github Enterprise:** `snyk-api-import orgs:data --source=github-enterprise --groupId=<snyk_group_id> -- sourceUrl=https://ghe.custom.github.com/`
