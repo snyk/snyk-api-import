@@ -98,9 +98,9 @@ export async function pollImportUrls(
         );
         console.log(
           `Discovered ${
-            projects.length
+            _.uniqBy(projects, 'projectUrl').length
           } projects from import job id: ${importJobId}${
-            failedProjects.length
+            _.uniqBy(projects, 'projectUrl').length
               ? `. ${failedProjects.length} project(s) failed to finish importing.`
               : ''
           }`,

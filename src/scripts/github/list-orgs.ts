@@ -49,6 +49,7 @@ async function fetchAllOrgs(
   let hasMorePages = true;
   while (hasMorePages) {
     currentPage = currentPage + 1;
+    debug(`Fetching page ${currentPage}`);
     const { orgs, hasNextPage } = await fetchOrgsForPage(octokit, currentPage);
     orgsData.push(...orgs);
     hasMorePages = hasNextPage;
@@ -66,6 +67,7 @@ export async function listGithubOrgs(host?: string): Promise<GithubOrgData[]> {
 
   const baseUrl = getGithubBaseUrl(host);
   const octokit: Octokit = new Octokit({ baseUrl, auth: githubToken });
+  debug('Fetching all Github orgs data');
 
   const orgs = await fetchAllOrgs(octokit);
 

@@ -1,4 +1,6 @@
 import * as debugLib from 'debug';
+import * as _ from 'lodash';
+
 const debug = debugLib('snyk:import-projects-script');
 
 import { importProjects } from '../scripts/import-projects';
@@ -22,7 +24,7 @@ export async function handler(): Promise<void> {
     } = await importProjects(importFile);
     const projectsMessage =
       projects.length > 0
-        ? `Imported ${projects.length} project(s)`
+        ? `Imported ${ _.uniqBy(projects, 'projectUrl').length} project(s)`
         : '⚠ No projects imported!';
 
     const targetsMessage = `\nProcessed ${filteredTargets.length} out of a total of ${

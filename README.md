@@ -27,5 +27,6 @@ The logs can be explored using [Bunyan CLI](http://trentm.com/node-bunyan/bunyan
 # Table of Contents
 - Utilities
   - [Generating orgs in Snyk](docs/orgs.md)
+  - [Generating import data](docs/import-data.md)
 - [Kicking off an import](docs/import.md)
 - [Contributing](.github/CONTRIBUTING.md)

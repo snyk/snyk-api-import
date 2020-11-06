@@ -6,9 +6,12 @@ exports[`\`snyk-api-import help <...>\` Shows help text as expected 1`] = `
 Kick off API powered import
 
 Commands:
-  index.js import     Kick off API powered import         [default] [aliases: i]
-  index.js orgs:data  Generate data required for Orgs to be created via API by
-                      mirroring a given source.
+  index.js import       Kick off API powered import       [default] [aliases: i]
+  index.js import:data  Generate data required for targets to be imported via
+                        API to create Snyk projects.
+
+  index.js orgs:data    Generate data required for Orgs to be created via API by
+                        mirroring a given source.
 
 
 Options:
