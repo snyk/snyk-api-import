@@ -22,9 +22,11 @@ This is a util that can help generate the import json data needed t=by the impor
     ]
   }
   ```
-   - Github/Github Enterprise orgs can be listed using the [/orgs API](https://docs.github.com/en/free-pro-team@latest/rest/reference/orgs)
-   - Integrations can be listed via [Snyk Orgs API](https://snyk.docs.apiary.io/#reference/integrations/integrations/list)
-   - All org IDs can be found by listing all orgs a group admin belongs to via [Snyk API](https://snyk.docs.apiary.io/#reference/organizations/the-snyk-organization-for-a-request/list-all-the-organizations-a-user-belongs-to)
+  Note: the "name" of the Github/Github Enterprise org is required in order
+  to list all repos belonging to that org via Github API, the Snyk specific data accompanying that org name will be used as the information to genrate import data assuming all repos in that org will be imported into a given Snyk organisation. This is opinionated! If you want to customise this please manually craft the import data described in [import.md](/docs/import.md)
+      - Github/Github Enterprise orgs can be listed using the [/orgs API](https://docs.github.com/en/free-pro-team@latest/rest/reference/orgs)
+      - Integrations can be listed via [Snyk Orgs API](https://snyk.docs.apiary.io/#reference/integrations/integrations/list)
+      - All org IDs can be found by listing all orgs a group admin belongs to via [Snyk API](https://snyk.docs.apiary.io/#reference/organizations/the-snyk-organization-for-a-request/list-all-the-organizations-a-user-belongs-to)
 
 3. Run the command to generate import data:
  - **Github.com:** `DEBUG=snyk* GITHUB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=github --integrationType=github`
