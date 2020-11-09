@@ -77,5 +77,5 @@ describe('generateOrgImportDataFile Github script', () => {
       name: expect.any(String),
       groupId,
     });
-  });
+  }, 50000);
 });

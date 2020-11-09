@@ -16,7 +16,7 @@ describe('generateTargetsImportDataFile Github script', () => {
     process.env = { ...OLD_ENV };
     await deleteFiles(filesToDelete);
   });
-  it('generate Github Orgs data', async () => {
+  it('generate Github repo data', async () => {
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     filesToDelete.push(path.resolve(__dirname + '/github-import-targets.json'));
     const orgsData: CreatedOrg[] = [
@@ -52,7 +52,7 @@ describe('generateTargetsImportDataFile Github script', () => {
     });
   });
 
-  it('generate Github Enterprise Orgs data', async () => {
+  it('generate Github Enterprise repo data', async () => {
     process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
     const GHE_URL = process.env.TEST_GHE_URL;
     filesToDelete.push(path.resolve(__dirname + '/github-import-targets.json'));
@@ -90,7 +90,7 @@ describe('generateTargetsImportDataFile Github script', () => {
     });
   });
 
-  it('generate Github Orgs data when no integrations are available', async () => {
+  it('generate Github repo data when no integrations are available', async () => {
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     const orgsData: CreatedOrg[] = [
       {

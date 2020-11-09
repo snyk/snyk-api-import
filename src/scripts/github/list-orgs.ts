@@ -1,4 +1,5 @@
 import { Octokit } from '@octokit/rest';
+import * as parseLinkHeader from 'parse-link-header';
 import * as debugLib from 'debug';
 
 import { getGithubBaseUrl } from './github-base-url';
@@ -13,20 +14,26 @@ export interface GithubOrgData {
 async function fetchOrgsForPage(
   octokit: Octokit,
   pageNumber = 1,
+  since = 0,
+  isGithubEnterprise = false,
 ): Promise<{
   orgs: GithubOrgData[];
   hasNextPage: boolean;
+  since?: number;
 }> {
   const orgsData: GithubOrgData[] = [];
   const params = {
     per_page: 100,
     page: pageNumber,
+    since,
   };
-  const res = await octokit.orgs.listForAuthenticatedUser(params);
+
+  const res = isGithubEnterprise
+    ? await octokit.orgs.list(params)
+    : await octokit.orgs.listForAuthenticatedUser(params);
+  const links = parseLinkHeader(res.headers.link as string) || {};
   const orgs = res && res.data;
-  let hasNextPage;
   if (orgs.length) {
-    hasNextPage = true;
     orgsData.push(
       ...orgs.map((org) => ({
         name: org.login,
@@ -34,25 +41,37 @@ async function fetchOrgsForPage(
         url: org.url,
       })),
     );
-  } else {
-    hasNextPage = false;
   }
-  return { orgs: orgsData, hasNextPage };
+  return {
+    orgs: orgsData,
+    hasNextPage: !!links.next,
+    since: links.next ? Number(links.next.since) : undefined,
+  };
 }
 
 async function fetchAllOrgs(
   octokit: Octokit,
   page = 0,
+  isGithubEnterprise = false,
 ): Promise<GithubOrgData[]> {
   const orgsData: GithubOrgData[] = [];
   let currentPage = page;
   let hasMorePages = true;
+  let currentSince = 0;
   while (hasMorePages) {
     currentPage = currentPage + 1;
     debug(`Fetching page ${currentPage}`);
-    const { orgs, hasNextPage } = await fetchOrgsForPage(octokit, currentPage);
+    const { orgs, hasNextPage, since } = await fetchOrgsForPage(
+      octokit,
+      currentPage,
+      currentSince,
+      isGithubEnterprise,
+    );
     orgsData.push(...orgs);
     hasMorePages = hasNextPage;
+    if (since) {
+      currentSince = since;
+    }
   }
   return orgsData;
 }
@@ -69,7 +88,6 @@ export async function listGithubOrgs(host?: string): Promise<GithubOrgData[]> {
   const octokit: Octokit = new Octokit({ baseUrl, auth: githubToken });
   debug('Fetching all Github orgs data');
 
-  const orgs = await fetchAllOrgs(octokit);
-
+  const orgs = await fetchAllOrgs(octokit, undefined, !!host);
   return orgs;
 }
