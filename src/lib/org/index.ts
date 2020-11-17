@@ -43,23 +43,16 @@ export async function listIntegrations(
 const defaultDisabledSettings = {
   'new-issues-remediations': {
     enabled: false,
-    issueSeverity: 'high',
-    issueType: 'vuln',
+    issueType: 'none',
   },
   'project-imported': {
     enabled: false,
-    issueSeverity: 'high',
-    issueType: 'vuln',
   },
   'test-limit': {
     enabled: false,
-    issueSeverity: 'high',
-    issueType: 'vuln',
   },
   'weekly-report': {
     enabled: false,
-    issueSeverity: 'high',
-    issueType: 'vuln',
   },
 };
 

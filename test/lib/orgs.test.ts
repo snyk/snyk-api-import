@@ -34,8 +34,8 @@ describe('Single target', () => {
     expect(res).toEqual({
       'new-issues-remediations': {
         enabled: false,
-        issueSeverity: 'high',
-        issueType: 'vuln',
+        issueSeverity: 'all',
+        issueType: 'none',
       },
       'project-imported': {
         enabled: false,
