@@ -5,7 +5,7 @@ orbs:
 jobs:
     build-test-monitor:
         docker:
-            - image: circleci/node:latest
+            - image: circleci/node:12
         steps:
             - slack/notify:
                 channel: C0137E8F72A
@@ -25,7 +25,7 @@ jobs:
                 only_for_branches: master
     build-test:
         docker:
-            - image: circleci/node:latest
+            - image: circleci/node:12
         steps:
             - slack/notify:
                 channel: C0137E8F72A
@@ -44,7 +44,7 @@ jobs:
             - run: npx tsc
     build-test-from-fork:
         docker:
-            - image: circleci/node:latest
+            - image: circleci/node:12
         steps:
             - checkout
             - run: npm install
