@@ -12,7 +12,7 @@ jobs:
                 color: '#42e2f4'
                 message: Starting snyk-api-import build-test-monitor job
             - checkout
-            - run: npm install
+            - run: npm ci
             - run: npm test
             - snyk/scan:
                 fail-on-issues: true
@@ -31,7 +31,7 @@ jobs:
                 color: '#42e2f4'
                 message: Starting snyk-api-import build-test job
             - checkout
-            - run: npm install
+            - run: npm ci
             - run: npm test
             - snyk/scan:
                 fail-on-issues: true
