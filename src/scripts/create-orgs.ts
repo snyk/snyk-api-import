@@ -35,6 +35,7 @@ export async function createOrgs(
   orgs: CreatedOrg[];
   failed: CreateOrgData[];
   fileName: string;
+  totalOrgs: number;
 }> {
   const content = await loadFile(filePath);
   const orgsData: CreateOrgData[] = [];
@@ -82,5 +83,5 @@ export async function createOrgs(
     throw new Error(`All requested orgs failed to be created. Review the errors in ${loggingPath}/<groupId>.${FAILED_ORG_LOG_NAME}`)
   }
   const fileName = await saveCreatedOrgData(createdOrgs);
-  return { orgs: createdOrgs, failed: failedOrgs, fileName };
+  return { orgs: createdOrgs, failed: failedOrgs, fileName, totalOrgs: orgsData.length };
 }

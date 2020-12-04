@@ -26,7 +26,7 @@ export async function handler(argv: {
 
     const orgsMessage =
       res.orgs.length > 0
-        ? `Created ${res.orgs.length} org(s). Written the data to file: ${res.fileName}`
+        ? `Created ${res.orgs.length} out of ${res.totalOrgs} org(s). Written the data to file: ${res.fileName}`
         : `⚠ No org(s) created!`;
 
     console.log(orgsMessage);
