@@ -9,7 +9,7 @@
     {
       "//": "HACK: remove type file that causes pkg error https://github.com/octokit/openapi-types.ts/issues/16",
       "path": "@semantic-release/exec",
-      "cmd": "node_modules/@octokit/openapi-types/generated/types.ts"
+      "cmd": "rm node_modules/@octokit/openapi-types/generated/types.ts"
     },
     {
       "//": "build the alpine, macos, linux and windows binaries",
