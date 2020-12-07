@@ -44,6 +44,7 @@ const defaultDisabledSettings = {
   'new-issues-remediations': {
     enabled: false,
     issueType: 'none',
+    issueSeverity: 'high'
   },
   'project-imported': {
     enabled: false,

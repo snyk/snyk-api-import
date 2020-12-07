@@ -7,6 +7,11 @@
       "cmd": "echo '' > dist/STANDALONE"
     },
     {
+      "//": "HACK: remove type file that causes pkg error https://github.com/octokit/openapi-types.ts/issues/16",
+      "path": "@semantic-release/exec",
+      "cmd": "node_modules/@octokit/openapi-types/generated/types.ts"
+    },
+    {
       "//": "build the alpine, macos, linux and windows binaries",
       "path": "@semantic-release/exec",
       "cmd": "npx pkg . -t node12-linux-x64,node12-macos-x64,node12-win-x64"
