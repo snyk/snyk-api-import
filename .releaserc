@@ -7,14 +7,9 @@
       "cmd": "echo '' > dist/STANDALONE"
     },
     {
-      "//": "HACK: remove type file that causes pkg error https://github.com/octokit/openapi-types.ts/issues/16",
+      "//": "build the alpine, macos, linux and windows binaries. HACK: remove type file that causes pkg error https://github.com/octokit/openapi-types.ts/issues/16",
       "path": "@semantic-release/exec",
-      "cmd": "rm node_modules/@octokit/openapi-types/generated/types.ts"
-    },
-    {
-      "//": "build the alpine, macos, linux and windows binaries",
-      "path": "@semantic-release/exec",
-      "cmd": "npx pkg . -t node12-linux-x64,node12-macos-x64,node12-win-x64"
+      "cmd": "rm node_modules/@octokit/openapi-types/generated/types.ts && npx pkg . -t node12-linux-x64,node12-macos-x64,node12-win-x64"
     },
     {
       "//": "shasum all binaries",
