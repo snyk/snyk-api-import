@@ -37,8 +37,8 @@ async function fetchReposForPage(
         .map((repo) => ({
           fork: repo.fork,
           name: repo.name,
-          owner: repo.owner.login,
-          branch: repo.default_branch,
+          owner: repo?.owner?.login as string,
+          branch: repo.default_branch as string,
         })),
     );
   } else {

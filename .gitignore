@@ -5,7 +5,6 @@ dist
 .DS_Store
 *.log
 *import-job-results.json
-package-lock.json
 yarn.lock
 .eslintcache
 local.*
