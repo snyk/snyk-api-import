@@ -19,7 +19,7 @@
     "build-watch": "tsc -w",
     "prepare": "npm run build",
     "snyk-test": "snyk test",
-    "pkg-binaries": "npx pkg . -t node12-linux-x64,node12-macos-x64,node12-win-x64"
+    "pkg-binaries": "npx nexe dist/index.js -r './dist/**/*.js' -t mac-x64-10.21.0 -o snyk-api-import-macos"
   },
   "types": "./dist/index.d.ts",
   "repository": {
@@ -67,7 +67,6 @@
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "jest": "^25.1.0",
-    "pkg": "4.4.9",
     "prettier": "^1.19.1",
     "semantic-release": "17.3.0",
     "ts-jest": "^25.1.0",
