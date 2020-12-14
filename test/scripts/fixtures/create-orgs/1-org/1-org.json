@@ -1,0 +1,6 @@
+{
+  "orgs": [{
+    "groupId": "abc",
+    "name": "snyk-api-import-test-org"
+  }]
+}

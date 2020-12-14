@@ -3,6 +3,7 @@ import { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 import { getApiToken } from '../get-api-token';
 import { getSnykHost } from '../get-snyk-host';
+import { CreateOrgData } from '../types';
 
 const debug = debugLib('snyk:api-group');
 
@@ -68,11 +69,12 @@ interface NotificationSettings {
 export async function setNotificationPreferences(
   requestManager: requestsManager,
   orgId: string,
+  orgData: CreateOrgData,
   settings: NotificationSettings = defaultDisabledSettings,
 ): Promise<IntegrationsListResponse> {
   getApiToken();
   getSnykHost();
-  debug('Disabling notifications for: ' + orgId);
+  debug(`Disabling notifications for org: ${orgData.name} (${orgId})`);
 
   if (!orgId) {
     throw new Error(
@@ -98,4 +100,32 @@ export async function setNotificationPreferences(
     debug('Failed to update notification settings for ', orgId, e);
     throw e;
   }
+}
+
+export async function deleteOrg(
+  requestManager: requestsManager,
+  orgId: string,
+): Promise<unknown> {
+  getApiToken();
+  getSnykHost();
+  debug(`Deleting org: "${orgId}"`);
+
+  if (!orgId) {
+    throw new Error(
+      `Missing required parameters. Please ensure you have set: orgId.
+      \nFor more information see: https://snyk.docs.apiary.io/#reference/organizations/manage-organization/remove-organization`,
+    );
+  }
+  const res = await requestManager.request({
+    verb: 'delete',
+    url: `/org/${orgId}`,
+    body: JSON.stringify({}),
+  });
+
+  if (res.statusCode && res.statusCode !== 204) {
+    throw new Error(
+      'Expected a 204 response, instead received: ' + JSON.stringify(res.data),
+    );
+  }
+  return res.data;
 }

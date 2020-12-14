@@ -19,7 +19,7 @@ export async function createOrg(
 ): Promise<CreatedOrgResponse> {
   getApiToken();
   getSnykHost();
-  debug('Creating a new org:' + name);
+  debug(`Creating a new org: "${name}"`);
 
   if (!groupId || !name) {
     throw new Error(
@@ -41,7 +41,7 @@ export async function createOrg(
   });
   if (res.statusCode && res.statusCode !== 200) {
     throw new Error(
-      'Expected a 200 response, instead received: ' + JSON.stringify(res.data),
+      'Expected a 200 response, instead received: ' + JSON.stringify(res),
     );
   }
   return res.data;

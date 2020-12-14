@@ -10,6 +10,8 @@ Commands:
   index.js import:data  Generate data required for targets to be imported via
                         API to create Snyk projects.
 
+  index.js orgs:create  Create the Orgs in Snyk based on data file generated
+                        with \`orgs:data\` command
   index.js orgs:data    Generate data required for Orgs to be created via API by
                         mirroring a given source.
 

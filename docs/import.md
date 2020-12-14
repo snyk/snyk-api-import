@@ -11,7 +11,7 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
   If you have any tests ot fixtures that should be ignored, please set the `exclusionGLobs` property:
   > a comma-separated list of up to 10 folder names to exclude from scanning. If not specified, it will default to "fixtures, tests, __tests__, node_modules". If an empty string is provided - no folders will be excluded
 
-#### Example:  Gitlab
+#### Example: Gitlab
 
 ```
 {
