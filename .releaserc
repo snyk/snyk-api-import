@@ -14,7 +14,7 @@
     {
       "//": "build the macos",
       "path": "@semantic-release/exec",
-      "cmd": "npx nexe dist/index.js  -r './dist/**/*.js' -t linux-x86-12.16.2 -o snyk-api-import-linux"
+      "cmd": "npx nexe dist/index.js  -r './dist/**/*.js' -t linux-x64-12.16.2 -o snyk-api-import-linux"
     },
     {
       "//": "build the windows binaries",
