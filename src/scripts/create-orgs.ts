@@ -7,7 +7,7 @@ import { listIntegrations, setNotificationPreferences } from '../lib/org';
 import { requestsManager } from 'snyk-request-manager';
 import { CreateOrgData } from '../lib/types';
 import { logCreatedOrg } from '../log-created-org';
-import { logFailedOrg } from '../log-failed-org';
+import { logFailedOrgs } from '../log-failed-orgs';
 import { writeFile } from '../write-file';
 import { FAILED_ORG_LOG_NAME } from '../common';
 
@@ -33,13 +33,17 @@ export async function createOrgs(
   loggingPath = getLoggingPath(),
 ): Promise<{
   orgs: CreatedOrg[];
-  failed: CreateOrgData[];
   fileName: string;
   totalOrgs: number;
 }> {
   const content = await loadFile(filePath);
   const orgsData: CreateOrgData[] = [];
-  const failedOrgs: CreateOrgData[] = [];
+  const failedOrgs: {
+    errorMessage: string;
+    groupId: string;
+    name: string;
+    sourceOrgId?: string;
+  }[] = [];
 
   try {
     orgsData.push(...JSON.parse(content).orgs);
@@ -69,19 +73,28 @@ export async function createOrgs(
       });
       logCreatedOrg(groupId, name, org, integrations, loggingPath);
     } catch (e) {
-      failedOrgs.push({ groupId, name, sourceOrgId });
       const errorMessage = e.data ? e.data.message : e.message;
-      logFailedOrg(
+      failedOrgs.push({
         groupId,
         name,
-        errorMessage || 'Failed to create org, please try again in DEBUG mode.',
-      );
+        sourceOrgId,
+        errorMessage:
+          errorMessage ||
+          'Failed to create org, please try again in DEBUG mode.',
+      });
       debug(`Failed to create org with data: ${JSON.stringify(orgsData)}`, e);
     }
   }
+  logFailedOrgs(failedOrgs);
   if (failedOrgs.length === orgsData.length) {
-    throw new Error(`All requested orgs failed to be created. Review the errors in ${loggingPath}/<groupId>.${FAILED_ORG_LOG_NAME}`)
+    throw new Error(
+      `All requested orgs failed to be created. Review the errors in ${loggingPath}/<groupId>.${FAILED_ORG_LOG_NAME}`,
+    );
   }
   const fileName = await saveCreatedOrgData(createdOrgs);
-  return { orgs: createdOrgs, failed: failedOrgs, fileName, totalOrgs: orgsData.length };
+  return {
+    orgs: createdOrgs,
+    fileName,
+    totalOrgs: orgsData.length,
+  };
 }
