@@ -7,8 +7,8 @@ const debug = debugLib('snyk:list-repos-script');
 
 export interface GithubRepoData {
   fork: boolean;
-  branch: string;
-  owner: string;
+  branch?: string;
+  owner?: string;
   name: string;
 }
 
@@ -22,6 +22,7 @@ async function fetchReposForPage(
 }> {
   const repoData: GithubRepoData[] = [];
   const params = {
+    // eslint-disable-next-line @typescript-eslint/camelcase
     per_page: 100,
     page: pageNumber,
     org: orgName,
@@ -37,7 +38,7 @@ async function fetchReposForPage(
         .map((repo) => ({
           fork: repo.fork,
           name: repo.name,
-          owner: repo.owner.login,
+          owner: repo.owner?.login,
           branch: repo.default_branch,
         })),
     );
