@@ -39,17 +39,20 @@ describe('createOrgs script', () => {
     expect(orgs).not.toBeNull();
     expect(orgs[0]).toEqual( {
       created: expect.any(String),
-      groupId: 'abc',
+      groupId: 'd64abc45-b39a-48a2-9636-a4f62adbf09a',
       id: expect.any(String),
       integrations: expect.any(Object),
       name: "snyk-api-import-test-org",
       orgId: expect.any(String),
       origName: "snyk-api-import-test-org",
       sourceOrgId: undefined,
+      slug: expect.any(String),
+      url: expect.any(String),
+      group: expect.any(Object)
     });
     createdOrgs.push(orgs[0].orgId);
     filesToDelete.push(path.resolve(logPath, fileName));
-  });
+  }, 20000);
   it.todo('creating multiple orgs');
   it('creating an org fails', async () => {
     const importFile = path.resolve(__dirname + '/fixtures/create-orgs/fails-to-create/1-org.json');
@@ -57,6 +60,6 @@ describe('createOrgs script', () => {
     process.env.SNYK_LOG_PATH = logPath;
     process.env.SNYK_TOKEN = 'bad-token';
 
-    expect(createOrgs(importFile)).rejects.toThrow("All requested orgs failed to be created. Review the errors in /Users/lili/www/tech-services/snyk-api-import/test/scripts/fixtures/create-orgs/fails-to-create/<groupId>.failed-to-create-orgs.log");
+    expect(createOrgs(importFile)).rejects.toThrow("fails-to-create/<groupId>.failed-to-create-orgs.log");
   }, 1000);
 });
