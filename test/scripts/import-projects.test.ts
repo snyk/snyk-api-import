@@ -172,7 +172,7 @@ describe('Skips & logs issues', () => {
     );
     expect(failedProjectsLog).not.toBeNull();
     expect(failedProjectsLog).toMatch(
-      `"targetFile":"dotnet/invalid.csproj","success":false,"projectUrl":"","msg":"Error importing project"`,
+      `"targetFile":"dotnet/invalid.csproj","success":false,"userMessage":"Failed to process manifest dotnet/invalid.csproj","projectUrl":"","msg":"Error importing project"`,
     );
 
     let failedImportLog = null;
