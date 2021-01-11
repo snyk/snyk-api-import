@@ -13,7 +13,7 @@ import { logImportedProjects } from '../../log-imported-projects';
 import { logJobResult } from '../../log-job-result';
 
 const debug = debugLib('snyk:poll-import');
-const MIN_RETRY_WAIT_TIME = 20000;
+const MIN_RETRY_WAIT_TIME = 5000;
 const MAX_RETRY_COUNT = 1000;
 
 export async function pollImportUrl(

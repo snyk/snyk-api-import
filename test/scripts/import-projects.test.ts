@@ -243,7 +243,7 @@ describe('No projects scenarios', () => {
     await deleteFiles(logs);
     process.env = { ...OLD_ENV };
   });
-  it.skip('succeeds to complete import targets from empty repo', async () => {
+  it.only('succeeds to complete import targets from empty repo', async () => {
     const testName = 'empty-target';
     const logPath = path.resolve(__dirname + '/fixtures/' + testName);
     const logFiles = generateLogsPaths(logPath, ORG_ID);

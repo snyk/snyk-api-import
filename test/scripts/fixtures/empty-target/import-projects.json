@@ -1,8 +1,8 @@
 {
   "targets": [
     {
-      "orgId": "f0125d9b-271a-4b50-ad23-80e12575a1bf",
-      "integrationId": "c4de291b-e083-4c43-a72c-113463e0d268",
+      "orgId": "cc6f6b27-be72-4834-a723-636c37ad5c13",
+      "integrationId": "46c4db70-bf76-4b55-a584-dd7b6c2cecaa",
       "target": {
         "name": "empty-repo",
         "owner": "snyk-fixtures",
