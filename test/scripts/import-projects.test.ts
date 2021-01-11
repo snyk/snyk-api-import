@@ -172,7 +172,7 @@ describe('Skips & logs issues', () => {
     );
     expect(failedProjectsLog).not.toBeNull();
     expect(failedProjectsLog).toMatch(
-      `"targetFile":"dotnet/invalid.csproj","success":false,"projectUrl":"","msg":"Error importing project"`,
+      `"targetFile":"dotnet/invalid.csproj","success":false,"userMessage":"Failed to process manifest dotnet/invalid.csproj","projectUrl":"","msg":"Error importing project"`,
     );
 
     let failedImportLog = null;
@@ -243,7 +243,7 @@ describe('No projects scenarios', () => {
     await deleteFiles(logs);
     process.env = { ...OLD_ENV };
   });
-  it('succeeds to complete import targets from empty repo', async () => {
+  it.skip('succeeds to complete import targets from empty repo', async () => {
     const testName = 'empty-target';
     const logPath = path.resolve(__dirname + '/fixtures/' + testName);
     const logFiles = generateLogsPaths(logPath, ORG_ID);
