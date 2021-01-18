@@ -2,8 +2,9 @@
   "compilerOptions": {
     "outDir": "./dist",
     "pretty": true,
-    "target": "esnext",
+    "target": "es2019",
     "module": "commonjs",
+    "incremental": true,
     "sourceMap": true,
     "declaration": true,
     "importHelpers": true,
