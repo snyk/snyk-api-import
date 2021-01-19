@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as debugLib from 'debug';
 import { requestsManager } from 'snyk-request-manager';
 import * as _ from 'lodash';
-import { Target, FilePath, ImportTarget } from '../../types';
+import { Target, FilePath, ImportTarget, Project } from '../../types';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
 import { logImportedTargets } from '../../../loggers/log-imported-targets';
@@ -13,6 +13,7 @@ import { logFailedImports } from '../../../loggers/log-failed-imports';
 import { logImportJobsPerOrg } from '../../../loggers/log-import-jobs';
 import { getConcurrentImportsNumber } from '../../get-concurrent-imports-number';
 import { FAILED_LOG_NAME } from '../../../common';
+import { pollImportUrls } from '../poll-import';
 
 const debug = debugLib('snyk:api-import');
 
@@ -117,7 +118,7 @@ export async function importTargets(
   requestManager: requestsManager,
   targets: ImportTarget[],
   loggingPath = getLoggingPath(),
-): Promise<string[]> {
+): Promise<{ projects: Project[] }> {
   const pollingUrls: string[] = [];
   let failed = 0;
   const concurrentImports = getConcurrentImportsNumber();
@@ -158,5 +159,10 @@ export async function importTargets(
     },
     { concurrency: getConcurrentImportsNumber() },
   );
-  return _.uniq(pollingUrls);
+  const { projects } = await pollImportUrls(requestManager, pollingUrls);
+  // TODO: how to relate original target to the project that results from polling url?
+  // import job while open will accept many targets.
+  // could we use the target converter to identify which project can from which target?
+  // must have concurrency of 1 to import & tag? or user must provide repo owner & name so target conversion can work?
+  return { projects };
 }

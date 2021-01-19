@@ -168,13 +168,12 @@ export async function importProjects(
       skippedTargets > 0 ? `(skipped ${skippedTargets})` : ''
     }`;
     logImportedBatch(batchProgressMessages);
-    const pollingUrlsAndContext = await importTargets(
+    const importedTargets = await importTargets(
       requestManager,
       batch,
       loggingPath,
     );
-    const res = await pollImportUrls(requestManager, pollingUrlsAndContext);
-    projects.push(...res.projects);
+    projects.push(...importedTargets.projects);
   }
   return { projects, skippedTargets, filteredTargets, targets };
 }

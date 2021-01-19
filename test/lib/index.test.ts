@@ -3,7 +3,6 @@ import {
   importTarget,
   pollImportUrl,
   importTargets,
-  pollImportUrls,
 } from '../../src/lib';
 import { Project } from '../../src/lib/types';
 import { deleteTestProjects } from '../delete-test-projects';
@@ -68,7 +67,7 @@ describe('Multiple targets', () => {
     const requestManager = new requestsManager({
       userAgentPrefix: 'snyk-api-import:tests',
     });
-    const pollingUrls = await importTargets(requestManager, [
+    const { projects } = await importTargets(requestManager, [
       {
         orgId: ORG_ID,
         integrationId: INTEGRATION_ID,
@@ -88,8 +87,6 @@ describe('Multiple targets', () => {
         },
       },
     ]);
-    expect(pollingUrls.length >= 1).toBeTruthy();
-    const { projects } = await pollImportUrls(requestManager, pollingUrls);
     // at least one job successfully finished
     expect(projects[0]).toMatchObject({
       projectUrl: expect.any(String),
