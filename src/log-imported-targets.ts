@@ -19,7 +19,7 @@ export async function logImportedTarget(
   orgId: string,
   integrationId: string,
   target: Target,
-  locationUrl: string,
+  locationUrl?: string,
   loggingPath: string = getLoggingPath(),
 ): Promise<void> {
   try {

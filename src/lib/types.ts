@@ -6,6 +6,52 @@ export interface ImportTarget {
   exclusionGlobs?: string;
 }
 
+export enum SupportedIntegrationTypes {
+  GITHUB = 'github',
+  GHE = 'github-enterprise',
+}
+
+export enum Sources {
+  GITHUB = 'github',
+  GHE = 'github-enterprise',
+}
+
+interface ImportingUser {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+}
+
+export interface SnykProject {
+  name: string;
+  id: string;
+  created: string;
+  origin: string;
+  type: string;
+  readOnly: boolean;
+  testFrequency: string;
+  isMonitored: boolean;
+  totalDependencies: number;
+  issueCountsBySeverity: {
+    low: number;
+    high: number;
+    medium: number;
+  };
+  remoteRepoUrl: string; // URL of the repo
+  lastTestedDate: string;
+  browseUrl: string;
+  owner: string | null;
+  importingUser: ImportingUser;
+  tags: unknown[];
+  attributes: {
+    criticality: unknown[];
+    lifecycle: unknown[];
+    environment: unknown[];
+  };
+  branch: string | null;
+}
+
 export interface CreatedOrg {
   name: string;
   created?: string;

@@ -3,7 +3,7 @@ import { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 import { getApiToken } from '../get-api-token';
 import { getSnykHost } from '../get-snyk-host';
-import { CreateOrgData } from '../types';
+import { CreateOrgData, SnykProject } from '../types';
 
 const debug = debugLib('snyk:api-group');
 
@@ -45,7 +45,7 @@ const defaultDisabledSettings = {
   'new-issues-remediations': {
     enabled: false,
     issueType: 'none',
-    issueSeverity: 'high'
+    issueSeverity: 'high',
   },
   'project-imported': {
     enabled: false,
@@ -127,5 +127,50 @@ export async function deleteOrg(
       'Expected a 204 response, instead received: ' + JSON.stringify(res.data),
     );
   }
+  debug(`Deleted org: "${orgId}"`);
   return res.data;
+}
+
+interface ProjectsResponse {
+  org: {
+    name: string;
+    id: string;
+  };
+  projects: SnykProject[];
+}
+
+export async function listProjects(
+  requestManager: requestsManager,
+  orgId: string,
+): Promise<ProjectsResponse> {
+  getApiToken();
+  getSnykHost();
+  debug(`Listing all projects for org: ${orgId}`);
+
+  if (!orgId) {
+    throw new Error(
+      `Missing required parameters. Please ensure you have set: orgId, settings.
+        \nFor more information see: https://snyk.docs.apiary.io/#reference/projects/all-projects/list-all-projects`,
+    );
+  }
+
+  const filters = {};
+  try {
+    const res = await requestManager.request({
+      verb: 'post',
+      url: `/org/${orgId.trim()}/projects`,
+      body: JSON.stringify(filters),
+    });
+
+    if (res.statusCode && res.statusCode !== 201) {
+      throw new Error(
+        'Expected a 201 response, instead received: ' +
+          JSON.stringify(res.data || res.data),
+      );
+    }
+    return res.data || {};
+  } catch (e) {
+    debug('Failed to update notification settings for ', orgId, e);
+    throw e;
+  }
 }
