@@ -19,7 +19,7 @@ describe('Generate imported targets based on Snyk data', () => {
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
 
   afterAll(async () => {
-    await deleteFiles(logs);
+    // await deleteFiles(logs);
     process.env = { ...OLD_ENV };
   });
 

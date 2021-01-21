@@ -21,6 +21,7 @@ export async function logImportedTarget(
   target: Target,
   locationUrl?: string,
   loggingPath: string = getLoggingPath(),
+  message = 'Target requested for import',
 ): Promise<void> {
   try {
     const log = bunyan.createLogger({
@@ -41,7 +42,7 @@ export async function logImportedTarget(
         integrationId,
         targetId: generateImportedTargetData(orgId, integrationId, target),
       },
-      'Target requested for import',
+      message,
     );
     log.info(
       {
@@ -51,9 +52,16 @@ export async function logImportedTarget(
         integrationId,
         targetId: generateImportedTargetData(orgId, integrationId, target),
       },
-      'Target requested for import',
+      message,
     );
   } catch (e) {
+    debug({
+      target,
+      locationUrl,
+      orgId,
+      integrationId,
+      targetId: generateImportedTargetData(orgId, integrationId, target),
+    }, e)
     // do nothing
   }
 }

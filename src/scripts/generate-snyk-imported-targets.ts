@@ -56,8 +56,15 @@ export async function generateSnykImportedTargets(
       .filter((p) => p.origin === integrationType)
       .map((p) => targetGenerators[p.origin as Sources](p));
     const uniqueTargets = new Set(scmTargets);
-    uniqueTargets.forEach((target) => {
-      logImportedTarget(id, integrationType, target);
+    uniqueTargets.forEach(async (target) => {
+      await logImportedTarget(
+        id,
+        integrationType,
+        target,
+        undefined,
+        undefined,
+        'Target exists in Snyk',
+      );
       targetsData.push({
         target,
         integrationId: integrations[integrationType],
