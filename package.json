@@ -50,6 +50,7 @@
     "snyk-config": "^4.0.0",
     "snyk-request-manager": "1.4.0",
     "source-map-support": "^0.5.16",
+    "split": "1.0.1",
     "tslib": "^1.10.0",
     "yargs": "16.2.0"
   },
@@ -62,6 +63,7 @@
     "@types/needle": "2.0.4",
     "@types/node": "^12.12.26",
     "@types/parse-link-header": "1.0.0",
+    "@types/split": "1.0.0",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
     "eslint": "^6.8.0",

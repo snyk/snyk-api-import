@@ -1,6 +1,10 @@
 import * as debugLib from 'debug';
 import * as path from 'path';
 import { requestsManager } from 'snyk-request-manager';
+import * as pMap from 'p-map';
+import * as fs from 'fs';
+import * as _ from 'lodash';
+import split = require('split');
 
 import { loadFile } from '../load-file';
 import { importTargets, pollImportUrls } from '../lib';
@@ -9,50 +13,86 @@ import { getLoggingPath } from '../lib/get-logging-path';
 import { getConcurrentImportsNumber } from '../lib/get-concurrent-imports-number';
 import { logImportedBatch } from '../loggers/log-imported-batch';
 import { IMPORT_LOG_NAME } from '../common';
-import pMap = require('p-map');
 import { generateTargetId } from '../generate-target-id';
 
 const debug = debugLib('snyk:import-projects-script');
 
-const regexForTarget = (target: string): RegExp =>
-  new RegExp(`(,?)${target}.*,`, 'm');
+export async function parseLogIntoTargetIds(logFile: string): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    const importedTargets: string[] = [];
+    fs.createReadStream(logFile)
+      .pipe(split())
+      .on('data', (lineObj) => {
+        if (!lineObj) {
+          return;
+        }
+        try {
+          const data = JSON.parse(lineObj);
+          const { orgId, integrationId, target } = data;
+          importedTargets.push(
+            generateTargetId(orgId, integrationId, target),
+          );
+        } catch (e) {
+          console.log(e);
+        }
+      })
+      .on('error', (err) => {
+        console.error('Failed to createReadStream for file: ' + err);
+        return reject(err);
+      })
+      .on('end', async () => {
+        return resolve(importedTargets);
+      });
+  });
+}
 
-export async function skipTargetIfFoundInLog(
+export async function shouldSkipTarget(
   targetItem: ImportTarget,
-  logFile: string,
+  importedTargets: string[],
 ): Promise<boolean> {
-  const { orgId, integrationId, target } = targetItem;
-  try {
+    try {
+    const { orgId, integrationId, target } = targetItem;
     const data = generateTargetId(orgId, integrationId, target);
-    const targetRegExp = regexForTarget(data);
-    const match = logFile.match(targetRegExp);
-    if (!match) {
-      return false;
-    }
-    debug('Dropped previously imported target: ', JSON.stringify(targetItem));
-    return true;
+    return importedTargets.includes(data);
   } catch (e) {
-    debug('Failed to process target', targetItem);
+    debug(`Failed to process target ${JSON.stringify(targetItem)}. ERROR: ${e}`);
     return false;
   }
 }
+
 async function filterOutImportedTargets(
   targets: ImportTarget[],
   loggingPath: string,
 ): Promise<ImportTarget[]> {
-  let logFile: string;
   const filterOutImportedTargets: ImportTarget[] = [];
+  let importedTargets: string[] = [];
   try {
-    logFile = await loadFile(path.resolve(loggingPath, IMPORT_LOG_NAME));
+    const importedTargetsFilePath = path.resolve(
+      process.cwd(),
+      loggingPath,
+      IMPORT_LOG_NAME,
+    );
+    if (!fs.existsSync(importedTargetsFilePath)) {
+      throw new Error(`File not found ${importedTargetsFilePath}`);
+    }
+    importedTargets = await parseLogIntoTargetIds(importedTargetsFilePath);
   } catch (e) {
+    console.log(
+      `Could not load previously imported targets file: ${IMPORT_LOG_NAME}.\nThis could be because it doesn't exist or it is malformed. Either way continuing without checking for previously imported targets.`,
+    );
     return targets;
   }
+  const totalTargets = targets.length;
   await pMap(
     targets,
     async (targetItem, index) => {
-      debug('Checking if target needs skipping: ' + index);
-      const foundInLog = await skipTargetIfFoundInLog(targetItem, logFile);
-      if (!foundInLog) {
+      console.log(
+        `Checking target should be skipped: ${index}/${totalTargets}`,
+      );
+      const shouldSkip = await shouldSkipTarget(targetItem, importedTargets);
+      if (shouldSkip) {
+        debug('Skipping target', JSON.stringify(targetItem));
+      } else {
         filterOutImportedTargets.push(targetItem);
       }
     },
@@ -92,6 +132,7 @@ export async function importProjects(
   );
   const filteredTargets = await filterOutImportedTargets(targets, loggingPath);
   const skippedTargets = targets.length - filteredTargets.length;
+
   if (skippedTargets > 0) {
     console.warn(
       `Skipped previously imported ${skippedTargets}/${
