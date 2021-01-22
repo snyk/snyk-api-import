@@ -9,12 +9,33 @@ import { getLoggingPath } from '../lib/get-logging-path';
 import { getConcurrentImportsNumber } from '../lib/get-concurrent-imports-number';
 import { logImportedBatch } from '../log-imported-batch';
 import { generateImportedTargetData } from '../log-imported-targets';
+import { IMPORT_LOG_NAME } from '../common';
+import pMap = require('p-map');
 
 const debug = debugLib('snyk:import-projects-script');
 
 const regexForTarget = (target: string): RegExp =>
   new RegExp(`(,?)${target}.*,`, 'm');
 
+async function skipTargetIfFoundInLog(
+  targetItem: ImportTarget,
+  logFile: string,
+): Promise<boolean> {
+  const { orgId, integrationId, target } = targetItem;
+  try {
+    const data = generateImportedTargetData(orgId, integrationId, target);
+    const targetRegExp = regexForTarget(data);
+    const match = logFile.match(targetRegExp);
+    if (!match) {
+      return false;
+    }
+    debug('Dropped previously imported target: ', JSON.stringify(targetItem));
+    return true;
+  } catch (e) {
+    debug('Failed to process target', targetItem);
+    return false;
+  }
+}
 async function filterOutImportedTargets(
   targets: ImportTarget[],
   loggingPath: string,
@@ -22,28 +43,21 @@ async function filterOutImportedTargets(
   let logFile: string;
   const filterOutImportedTargets: ImportTarget[] = [];
   try {
-    logFile = await loadFile(path.resolve(loggingPath, 'imported-targets.log'));
+    logFile = await loadFile(path.resolve(loggingPath, IMPORT_LOG_NAME));
   } catch (e) {
     return targets;
   }
-  targets.forEach((targetItem) => {
-    const { orgId, integrationId, target } = targetItem;
-    try {
-      const data = generateImportedTargetData(orgId, integrationId, target);
-      const targetRegExp = regexForTarget(data);
-      const match = logFile.match(targetRegExp);
-      if (!match) {
+  await pMap(
+    targets,
+    async (targetItem, index) => {
+      debug('Checking if target needs skipping: ' + index);
+      const foundInLog = await skipTargetIfFoundInLog(targetItem, logFile);
+      if (!foundInLog) {
         filterOutImportedTargets.push(targetItem);
-      } else {
-        debug(
-          'Dropped previously imported target: ',
-          JSON.stringify(targetItem),
-        );
       }
-    } catch (e) {
-      debug('Failed to process target', targetItem);
-    }
-  });
+    },
+    { concurrency: 150 },
+  );
 
   return filterOutImportedTargets;
 }
@@ -64,17 +78,25 @@ export async function importProjects(
   } catch (e) {
     throw new Error(`Failed to parse targets from ${fileName}`);
   }
-  const dateNow = new Date(Date.now());
   console.log(
-    `Loaded ${targets.length} target(s) to import ${dateNow.toUTCString()}`,
+    `Loaded ${targets.length} target(s) to import | ${new Date(
+      Date.now(),
+    ).toUTCString()}`,
   );
   const concurrentTargets = getConcurrentImportsNumber();
   const projects: Project[] = [];
+  console.log(
+    `Filtering out previously imported targets, this might be slow | ${new Date(
+      Date.now(),
+    ).toUTCString()}`,
+  );
   const filteredTargets = await filterOutImportedTargets(targets, loggingPath);
   const skippedTargets = targets.length - filteredTargets.length;
   if (skippedTargets > 0) {
     console.warn(
-      `Skipped previously imported ${skippedTargets}/${targets.length} target(s)`,
+      `Skipped previously imported ${skippedTargets}/${
+        targets.length
+      } target(s) | ${new Date(Date.now()).toUTCString()}`,
     );
   }
   if (filteredTargets.length === 0) {
