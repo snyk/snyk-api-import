@@ -1,8 +1,8 @@
 import * as bunyan from 'bunyan';
-import { IMPORT_JOB_RESULTS } from './common';
+import { IMPORT_JOB_RESULTS } from './../common';
 
-import { getLoggingPath } from './lib/get-logging-path';
-import { PollImportResponse } from './lib/types';
+import { getLoggingPath } from './../lib/get-logging-path';
+import { PollImportResponse } from './../lib/types';
 
 export async function logJobResult(
   locationUrl: string,

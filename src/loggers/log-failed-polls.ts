@@ -1,8 +1,8 @@
 import * as bunyan from 'bunyan';
 import * as debugLib from 'debug';
 
-import { getLoggingPath } from './lib/get-logging-path';
-import { FAILED_POLLS_LOG_NAME } from './common';
+import { getLoggingPath } from './../lib/get-logging-path';
+import { FAILED_POLLS_LOG_NAME } from './../common';
 
 const debug = debugLib('snyk:import-projects-script');
 

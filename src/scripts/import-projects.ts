@@ -7,23 +7,23 @@ import { importTargets, pollImportUrls } from '../lib';
 import { Project, ImportTarget } from '../lib/types';
 import { getLoggingPath } from '../lib/get-logging-path';
 import { getConcurrentImportsNumber } from '../lib/get-concurrent-imports-number';
-import { logImportedBatch } from '../log-imported-batch';
-import { generateImportedTargetData } from '../log-imported-targets';
+import { logImportedBatch } from '../loggers/log-imported-batch';
 import { IMPORT_LOG_NAME } from '../common';
 import pMap = require('p-map');
+import { generateTargetId } from '../generate-target-id';
 
 const debug = debugLib('snyk:import-projects-script');
 
 const regexForTarget = (target: string): RegExp =>
   new RegExp(`(,?)${target}.*,`, 'm');
 
-async function skipTargetIfFoundInLog(
+export async function skipTargetIfFoundInLog(
   targetItem: ImportTarget,
   logFile: string,
 ): Promise<boolean> {
   const { orgId, integrationId, target } = targetItem;
   try {
-    const data = generateImportedTargetData(orgId, integrationId, target);
+    const data = generateTargetId(orgId, integrationId, target);
     const targetRegExp = regexForTarget(data);
     const match = logFile.match(targetRegExp);
     if (!match) {

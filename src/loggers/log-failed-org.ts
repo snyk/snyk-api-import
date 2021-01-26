@@ -1,8 +1,8 @@
 import * as debugLib from 'debug';
 import * as bunyan from 'bunyan';
 
-import { getLoggingPath } from './lib/get-logging-path';
-import { FAILED_ORG_LOG_NAME } from './common';
+import { getLoggingPath } from '../lib/get-logging-path';
+import { FAILED_ORG_LOG_NAME } from '../common';
 
 const debug = debugLib('snyk:create-orgs-script');
 

@@ -7,10 +7,10 @@ import * as _ from 'lodash';
 import { Target, FilePath, ImportTarget } from '../types';
 import { getApiToken } from '../get-api-token';
 import { getSnykHost } from '../get-snyk-host';
-import { logImportedTarget } from '../../log-imported-targets';
+import { logImportedTarget } from '../../loggers/log-imported-targets';
 import { getLoggingPath } from '../get-logging-path';
-import { logFailedImports } from '../../log-failed-imports';
-import { logImportJobsPerOrg } from '../../log-import-jobs';
+import { logFailedImports } from '../../loggers/log-failed-imports';
+import { logImportJobsPerOrg } from '../../loggers/log-import-jobs';
 import { getConcurrentImportsNumber } from '../get-concurrent-imports-number';
 import { FAILED_LOG_NAME } from '../../common';
 

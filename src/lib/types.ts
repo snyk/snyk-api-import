@@ -17,6 +17,8 @@ export interface CreatedOrg {
   origName: string; // name requested to be created
   sourceOrgId?: string;
 }
+
+// also must update targetProps if any new props are added
 export interface Target {
   name?: string; // Gitlab, GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos, Bitbucket Server, Azure Container Registry, Elastic Container Registry, Artifactory Container Registry, Docker Hub
   appId?: string; // Heroku, CloudFoundry, Pivotal & IBM Cloud

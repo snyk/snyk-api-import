@@ -1,9 +1,9 @@
 import * as debugLib from 'debug';
 import * as bunyan from 'bunyan';
 
-import { Target } from './lib/types';
-import { getLoggingPath } from './lib/get-logging-path';
-import { FAILED_LOG_NAME } from './common';
+import { Target } from './../lib/types';
+import { getLoggingPath } from './../lib/get-logging-path';
+import { FAILED_LOG_NAME } from './../common';
 
 const debug = debugLib('snyk:import-projects-script');
 

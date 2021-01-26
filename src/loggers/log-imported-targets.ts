@@ -1,19 +1,12 @@
 import * as bunyan from 'bunyan';
 import * as debugLib from 'debug';
 
-import { Target } from './lib/types';
-import { getLoggingPath } from './lib/get-logging-path';
-import { IMPORT_LOG_NAME } from './common';
+import { Target } from './../lib/types';
+import { getLoggingPath } from './../lib/get-logging-path';
+import { IMPORT_LOG_NAME } from './../common';
+import { generateTargetId } from '../generate-target-id';
 
 const debug = debugLib('snyk:import-projects-script');
-
-export function generateImportedTargetData(
-  orgId: string,
-  integrationId: string,
-  target: Target,
-): string {
-  return `${orgId}:${integrationId}:${Object.values(target).join(':')}`;
-}
 
 export async function logImportedTarget(
   orgId: string,
@@ -39,7 +32,7 @@ export async function logImportedTarget(
         locationUrl,
         orgId,
         integrationId,
-        targetId: generateImportedTargetData(orgId, integrationId, target),
+        targetId: generateTargetId(orgId, integrationId, target),
       },
       'Target requested for import',
     );
@@ -49,7 +42,7 @@ export async function logImportedTarget(
         locationUrl,
         orgId,
         integrationId,
-        targetId: generateImportedTargetData(orgId, integrationId, target),
+        targetId: generateTargetId(orgId, integrationId, target),
       },
       'Target requested for import',
     );

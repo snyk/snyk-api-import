@@ -8,3 +8,14 @@ export const IMPORTED_BATCHES_LOG_NAME = 'imported-batches.log';
 export const IMPORT_JOB_RESULTS = 'import-job-results.log';
 export const CREATED_ORG_LOG_NAME = 'created-orgs.log'
 export const FAILED_ORG_LOG_NAME = 'failed-to-create-orgs.log'
+export const targetProps = [
+  'name',
+  'appId',
+  'functionId',
+  'slugId',
+  'projectKey',
+  'repoSlug',
+  'id',
+  'owner',
+  'branch',
+];
