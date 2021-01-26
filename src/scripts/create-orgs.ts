@@ -6,8 +6,8 @@ import { getLoggingPath } from '../lib/get-logging-path';
 import { listIntegrations, setNotificationPreferences } from '../lib/org';
 import { requestsManager } from 'snyk-request-manager';
 import { CreateOrgData } from '../lib/types';
-import { logCreatedOrg } from '../log-created-org';
-import { logFailedOrg } from '../log-failed-org';
+import { logCreatedOrg } from '../loggers/log-created-org';
+import { logFailedOrg } from '../loggers/log-failed-org';
 import { writeFile } from '../write-file';
 import { FAILED_ORG_LOG_NAME } from '../common';
 

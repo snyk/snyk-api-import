@@ -7,10 +7,10 @@ import * as _ from 'lodash';
 import * as pMap from 'p-map';
 import { PollImportResponse, Project } from '../types';
 import { getApiToken } from '../get-api-token';
-import { logFailedProjects } from '../../log-failed-projects';
-import { logFailedPollUrls } from '../../log-failed-polls';
-import { logImportedProjects } from '../../log-imported-projects';
-import { logJobResult } from '../../log-job-result';
+import { logFailedProjects } from '../../loggers/log-failed-projects';
+import { logFailedPollUrls } from '../../loggers/log-failed-polls';
+import { logImportedProjects } from '../../loggers/log-imported-projects';
+import { logJobResult } from '../../loggers/log-job-result';
 
 const debug = debugLib('snyk:poll-import');
 const MIN_RETRY_WAIT_TIME = 20000;
