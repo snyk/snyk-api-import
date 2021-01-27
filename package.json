@@ -19,7 +19,8 @@
     "build-watch": "tsc -w",
     "prepare": "npm run build",
     "snyk-test": "snyk test",
-    "pkg-binaries": "npx  nexe@3.3.7 dist/index.js -r './dist/**/*.js' -t mac-x64-10.21.0 -o snyk-api-import-macos"
+    "pkg-binaries-linux": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t linux-x64-12.16.2 -o snyk-api-import-linux",
+    "pkg-binaries": "npx nexe@3.3.7 dist/index.js -r './dist/**/*.js' -t mac-x64-10.21.0 -o snyk-api-import-macos"
   },
   "types": "./dist/index.d.ts",
   "repository": {

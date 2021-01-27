@@ -37,10 +37,12 @@ jobs:
                 fail-on-issues: true
                 monitor-on-build: false
                 token-variable: SNYK_TOKEN_PROD
+            - run: npx tsc
+            - run: npm run pkg-binaries-linux
+            - run: ./snyk-api-import-linux help
             - slack/status:
                 fail_only: true
                 only_for_branches: master
-            - run: npx tsc
     build-test-from-fork:
         docker:
             - image: circleci/node:12
