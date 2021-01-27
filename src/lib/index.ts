@@ -2,6 +2,7 @@ export * from './api/import';
 export * from './api/poll-import';
 export * from './api/project';
 export * from './api/group';
+export * from './api/org';
 
 export * from './get-api-token';
 export * from './get-concurrent-imports-number';

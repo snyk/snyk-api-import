@@ -2,9 +2,9 @@ import * as debugLib from 'debug';
 const debug = debugLib('snyk:generate-data-script');
 
 import { getLoggingPath } from '../lib/get-logging-path';
+import { Sources } from '../lib/types';
 import {
   generateOrgImportDataFile,
-  Sources,
 } from '../scripts/generate-org-data';
 
 export const command = ['orgs:data'];

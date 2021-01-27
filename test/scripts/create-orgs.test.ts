@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { requestsManager } from 'snyk-request-manager';
 import { CREATED_ORG_LOG_NAME } from '../../src/common';
-import { deleteOrg } from '../../src/lib/org';
+import { deleteOrg } from '../../src/lib';
 import { createOrgs } from '../../src/scripts/create-orgs';
 import { deleteFiles } from '../delete-files';
 

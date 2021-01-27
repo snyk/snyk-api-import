@@ -1,13 +1,8 @@
 import * as _ from 'lodash';
 
-import { CreatedOrg, ImportTarget } from '../lib/types';
+import { CreatedOrg, ImportTarget, Sources, SupportedIntegrationTypes } from '../lib/types';
 import { writeFile } from '../write-file';
 import { GithubRepoData, listGithubRepos } from './github';
-
-export enum Sources {
-  GITHUB = 'github',
-  GHE = 'github-enterprise',
-}
 
 async function githubRepos(orgName: string): Promise<GithubRepoData[]> {
   const ghRepos: GithubRepoData[] = await listGithubRepos(orgName);
@@ -23,11 +18,6 @@ async function githubEnterpriseRepos(
   }
   const ghRepos: GithubRepoData[] = await listGithubRepos(orgName, sourceUrl);
   return ghRepos;
-}
-
-export enum SupportedIntegrationTypes {
-  GITHUB = 'github',
-  GHE = 'github-enterprise',
 }
 
 const sourceGenerators = {

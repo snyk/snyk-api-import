@@ -2,12 +2,10 @@ import * as debugLib from 'debug';
 import { getLoggingPath } from '../lib/get-logging-path';
 const debug = debugLib('snyk:generate-data-script');
 
-import { CreatedOrg } from '../lib/types';
+import { CreatedOrg, Sources, SupportedIntegrationTypes } from '../lib/types';
 import { loadFile } from '../load-file';
-import { Sources } from '../scripts/generate-org-data';
 import {
   generateTargetsImportDataFile,
-  SupportedIntegrationTypes,
 } from '../scripts/generate-targets-data';
 
 export const command = ['import:data'];
