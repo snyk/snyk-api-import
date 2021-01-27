@@ -19,6 +19,10 @@ export const builder = {
     default: undefined,
     desc: 'Path to orgs data file generated with "orgs:data" command',
   },
+  // sync
+  mode: {
+    choices: ['new-targets', 'new-projects', 'full-sync', 'delete-old-projects']
+  },
   source: {
     required: true,
     default: Sources.GITHUB,

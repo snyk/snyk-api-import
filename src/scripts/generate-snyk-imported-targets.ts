@@ -78,3 +78,42 @@ export async function generateSnykImportedTargets(
   }
   return { targets: targetsData, fileName: 'TODO' };
 }
+
+// PRE REQ
+// gheData = generateTargetsData(); // 100% data => import-file
+export async function importNewTargets() {
+  // NEW REPOS not in Snyk
+  // nice step to see whats different
+  // if org provided for all new imports => use it
+
+  existingRepos = generateSnykImportedTargets(); // existing imported data => if saved as a log
+  startImport();
+
+}
+
+
+export async function importNewTargetsAndMakeOrgs() {
+  // NEW REPOS not in Snyk
+  // nice step to see whats different
+  // if org provided for all new imports => use it
+
+
+  existingRepos = generateSnykImportedTargets(); // existing imported data => if saved as a log
+  startImport();
+
+}
+
+
+
+// STEP 1: generate all import file data (either for a given org or create & make org diff)
+
+// STEP 2: run the import
+
+export async function importNewProjects() {
+
+}
+
+export async function deactivateOldProjects() {
+  //this will cover deleted repos/targets too
+
+}
