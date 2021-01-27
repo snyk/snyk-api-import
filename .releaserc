@@ -9,17 +9,17 @@
     {
       "//": "build the linux",
       "path": "@semantic-release/exec",
-      "cmd": "npx nexe dist/index.js  -r './dist/**/*.js' -t mac-x64-10.21.0 -o snyk-api-import-macos"
+      "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t mac-x64-10.21.0 -o snyk-api-import-macos"
     },
     {
       "//": "build the macos",
       "path": "@semantic-release/exec",
-      "cmd": "npx nexe dist/index.js  -r './dist/**/*.js' -t linux-x64-12.16.2 -o snyk-api-import-linux"
+      "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t linux-x64-12.16.2 -o snyk-api-import-linux"
     },
     {
       "//": "build the windows binaries",
       "path": "@semantic-release/exec",
-      "cmd": "npx nexe dist/index.js  -r './dist/**/*.js' -t windows-x64-10.16.0 -o snyk-api-import-win.exe"
+      "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t windows-x64-10.16.0 -o snyk-api-import-win.exe"
     },
     {
       "//": "shasum all binaries",
