@@ -7,10 +7,9 @@ import * as _ from 'lodash';
 import split = require('split');
 
 import { loadFile } from '../load-file';
-import { importTargets, pollImportUrls } from '../lib';
+import { importTargets, pollImportUrls, getConcurrentImportsNumber } from '../lib';
 import { Project, ImportTarget } from '../lib/types';
-import { getLoggingPath } from '../lib/get-logging-path';
-import { getConcurrentImportsNumber } from '../lib/get-concurrent-imports-number';
+import { getLoggingPath } from '../lib';
 import { logImportedBatch } from '../loggers/log-imported-batch';
 import { IMPORT_LOG_NAME } from '../common';
 import { generateTargetId } from '../generate-target-id';

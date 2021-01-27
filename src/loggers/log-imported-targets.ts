@@ -3,8 +3,8 @@ import * as debugLib from 'debug';
 import * as _ from 'lodash';
 
 import { Target } from './../lib/types';
-import { getLoggingPath } from './../lib/get-logging-path';
 import { IMPORT_LOG_NAME, targetProps } from './../common';
+import { getLoggingPath } from './../lib';
 import { generateTargetId } from '../generate-target-id';
 
 const debug = debugLib('snyk:import-projects-script');

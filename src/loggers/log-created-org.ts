@@ -1,7 +1,7 @@
 import * as debugLib from 'debug';
 import * as bunyan from 'bunyan';
 
-import { getLoggingPath } from '../lib/get-logging-path';
+import { getLoggingPath } from '../lib';
 import { CREATED_ORG_LOG_NAME } from '../common';
 import { CreatedOrgResponse } from '../lib';
 
