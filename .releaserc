@@ -7,12 +7,12 @@
       "cmd": "echo '' > dist/STANDALONE"
     },
     {
-      "//": "build the linux",
+      "//": "build the macos",
       "path": "@semantic-release/exec",
       "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t mac-x64-10.21.0 -o snyk-api-import-macos"
     },
     {
-      "//": "build the macos",
+      "//": "build the linux",
       "path": "@semantic-release/exec",
       "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t linux-x64-12.16.2 -o snyk-api-import-linux"
     },
