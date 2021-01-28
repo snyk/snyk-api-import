@@ -62,8 +62,14 @@ describe('Org notification settings', () => {
 });
 
 describe('listProjects', () => {
+  const OLD_ENV = process.env;
+  process.env.SNYK_API = SNYK_API_TEST;
+  process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import:tests',
+  });
+  afterAll(async () => {
+    process.env = { ...OLD_ENV };
   });
   it('Lists projects in a given Org', async () => {
     const res = await listProjects(requestManager, ORG_ID);

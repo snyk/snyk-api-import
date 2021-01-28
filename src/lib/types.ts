@@ -114,3 +114,14 @@ export interface SnykProject {
   };
   branch: string | null;
 }
+
+export interface Org {
+  name: string;
+  id: string;
+  slug: string;
+  url: string;
+  group: {
+    name: string;
+    id: string;
+  };
+}
