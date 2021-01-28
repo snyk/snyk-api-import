@@ -13,8 +13,9 @@ export async function logImportedTarget(
   orgId: string,
   integrationId: string,
   target: Target,
-  locationUrl: string,
+  locationUrl: string | null,
   loggingPath: string = getLoggingPath(),
+  message = 'Target requested for import',
 ): Promise<void> {
   try {
     // only properties available on Target allowed here, must keep them in sync
@@ -28,16 +29,6 @@ export async function logImportedTarget(
         },
       ],
     });
-    debug(
-      {
-        target: _.pick(target, ...targetProps),
-        locationUrl,
-        orgId,
-        integrationId,
-        targetId: generateTargetId(orgId, integrationId, target),
-      },
-      'Target requested for import',
-    );
     log.info(
       {
         target: _.pick(target, ...targetProps),
@@ -46,7 +37,7 @@ export async function logImportedTarget(
         integrationId,
         targetId: generateTargetId(orgId, integrationId, target),
       },
-      'Target requested for import',
+      message,
     );
   } catch (e) {
     // do nothing
