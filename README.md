@@ -31,3 +31,17 @@ The logs can be explored using [Bunyan CLI](http://trentm.com/node-bunyan/bunyan
   - [Mirroring Github.com/Github Enterprise organizations & repos in Snyk](docs/mirror-github.md)
 - [Kicking off an import](docs/import.md)
 - [Contributing](.github/CONTRIBUTING.md)
+
+# FAQ
+<details>
+<summary><code>Error: ENFILE: file table overflow, open</code> or <code>Error: EMFILE, too many open files</code></summary>
+<br/>
+  <p>If you see these errors then you may need to bump <b>ulimit</b> to allow more open file operations. In order to keep the operations more performant tool logs as soon as it is convenient rather than wait until very end of a loop and log a huge data structure. This means depending on number of concurrent imports set the tool may exceed the system default <b>ulimit</b>.</p>
+  <p>Some of these resources may help you bump the <b>ulimit</b>:</p>
+  <ul>
+    <li><a href="https://ss64.com/bash/ulimit.html">ss64.com</a></li>
+    <li><a href="https://stackoverflow.com/questions/45004352/error-enfile-file-table-overflow-scandir-while-run-reaction-on-mac">StackOverflow</a></li>
+    <li><a href="http://blog.mact.me/2014/10/22/yosemite-upgrade-changes-open-file-limit">blog.mact.me</a></li>
+  </ul>
+</details>
+
