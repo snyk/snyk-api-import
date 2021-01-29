@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`\`snyk-api-import list:imported <...>\` Generates Snyk imported targets data as expected 1`] = `
+"api f0125d9b-271a-4b50-ad23-80e12575a1bf: 1095.537ms
+logging f0125d9b-271a-4b50-ad23-80e12575a1bf: 6.287ms
+logging f0125d9b-271a-4b50-ad23-80e12575a1bf: 0.560ms
+Found 2 repo(s). Written the data to file: imported-targets.log"
+`;
+
+exports[`\`snyk-api-import list:imported <...>\` Shows error when missing groupId 1`] = `
+[Error: Command failed: node ./dist/index.js list:imported --integrationType=github
+index.js list:imported
+
+List all targets imported in Snyk for a given group & source type. An analysis
+is performed on all current orgs and their projects to generate this. The
+generated file can be used to skip previously imported targets when running the
+\`import\` command
+
+Options:
+  --version          Show version number                               [boolean]
+  --help             Show help                                         [boolean]
+  --groupId          Public id of the group in Snyk (available on group
+                     settings)                                        [required]
+  --integrationType  The configured integration type (source of the projects in
+                     Snyk e.g. Github, Github Enterprise.). This will be used to
+                     pick the correct integrationID from each org in Snyk
+                             [required] [choices: "github", "github-enterprise"]
+
+Missing required argument: groupId
+]
+`;
+
+exports[`\`snyk-api-import list:imported <...>\` Shows help text as expected 1`] = `
+"index.js list:imported
+
+List all targets imported in Snyk for a given group & source type. An analysis
+is performed on all current orgs and their projects to generate this. The
+generated file can be used to skip previously imported targets when running the
+\`import\` command
+
+Options:
+  --version          Show version number                               [boolean]
+  --help             Show help                                         [boolean]
+  --groupId          Public id of the group in Snyk (available on group
+                     settings)                                        [required]
+  --integrationType  The configured integration type (source of the projects in
+                     Snyk e.g. Github, Github Enterprise.). This will be used to
+                     pick the correct integrationID from each org in Snyk
+                             [required] [choices: \\"github\\", \\"github-enterprise\\"]"
+`;

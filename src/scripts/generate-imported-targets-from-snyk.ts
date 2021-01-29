@@ -1,5 +1,6 @@
 import { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
+import * as pMap from 'p-map';
 import * as _ from 'lodash';
 
 import {
@@ -41,48 +42,59 @@ export async function generateSnykImportedTargets(
   groupId: string,
   integrationType: SupportedIntegrationTypes,
 ): Promise<{ targets: ImportTarget[]; fileName: string; failedOrgs: Org[] }> {
+  const timeLabel = 'Generated imported Snyk targets';
+  console.time(timeLabel);
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import',
   });
   const targetsData: ImportTarget[] = [];
   const groupOrgs = await getAllOrgs(requestManager, groupId);
   const failedOrgs: Org[] = [];
-  for (const org of groupOrgs) {
-    const { id, name, slug } = org;
-    try {
-      const { projects } = await listProjects(requestManager, id);
-      const integrations = await listIntegrations(requestManager, id);
-      const scmTargets = projects
-        .filter((p) => p.origin === integrationType)
-        .map((p) => targetGenerators[p.origin as Sources](p));
-      const uniqueTargets = new Set(scmTargets);
-      for (const target of uniqueTargets) {
-        await logImportedTarget(
-          id,
-          integrationType,
-          target,
-          null,
-          undefined,
-          'Target exists in Snyk',
+  await pMap(
+    groupOrgs,
+    async (org: Org) => {
+      const { id, name, slug } = org;
+      try {
+        const [resProjects, resIntegrations] = await Promise.all([
+          listProjects(requestManager, id),
+          listIntegrations(requestManager, id),
+        ]);
+        const { projects } = resProjects;
+
+        const scmTargets = projects
+          .filter((p) => p.origin === integrationType)
+          .map((p) => targetGenerators[p.origin as Sources](p));
+        const uniqueTargets = new Set(scmTargets);
+        for (const target of uniqueTargets) {
+          await logImportedTarget(
+            id,
+            integrationType,
+            target,
+            null,
+            undefined,
+            'Target exists in Snyk',
+          );
+          targetsData.push({
+            target: _.pick(target, ...targetProps),
+            integrationId: resIntegrations[integrationType],
+            orgId: id,
+          });
+        }
+      } catch (e) {
+        failedOrgs.push(org);
+        console.warn(
+          `Failed to process projects for org ${name}(${slug}). Continuing.`,
         );
-        targetsData.push({
-          target: _.pick(target, ...targetProps),
-          integrationId: integrations[integrationType],
-          orgId: id,
-        });
       }
-    } catch (e) {
-      failedOrgs.push(org);
-      console.warn(
-        `Failed to process projects for org ${name}(${slug}). Continuing.`,
-      );
-    }
-  }
+    },
+    { concurrency: 30 },
+  );
   if (targetsData.length === 0) {
     debug('No targets could be generated. Could Snyk Group have no projects?');
     console.warn(
       `No targets could be generated. Could Snyk Orgs in the Group (${groupId}) be empty?`,
     );
   }
+  console.timeEnd(timeLabel);
   return { targets: targetsData, fileName: IMPORT_LOG_NAME, failedOrgs };
 }
