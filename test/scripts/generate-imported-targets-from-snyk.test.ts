@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteFiles } from '../delete-files';
@@ -33,7 +34,7 @@ describe('Generate imported targets based on Snyk data', () => {
       SupportedIntegrationTypes.GITHUB,
     );
     expect(failedOrgs).toEqual([]);
-    expect(fileName).toEqual(IMPORT_LOG_NAME);
+    expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
     expect(targets[0]).toMatchObject({
       integrationId: expect.any(String),
       orgId: expect.any(String),
@@ -43,11 +44,12 @@ describe('Generate imported targets based on Snyk data', () => {
         owner: expect.any(String),
       },
     });
-    const importedTargetsLog = fs.readFileSync(logFiles.importLogPath, 'utf8');
     // give file a little time to be finished to be written
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 20000));
+    const importedTargetsLog = fs.readFileSync(logFiles.importLogPath, 'utf8');
     expect(importedTargetsLog).toMatch(targets[0].target.owner as string);
     expect(importedTargetsLog).toMatch(targets[0].orgId);
+    expect(importedTargetsLog).toMatch(targets[0].integrationId);
   }, 240000);
   it.todo('One org failed to be processed');
 });

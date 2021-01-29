@@ -39,12 +39,17 @@ describe('`snyk-api-import list:imported <...>`', () => {
           throw err;
         }
         expect(err).toBeNull();
-        expect(stdout.trim()).toMatch('repo(s). Written the data to file: imported-targets.log');
-        deleteFiles([path.resolve(__dirname,IMPORT_LOG_NAME)]);
+        expect(stdout.trim()).toMatch(
+          `repo(s). Written the data to file: ${path.resolve(
+            __dirname,
+            'imported-targets.log',
+          )}`,
+        );
+        deleteFiles([path.resolve(__dirname, IMPORT_LOG_NAME)]);
         done();
       },
     );
-  });
+  }, 10000);
   it('Shows error when missing groupId', async (done) => {
     return exec(
       `node ${main} list:imported --integrationType=github`,

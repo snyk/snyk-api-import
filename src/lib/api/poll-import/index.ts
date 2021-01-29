@@ -44,7 +44,6 @@ export async function pollImportUrl(
           JSON.stringify(res.data),
       );
     }
-    // TODO: use logger to show what we got
     debug(`Import task status is "${importStatus.status}"`);
     if (
       importStatus.status &&

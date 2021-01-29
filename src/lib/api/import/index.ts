@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import { Target, FilePath, ImportTarget } from '../../types';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
-import { logImportedTarget } from '../../../loggers/log-imported-targets';
+import { logImportedTargets } from '../../../loggers/log-imported-targets';
 import { getLoggingPath } from '../../get-logging-path';
 import { logFailedImports } from '../../../loggers/log-failed-imports';
 import { logImportJobsPerOrg } from '../../../loggers/log-import-jobs';
@@ -68,10 +68,10 @@ export async function importTarget(
     debug(
       `Received locationUrl for ${target.name || 'target'}: ${locationUrl}`,
     );
-    await logImportedTarget(
+    await logImportedTargets(
       orgId,
       integrationId,
-      target,
+      [target],
       locationUrl,
       loggingPath,
     );

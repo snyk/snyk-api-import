@@ -1,5 +1,6 @@
 import { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
+import * as path from 'path';
 import * as pMap from 'p-map';
 import * as _ from 'lodash';
 
@@ -11,9 +12,10 @@ import {
   SupportedIntegrationTypes,
   Target,
 } from '../lib/types';
-import { getAllOrgs, listIntegrations, listProjects } from '../lib';
-import { logImportedTarget } from '../loggers/log-imported-targets';
+import { getAllOrgs, getLoggingPath, listIntegrations, listProjects } from '../lib';
+import { logImportedTargets } from '../loggers/log-imported-targets';
 import { IMPORT_LOG_NAME, targetProps } from '../common';
+import { generateTargetId } from '../generate-target-id';
 
 const debug = debugLib('snyk:generate-snyk-imported-targets');
 
@@ -53,33 +55,53 @@ export async function generateSnykImportedTargets(
   await pMap(
     groupOrgs,
     async (org: Org) => {
-      const { id, name, slug } = org;
+      const { id: orgId, name, slug } = org;
       try {
         const [resProjects, resIntegrations] = await Promise.all([
-          listProjects(requestManager, id),
-          listIntegrations(requestManager, id),
+          listProjects(requestManager, orgId),
+          listIntegrations(requestManager, orgId),
         ]);
+        const integrationId = resIntegrations[integrationType];
         const { projects } = resProjects;
-
         const scmTargets = projects
           .filter((p) => p.origin === integrationType)
           .map((p) => targetGenerators[p.origin as Sources](p));
-        const uniqueTargets = new Set(scmTargets);
-        for (const target of uniqueTargets) {
-          await logImportedTarget(
-            id,
-            integrationType,
-            target,
-            null,
-            undefined,
-            'Target exists in Snyk',
-          );
-          targetsData.push({
-            target: _.pick(target, ...targetProps),
-            integrationId: resIntegrations[integrationType],
-            orgId: id,
-          });
+        const uniqueTargets: Set<string> = new Set();
+        const orgTargets: Target[] = [];
+        if (!scmTargets.length || scmTargets.length === 0) {
+          console.warn('No projects in org', orgId);
+          return;
         }
+        for (const target of scmTargets) {
+          const targetId = generateTargetId(orgId, integrationId, target);
+          if (uniqueTargets.has(targetId)) {
+            continue;
+          }
+          uniqueTargets.add(targetId);
+          const importedTarget = {
+            target: _.pick(target, ...targetProps),
+            integrationId,
+            orgId,
+          };
+          targetsData.push(importedTarget);
+          orgTargets.push(target);
+        }
+        console.log(
+          'Extracted',
+          uniqueTargets.size,
+          'unique targets from',
+          scmTargets.length,
+          'projects from org',
+          orgId,
+        );
+        await logImportedTargets(
+          orgId,
+          integrationId,
+          orgTargets,
+          null,
+          undefined,
+          'Target exists in Snyk',
+        );
       } catch (e) {
         failedOrgs.push(org);
         console.warn(
@@ -87,7 +109,7 @@ export async function generateSnykImportedTargets(
         );
       }
     },
-    { concurrency: 30 },
+    { concurrency: 15 },
   );
   if (targetsData.length === 0) {
     debug('No targets could be generated. Could Snyk Group have no projects?');
@@ -96,5 +118,5 @@ export async function generateSnykImportedTargets(
     );
   }
   console.timeEnd(timeLabel);
-  return { targets: targetsData, fileName: IMPORT_LOG_NAME, failedOrgs };
+  return { targets: targetsData, fileName: path.resolve(getLoggingPath(), IMPORT_LOG_NAME), failedOrgs };
 }
