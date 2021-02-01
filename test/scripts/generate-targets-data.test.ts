@@ -1,10 +1,8 @@
 import * as _ from 'lodash';
 import * as path from 'path';
-import { CreatedOrg } from '../../src/lib/types';
-import { Sources } from '../../src/scripts/generate-org-data';
+import { CreatedOrg, Sources, SupportedIntegrationTypes } from '../../src/lib/types';
 import {
   generateTargetsImportDataFile,
-  SupportedIntegrationTypes,
 } from '../../src/scripts/generate-targets-data';
 import { deleteFiles } from '../delete-files';
 

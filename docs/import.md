@@ -95,3 +95,20 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
 ### 3. Download & run
 Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos`
 
+## To skip all previously imported targets
+This can be used to skip previously imported targets (repos) so only remaining targets will be imported.
+
+This utility helps generate the `imported-targets.log` file by analysing the projects already in a given Snyk Group. When present in the logging path this file is used to look up targets that should be skipped during the import.
+
+Example:
+- all Github repos have been imported into Snyk into their respective organizations during initial onboarding
+- new Github repos have since been added and now need to be added to Snyk
+- to avoid importing everything again, using this util and running import again provides a way to only import "new" Github repos. This is much much faster and removes unnecessary calls to Snyk & Github to fetch files and do the import for everything again.
+
+Note:
+- The same target imported into a different org will be allowed to be imported
+- The same target (but different branch) will be allowed to be imported
+- The same target from a differed source be allowed to be imported (For example the same repo is present in Github and now it being imported via Github Enterprise into the same org)
+### Github.com / Github Enterprise
+- `snyk-api-import-macos list:imported --integrationType=github-enterprise --groupId=<snyk_group_id>`
+- `snyk-api-import-macos list:imported --integrationType=github --groupId=<snyk_group_id>`

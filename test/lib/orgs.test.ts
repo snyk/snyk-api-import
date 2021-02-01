@@ -1,14 +1,15 @@
 import { requestsManager } from 'snyk-request-manager';
-import { setNotificationPreferences } from '../../src/lib/org';
+import { getAllOrgs, listAllOrgsTokenBelongsTo } from '../../src/lib';
 
-const ORG_ID = process.env.TEST_ORG_ID as string;
+const GROUP_ID = process.env.SNYK_GROUP_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 
 jest.unmock('snyk-request-manager');
 jest.requireActual('snyk-request-manager');
 
-describe('Single target', () => {
+describe('Orgs API', () => {
   const OLD_ENV = process.env;
+  process.env.GROUP_;
   process.env.SNYK_API = SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
   const requestManager = new requestsManager({
@@ -17,40 +18,37 @@ describe('Single target', () => {
   afterAll(async () => {
     process.env = { ...OLD_ENV };
   });
-  it('Can change the notification settings for org', async () => {
-    const res = await setNotificationPreferences(requestManager, ORG_ID, {
-      groupId: 'exampleGroupId',
-      name: 'exampleName',
-    }, {
-      'test-limit': {
-        enabled: false,
-      },
-    });
+  it('Lists all Orgs a token belongs to', async () => {
+    const res = await listAllOrgsTokenBelongsTo(requestManager);
     expect(res).toMatchObject({
-      'test-limit': {
-        enabled: false,
+      orgs: expect.any(Array),
+    });
+    expect(res.orgs.filter((org) => org.group)[0]).toMatchObject({
+      name: expect.any(String),
+      id: expect.any(String),
+      slug: expect.any(String),
+      url: expect.any(String),
+      group: {
+        name: expect.any(String),
+        id: expect.any(String),
       },
     });
-  }, 3000);
-  it('Default disables all notifications', async () => {
-    const res = await setNotificationPreferences(requestManager, ORG_ID, {      groupId: 'exampleGroupId',
-    name: 'exampleName',
   });
-    expect(res).toEqual({
-      'new-issues-remediations': {
-        enabled: false,
-        issueSeverity: 'high',
-        issueType: 'none',
-      },
-      'project-imported': {
-        enabled: false,
-      },
-      'test-limit': {
-        enabled: false,
-      },
-      'weekly-report': {
-        enabled: false,
+
+  it('Get all orgs for GROUP', async () => {
+    const orgs = await getAllOrgs(requestManager, GROUP_ID);
+
+    expect(orgs).toMatchObject(expect.any(Array));
+    expect(orgs[0]).toMatchObject({
+      name: expect.any(String),
+      id: expect.any(String),
+      slug: expect.any(String),
+      url: expect.any(String),
+      group: {
+        name: expect.any(String),
+        id: expect.any(String),
       },
     });
-  }, 3000);
+    expect(orgs.every((org) => org.group.id === GROUP_ID)).toBeTruthy();
+  }, 20000);
 });

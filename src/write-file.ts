@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as debugLib from 'debug';
-import { getLoggingPath } from './lib/get-logging-path';
+import { getLoggingPath } from './lib';
 const debug = debugLib('snyk:write-file');
 
 export async function writeFile(

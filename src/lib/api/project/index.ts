@@ -1,8 +1,8 @@
 import 'source-map-support/register';
 import * as needle from 'needle';
 import * as debugLib from 'debug';
-import { getApiToken } from '../get-api-token';
-import { getSnykHost } from '../get-snyk-host';
+import { getApiToken } from '../../get-api-token';
+import { getSnykHost } from '../../get-snyk-host';
 const debug = debugLib('snyk:api-import');
 
 export async function deleteProjects(

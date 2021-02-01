@@ -4,8 +4,8 @@ import * as _ from 'lodash';
 const debug = debugLib('snyk:import-projects-script');
 
 import { importProjects } from '../scripts/import-projects';
-import { getImportProjectsFile } from '../lib/get-import-path';
-import { getLoggingPath } from '../lib/get-logging-path';
+import { getImportProjectsFile } from '../lib';
+import { getLoggingPath } from '../lib';
 
 export const command = ['import', '$0'];
 export const desc = 'Kick off API powered import';

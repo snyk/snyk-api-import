@@ -2,10 +2,8 @@ import * as debugLib from 'debug';
 const debug = debugLib('snyk:generate-data-script');
 
 import { getLoggingPath } from '../lib/get-logging-path';
-import {
-  generateOrgImportDataFile,
-  Sources,
-} from '../scripts/generate-org-data';
+import { Sources } from '../lib/types';
+import { generateOrgImportDataFile } from '../scripts/generate-org-data';
 
 export const command = ['orgs:data'];
 export const desc =
@@ -14,7 +12,10 @@ export const builder = {
   sourceOrgPublicId: {
     required: false,
     default: undefined,
+    desc:
+      'Public id of the org in Snyk that can be used as a template to copy all supported org settings.',
   },
+
   groupId: {
     required: true,
     default: undefined,

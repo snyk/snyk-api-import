@@ -1,11 +1,6 @@
-import { CreateOrgData } from '../lib/types';
+import { CreateOrgData, Sources } from '../lib/types';
 import { writeFile } from '../write-file';
 import { GithubOrgData, listGithubOrgs } from './github';
-
-export enum Sources {
-  GITHUB = 'github',
-  GHE = 'github-enterprise',
-}
 
 async function githubEnterpriseOrganizations(sourceUrl?: string): Promise<{ name: string }[]> {
   if (!sourceUrl) {

@@ -7,17 +7,22 @@ import * as _ from 'lodash';
 import split = require('split');
 
 import { loadFile } from '../load-file';
-import { importTargets, pollImportUrls } from '../lib';
+import {
+  importTargets,
+  pollImportUrls,
+  getConcurrentImportsNumber,
+} from '../lib';
 import { Project, ImportTarget } from '../lib/types';
-import { getLoggingPath } from '../lib/get-logging-path';
-import { getConcurrentImportsNumber } from '../lib/get-concurrent-imports-number';
+import { getLoggingPath } from '../lib';
 import { logImportedBatch } from '../loggers/log-imported-batch';
 import { IMPORT_LOG_NAME } from '../common';
 import { generateTargetId } from '../generate-target-id';
 
 const debug = debugLib('snyk:import-projects-script');
 
-export async function parseLogIntoTargetIds(logFile: string): Promise<string[]> {
+export async function parseLogIntoTargetIds(
+  logFile: string,
+): Promise<string[]> {
   return new Promise((resolve, reject) => {
     const importedTargets: string[] = [];
     fs.createReadStream(logFile)
@@ -29,9 +34,7 @@ export async function parseLogIntoTargetIds(logFile: string): Promise<string[]> 
         try {
           const data = JSON.parse(lineObj);
           const { orgId, integrationId, target } = data;
-          importedTargets.push(
-            generateTargetId(orgId, integrationId, target),
-          );
+          importedTargets.push(generateTargetId(orgId, integrationId, target));
         } catch (e) {
           console.log(e);
         }
@@ -50,12 +53,14 @@ export async function shouldSkipTarget(
   targetItem: ImportTarget,
   importedTargets: string[],
 ): Promise<boolean> {
-    try {
+  try {
     const { orgId, integrationId, target } = targetItem;
-    const data = generateTargetId(orgId, integrationId, target);
-    return importedTargets.includes(data);
+    const targetId = generateTargetId(orgId, integrationId, target);
+    return importedTargets.includes(targetId);
   } catch (e) {
-    debug(`Failed to process target ${JSON.stringify(targetItem)}. ERROR: ${e}`);
+    debug(
+      `Failed to process target ${JSON.stringify(targetItem)}. ERROR: ${e}`,
+    );
     return false;
   }
 }
@@ -86,9 +91,7 @@ async function filterOutImportedTargets(
   await pMap(
     targets,
     async (targetItem, index) => {
-      console.log(
-        `Checking target should be skipped: ${index}/${totalTargets}`,
-      );
+      debug(`Checking target should be skipped: ${index}/${totalTargets}`);
       const shouldSkip = await shouldSkipTarget(targetItem, importedTargets);
       if (shouldSkip) {
         debug('Skipping target', JSON.stringify(targetItem));
@@ -140,6 +143,7 @@ export async function importProjects(
       } target(s) | ${new Date(Date.now()).toUTCString()}`,
     );
   }
+
   if (filteredTargets.length === 0) {
     return { projects: [], targets, filteredTargets, skippedTargets: 0 };
   }

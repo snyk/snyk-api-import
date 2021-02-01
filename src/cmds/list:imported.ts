@@ -1,0 +1,63 @@
+import * as debugLib from 'debug';
+import { getLoggingPath } from '../lib/get-logging-path';
+const debug = debugLib('snyk:generate-data-script');
+
+import { SupportedIntegrationTypes } from '../lib/types';
+import { generateSnykImportedTargets } from '../scripts/generate-imported-targets-from-snyk';
+
+export const command = ['list:imported'];
+export const desc =
+  'List all targets imported in Snyk for a given group & source type. An analysis is performed on all current orgs and their projects to generate this. The generated file can be used to skip previously imported targets when running the `import` command';
+export const builder = {
+  groupId: {
+    required: true,
+    default: undefined,
+    desc: 'Public id of the group in Snyk (available on group settings)',
+  },
+  integrationType: {
+    required: true,
+    default: undefined,
+    choices: [...Object.values(SupportedIntegrationTypes)],
+    desc:
+      'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each org in Snyk',
+  },
+};
+
+const entityName: {
+  [source in SupportedIntegrationTypes]: string;
+} = {
+  github: 'repo',
+  'github-enterprise': 'repo',
+};
+
+export async function handler(argv: {
+  groupId: string;
+  integrationType: SupportedIntegrationTypes;
+}): Promise<void> {
+  getLoggingPath();
+  const { groupId, integrationType } = argv;
+  try {
+    debug('ℹ️  Options: ' + JSON.stringify(argv));
+
+    const { targets, fileName, failedOrgs } = await generateSnykImportedTargets(
+      groupId,
+      integrationType,
+    );
+    const targetsMessage =
+      targets.length > 0
+        ? `Found ${targets.length} ${entityName[integrationType]}(s). Written the data to file: ${fileName}`
+        : `⚠ No ${entityName[integrationType]}(s) received for Group '${groupId} and integration type '${integrationType}!`;
+
+    if (failedOrgs.length > 0) {
+      console.warn(
+        `Failed to process the following orgs: ${failedOrgs.join(',')}`,
+      );
+    }
+    console.log(targetsMessage);
+  } catch (e) {
+    debug('Failed to list all imported targets in Snyk.\n' + e);
+    console.error(
+      `ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e}`,
+    );
+  }
+}

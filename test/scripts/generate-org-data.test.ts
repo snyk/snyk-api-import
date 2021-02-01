@@ -1,6 +1,6 @@
+import { Sources } from '../../src/lib/types';
 import {
   generateOrgImportDataFile,
-  Sources,
 } from '../../src/scripts/generate-org-data';
 import { deleteFiles } from '../delete-files';
 

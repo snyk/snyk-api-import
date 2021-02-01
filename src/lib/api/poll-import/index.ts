@@ -5,12 +5,12 @@ import * as sleep from 'sleep-promise';
 import * as debugLib from 'debug';
 import * as _ from 'lodash';
 import * as pMap from 'p-map';
-import { PollImportResponse, Project } from '../types';
-import { getApiToken } from '../get-api-token';
-import { logFailedProjects } from '../../loggers/log-failed-projects';
-import { logFailedPollUrls } from '../../loggers/log-failed-polls';
-import { logImportedProjects } from '../../loggers/log-imported-projects';
-import { logJobResult } from '../../loggers/log-job-result';
+import { PollImportResponse, Project } from '../../types';
+import { getApiToken } from '../../get-api-token';
+import { logFailedProjects } from '../../../loggers/log-failed-projects';
+import { logFailedPollUrls } from '../../../loggers/log-failed-polls';
+import { logImportedProjects } from '../../../loggers/log-imported-projects';
+import { logJobResult } from '../../../loggers/log-job-result';
 
 const debug = debugLib('snyk:poll-import');
 const MIN_RETRY_WAIT_TIME = 20000;
@@ -44,7 +44,6 @@ export async function pollImportUrl(
           JSON.stringify(res.data),
       );
     }
-    // TODO: use logger to show what we got
     debug(`Import task status is "${importStatus.status}"`);
     if (
       importStatus.status &&

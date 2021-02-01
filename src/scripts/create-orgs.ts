@@ -2,8 +2,8 @@ import * as debugLib from 'debug';
 
 import { loadFile } from '../load-file';
 import { CreatedOrgResponse, createOrg } from '../lib';
-import { getLoggingPath } from '../lib/get-logging-path';
-import { listIntegrations, setNotificationPreferences } from '../lib/org';
+import { getLoggingPath } from './../lib';
+import { listIntegrations, setNotificationPreferences } from '../lib/api/org';
 import { requestsManager } from 'snyk-request-manager';
 import { CreateOrgData } from '../lib/types';
 import { logCreatedOrg } from '../loggers/log-created-org';
