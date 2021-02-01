@@ -69,16 +69,21 @@ export interface PollImportResponse {
   created: string;
   logs: Log[];
 }
-export enum SupportedIntegrationTypes {
+
+// used to generate import data by connecting to the source via API
+// and listing all orgs + repos / targets
+export enum SupportedIntegrationTypesToGenerateImportData {
   GITHUB = 'github',
   GHE = 'github-enterprise',
 }
 
-export enum Sources {
+// used to generate imported targets that exist in Snyk
+// when we need to grab the integrationId from Snyk
+export enum SupportedIntegrationTypesToListSnykTargets {
   GITHUB = 'github',
   GHE = 'github-enterprise',
+  BITBUCKET_CLOUD = 'bitbucket-cloud',
 }
-
 interface ImportingUser {
   id: string;
   name: string;

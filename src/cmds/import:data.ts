@@ -2,11 +2,12 @@ import * as debugLib from 'debug';
 import { getLoggingPath } from '../lib/get-logging-path';
 const debug = debugLib('snyk:generate-data-script');
 
-import { CreatedOrg, Sources, SupportedIntegrationTypes } from '../lib/types';
-import { loadFile } from '../load-file';
 import {
-  generateTargetsImportDataFile,
-} from '../scripts/generate-targets-data';
+  CreatedOrg,
+  SupportedIntegrationTypesToGenerateImportData,
+} from '../lib/types';
+import { loadFile } from '../load-file';
+import { generateTargetsImportDataFile } from '../scripts/generate-targets-data';
 
 export const command = ['import:data'];
 export const desc =
@@ -19,8 +20,8 @@ export const builder = {
   },
   source: {
     required: true,
-    default: Sources.GITHUB,
-    choices: [...Object.values(Sources)],
+    default: SupportedIntegrationTypesToGenerateImportData.GITHUB,
+    choices: [...Object.values(SupportedIntegrationTypesToGenerateImportData)],
     desc:
       'The source of the targets to be imported e.g. Github, Github Enterprise. This will be used to make an API call to list all available entities per org',
   },
@@ -33,23 +34,23 @@ export const builder = {
   integrationType: {
     required: true,
     default: undefined,
-    choices: [...Object.values(SupportedIntegrationTypes)],
+    choices: [...Object.values(SupportedIntegrationTypesToGenerateImportData)],
     desc:
       'The configured integration type on the created Snyk Org to use for generating import targets data. Applies to all targets.',
   },
 };
 
 const entityName: {
-  [source in Sources]: string;
+  [source in SupportedIntegrationTypesToGenerateImportData]: string;
 } = {
   github: 'org',
   'github-enterprise': 'org',
 };
 
 export async function handler(argv: {
-  source: Sources;
+  source: SupportedIntegrationTypesToGenerateImportData;
   orgsData: string;
-  integrationType: SupportedIntegrationTypes;
+  integrationType: SupportedIntegrationTypesToGenerateImportData;
   sourceUrl: string;
 }): Promise<void> {
   try {
@@ -68,9 +69,7 @@ export async function handler(argv: {
       );
     }
     if (orgsDataJson.length === 0) {
-      throw new Error(
-        `No orgs could be loaded from ${orgsData}.`,
-      );
+      throw new Error(`No orgs could be loaded from ${orgsData}.`);
     }
     const res = await generateTargetsImportDataFile(
       source,

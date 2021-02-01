@@ -17,7 +17,7 @@ Options:
   --integrationType  The configured integration type (source of the projects in
                      Snyk e.g. Github, Github Enterprise.). This will be used to
                      pick the correct integrationID from each org in Snyk
-                             [required] [choices: "github", "github-enterprise"]
+          [required] [choices: "github", "github-enterprise", "bitbucket-cloud"]
 
 Missing required argument: groupId
 ]
@@ -39,5 +39,5 @@ Options:
   --integrationType  The configured integration type (source of the projects in
                      Snyk e.g. Github, Github Enterprise.). This will be used to
                      pick the correct integrationID from each org in Snyk
-                             [required] [choices: \\"github\\", \\"github-enterprise\\"]"
+          [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\"]"
 `;

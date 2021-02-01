@@ -1,10 +1,17 @@
-import { CreateOrgData, Sources } from '../lib/types';
+import {
+  CreateOrgData,
+  SupportedIntegrationTypesToGenerateImportData,
+} from '../lib/types';
 import { writeFile } from '../write-file';
 import { GithubOrgData, listGithubOrgs } from './github';
 
-async function githubEnterpriseOrganizations(sourceUrl?: string): Promise<{ name: string }[]> {
+async function githubEnterpriseOrganizations(
+  sourceUrl?: string,
+): Promise<{ name: string }[]> {
   if (!sourceUrl) {
-    throw new Error('Please provide required `sourceUrl` for Github Enterprise source')
+    throw new Error(
+      'Please provide required `sourceUrl` for Github Enterprise source',
+    );
   }
   const ghOrgs: GithubOrgData[] = await listGithubOrgs(sourceUrl);
   return ghOrgs;
@@ -16,12 +23,12 @@ async function githubOrganizations(): Promise<{ name: string }[]> {
 }
 
 const sourceGenerators = {
-  [Sources.GITHUB]: githubOrganizations,
-  [Sources.GHE]: githubEnterpriseOrganizations,
+  [SupportedIntegrationTypesToGenerateImportData.GITHUB]: githubOrganizations,
+  [SupportedIntegrationTypesToGenerateImportData.GHE]: githubEnterpriseOrganizations,
 };
 
 export async function generateOrgImportDataFile(
-  source: Sources,
+  source: SupportedIntegrationTypesToGenerateImportData,
   groupId: string,
   sourceOrgId?: string,
   sourceUrl?: string,
@@ -40,7 +47,9 @@ export async function generateOrgImportDataFile(
     }
     orgData.push(data);
   }
-  const fileName = `group-${groupId}-${sourceUrl? 'github-enterprise' : 'github-com'}-orgs.json`;
+  const fileName = `group-${groupId}-${
+    sourceUrl ? 'github-enterprise' : 'github-com'
+  }-orgs.json`;
   await writeFile(fileName, ({
     orgs: orgData,
   } as unknown) as JSON);

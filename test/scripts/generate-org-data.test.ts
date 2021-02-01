@@ -1,7 +1,5 @@
-import { Sources } from '../../src/lib/types';
-import {
-  generateOrgImportDataFile,
-} from '../../src/scripts/generate-org-data';
+import { SupportedIntegrationTypesToGenerateImportData } from '../../src/lib/types';
+import { generateOrgImportDataFile } from '../../src/scripts/generate-org-data';
 import { deleteFiles } from '../delete-files';
 
 describe('generateOrgImportDataFile Github script', () => {
@@ -24,7 +22,7 @@ describe('generateOrgImportDataFile Github script', () => {
     const sourceOrgId = 'sourceOrgIdExample';
 
     const res = await generateOrgImportDataFile(
-      Sources.GITHUB,
+      SupportedIntegrationTypesToGenerateImportData.GITHUB,
       groupId,
       sourceOrgId,
     );
@@ -40,7 +38,10 @@ describe('generateOrgImportDataFile Github script', () => {
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     const groupId = 'groupIdExample';
 
-    const res = await generateOrgImportDataFile(Sources.GITHUB, groupId);
+    const res = await generateOrgImportDataFile(
+      SupportedIntegrationTypesToGenerateImportData.GITHUB,
+      groupId,
+    );
     expect(res.fileName).toEqual('group-groupIdExample-github-com-orgs.json');
     expect(res.orgs.length > 0).toBeTruthy();
     expect(res.orgs[0]).toEqual({
@@ -53,7 +54,12 @@ describe('generateOrgImportDataFile Github script', () => {
     process.env.GITHUB_TOKEN = process.env.GHE_TOKEN;
     const groupId = 'groupIdExample';
 
-    expect(generateOrgImportDataFile(Sources.GHE, groupId)).rejects.toThrow(
+    expect(
+      generateOrgImportDataFile(
+        SupportedIntegrationTypesToGenerateImportData.GHE,
+        groupId,
+      ),
+    ).rejects.toThrow(
       'Please provide required `sourceUrl` for Github Enterprise source',
     );
   });
@@ -64,7 +70,7 @@ describe('generateOrgImportDataFile Github script', () => {
     const groupId = 'groupIdExample';
 
     const res = await generateOrgImportDataFile(
-      Sources.GHE,
+      SupportedIntegrationTypesToGenerateImportData.GHE,
       groupId,
       undefined,
       GHE_URL,

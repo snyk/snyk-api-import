@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 
-import { CreatedOrg, ImportTarget, Sources, SupportedIntegrationTypes } from '../lib/types';
+import { CreatedOrg, ImportTarget, SupportedIntegrationTypesToGenerateImportData } from '../lib/types';
 import { writeFile } from '../write-file';
 import { GithubRepoData, listGithubRepos } from './github';
 
@@ -21,8 +21,8 @@ async function githubEnterpriseRepos(
 }
 
 const sourceGenerators = {
-  [Sources.GITHUB]: githubRepos,
-  [Sources.GHE]: githubEnterpriseRepos,
+  [SupportedIntegrationTypesToGenerateImportData.GITHUB]: githubRepos,
+  [SupportedIntegrationTypesToGenerateImportData.GHE]: githubEnterpriseRepos,
 };
 
 function validateRequiredOrgData(
@@ -47,22 +47,22 @@ function validateRequiredOrgData(
   if (
     _.intersection(
       Object.keys(integrations),
-      Object.values(SupportedIntegrationTypes),
+      Object.values(SupportedIntegrationTypesToGenerateImportData),
     ).length === 0
   ) {
     throw new Error(
       'At least one supported integration is expected in `integrations` field.' +
         `Supported integrations are: ${Object.values(
-          SupportedIntegrationTypes,
+          SupportedIntegrationTypesToGenerateImportData,
         ).join(',')}`,
     );
   }
 }
 
 export async function generateTargetsImportDataFile(
-  source: Sources,
+  source: SupportedIntegrationTypesToGenerateImportData,
   orgsData: CreatedOrg[],
-  integrationType: SupportedIntegrationTypes,
+  integrationType: SupportedIntegrationTypesToGenerateImportData,
   sourceUrl?: string,
 ): Promise<{ targets: ImportTarget[]; fileName: string }> {
   const targetsData: ImportTarget[] = [];
