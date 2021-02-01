@@ -1,12 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`\`snyk-api-import list:imported <...>\` Generates Snyk imported targets data as expected 1`] = `
-"api f0125d9b-271a-4b50-ad23-80e12575a1bf: 1095.537ms
-logging f0125d9b-271a-4b50-ad23-80e12575a1bf: 6.287ms
-logging f0125d9b-271a-4b50-ad23-80e12575a1bf: 0.560ms
-Found 2 repo(s). Written the data to file: imported-targets.log"
-`;
-
 exports[`\`snyk-api-import list:imported <...>\` Shows error when missing groupId 1`] = `
 [Error: Command failed: node ./dist/index.js list:imported --integrationType=github
 index.js list:imported

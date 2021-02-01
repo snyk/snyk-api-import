@@ -6,6 +6,9 @@ export async function getAllOrgs(
   requestManager: requestsManager,
   groupId: string,
 ): Promise<Org[]> {
+  if (!groupId) {
+    throw new Error("Missing required param groupId");
+  }
   const allOrgsTokenHasAccessTo = await listAllOrgsTokenBelongsTo(
     requestManager,
   );

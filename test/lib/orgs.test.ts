@@ -23,7 +23,7 @@ describe('Orgs API', () => {
     expect(res).toMatchObject({
       orgs: expect.any(Array),
     });
-    expect(res.orgs[0]).toMatchObject({
+    expect(res.orgs.filter((org) => org.group)[0]).toMatchObject({
       name: expect.any(String),
       id: expect.any(String),
       slug: expect.any(String),
@@ -50,5 +50,5 @@ describe('Orgs API', () => {
       },
     });
     expect(orgs.every((org) => org.group.id === GROUP_ID)).toBeTruthy();
-  });
+  }, 20000);
 });

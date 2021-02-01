@@ -13,7 +13,6 @@ export async function listAllOrgsTokenBelongsTo(
   getApiToken();
   getSnykHost();
   debug('Listing all orgs orgs user belongs to');
-
   const res = await requestManager.request({
     verb: 'get',
     url: `/orgs`,

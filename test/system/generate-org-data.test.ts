@@ -36,7 +36,7 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         done();
       },
     );
-  });
+  }, 20000);
   it('Shows error when missing groupId', async (done) => {
     return exec(
       `node ${main} orgs:data --source=github`,
