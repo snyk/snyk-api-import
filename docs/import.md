@@ -112,7 +112,11 @@ Note:
 
 
 Command to run:
+- skip all previously imported into all orgs in a Group:
 `snyk-api-import-macos list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
+- skip all previously imported for a specific Organization:
+`snyk-api-import-macos list:imported --integrationType=<integration-type> --orgId=<snyk_org_id>`
+
 
 Supported integration types:
 - Github.com `github`

@@ -10,9 +10,15 @@ export const desc =
   'List all targets imported in Snyk for a given group & source type. An analysis is performed on all current organizations and their projects to generate this. The generated file can be used to skip previously imported targets when running the `import` command';
 export const builder = {
   groupId: {
-    required: true,
+    required: false,
     default: undefined,
     desc: 'Public id of the group in Snyk (available on group settings)',
+  },
+  orgId: {
+    required: false,
+    default: undefined,
+    desc:
+      'Public id of the organization in Snyk (available in organization settings)',
   },
   integrationType: {
     required: true,
@@ -32,22 +38,33 @@ const entityName: {
 };
 
 export async function handler(argv: {
-  groupId: string;
+  groupId?: string;
+  orgId?: string;
   integrationType: SupportedIntegrationTypesToListSnykTargets;
 }): Promise<void> {
   getLoggingPath();
-  const { groupId, integrationType } = argv;
+  const { groupId, integrationType, orgId } = argv;
   try {
-    debug('ℹ️  Options: ' + JSON.stringify(argv));
+    if (!(groupId || orgId)) {
+      throw new Error(
+        'Missing required parameters: orgId or groupId must be provided.',
+      );
+    }
 
+    if (groupId && orgId) {
+      throw new Error(
+        'Too many parameters: orgId or groupId must be provided, not both.',
+      );
+    }
+    debug('ℹ️  Options: ' + JSON.stringify(argv));
     const { targets, fileName, failedOrgs } = await generateSnykImportedTargets(
-      groupId,
+      { groupId, orgId },
       integrationType,
     );
     const targetsMessage =
       targets.length > 0
         ? `Found ${targets.length} ${entityName[integrationType]}(s). Written the data to file: ${fileName}`
-        : `⚠ No ${entityName[integrationType]}(s) received for Group '${groupId} and integration type '${integrationType}!`;
+        : `⚠ No ${entityName[integrationType]}(s) received for Group '${groupId}' and integration type ${integrationType}!`;
 
     if (failedOrgs.length > 0) {
       console.warn(
@@ -58,7 +75,7 @@ export async function handler(argv: {
   } catch (e) {
     debug('Failed to list all imported targets in Snyk.\n' + e);
     console.error(
-      `ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e}`,
+      `ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`,
     );
   }
 }
