@@ -26,14 +26,14 @@ export async function handler(argv: {
 
     const orgsMessage =
       res.orgs.length > 0
-        ? `Created ${res.orgs.length} out of ${res.totalOrgs} org(s). Written the data to file: ${res.fileName}`
-        : `⚠ No org(s) created!`;
+        ? `Created ${res.orgs.length} out of ${res.totalOrgs} organization(s). Written the data to file: ${res.fileName}`
+        : `⚠ No organization(s) created!`;
 
     console.log(orgsMessage);
   } catch (e) {
-    debug('Failed to create orgs.\n' + e);
+    debug('Failed to create organizations.\n' + e);
     console.error(
-      `ERROR! Failed to create orgs. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e}`,
+      `ERROR! Failed to create organizations. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e}`,
     );
   }
 }

@@ -115,7 +115,7 @@ export async function generateSnykImportedTargets(
       } catch (e) {
         failedOrgs.push(org);
         console.warn(
-          `Failed to process projects for org ${name}(${slug}). Continuing.`,
+          `Failed to process projects for organization ${name}(${slug}). Continuing.`,
         );
       }
     },

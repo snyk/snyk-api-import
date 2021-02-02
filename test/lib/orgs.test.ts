@@ -1,7 +1,7 @@
 import { requestsManager } from 'snyk-request-manager';
 import { getAllOrgs, listAllOrgsTokenBelongsTo } from '../../src/lib';
 
-const GROUP_ID = process.env.SNYK_GROUP_ID as string;
+const GROUP_ID = process.env.TEST_GROUP_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 
 jest.unmock('snyk-request-manager');
