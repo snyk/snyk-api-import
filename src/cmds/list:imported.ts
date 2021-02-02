@@ -16,11 +16,11 @@ export const builder = {
     desc: 'Public id of the group in Snyk (available on group settings)',
   },
   integrationType: {
-    required: true,
+    required: false,
     default: [],
     choices: [...Object.values(SupportedIntegrationTypesToListSnykTargets)],
     desc:
-      'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each org in Snyk E.g. --integrationType=github --integrationType=github-enterprise',
+      'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each org in Snyk E.g. --integrationType=github --integrationType=github-enterprise. Defaults to all supported integrations when not set.',
   },
 };
 
@@ -40,10 +40,14 @@ export async function handler(argv: {
   const { groupId, integrationType } = argv;
   try {
     debug('ℹ️  Options: ' + JSON.stringify(argv));
-    const integrationTypes = _.castArray(integrationType);
+    const integrationTypeArray = _.castArray(integrationType);
+    const integrationTypes =
+      integrationTypeArray.length > 0
+        ? integrationTypeArray
+        : [...Object.values(SupportedIntegrationTypesToListSnykTargets)];
     const { targets, fileName, failedOrgs } = await generateSnykImportedTargets(
       groupId,
-      _.castArray(integrationType),
+      integrationTypes,
     );
 
     const targetsMessage =
