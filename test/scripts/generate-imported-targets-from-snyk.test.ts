@@ -3,9 +3,12 @@ import * as path from 'path';
 
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteFiles } from '../delete-files';
-import { SupportedIntegrationTypes } from '../../src/lib/types';
-import { generateSnykImportedTargets } from '../../src/scripts/generate-imported-targets-from-snyk';
+import {
+  generateSnykImportedTargets,
+  projectToTarget,
+} from '../../src/scripts/generate-imported-targets-from-snyk';
 import { IMPORT_LOG_NAME } from '../../src/common';
+import { SupportedIntegrationTypesToListSnykTargets } from '../../src/lib/types';
 
 const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
@@ -31,7 +34,7 @@ describe('Generate imported targets based on Snyk data', () => {
     logs = Object.values(logFiles);
     const { targets, failedOrgs, fileName } = await generateSnykImportedTargets(
       GROUP_ID,
-      SupportedIntegrationTypes.GITHUB,
+      SupportedIntegrationTypesToListSnykTargets.GITHUB,
     );
     expect(failedOrgs).toEqual([]);
     expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
@@ -52,4 +55,17 @@ describe('Generate imported targets based on Snyk data', () => {
     expect(importedTargetsLog).toMatch(targets[0].integrationId);
   }, 240000);
   it.todo('One org failed to be processed');
+
+  it('succeed to convert Github project name to target', async () => {
+    const project = {
+      name: 'lili-snyk/huge-monorepo:cockroach/build/builder/Dockerfile',
+      branch: 'main',
+    };
+    const target = projectToTarget(project);
+    expect(target).toEqual({
+      branch: 'main',
+      name: 'huge-monorepo',
+      owner: 'lili-snyk',
+    });
+  });
 });

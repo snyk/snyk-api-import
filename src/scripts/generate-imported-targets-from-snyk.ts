@@ -8,11 +8,15 @@ import {
   FilePath,
   Org,
   SnykProject,
-  Sources,
-  SupportedIntegrationTypes,
+  SupportedIntegrationTypesToListSnykTargets,
   Target,
 } from '../lib/types';
-import { getAllOrgs, getLoggingPath, listIntegrations, listProjects } from '../lib';
+import {
+  getAllOrgs,
+  getLoggingPath,
+  listIntegrations,
+  listProjects,
+} from '../lib';
 import { logImportedTargets } from '../loggers/log-imported-targets';
 import { IMPORT_LOG_NAME, targetProps } from '../common';
 import { generateTargetId } from '../generate-target-id';
@@ -27,7 +31,7 @@ export interface ImportTarget {
   exclusionGlobs?: string;
 }
 
-function projectToTarget(project: SnykProject): Target {
+export function projectToTarget(project: Pick<SnykProject, 'name' | 'branch'>): Target {
   const [owner, name] = project.name.split(':')[0].split('/');
   return {
     owner,
@@ -35,14 +39,16 @@ function projectToTarget(project: SnykProject): Target {
     name,
   };
 }
+
 const targetGenerators = {
-  [Sources.GITHUB]: projectToTarget,
-  [Sources.GHE]: projectToTarget,
+  [SupportedIntegrationTypesToListSnykTargets.GITHUB]: projectToTarget,
+  [SupportedIntegrationTypesToListSnykTargets.GHE]: projectToTarget,
+  [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD]: projectToTarget,
 };
 
 export async function generateSnykImportedTargets(
   groupId: string,
-  integrationType: SupportedIntegrationTypes,
+  integrationType: SupportedIntegrationTypesToListSnykTargets,
 ): Promise<{ targets: ImportTarget[]; fileName: string; failedOrgs: Org[] }> {
   const timeLabel = 'Generated imported Snyk targets';
   console.time(timeLabel);
@@ -65,7 +71,11 @@ export async function generateSnykImportedTargets(
         const { projects } = resProjects;
         const scmTargets = projects
           .filter((p) => p.origin === integrationType)
-          .map((p) => targetGenerators[p.origin as Sources](p));
+          .map((p) =>
+            targetGenerators[
+              p.origin as SupportedIntegrationTypesToListSnykTargets
+            ](p),
+          );
         const uniqueTargets: Set<string> = new Set();
         const orgTargets: Target[] = [];
         if (!scmTargets.length || scmTargets.length === 0) {
@@ -118,5 +128,9 @@ export async function generateSnykImportedTargets(
     );
   }
   console.timeEnd(timeLabel);
-  return { targets: targetsData, fileName: path.resolve(getLoggingPath(), IMPORT_LOG_NAME), failedOrgs };
+  return {
+    targets: targetsData,
+    fileName: path.resolve(getLoggingPath(), IMPORT_LOG_NAME),
+    failedOrgs,
+  };
 }

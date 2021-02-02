@@ -109,6 +109,12 @@ Note:
 - The same target imported into a different org will be allowed to be imported
 - The same target (but different branch) will be allowed to be imported
 - The same target from a differed source be allowed to be imported (For example the same repo is present in Github and now it being imported via Github Enterprise into the same org)
-### Github.com / Github Enterprise
-- `snyk-api-import-macos list:imported --integrationType=github-enterprise --groupId=<snyk_group_id>`
-- `snyk-api-import-macos list:imported --integrationType=github --groupId=<snyk_group_id>`
+
+
+Command to run:
+`snyk-api-import-macos list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
+
+Supported integration types:
+- Github.com `github`
+- Github Enterprise `github-enterprise`
+- Bitbucket Cloud `bitbucket-cloud`

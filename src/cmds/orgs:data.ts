@@ -2,7 +2,7 @@ import * as debugLib from 'debug';
 const debug = debugLib('snyk:generate-data-script');
 
 import { getLoggingPath } from '../lib/get-logging-path';
-import { Sources } from '../lib/types';
+import { SupportedIntegrationTypesToGenerateImportData } from '../lib/types';
 import { generateOrgImportDataFile } from '../scripts/generate-org-data';
 
 export const command = ['orgs:data'];
@@ -29,22 +29,22 @@ export const builder = {
   },
   source: {
     required: true,
-    default: Sources.GITHUB,
-    choices: [...Object.values(Sources)],
+    default: SupportedIntegrationTypesToGenerateImportData.GITHUB,
+    choices: [...Object.values(SupportedIntegrationTypesToGenerateImportData)],
     desc:
       'The source of the targets to be imported e.g. Github, Github Enterprise',
   },
 };
 
 const entityName: {
-  [source in Sources]: string;
+  [source in SupportedIntegrationTypesToGenerateImportData]: string;
 } = {
   github: 'org',
   'github-enterprise': 'org',
 };
 
 export async function handler(argv: {
-  source: Sources;
+  source: SupportedIntegrationTypesToGenerateImportData;
   groupId: string;
   sourceOrgPublicId?: string;
   sourceUrl?: string;

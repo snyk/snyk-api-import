@@ -1,8 +1,8 @@
 import * as debugLib from 'debug';
 import { getLoggingPath } from '../lib/get-logging-path';
+import { SupportedIntegrationTypesToListSnykTargets } from '../lib/types';
 const debug = debugLib('snyk:generate-data-script');
 
-import { SupportedIntegrationTypes } from '../lib/types';
 import { generateSnykImportedTargets } from '../scripts/generate-imported-targets-from-snyk';
 
 export const command = ['list:imported'];
@@ -17,22 +17,23 @@ export const builder = {
   integrationType: {
     required: true,
     default: undefined,
-    choices: [...Object.values(SupportedIntegrationTypes)],
+    choices: [...Object.values(SupportedIntegrationTypesToListSnykTargets)],
     desc:
       'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each org in Snyk',
   },
 };
 
 const entityName: {
-  [source in SupportedIntegrationTypes]: string;
+  [source in SupportedIntegrationTypesToListSnykTargets]: string;
 } = {
   github: 'repo',
   'github-enterprise': 'repo',
+  'bitbucket-cloud': 'repo',
 };
 
 export async function handler(argv: {
   groupId: string;
-  integrationType: SupportedIntegrationTypes;
+  integrationType: SupportedIntegrationTypesToListSnykTargets;
 }): Promise<void> {
   getLoggingPath();
   const { groupId, integrationType } = argv;
