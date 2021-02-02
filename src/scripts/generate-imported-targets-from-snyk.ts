@@ -6,7 +6,6 @@ import * as _ from 'lodash';
 
 import {
   FilePath,
-  Org,
   SnykProject,
   SupportedIntegrationTypesToListSnykTargets,
   Target,
@@ -31,7 +30,9 @@ export interface ImportTarget {
   exclusionGlobs?: string;
 }
 
-export function projectToTarget(project: Pick<SnykProject, 'name' | 'branch'>): Target {
+export function projectToTarget(
+  project: Pick<SnykProject, 'name' | 'branch'>,
+): Target {
   const [owner, name] = project.name.split(':')[0].split('/');
   return {
     owner,
@@ -46,21 +47,44 @@ const targetGenerators = {
   [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD]: projectToTarget,
 };
 
+interface SnykOrg {
+  id: string;
+  slug?: string;
+  name?: string;
+}
+
 export async function generateSnykImportedTargets(
-  groupId: string,
+  id: { groupId?: string; orgId?: string },
   integrationType: SupportedIntegrationTypesToListSnykTargets,
-): Promise<{ targets: ImportTarget[]; fileName: string; failedOrgs: Org[] }> {
+): Promise<{
+  targets: ImportTarget[];
+  fileName: string;
+  failedOrgs: SnykOrg[];
+}> {
   const timeLabel = 'Generated imported Snyk targets';
   console.time(timeLabel);
+  const { groupId, orgId } = id;
+  if (!(groupId || orgId)) {
+    throw new Error(
+      'Missing required parameters: orgId or groupId must be provided.',
+    );
+  }
+  if (groupId && orgId) {
+    throw new Error(
+      'Too many parameters: orgId or groupId must be provided, not both.',
+    );
+  }
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import',
   });
   const targetsData: ImportTarget[] = [];
-  const groupOrgs = await getAllOrgs(requestManager, groupId);
-  const failedOrgs: Org[] = [];
+  const groupOrgs = groupId
+    ? await getAllOrgs(requestManager, groupId)
+    : [{ id: orgId! }];
+  const failedOrgs: SnykOrg[] = [];
   await pMap(
     groupOrgs,
-    async (org: Org) => {
+    async (org: SnykOrg) => {
       const { id: orgId, name, slug } = org;
       try {
         const [resProjects, resIntegrations] = await Promise.all([
@@ -115,7 +139,9 @@ export async function generateSnykImportedTargets(
       } catch (e) {
         failedOrgs.push(org);
         console.warn(
-          `Failed to process projects for organization ${name}(${slug}). Continuing.`,
+          `Failed to process projects for organization ${
+            name && slug ? `${name}(${slug})` : orgId
+          }. Continuing.`,
         );
       }
     },
