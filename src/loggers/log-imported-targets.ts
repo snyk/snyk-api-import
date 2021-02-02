@@ -1,15 +1,13 @@
 import * as bunyan from 'bunyan';
 import * as _ from 'lodash';
 
-import { Target } from './../lib/types';
+import { ImportTarget } from './../lib/types';
 import { IMPORT_LOG_NAME, targetProps } from './../common';
 import { getLoggingPath } from './../lib';
 import { generateTargetId } from '../generate-target-id';
 
 export async function logImportedTargets(
-  orgId: string,
-  integrationId: string,
-  targets: Target[],
+  targets: ImportTarget[],
   locationUrl: string | null,
   loggingPath: string = getLoggingPath(),
   message = 'Target requested for import',
@@ -27,13 +25,14 @@ export async function logImportedTargets(
       ],
     });
 
-    for (const target of targets) {
+    for (const data of targets) {
+      const { integrationId, target, orgId } = data;
       log.info(
         {
           target: _.pick(target, ...targetProps),
           locationUrl,
           orgId,
-          integrationId,
+          integrationId: integrationId,
           targetId: generateTargetId(orgId, integrationId, target),
         },
         message,

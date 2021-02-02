@@ -1,4 +1,5 @@
 import * as debugLib from 'debug';
+import * as _ from 'lodash';
 import { getLoggingPath } from '../lib/get-logging-path';
 import { SupportedIntegrationTypesToListSnykTargets } from '../lib/types';
 const debug = debugLib('snyk:generate-data-script');
@@ -16,10 +17,10 @@ export const builder = {
   },
   integrationType: {
     required: true,
-    default: undefined,
+    default: [],
     choices: [...Object.values(SupportedIntegrationTypesToListSnykTargets)],
     desc:
-      'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each org in Snyk',
+      'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each org in Snyk E.g. --integrationType=github --integrationType=github-enterprise',
   },
 };
 
@@ -39,14 +40,19 @@ export async function handler(argv: {
   const { groupId, integrationType } = argv;
   try {
     debug('ℹ️  Options: ' + JSON.stringify(argv));
-
+    const integrationTypes = _.castArray(integrationType);
     const { targets, fileName, failedOrgs } = await generateSnykImportedTargets(
       groupId,
-      integrationType,
+      _.castArray(integrationType),
     );
+
     const targetsMessage =
       targets.length > 0
-        ? `Found ${targets.length} ${entityName[integrationType]}(s). Written the data to file: ${fileName}`
+        ? `Found ${targets.length} ${
+            integrationTypes.length > 1
+              ? 'target'
+              : entityName[integrationTypes[0]]
+          }(s). Written the data to file: ${fileName}`
         : `⚠ No ${entityName[integrationType]}(s) received for Group '${groupId} and integration type '${integrationType}!`;
 
     if (failedOrgs.length > 0) {

@@ -23,7 +23,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
     });
   });
 
-  it('Generates Snyk imported targets data as expected', async (done) => {
+  it('Generates Snyk imported targets data as expected for github', async (done) => {
     return exec(
       `node ${main} list:imported --integrationType=github --groupId=${process.env.TEST_GROUP_ID}`,
       {
@@ -41,6 +41,33 @@ describe('`snyk-api-import list:imported <...>`', () => {
         expect(err).toBeNull();
         expect(stdout.trim()).toMatch(
           `repo(s). Written the data to file: ${path.resolve(
+            __dirname,
+            'imported-targets.log',
+          )}`,
+        );
+        deleteFiles([path.resolve(__dirname, IMPORT_LOG_NAME)]);
+        done();
+      },
+    );
+  }, 10000);
+  it('Generates Snyk imported targets data as expected', async (done) => {
+    return exec(
+      `node ${main} list:imported --integrationType=github --integrationType=github-enterprise --groupId=${process.env.TEST_GROUP_ID}`,
+      {
+        env: {
+          PATH: process.env.PATH,
+          SNYK_TOKEN: process.env.SNYK_TOKEN_TEST,
+          SNYK_API: process.env.SNYK_API_TEST,
+          SNYK_LOG_PATH: __dirname,
+        },
+      },
+      (err, stdout) => {
+        if (err) {
+          throw err;
+        }
+        expect(err).toBeNull();
+        expect(stdout.trim()).toMatch(
+          `target(s). Written the data to file: ${path.resolve(
             __dirname,
             'imported-targets.log',
           )}`,

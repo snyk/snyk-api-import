@@ -15,7 +15,6 @@ export const builder = {
     desc:
       'Public id of the org in Snyk that can be used as a template to copy all supported org settings.',
   },
-
   groupId: {
     required: true,
     default: undefined,

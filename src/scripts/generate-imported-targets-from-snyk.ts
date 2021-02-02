@@ -31,7 +31,9 @@ export interface ImportTarget {
   exclusionGlobs?: string;
 }
 
-export function projectToTarget(project: Pick<SnykProject, 'name' | 'branch'>): Target {
+export function projectToTarget(
+  project: Pick<SnykProject, 'name' | 'branch'>,
+): Target {
   const [owner, name] = project.name.split(':')[0].split('/');
   return {
     owner,
@@ -48,7 +50,7 @@ const targetGenerators = {
 
 export async function generateSnykImportedTargets(
   groupId: string,
-  integrationType: SupportedIntegrationTypesToListSnykTargets,
+  integrationTypes: SupportedIntegrationTypesToListSnykTargets[],
 ): Promise<{ targets: ImportTarget[]; fileName: string; failedOrgs: Org[] }> {
   const timeLabel = 'Generated imported Snyk targets';
   console.time(timeLabel);
@@ -67,22 +69,30 @@ export async function generateSnykImportedTargets(
           listProjects(requestManager, orgId),
           listIntegrations(requestManager, orgId),
         ]);
-        const integrationId = resIntegrations[integrationType];
         const { projects } = resProjects;
         const scmTargets = projects
-          .filter((p) => p.origin === integrationType)
-          .map((p) =>
-            targetGenerators[
+          .filter((p) =>
+            integrationTypes.includes(
+              p.origin as SupportedIntegrationTypesToListSnykTargets,
+            ),
+          )
+          .map((p) => {
+            const target = targetGenerators[
               p.origin as SupportedIntegrationTypesToListSnykTargets
-            ](p),
-          );
+            ](p);
+            return {
+              target,
+              integrationId: resIntegrations[p.origin],
+            };
+          });
         const uniqueTargets: Set<string> = new Set();
         const orgTargets: Target[] = [];
         if (!scmTargets.length || scmTargets.length === 0) {
           console.warn('No projects in org', orgId);
           return;
         }
-        for (const target of scmTargets) {
+        for (const data of scmTargets) {
+          const { target, integrationId } = data;
           const targetId = generateTargetId(orgId, integrationId, target);
           if (uniqueTargets.has(targetId)) {
             continue;
@@ -105,9 +115,7 @@ export async function generateSnykImportedTargets(
           orgId,
         );
         await logImportedTargets(
-          orgId,
-          integrationId,
-          orgTargets,
+          targetsData,
           null,
           undefined,
           'Target exists in Snyk',

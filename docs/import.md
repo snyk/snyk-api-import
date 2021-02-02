@@ -111,8 +111,9 @@ Note:
 - The same target from a differed source be allowed to be imported (For example the same repo is present in Github and now it being imported via Github Enterprise into the same org)
 
 
-Command to run:
-`snyk-api-import-macos list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
+Command to run for:
+-  a single integration / projects source `snyk-api-import-macos list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
+-  multiple integrations / projects sources `snyk-api-import-macos list:imported --integrationType=<integration-type> --integrationType=<integration-type> --groupId=<snyk_group_id>`
 
 Supported integration types:
 - Github.com `github`
