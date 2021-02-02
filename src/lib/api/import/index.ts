@@ -69,9 +69,7 @@ export async function importTarget(
       `Received locationUrl for ${target.name || 'target'}: ${locationUrl}`,
     );
     await logImportedTargets(
-      orgId,
-      integrationId,
-      [target],
+      [{ target, integrationId, orgId }],
       locationUrl,
       loggingPath,
     );
