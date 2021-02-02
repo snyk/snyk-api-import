@@ -8,15 +8,15 @@ It is recommended to have as many Organizations in Snyk as you have in the sourc
 
 ### using `orgs:data` util
 This util helps generate data needed to mirror the Github.com / Github Enterprise organization structure in Snyk.
-This is an opinionated util and will assume every organization in Github.com / Github Enterprise should become an organization in Snyk. If this is not what you are looking for, please look at using the [Orgs API](https://snyk.docs.apiary.io/#reference/groups/organizations-in-a-group/create-a-new-organization-in-a-group) directly to create the structure you need.
+This is an opinionated util and will assume every organization in Github.com / Github Enterprise should become an organization in Snyk. If this is not what you are looking for, please look at using the [Organizations API](https://snyk.docs.apiary.io/#reference/groups/organizations-in-a-group/create-a-new-organization-in-a-group) directly to create the structure you need.
 
 #### Github.com / Github Enterprise
 1. set the [Github.com personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) as an environment variable: `export GITHUB_TOKEN=your_personal_access_token`
-2. Run the command to generate Org data:
+2. Run the command to generate organization data:
  - **Github.com:** `snyk-api-import orgs:data --source=github --groupId=<snyk_group_id>`
  - **Github Enterprise:** `snyk-api-import orgs:data --source=github-enterprise --groupId=<snyk_group_id> -- sourceUrl=https://ghe.custom.github.com/`
 
-This will create the org data in a file `group-<snyk_group_id>-github-<com|enterprise>-orgs.json`
+This will create the organization data in a file `group-<snyk_group_id>-github-<com|enterprise>-orgs.json`
 
 ## Creating Organizations in Snyk
 Use the generated data file to help create the organizations via API or use the provided util.

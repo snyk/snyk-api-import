@@ -106,7 +106,7 @@ Example:
 - to avoid importing everything again, using this util and running import again provides a way to only import "new" Github repos. This is much much faster and removes unnecessary calls to Snyk & Github to fetch files and do the import for everything again.
 
 Note:
-- The same target imported into a different org will be allowed to be imported
+- The same target imported into a different organization will be allowed to be imported
 - The same target (but different branch) will be allowed to be imported
 - The same target from a differed source be allowed to be imported (For example the same repo is present in Github and now it being imported via Github Enterprise into the same org)
 

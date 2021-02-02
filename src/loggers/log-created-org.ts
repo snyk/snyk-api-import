@@ -33,7 +33,7 @@ export async function logCreatedOrg(
     const { id, name, created } = orgData;
     log.info({ origName, id, name, created, integrations } , 'Created org');
   } catch (e) {
-    debug('Failed to log created orgs at location: ', `${loggingPath}/${groupId}.${CREATED_ORG_LOG_NAME}`, e);
+    debug('Failed to log created organizations at location: ', `${loggingPath}/${groupId}.${CREATED_ORG_LOG_NAME}`, e);
     // do nothing
   }
 }

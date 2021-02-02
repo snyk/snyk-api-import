@@ -7,7 +7,7 @@ import { generateSnykImportedTargets } from '../scripts/generate-imported-target
 
 export const command = ['list:imported'];
 export const desc =
-  'List all targets imported in Snyk for a given group & source type. An analysis is performed on all current orgs and their projects to generate this. The generated file can be used to skip previously imported targets when running the `import` command';
+  'List all targets imported in Snyk for a given group & source type. An analysis is performed on all current organizations and their projects to generate this. The generated file can be used to skip previously imported targets when running the `import` command';
 export const builder = {
   groupId: {
     required: true,
@@ -19,7 +19,7 @@ export const builder = {
     default: undefined,
     choices: [...Object.values(SupportedIntegrationTypesToListSnykTargets)],
     desc:
-      'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each org in Snyk',
+      'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each organization in Snyk',
   },
 };
 

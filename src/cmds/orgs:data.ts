@@ -13,7 +13,7 @@ export const builder = {
     required: false,
     default: undefined,
     desc:
-      'Public id of the org in Snyk that can be used as a template to copy all supported org settings.',
+      'Public id of the organization in Snyk that can be used as a template to copy all supported organization settings.',
   },
 
   groupId: {

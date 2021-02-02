@@ -16,7 +16,7 @@ export const builder = {
   orgsData: {
     required: true,
     default: undefined,
-    desc: 'Path to orgs data file generated with "orgs:data" command',
+    desc: 'Path to organizations data file generated with "orgs:data" command',
   },
   source: {
     required: true,
@@ -65,11 +65,11 @@ export async function handler(argv: {
       orgsDataJson = [...orgsJson.orgData];
     } catch (e) {
       throw new Error(
-        `Failed to parse orgs from ${orgsData}. ERROR: ${e.message}`,
+        `Failed to parse organizations from ${orgsData}. ERROR: ${e.message}`,
       );
     }
     if (orgsDataJson.length === 0) {
-      throw new Error(`No orgs could be loaded from ${orgsData}.`);
+      throw new Error(`No organizations could be loaded from ${orgsData}.`);
     }
     const res = await generateTargetsImportDataFile(
       source,

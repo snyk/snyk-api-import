@@ -12,7 +12,7 @@ export async function listAllOrgsTokenBelongsTo(
 ): Promise<{ orgs: Org[] }> {
   getApiToken();
   getSnykHost();
-  debug('Listing all orgs orgs user belongs to');
+  debug('Listing all organizations user belongs to');
   const res = await requestManager.request({
     verb: 'get',
     url: `/orgs`,

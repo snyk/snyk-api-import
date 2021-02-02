@@ -7,9 +7,9 @@ import { listIntegrations, setNotificationPreferences } from '../lib/api/org';
 import { requestsManager } from 'snyk-request-manager';
 import { CreateOrgData } from '../lib/types';
 import { logCreatedOrg } from '../loggers/log-created-org';
-import { logFailedOrg } from '../loggers/log-failed-org';
 import { writeFile } from '../write-file';
 import { FAILED_ORG_LOG_NAME } from '../common';
+import { logFailedOrg } from '../loggers/log-failed-org';
 
 const debug = debugLib('snyk:create-orgs-script');
 interface CreatedOrg extends CreatedOrgResponse {
@@ -44,12 +44,12 @@ export async function createOrgs(
   try {
     orgsData.push(...JSON.parse(content).orgs);
   } catch (e) {
-    throw new Error(`Failed to parse orgs from ${filePath}`);
+    throw new Error(`Failed to parse organizations from ${filePath}`);
   }
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import',
   });
-  debug(`Loaded ${orgsData.length} orgs to create ${Date.now()}`);
+  debug(`Loaded ${orgsData.length} organizations to create ${Date.now()}`);
   const createdOrgs: CreatedOrg[] = [];
 
   for (const orgData of orgsData) {
@@ -76,11 +76,11 @@ export async function createOrgs(
         name,
         errorMessage || 'Failed to create org, please try again in DEBUG mode.',
       );
-      debug(`Failed to create org with data: ${JSON.stringify(orgsData)}`, e);
+      debug(`Failed to create organization with data: ${JSON.stringify(orgsData)}`, e);
     }
   }
   if (failedOrgs.length === orgsData.length) {
-    throw new Error(`All requested orgs failed to be created. Review the errors in ${loggingPath}/<groupId>.${FAILED_ORG_LOG_NAME}`)
+    throw new Error(`All requested organizations failed to be created. Review the errors in ${loggingPath}/<groupId>.${FAILED_ORG_LOG_NAME}`)
   }
   const fileName = await saveCreatedOrgData(createdOrgs);
   return { orgs: createdOrgs, failed: failedOrgs, fileName, totalOrgs: orgsData.length };

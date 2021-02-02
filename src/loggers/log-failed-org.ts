@@ -29,7 +29,7 @@ export async function logFailedOrg(
       'Failed to create org',
     );
   } catch (e) {
-    debug('Failed to log failed orgs at location: ', e);
+    debug('Failed to log failed organizations at location: ', e);
     // do nothing
   }
 }

@@ -86,7 +86,7 @@ export async function listGithubOrgs(host?: string): Promise<GithubOrgData[]> {
 
   const baseUrl = getGithubBaseUrl(host);
   const octokit: Octokit = new Octokit({ baseUrl, auth: githubToken });
-  debug('Fetching all Github orgs data');
+  debug('Fetching all Github organizations data');
 
   const orgs = await fetchAllOrgs(octokit, undefined, !!host);
   return orgs;
