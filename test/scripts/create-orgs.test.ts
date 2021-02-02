@@ -56,7 +56,7 @@ describe('createOrgs script', () => {
     filesToDelete.push(path.resolve(logPath, fileName));
   }, 20000);
   it.todo('creating multiple orgs');
-  it('creating an org fails', async () => {
+  it('creating an organization fails', async () => {
     const importFile = path.resolve(
       __dirname + '/fixtures/create-orgs/fails-to-create/1-org.json',
     );

@@ -37,9 +37,9 @@ export async function generateOrgImportDataFile(
 
   const topLevelEntities = await sourceGenerators[source](sourceUrl);
 
-  for (const org in topLevelEntities) {
+  for (const organization in topLevelEntities) {
     const data: CreateOrgData = {
-      name: topLevelEntities[org].name,
+      name: topLevelEntities[organization].name,
       groupId,
     };
     if (sourceOrgId) {

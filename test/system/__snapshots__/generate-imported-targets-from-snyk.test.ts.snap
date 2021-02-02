@@ -5,7 +5,7 @@ exports[`\`snyk-api-import list:imported <...>\` Shows error when missing groupI
 index.js list:imported
 
 List all targets imported in Snyk for a given group & source type. An analysis
-is performed on all current orgs and their projects to generate this. The
+is performed on all current organizations and their projects to generate this. The
 generated file can be used to skip previously imported targets when running the
 \`import\` command
 
@@ -16,7 +16,7 @@ Options:
                      settings)                                        [required]
   --integrationType  The configured integration type (source of the projects in
                      Snyk e.g. Github, Github Enterprise.). This will be used to
-                     pick the correct integrationID from each org in Snyk
+                     pick the correct integrationID from each organization in Snyk
           [required] [choices: "github", "github-enterprise", "bitbucket-cloud"]
 
 Missing required argument: groupId
@@ -27,7 +27,7 @@ exports[`\`snyk-api-import list:imported <...>\` Shows help text as expected 1`]
 "index.js list:imported
 
 List all targets imported in Snyk for a given group & source type. An analysis
-is performed on all current orgs and their projects to generate this. The
+is performed on all current organizations and their projects to generate this. The
 generated file can be used to skip previously imported targets when running the
 \`import\` command
 
@@ -38,6 +38,6 @@ Options:
                      settings)                                        [required]
   --integrationType  The configured integration type (source of the projects in
                      Snyk e.g. Github, Github Enterprise.). This will be used to
-                     pick the correct integrationID from each org in Snyk
+                     pick the correct integrationID from each organization in Snyk
           [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\"]"
 `;

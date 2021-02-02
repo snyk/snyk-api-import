@@ -10,16 +10,22 @@ export const desc =
   'List all targets imported in Snyk for a given group & source type. An analysis is performed on all current orgs and their projects to generate this. The generated file can be used to skip previously imported targets when running the `import` command';
 export const builder = {
   groupId: {
-    required: true,
+    required: false,
     default: undefined,
     desc: 'Public id of the group in Snyk (available on group settings)',
+  },
+  orgId: {
+    required: false,
+    default: undefined,
+    desc:
+      'Public id of the organization in Snyk (available in organization settings)',
   },
   integrationType: {
     required: true,
     default: undefined,
     choices: [...Object.values(SupportedIntegrationTypesToListSnykTargets)],
     desc:
-      'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each org in Snyk',
+      'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each organization in Snyk',
   },
 };
 
@@ -32,16 +38,17 @@ const entityName: {
 };
 
 export async function handler(argv: {
-  groupId: string;
+  orgId?: string;
+  groupId?: string;
   integrationType: SupportedIntegrationTypesToListSnykTargets;
 }): Promise<void> {
   getLoggingPath();
-  const { groupId, integrationType } = argv;
+  const { groupId, integrationType, orgId } = argv;
   try {
     debug('ℹ️  Options: ' + JSON.stringify(argv));
 
     const { targets, fileName, failedOrgs } = await generateSnykImportedTargets(
-      groupId,
+      { groupId, orgId },
       integrationType,
     );
     const targetsMessage =

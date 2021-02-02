@@ -74,9 +74,9 @@ export async function createOrgs(
       logFailedOrg(
         groupId,
         name,
-        errorMessage || 'Failed to create org, please try again in DEBUG mode.',
+        errorMessage || 'Failed to create organization, please try again in DEBUG mode.',
       );
-      debug(`Failed to create org with data: ${JSON.stringify(orgsData)}`, e);
+      debug(`Failed to create organization with data: ${JSON.stringify(orgsData)}`, e);
     }
   }
   if (failedOrgs.length === orgsData.length) {

@@ -13,8 +13,8 @@ source.
 Options:
   --version            Show version number                             [boolean]
   --help               Show help                                       [boolean]
-  --sourceOrgPublicId  Public id of the org in Snyk that can be used as a
-                       template to copy all supported org settings.
+  --sourceOrgPublicId  Public id of the organization in Snyk that can be used as a
+                       template to copy all supported organization settings.
   --groupId            Public id of the group in Snyk (available on group
                        settings)                                      [required]
   --sourceUrl          Custom base url for the source API that can list
@@ -37,8 +37,8 @@ source.
 Options:
   --version            Show version number                             [boolean]
   --help               Show help                                       [boolean]
-  --sourceOrgPublicId  Public id of the org in Snyk that can be used as a
-                       template to copy all supported org settings.
+  --sourceOrgPublicId  Public id of the organization in Snyk that can be used as a
+                       template to copy all supported organization settings.
   --groupId            Public id of the group in Snyk (available on group
                        settings)                                      [required]
   --sourceUrl          Custom base url for the source API that can list

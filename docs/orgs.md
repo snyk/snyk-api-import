@@ -16,7 +16,7 @@ This is an opinionated util and will assume every organization in Github.com / G
  - **Github.com:** `snyk-api-import orgs:data --source=github --groupId=<snyk_group_id>`
  - **Github Enterprise:** `snyk-api-import orgs:data --source=github-enterprise --groupId=<snyk_group_id> -- sourceUrl=https://ghe.custom.github.com/`
 
-This will create the org data in a file `group-<snyk_group_id>-github-<com|enterprise>-orgs.json`
+This will create the organization data in a file `group-<snyk_group_id>-github-<com|enterprise>-orgs.json`
 
 ## Creating Organizations in Snyk
 Use the generated data file to help create the organizations via API or use the provided util.

@@ -79,7 +79,7 @@ describe('Skip target if found in log', () => {
     const shouldSkip = await shouldSkipTarget(importTarget, importedTargetIds);
     expect(shouldSkip).toBeTruthy();
   });
-  it('Same target but for different org should not be skipped', async () => {
+  it('Same target but for different organization should not be skipped', async () => {
     const target = {
       name: 'composer-with-vulns',
       owner: 'snyk-fixtures',
