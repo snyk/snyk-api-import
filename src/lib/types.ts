@@ -83,6 +83,7 @@ export enum SupportedIntegrationTypesToListSnykTargets {
   GITHUB = 'github',
   GHE = 'github-enterprise',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
+  GCR = 'gcr',
 }
 interface ImportingUser {
   id: string;

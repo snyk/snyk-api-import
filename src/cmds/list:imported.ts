@@ -35,6 +35,7 @@ const entityName: {
   github: 'repo',
   'github-enterprise': 'repo',
   'bitbucket-cloud': 'repo',
+  'gcr': 'images'
 };
 
 export async function handler(argv: {
