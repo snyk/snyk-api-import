@@ -6,6 +6,7 @@ import { deleteFiles } from '../delete-files';
 import {
   generateSnykImportedTargets,
   projectToTarget,
+  imageProjectToTarget
 } from '../../src/scripts/generate-imported-targets-from-snyk';
 import { IMPORT_LOG_NAME } from '../../src/common';
 import { SupportedIntegrationTypesToListSnykTargets } from '../../src/lib/types';
@@ -92,6 +93,16 @@ describe('Generate imported targets based on Snyk data', () => {
       branch: 'main',
       name: 'huge-monorepo',
       owner: 'lili-snyk',
+    });
+  });
+
+  it('succeed to convert GCR project name to target', async () => {
+    const project = {
+      name: 'snyk-main/bundle-lock-job:prod'
+    };
+    const target = imageProjectToTarget(project);
+    expect(target).toEqual({
+      name: 'snyk-main/bundle-lock-job:prod'
     });
   });
 });

@@ -122,3 +122,4 @@ Supported integration types:
 - Github.com `github`
 - Github Enterprise `github-enterprise`
 - Bitbucket Cloud `bitbucket-cloud`
+- Google Cloud Registry `gcr`

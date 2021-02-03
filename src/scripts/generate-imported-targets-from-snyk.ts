@@ -41,10 +41,19 @@ export function projectToTarget(
   };
 }
 
+export function imageProjectToTarget(
+  project: Pick<SnykProject, 'name'>,
+): Target {
+  return {
+    name: project.name
+  };
+}
+
 const targetGenerators = {
   [SupportedIntegrationTypesToListSnykTargets.GITHUB]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.GHE]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD]: projectToTarget,
+  [SupportedIntegrationTypesToListSnykTargets.GCR]: imageProjectToTarget,
 };
 
 interface SnykOrg {

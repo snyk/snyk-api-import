@@ -19,5 +19,5 @@ Options:
                      Snyk e.g. Github, Github Enterprise.). This will be used to
                      pick the correct integrationID from each organization in
                      Snyk
-          [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\"]"
+   [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\", \\"gcr\\"]"
 `;
