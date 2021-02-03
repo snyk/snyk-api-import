@@ -1,8 +1,14 @@
 import { requestsManager } from 'snyk-request-manager';
-import { getAllOrgs, listAllOrgsTokenBelongsTo } from '../../src/lib';
+import {
+  filterOutExistingOrgs,
+  getAllOrgs,
+  listAllOrgsTokenBelongsTo,
+} from '../../src/lib';
+import { CreateOrgData } from '../../src/lib/types';
 
 const GROUP_ID = process.env.TEST_GROUP_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
+const ORG_NAME = process.env.TEST_ORG_NAME as string;
 
 jest.unmock('snyk-request-manager');
 jest.requireActual('snyk-request-manager');
@@ -33,6 +39,36 @@ describe('Orgs API', () => {
         id: expect.any(String),
       },
     });
+  });
+
+  it('Split orgs into existing & new for a Group', async () => {
+    const orgs: CreateOrgData[] = [
+      {
+        groupId: GROUP_ID,
+        name: 'non-existing-org',
+      },
+      {
+        groupId: GROUP_ID,
+        name: ORG_NAME, // existing
+      },
+    ];
+    const { existingOrgs, newOrgs } = await filterOutExistingOrgs(
+      requestManager,
+      orgs,
+      GROUP_ID,
+    );
+    expect(existingOrgs).toEqual([
+      {
+        groupId: GROUP_ID,
+        name: ORG_NAME,
+      },
+    ]);
+    expect(newOrgs).toEqual([
+      {
+        groupId: GROUP_ID,
+        name: 'non-existing-org',
+      },
+    ]);
   });
 
   it('Get all orgs for GROUP', async () => {

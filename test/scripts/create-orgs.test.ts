@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { requestsManager } from 'snyk-request-manager';
 import { CREATED_ORG_LOG_NAME } from '../../src/common';
-import { deleteOrg } from '../../src/lib';
+import { createOrg, deleteOrg } from '../../src/lib';
 import { createOrgs } from '../../src/scripts/create-orgs';
 import { deleteFiles } from '../delete-files';
 
@@ -44,9 +44,9 @@ describe('createOrgs script', () => {
       groupId: 'd64abc45-b39a-48a2-9636-a4f62adbf09a',
       id: expect.any(String),
       integrations: expect.any(Object),
-      name: 'snyk-api-import-test-org',
+      name: 'snyk-api-import-hello',
       orgId: expect.any(String),
-      origName: 'snyk-api-import-test-org',
+      origName: 'snyk-api-import-hello',
       sourceOrgId: undefined,
       slug: expect.any(String),
       url: expect.any(String),
@@ -55,6 +55,31 @@ describe('createOrgs script', () => {
     createdOrgs.push(orgs[0].orgId);
     filesToDelete.push(path.resolve(logPath, fileName));
   }, 20000);
+
+  it('creating an org with the same name as an org in the Group fails', async () => {
+    const importFile = path.resolve(
+      __dirname + '/fixtures/create-orgs/unique-org/1-org.json',
+    );
+    const logPath = path.resolve(
+      __dirname + '/fixtures/create-orgs/unique-org/',
+    );
+    process.env.SNYK_LOG_PATH = logPath;
+    const skipIfOrgNameExists = true;
+
+    // first create the org
+    const { fileName, orgs, failed, totalOrgs } = await createOrgs(importFile);
+    expect(failed).toHaveLength(0);
+    expect(orgs).toHaveLength(1);
+    expect(totalOrgs).toEqual(1);
+    // try again but in stricter name check mode and expect a it to fail
+    expect(createOrgs(importFile, skipIfOrgNameExists)).rejects.toThrow(
+      'All requested organizations failed to be created. Review the errors in',
+    );
+    // cleanup
+    createdOrgs.push(orgs[0].orgId);
+    filesToDelete.push(path.resolve(logPath, fileName));
+    filesToDelete.push(path.resolve(logPath + `/abc.${CREATED_ORG_LOG_NAME}`));
+  }, 40000);
   it.todo('creating multiple orgs');
   it('creating an org fails', async () => {
     const importFile = path.resolve(

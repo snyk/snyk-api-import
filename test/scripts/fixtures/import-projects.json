@@ -1,8 +1,8 @@
 {
   "targets": [
     {
-      "orgId": "f0125d9b-271a-4b50-ad23-80e12575a1bf",
-      "integrationId": "c4de291b-e083-4c43-a72c-113463e0d268",
+      "orgId": "74e2f385-a54f-491e-9034-76c53e72927a",
+      "integrationId": "a8a32129-ed31-45dd-b95e-e46f64025d43",
       "target": {
         "name": "ruby-with-versions",
         "owner": "snyk-fixtures",

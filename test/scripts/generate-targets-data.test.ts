@@ -111,7 +111,7 @@ describe('generateTargetsImportDataFile Github script', () => {
     ).rejects.toThrow(
       'No targets could be generated. Check the error output & try again.',
     );
-  });
+  }, 10000);
   it('Duplicate orgs are ignored', async () => {
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     filesToDelete.push(path.resolve(__dirname + '/github-import-targets.json'));
