@@ -1,4 +1,5 @@
 import * as debugLib from 'debug';
+import * as _ from 'lodash';
 import { getLoggingPath } from '../lib/get-logging-path';
 import { SupportedIntegrationTypesToListSnykTargets } from '../lib/types';
 const debug = debugLib('snyk:generate-data-script');
@@ -22,10 +23,10 @@ export const builder = {
   },
   integrationType: {
     required: true,
-    default: undefined,
+    default: [],
     choices: [...Object.values(SupportedIntegrationTypesToListSnykTargets)],
     desc:
-      'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each organization in Snyk',
+      'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each org in Snyk E.g. --integrationType=github --integrationType=github-enterprise',
   },
 };
 
@@ -35,7 +36,7 @@ const entityName: {
   github: 'repo',
   'github-enterprise': 'repo',
   'bitbucket-cloud': 'repo',
-  'gcr': 'images'
+  gcr: 'images',
 };
 
 export async function handler(argv: {
@@ -58,14 +59,21 @@ export async function handler(argv: {
       );
     }
     debug('ℹ️  Options: ' + JSON.stringify(argv));
+    const integrationTypes = _.castArray(integrationType);
     const { targets, fileName, failedOrgs } = await generateSnykImportedTargets(
       { groupId, orgId },
-      integrationType,
+      integrationTypes,
     );
+    const integrationEntity =
+      integrationTypes.length > 1 ? 'target' : entityName[integrationTypes[0]];
+
+    const entityMessage = groupId ? `Group ${groupId} ` : `Org ${orgId}`;
     const targetsMessage =
       targets.length > 0
-        ? `Found ${targets.length} ${entityName[integrationType]}(s). Written the data to file: ${fileName}`
-        : `⚠ No ${entityName[integrationType]}(s) received for Group '${groupId}' and integration type ${integrationType}!`;
+        ? `Found ${targets.length} ${integrationEntity}(s). Written the data to file: ${fileName}`
+        : `⚠ No ${integrationEntity}(s) ${entityMessage} and integration type(s) ${integrationTypes.join(
+            ', ',
+          )}!`;
 
     if (failedOrgs.length > 0) {
       console.warn(

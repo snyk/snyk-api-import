@@ -30,13 +30,16 @@ describe('Generate imported targets based on Snyk data', () => {
     process.env = { ...OLD_ENV };
   });
 
-  it('succeeds to generate targets for Group', async () => {
+  it('succeeds to generate targets for Group for Github', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
-    const { targets, failedOrgs, fileName } = await generateSnykImportedTargets(
-      { groupId: GROUP_ID },
+    const {
+      targets,
+      failedOrgs,
+      fileName,
+    } = await generateSnykImportedTargets({ groupId: GROUP_ID }, [
       SupportedIntegrationTypesToListSnykTargets.GITHUB,
-    );
+    ]);
     expect(failedOrgs).toEqual([]);
     expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
     expect(targets[0]).toMatchObject({
@@ -56,13 +59,76 @@ describe('Generate imported targets based on Snyk data', () => {
     expect(importedTargetsLog).toMatch(targets[0].integrationId);
   }, 240000);
 
-  it('succeeds to generate targets for Org', async () => {
+  it('succeeds to generate targets for Org + Github', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
-    const { targets, failedOrgs, fileName } = await generateSnykImportedTargets(
-      { orgId: ORG_ID },
+    const {
+      targets,
+      failedOrgs,
+      fileName,
+    } = await generateSnykImportedTargets({ orgId: ORG_ID }, [
       SupportedIntegrationTypesToListSnykTargets.GITHUB,
-    );
+    ]);
+    expect(failedOrgs).toEqual([]);
+    expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
+    expect(targets[0]).toMatchObject({
+      integrationId: expect.any(String),
+      orgId: expect.any(String),
+      target: {
+        branch: expect.any(String),
+        name: expect.any(String),
+        owner: expect.any(String),
+      },
+    });
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 20000));
+    const importedTargetsLog = fs.readFileSync(logFiles.importLogPath, 'utf8');
+    expect(importedTargetsLog).toMatch(targets[0].target.owner as string);
+    expect(importedTargetsLog).toMatch(targets[0].orgId);
+    expect(importedTargetsLog).toMatch(targets[0].integrationId);
+  }, 240000);
+
+  it('succeeds to generate targets for Group for Github & Github Enterprise', async () => {
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
+    logs = Object.values(logFiles);
+    const {
+      targets,
+      failedOrgs,
+      fileName,
+    } = await generateSnykImportedTargets({ groupId: GROUP_ID }, [
+      SupportedIntegrationTypesToListSnykTargets.GITHUB,
+      SupportedIntegrationTypesToListSnykTargets.GHE,
+    ]);
+    expect(failedOrgs).toEqual([]);
+    expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
+    expect(targets[0]).toMatchObject({
+      integrationId: expect.any(String),
+      orgId: expect.any(String),
+      target: {
+        branch: expect.any(String),
+        name: expect.any(String),
+        owner: expect.any(String),
+      },
+    });
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 20000));
+    const importedTargetsLog = fs.readFileSync(logFiles.importLogPath, 'utf8');
+    expect(importedTargetsLog).toMatch(targets[0].target.owner as string);
+    expect(importedTargetsLog).toMatch(targets[0].orgId);
+    expect(importedTargetsLog).toMatch(targets[0].integrationId);
+  }, 240000);
+
+  it('succeeds to generate targets for Org for Github & Github Enterprise', async () => {
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
+    logs = Object.values(logFiles);
+    const {
+      targets,
+      failedOrgs,
+      fileName,
+    } = await generateSnykImportedTargets({ orgId: ORG_ID }, [
+      SupportedIntegrationTypesToListSnykTargets.GITHUB,
+      SupportedIntegrationTypesToListSnykTargets.GHE,
+    ]);
     expect(failedOrgs).toEqual([]);
     expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
     expect(targets[0]).toMatchObject({

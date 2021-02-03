@@ -17,7 +17,9 @@ Options:
                      organization settings)
   --integrationType  The configured integration type (source of the projects in
                      Snyk e.g. Github, Github Enterprise.). This will be used to
-                     pick the correct integrationID from each organization in
-                     Snyk
-   [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\", \\"gcr\\"]"
+                     pick the correct integrationID from each org in Snyk E.g.
+                     --integrationType=github
+                     --integrationType=github-enterprise
+   [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\", \\"gcr\\"]
+                                                                   [default: []]"
 `;

@@ -116,7 +116,8 @@ Command to run:
 `snyk-api-import-macos list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
 - skip all previously imported for a specific Organization:
 `snyk-api-import-macos list:imported --integrationType=<integration-type> --orgId=<snyk_org_id>`
-
+- a single integration / projects source `snyk-api-import-macos list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
+-  multiple integrations / projects sources `snyk-api-import-macos list:imported --integrationType=<integration-type> --integrationType=<integration-type> --orgId=<snyk_org_id>`
 
 Supported integration types:
 - Github.com `github`
