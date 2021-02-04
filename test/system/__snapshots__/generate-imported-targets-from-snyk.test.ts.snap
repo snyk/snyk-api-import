@@ -20,6 +20,6 @@ Options:
                      pick the correct integrationID from each org in Snyk E.g.
                      --integrationType=github
                      --integrationType=github-enterprise
-   [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\", \\"gcr\\"]
-                                                                   [default: []]"
+   [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\", \\"gcr\\",
+                                                     \\"docker-hub\\"] [default: []]"
 `;

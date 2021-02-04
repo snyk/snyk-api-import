@@ -84,6 +84,7 @@ export enum SupportedIntegrationTypesToListSnykTargets {
   GHE = 'github-enterprise',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
   GCR = 'gcr',
+  DOCKER_HUB = 'docker-hub'
 }
 interface ImportingUser {
   id: string;

@@ -124,3 +124,4 @@ Supported integration types:
 - Github Enterprise `github-enterprise`
 - Bitbucket Cloud `bitbucket-cloud`
 - Google Cloud Registry `gcr`
+- DockerHub registry `docker-hub`
