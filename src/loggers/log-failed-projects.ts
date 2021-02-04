@@ -24,7 +24,7 @@ export async function logFailedProjects(
       if (!projectsPerOrg[orgId]) {
         projectsPerOrg[orgId] = [p];
       } else {
-        projectsPerOrg.orgId.push(p);
+        projectsPerOrg[orgId].push(p);
       }
     });
 
