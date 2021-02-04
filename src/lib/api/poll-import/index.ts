@@ -7,7 +7,10 @@ import * as _ from 'lodash';
 import * as pMap from 'p-map';
 import { PollImportResponse, Project } from '../../types';
 import { getApiToken } from '../../get-api-token';
-import { logFailedProjects } from '../../../loggers/log-failed-projects';
+import {
+  FailedProject,
+  logFailedProjects,
+} from '../../../loggers/log-failed-projects';
 import { logFailedPollUrls } from '../../../loggers/log-failed-polls';
 import { logImportedProjects } from '../../../loggers/log-imported-projects';
 import { logJobResult } from '../../../loggers/log-job-result';
@@ -84,6 +87,7 @@ export async function pollImportUrls(
   }
   const uniqueLocationUrls = _.uniq(locationUrls);
   const projectsArray: Project[] = [];
+  const allFailedProjects: FailedProject[] = [];
   await pMap(
     uniqueLocationUrls,
     async (locationUrl) => {
@@ -104,7 +108,12 @@ export async function pollImportUrls(
               : ''
           }`,
         );
-        await logFailedProjects(locationUrl, failedProjects);
+        allFailedProjects.push(
+          ...failedProjects.map((project: Project) => ({
+            ...project,
+            locationUrl,
+          })),
+        );
         await logImportedProjects(locationUrl, projects);
         projectsArray.push(...projects);
       } catch (error) {
@@ -119,6 +128,8 @@ export async function pollImportUrls(
     },
     { concurrency: 10 },
   );
+
+  await logFailedProjects(allFailedProjects);
 
   return { projects: projectsArray };
 }
