@@ -37,6 +37,7 @@ const entityName: {
   'github-enterprise': 'repo',
   'bitbucket-cloud': 'repo',
   gcr: 'images',
+  'docker-hub': 'images',
 };
 
 export async function handler(argv: {
@@ -77,7 +78,7 @@ export async function handler(argv: {
 
     if (failedOrgs.length > 0) {
       console.warn(
-        `Failed to process the following orgs: ${failedOrgs.join(',')}`,
+        `Failed to process the following orgs: ${failedOrgs.map(org => org.id).join(',')}`,
       );
     }
     console.log(targetsMessage);
