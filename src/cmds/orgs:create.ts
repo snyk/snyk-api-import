@@ -15,19 +15,20 @@ export const builder = {
   },
   noDuplicateNames: {
     required: false,
-    desc: 'Skip creating an org if the given name is already taken within the Group.',
-  }
+    desc:
+      'Skip creating an organization if the given name is already taken within the Group.',
+  },
 };
 
 export async function handler(argv: {
   file: string;
-  noDuplicateNames: false;
+  noDuplicateNames?: boolean;
 }): Promise<void> {
   try {
     getLoggingPath();
     const { file, noDuplicateNames } = argv;
     debug('ℹ️  Options: ' + JSON.stringify(argv));
-    const res = await createOrgs(file, noDuplicateNames)
+    const res = await createOrgs(file, noDuplicateNames);
 
     const orgsMessage =
       res.orgs.length > 0

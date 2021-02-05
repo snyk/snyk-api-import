@@ -3,14 +3,11 @@ import * as parseLinkHeader from 'parse-link-header';
 import * as debugLib from 'debug';
 
 import { getGithubBaseUrl } from './github-base-url';
+import { GithubOrgData, SnykOrgData } from './types';
+import { getGithubToken } from './get-github-token';
 
-const debug = debugLib('snyk:list-orgs-script');
+const debug = debugLib('snyk:github');
 
-export interface GithubOrgData {
-  name: string;
-  id: number;
-  url: string;
-}
 async function fetchOrgsForPage(
   octokit: Octokit,
   pageNumber = 1,
@@ -77,17 +74,27 @@ async function fetchAllOrgs(
 }
 
 export async function listGithubOrgs(host?: string): Promise<GithubOrgData[]> {
-  const githubToken = process.env.GITHUB_TOKEN;
-  if (!githubToken) {
-    throw new Error(
-      `Please set the GITHUB_TOKEN e.g. export GITHUB_TOKEN='mypersonalaccesstoken123'`,
-    );
-  }
-
+  const githubToken = getGithubToken();
   const baseUrl = getGithubBaseUrl(host);
   const octokit: Octokit = new Octokit({ baseUrl, auth: githubToken });
   debug('Fetching all Github organizations data');
-
   const orgs = await fetchAllOrgs(octokit, undefined, !!host);
   return orgs;
+}
+
+export async function githubEnterpriseOrganizations(
+  sourceUrl?: string,
+): Promise<SnykOrgData[]> {
+  if (!sourceUrl) {
+    throw new Error(
+      'Please provide required `sourceUrl` for Github Enterprise source',
+    );
+  }
+  const ghOrgs: GithubOrgData[] = await listGithubOrgs(sourceUrl);
+  return ghOrgs;
+}
+
+export async function githubOrganizations(): Promise<SnykOrgData[]> {
+  const ghOrgs: GithubOrgData[] = await listGithubOrgs();
+  return ghOrgs;
 }

@@ -1,8 +1,12 @@
 import * as _ from 'lodash';
 
-import { CreatedOrg, ImportTarget, SupportedIntegrationTypesToGenerateImportData } from '../lib/types';
+import {
+  CreatedOrg,
+  ImportTarget,
+  SupportedIntegrationTypesToGenerateImportData,
+} from '../lib/types';
 import { writeFile } from '../write-file';
-import { GithubRepoData, listGithubRepos } from './github';
+import { GithubRepoData, listGithubRepos } from '../lib';
 
 async function githubRepos(orgName: string): Promise<GithubRepoData[]> {
   const ghRepos: GithubRepoData[] = await listGithubRepos(orgName);
@@ -14,7 +18,9 @@ async function githubEnterpriseRepos(
   sourceUrl?: string,
 ): Promise<GithubRepoData[]> {
   if (!sourceUrl) {
-    throw new Error('Please provide required `sourceUrl` for Github Enterprise source')
+    throw new Error(
+      'Please provide required `sourceUrl` for Github Enterprise source',
+    );
   }
   const ghRepos: GithubRepoData[] = await listGithubRepos(orgName, sourceUrl);
   return ghRepos;
@@ -72,7 +78,10 @@ export async function generateTargetsImportDataFile(
     const { name, integrations, orgId } = topLevelEntity;
     try {
       validateRequiredOrgData(name, integrations, orgId);
-      const entities = await sourceGenerators[source](topLevelEntity.name, sourceUrl);
+      const entities = await sourceGenerators[source](
+        topLevelEntity.name,
+        sourceUrl,
+      );
       entities.forEach((entity) => {
         targetsData.push({
           target: entity,

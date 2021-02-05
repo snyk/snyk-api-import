@@ -12,3 +12,6 @@ export * from './get-logging-path';
 export * from './get-snyk-host';
 export * from './get-all-orgs-for-group';
 export * from './filter-out-existing-orgs';
+
+
+export * from './source-handlers/github';

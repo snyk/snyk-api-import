@@ -10,6 +10,6 @@ Options:
   --help              Show help                                        [boolean]
   --file              Path to data file generated with \`orgs:data\` command
                                                                       [required]
-  --noDuplicateNames  Skip creating an org if the given name is already taken
-                      within the Group."
+  --noDuplicateNames  Skip creating an organization if the given name is already
+                      taken within the Group."
 `;

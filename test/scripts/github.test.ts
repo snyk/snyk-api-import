@@ -1,5 +1,5 @@
-import { listGithubOrgs } from '../../src/scripts/github/list-orgs';
-import { listGithubRepos } from '../../src/scripts/github/list-repos';
+import { listGithubOrgs } from '../../src/lib/source-handlers/github/list-organizations';
+import { listGithubRepos } from '../../src/lib/source-handlers/github/list-repos';
 
 describe('listGithubOrgs script', () => {
   const OLD_ENV = process.env;

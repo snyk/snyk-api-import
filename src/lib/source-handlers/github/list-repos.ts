@@ -1,21 +1,17 @@
 import { Octokit } from '@octokit/rest';
 import * as debugLib from 'debug';
+import { getGithubToken } from './get-github-token';
 
 import { getGithubBaseUrl } from './github-base-url';
+import { GithubRepoData } from './types';
 
 const debug = debugLib('snyk:list-repos-script');
 
-export interface GithubRepoData {
-  fork: boolean;
-  branch?: string;
-  owner?: string;
-  name: string;
-}
-
-async function fetchReposForPage(
+export async function fetchReposForPage(
   octokit: Octokit,
   orgName: string,
   pageNumber = 1,
+  perPage = 100,
 ): Promise<{
   repos: GithubRepoData[];
   hasNextPage: boolean;
@@ -23,7 +19,7 @@ async function fetchReposForPage(
   const repoData: GithubRepoData[] = [];
   const params = {
     // eslint-disable-next-line @typescript-eslint/camelcase
-    per_page: 100,
+    per_page: perPage,
     page: pageNumber,
     org: orgName,
   };
@@ -45,7 +41,7 @@ async function fetchReposForPage(
   } else {
     hasNextPage = false;
   }
-  return { repos: repoData, hasNextPage};
+  return { repos: repoData, hasNextPage };
 }
 
 async function fetchAllRepos(
@@ -58,8 +54,12 @@ async function fetchAllRepos(
   let hasMorePages = true;
   while (hasMorePages) {
     currentPage = currentPage + 1;
-    debug(`Fetching page: ${currentPage}`)
-    const { repos, hasNextPage } = await fetchReposForPage(octokit, orgName, currentPage);
+    debug(`Fetching page: ${currentPage}`);
+    const { repos, hasNextPage } = await fetchReposForPage(
+      octokit,
+      orgName,
+      currentPage,
+    );
     hasMorePages = hasNextPage;
     repoData.push(...repos);
   }
@@ -70,15 +70,10 @@ export async function listGithubRepos(
   orgName: string,
   host?: string,
 ): Promise<GithubRepoData[]> {
-  const githubToken = process.env.GITHUB_TOKEN;
-  if (!githubToken) {
-    throw new Error(
-      `Please set the GITHUB_TOKEN e.g. export GITHUB_TOKEN='mypersonalaccesstoken123'`,
-    );
-  }
+  const githubToken = getGithubToken();
   const baseUrl = getGithubBaseUrl(host);
   const octokit: Octokit = new Octokit({ baseUrl, auth: githubToken });
-  debug(`Fetching all repos data for org: ${orgName}`)
+  debug(`Fetching all repos data for org: ${orgName}`);
   const repos = await fetchAllRepos(octokit, orgName);
 
   return repos;
