@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "orgId": "f0125d9b-271a-4b50-ad23-80e12575a1bf",
+      "orgId": "74e2f385-a54f-491e-9034-76c53e72927a",
       "target": {
         "name": "shallow-goof-policy",
         "owner": "snyk-fixtures",

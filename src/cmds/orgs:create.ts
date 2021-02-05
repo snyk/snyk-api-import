@@ -13,16 +13,21 @@ export const builder = {
     default: undefined,
     desc: 'Path to data file generated with `orgs:data` command',
   },
+  noDuplicateNames: {
+    required: false,
+    desc: 'Skip creating an org if the given name is already taken within the Group.',
+  }
 };
 
 export async function handler(argv: {
   file: string;
+  noDuplicateNames: false;
 }): Promise<void> {
   try {
     getLoggingPath();
-    const { file } = argv;
+    const { file, noDuplicateNames } = argv;
     debug('ℹ️  Options: ' + JSON.stringify(argv));
-    const res = await createOrgs(file)
+    const res = await createOrgs(file, noDuplicateNames)
 
     const orgsMessage =
       res.orgs.length > 0
