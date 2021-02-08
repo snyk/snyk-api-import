@@ -3,7 +3,6 @@ import * as path from 'path';
 import { requestsManager } from 'snyk-request-manager';
 import * as pMap from 'p-map';
 import * as fs from 'fs';
-import * as _ from 'lodash';
 import split = require('split');
 
 import { loadFile } from '../load-file';
