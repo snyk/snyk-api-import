@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`\`snyk-api-import orgs:data <...>\` Generates orgs data as expected 1`] = `"Found 9 org(s). Written the data to file: group-hello-github-com-orgs.json"`;
+exports[`\`snyk-api-import orgs:data <...>\` Generates orgs data as expected 1`] = `"Found 9 organization(s). Written the data to file: group-hello-github-com-orgs.json"`;
 
 exports[`\`snyk-api-import orgs:data <...>\` Shows error when missing groupId 1`] = `
 [Error: Command failed: node ./dist/index.js orgs:data --source=github
@@ -19,6 +19,8 @@ Options:
                        settings)                                      [required]
   --sourceUrl          Custom base url for the source API that can list
                        organizations (e.g. Github Enterprise url)
+  --skipEmptyOrgs      Skip any organizations that do not any targets. (e.g.
+                       Github Organization does not have any repos)
   --source             The source of the targets to be imported e.g. Github,
                        Github Enterprise
          [required] [choices: "github", "github-enterprise"] [default: "github"]
@@ -43,6 +45,8 @@ Options:
                        settings)                                      [required]
   --sourceUrl          Custom base url for the source API that can list
                        organizations (e.g. Github Enterprise url)
+  --skipEmptyOrgs      Skip any organizations that do not any targets. (e.g.
+                       Github Organization does not have any repos)
   --source             The source of the targets to be imported e.g. Github,
                        Github Enterprise
          [required] [choices: \\"github\\", \\"github-enterprise\\"] [default: \\"github\\"]"

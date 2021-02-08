@@ -3,7 +3,7 @@ const debug = debugLib('snyk:generate-data-script');
 
 import { getLoggingPath } from '../lib/get-logging-path';
 import { SupportedIntegrationTypesToGenerateImportData } from '../lib/types';
-import { generateOrgImportDataFile } from '../scripts/generate-org-data';
+import { entityName, generateOrgImportDataFile } from '../scripts/generate-org-data';
 
 export const command = ['orgs:data'];
 export const desc =
@@ -26,6 +26,11 @@ export const builder = {
     desc:
       'Custom base url for the source API that can list organizations (e.g. Github Enterprise url)',
   },
+  skipEmptyOrgs: {
+    required: false,
+    desc:
+      'Skip any organizations that do not any targets. (e.g. Github Organization does not have any repos)',
+  },
   source: {
     required: true,
     default: SupportedIntegrationTypesToGenerateImportData.GITHUB,
@@ -35,22 +40,22 @@ export const builder = {
   },
 };
 
-const entityName: {
-  [source in SupportedIntegrationTypesToGenerateImportData]: string;
-} = {
-  github: 'org',
-  'github-enterprise': 'org',
-};
-
 export async function handler(argv: {
   source: SupportedIntegrationTypesToGenerateImportData;
   groupId: string;
   sourceOrgPublicId?: string;
   sourceUrl?: string;
+  skipEmptyOrgs?: boolean;
 }): Promise<void> {
   try {
     getLoggingPath();
-    const { source, sourceOrgPublicId, groupId, sourceUrl } = argv;
+    const {
+      source,
+      sourceOrgPublicId,
+      groupId,
+      sourceUrl,
+      skipEmptyOrgs = false,
+    } = argv;
     debug('ℹ️  Options: ' + JSON.stringify(argv));
 
     const res = await generateOrgImportDataFile(
@@ -58,6 +63,7 @@ export async function handler(argv: {
       groupId,
       sourceOrgPublicId,
       sourceUrl,
+      skipEmptyOrgs,
     );
     const orgsMessage =
       res.orgs.length > 0
