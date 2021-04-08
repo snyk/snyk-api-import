@@ -1,13 +1,15 @@
+import * as _ from 'lodash';
+
 import { requestsManager } from 'snyk-request-manager';
 import { getAllOrgs } from './get-all-orgs-for-group';
-import { CreateOrgData } from './types';
+import { CreateOrgData, Org } from './types';
 
 export async function filterOutExistingOrgs(
   requestManager: requestsManager,
   orgs: CreateOrgData[] = [],
   groupId: string,
 ): Promise<{
-  existingOrgs: CreateOrgData[];
+  existingOrgs: Org[];
   newOrgs: CreateOrgData[];
 }> {
   if (!groupId) {
@@ -17,17 +19,25 @@ export async function filterOutExistingOrgs(
     return { existingOrgs: [], newOrgs: [] };
   }
 
-  const existingOrgs: CreateOrgData[] = [];
+  const existingOrgs: Org[] = [];
   const newOrgs: CreateOrgData[] = [];
   const groupOrgs = await getAllOrgs(requestManager, groupId);
   const uniqueOrgNames: Set<string> = new Set(groupOrgs.map((org) => org.name));
   for (const org of orgs) {
-    if (uniqueOrgNames.has(org.name)) {
-      existingOrgs.push(org);
-      continue;
+    if (!uniqueOrgNames.has(org.name)) {
+      newOrgs.push(org);
     }
-    newOrgs.push(org);
+  }
+  if (existingOrgs.length > 0) {
+    console.log(
+      `Skipped creating ${
+        existingOrgs.length
+      } organization(s) as the names were already used in the Group ${groupId}. Organizations skipped: ${existingOrgs
+        .map((o) => o.name)
+        .join(', ')}`,
+    );
   }
 
-  return { existingOrgs, newOrgs };
+  return { existingOrgs: groupOrgs, newOrgs };
 }
+
