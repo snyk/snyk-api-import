@@ -51,7 +51,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
         done();
       },
     );
-  }, 10000);
+  }, 20000);
 
   it('Generates Snyk imported targets data as expected for all integrations by default for an Org', async (done) => {
     return exec(
