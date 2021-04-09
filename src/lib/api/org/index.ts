@@ -69,12 +69,12 @@ interface NotificationSettings {
 export async function setNotificationPreferences(
   requestManager: requestsManager,
   orgId: string,
-  orgData: CreateOrgData,
+  orgName: string,
   settings: NotificationSettings = defaultDisabledSettings,
 ): Promise<IntegrationsListResponse> {
   getApiToken();
   getSnykHost();
-  debug(`Disabling notifications for org: ${orgData.name} (${orgId})`);
+  debug(`Disabling notifications for org: ${orgName} (${orgId})`);
 
   if (!orgId) {
     throw new Error(

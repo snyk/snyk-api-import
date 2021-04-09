@@ -57,12 +57,13 @@ describe('Orgs API', () => {
       orgs,
       GROUP_ID,
     );
-    expect(existingOrgs).toEqual([
-      {
-        groupId: GROUP_ID,
-        name: ORG_NAME,
-      },
-    ]);
+    expect(existingOrgs.filter((o) => o.name === ORG_NAME)[0]).toMatchObject({
+      name: ORG_NAME,
+      id: expect.any(String),
+      slug: expect.any(String),
+      url: expect.any(String),
+      group: expect.any(Object),
+    });
     expect(newOrgs).toEqual([
       {
         groupId: GROUP_ID,

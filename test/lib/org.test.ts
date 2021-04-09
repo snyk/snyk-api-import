@@ -21,10 +21,7 @@ describe('Org notification settings', () => {
     const res = await setNotificationPreferences(
       requestManager,
       ORG_ID,
-      {
-        groupId: 'exampleGroupId',
-        name: 'exampleName',
-      },
+      'exampleName',
       {
         'test-limit': {
           enabled: false,
@@ -38,10 +35,11 @@ describe('Org notification settings', () => {
     });
   }, 5000);
   it('Default disables all notifications', async () => {
-    const res = await setNotificationPreferences(requestManager, ORG_ID, {
-      groupId: 'exampleGroupId',
-      name: 'exampleName',
-    });
+    const res = await setNotificationPreferences(
+      requestManager,
+      ORG_ID,
+      'exampleName',
+    );
     expect(res).toEqual({
       'new-issues-remediations': {
         enabled: false,
