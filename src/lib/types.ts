@@ -107,6 +107,7 @@ export interface SnykProject {
     low: number;
     high: number;
     medium: number;
+    critical: number;
   };
   remoteRepoUrl: string; // URL of the repo
   lastTestedDate: string;
