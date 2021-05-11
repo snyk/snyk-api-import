@@ -38,7 +38,7 @@
   ],
   "homepage": "https://github.com/snyk-tech-services/snyk-api-import#readme",
   "dependencies": {
-    "@octokit/rest": "18.5.2",
+    "@octokit/rest": "18.5.3",
     "@snyk/configstore": "^3.2.0-rc1",
     "axios": "^0.21.0",
     "bunyan": "1.8.15",
@@ -63,6 +63,7 @@
     "@types/lodash": "^4.14.149",
     "@types/needle": "2.0.4",
     "@types/node": "^12.12.26",
+    "@octokit/types": "6.14.2",
     "@types/parse-link-header": "1.0.0",
     "@types/split": "1.0.0",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
