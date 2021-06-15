@@ -13,7 +13,6 @@ import {
 } from '../lib';
 import { Project, ImportTarget } from '../lib/types';
 import { getLoggingPath } from '../lib';
-import { logImportedBatch } from '../loggers/log-imported-batch';
 import { IMPORT_LOG_NAME } from '../common';
 import { generateTargetId } from '../generate-target-id';
 
@@ -154,23 +153,9 @@ export async function importProjects(
     targetIndex < filteredTargets.length;
     targetIndex = targetIndex + concurrentTargets
   ) {
-    const batch = filteredTargets.slice(
-      targetIndex,
-      targetIndex + concurrentTargets,
-    );
-    const currentTargets = skippedTargets + targetIndex + 1;
-    const fullTargetsNumber = filteredTargets.length + skippedTargets;
-    let currentBatchEnd = currentTargets + concurrentTargets - 1;
-    if (currentBatchEnd > fullTargetsNumber) {
-      currentBatchEnd = currentTargets;
-    }
-    const batchProgressMessages = `Importing batch ${currentTargets} - ${currentBatchEnd} out of ${fullTargetsNumber} ${
-      skippedTargets > 0 ? `(skipped ${skippedTargets})` : ''
-    }`;
-    logImportedBatch(batchProgressMessages);
     const pollingUrlsAndContext = await importTargets(
       requestManager,
-      batch,
+      targets,
       loggingPath,
     );
     const res = await pollImportUrls(requestManager, pollingUrlsAndContext);

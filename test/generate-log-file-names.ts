@@ -6,7 +6,6 @@ import {
   FAILED_PROJECTS_LOG_NAME,
   IMPORT_JOBS_LOG_NAME,
   IMPORTED_PROJECTS_LOG_NAME,
-  IMPORTED_BATCHES_LOG_NAME,
   IMPORT_JOB_RESULTS,
 } from '../src/common';
 
@@ -19,7 +18,6 @@ export function generateLogsPaths(
   failedProjectsLogPath: string;
   importJobIdsLogsPath: string;
   importedProjectsLogPath: string;
-  importedBatchesLogPath: string;
   importJobsLogPath: string;
 } {
   process.env.SNYK_LOG_PATH = logPath;
@@ -40,10 +38,6 @@ export function generateLogsPaths(
     logPath,
     `${orgId}.${IMPORTED_PROJECTS_LOG_NAME}`,
   );
-  const importedBatchesLogPath = path.resolve(
-    logPath,
-    IMPORTED_BATCHES_LOG_NAME,
-  );
   const importJobsLogPath = path.resolve(logPath, IMPORT_JOB_RESULTS);
   return {
     importLogPath,
@@ -51,7 +45,6 @@ export function generateLogsPaths(
     failedProjectsLogPath,
     importJobIdsLogsPath,
     importedProjectsLogPath,
-    importedBatchesLogPath,
     importJobsLogPath,
   };
 }

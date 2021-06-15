@@ -1,6 +1,6 @@
 import { requestsManager } from 'snyk-request-manager';
 import {
-  importTarget,
+  importBulk,
   pollImportUrl,
   importTargets,
   pollImportUrls,
@@ -29,15 +29,21 @@ describe('Single target', () => {
     const requestManager = new requestsManager({
       userAgentPrefix: 'snyk-api-import:tests',
     });
-    const { pollingUrl } = await importTarget(
+    const { pollingUrl } = await importBulk(
       requestManager,
       ORG_ID,
       INTEGRATION_ID,
-      {
-        name: 'ruby-with-versions',
-        owner: 'snyk-fixtures',
-        branch: 'master',
-      },
+      [
+        {
+          orgId: ORG_ID,
+          integrationId: INTEGRATION_ID,
+          target: {
+            name: 'ruby-with-versions',
+            owner: 'snyk-fixtures',
+            branch: 'master',
+          }
+        }
+      ],
     );
     expect(pollingUrl).not.toBeNull();
     const { projects } = await pollImportUrl(requestManager, pollingUrl);

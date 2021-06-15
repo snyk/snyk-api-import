@@ -69,8 +69,7 @@ describe('Import skips previously imported', () => {
       ),
     );
     expect(projects.length === 0).toBeTruthy();
-    // give file a little time to be finished to be written
-    await new Promise((r) => setTimeout(r, 1000));
+
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
     expect(logFile).toMatch('composer-with-vulns:snyk-fixtures:master');
   }, 240000);
@@ -86,13 +85,14 @@ describe('Skips & logs issues', () => {
   let logs: string[];
 
   afterEach(async () => {
-    await deleteFiles(logs);
+    deleteFiles(logs);
     process.env = { ...OLD_ENV };
   }, 1000);
 
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
   });
+  
   it('Skips any badly formatted targets', async () => {
     const logRoot = __dirname + '/fixtures/invalid-target/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
@@ -114,10 +114,11 @@ describe('Skips & logs issues', () => {
     await new Promise((r) => setTimeout(r, 500));
     const failedLog = fs.readFileSync(logFiles.failedImportLogPath, 'utf8');
     expect(failedLog).toMatch('ruby-with-versions');
-  }, 3000);
+  }, 240000);
 
   it('Logs failed when API errors', async () => {
     // this folder does not exist and will be created on run
+    process.env.CONCURRENT_IMPORTS = '1';
     const logRoot = __dirname + '/fixtures/failed-batch-log/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
@@ -139,6 +140,8 @@ describe('Skips & logs issues', () => {
     } catch (e) {
       expect(logFile).toBeNull();
     }
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 1000));
     const failedLog = fs.readFileSync(logFiles.failedImportLogPath, 'utf8');
     expect(failedLog).toMatch('ruby-with-versions');
     // delete auto generated folder
@@ -148,6 +151,7 @@ describe('Skips & logs issues', () => {
       // ignore
     }
   }, 240000);
+  
   it('Logs failed projects', async () => {
     const logRoot = __dirname + '/fixtures/projects-with-errors/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
@@ -155,15 +159,10 @@ describe('Skips & logs issues', () => {
     const { projects } = await importProjects(
       path.resolve(
         __dirname + '/fixtures/projects-with-errors/import-projects.json',
-      ),
+      )
     );
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
     expect(logFile).not.toBeNull();
-    const batchesLogFile = fs.readFileSync(
-      logFiles.importedBatchesLogPath,
-      'utf8',
-    );
-    expect(batchesLogFile).not.toBeNull();
     // give file a little time to be finished to be written
     await new Promise((r) => setTimeout(r, 500));
     const failedProjectsLog = fs.readFileSync(
@@ -193,7 +192,7 @@ describe('Skips & logs issues', () => {
     );
     expect(importedProjectsLog).not.toBeNull();
     discoveredProjects.push(...projects);
-  }, 50000);
+  }, 240000);
 });
 
 describe('Error handling', () => {
@@ -261,7 +260,7 @@ describe('No projects scenarios', () => {
     const logFile = fs.readFileSync(logFiles.importJobsLogPath, 'utf8');
     expect(logFile).toMatch(`"status":"complete","projects":[]}`);
     expect(logFile).toMatch(`"logs":[{"name":"snyk-fixtures/empty-repo"`);
-  }, 30000);
+  }, 240000);
 
   it('succeeds to complete import from repo with no supported manifests', async () => {
     const testName = 'no-supported-manifests';
@@ -284,5 +283,5 @@ describe('No projects scenarios', () => {
     expect(logFile).toMatch(
       `"logs":[{"name":"snyk-fixtures/no-supported-manifests"`,
     );
-  }, 30000);
+  }, 240000);
 });
