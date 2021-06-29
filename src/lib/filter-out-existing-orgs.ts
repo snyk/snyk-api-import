@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 
 import { requestsManager } from 'snyk-request-manager';
-import { getAllOrgs } from './get-all-orgs-for-group';
+import { getAllOrgs } from './api/group';
 import { CreateOrgData, Org } from './types';
 
 export async function filterOutExistingOrgs(
