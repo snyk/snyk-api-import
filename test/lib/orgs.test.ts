@@ -2,7 +2,6 @@ import { requestsManager } from 'snyk-request-manager';
 import {
   filterOutExistingOrgs,
   getAllOrgs,
-  listAllOrgsTokenBelongsTo,
 } from '../../src/lib';
 import { CreateOrgData } from '../../src/lib/types';
 
@@ -23,22 +22,6 @@ describe('Orgs API', () => {
   });
   afterAll(async () => {
     process.env = { ...OLD_ENV };
-  });
-  it('Lists all Orgs a token belongs to', async () => {
-    const res = await listAllOrgsTokenBelongsTo(requestManager);
-    expect(res).toMatchObject({
-      orgs: expect.any(Array),
-    });
-    expect(res.orgs.filter((org) => org.group)[0]).toMatchObject({
-      name: expect.any(String),
-      id: expect.any(String),
-      slug: expect.any(String),
-      url: expect.any(String),
-      group: {
-        name: expect.any(String),
-        id: expect.any(String),
-      },
-    });
   });
 
   it('Split orgs into existing & new for a Group', async () => {

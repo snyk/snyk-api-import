@@ -3,7 +3,7 @@ import { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
-import { CreateOrgData, SnykProject } from '../../types';
+import { SnykProject } from '../../types';
 
 const debug = debugLib('snyk:api-group');
 
