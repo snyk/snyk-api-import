@@ -161,3 +161,130 @@ describe('generateTargetsImportDataFile Github script', () => {
     });
   });
 });
+
+describe('generateTargetsImportDataFile Gitlab script', () => {
+  const OLD_ENV = process.env;
+  process.env.SNYK_LOG_PATH = __dirname;
+  const filesToDelete: string[] = [];
+  afterEach(async () => {
+    process.env = { ...OLD_ENV };
+    await deleteFiles(filesToDelete);
+  });
+  it('generate Gitlab repo data', async () => {
+    const GITLAB_BASE_URL = process.env.TEST_GITLAB_BASE_URL;
+    const GITLAB_ORG_NAME = process.env.TEST_GITLAB_ORG_NAME as string;
+    process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
+
+    filesToDelete.push(path.resolve(__dirname + '/gitlab-import-targets.json'));
+    const orgsData: CreatedOrg[] = [
+      {
+        orgId: 'org-id',
+        name: GITLAB_ORG_NAME,
+        groupId: 'group-id',
+        origName: GITLAB_ORG_NAME,
+        integrations: {
+          gitlab: 'gitlab-********-********',
+        },
+        sourceOrgId: 'source-org-id',
+      },
+    ];
+
+    const res = await generateTargetsImportDataFile(
+      SupportedIntegrationTypesToGenerateImportData.GITLAB,
+      orgsData,
+      SupportedIntegrationTypesToGenerateImportData.GITLAB,
+      GITLAB_BASE_URL,
+    );
+    expect(res.fileName).toEqual('gitlab-import-targets.json');
+    expect(res.targets.length > 0).toBeTruthy();
+    expect(res.targets[0]).toEqual({
+      target: {
+        id: expect.any(Number),
+        branch: expect.any(String),
+        name: expect.any(String),
+        fork: expect.any(Boolean),
+      },
+      integrationId: 'gitlab-********-********',
+      orgId: 'org-id',
+    });
+  }, 10000);
+
+  it('generate Gitlab repo data when no integrations are available', async () => {
+    const GITLAB_BASE_URL = process.env.TEST_GITLAB_BASE_URL;
+    const GITLAB_ORG_NAME = process.env.TEST_GITLAB_ORG_NAME as string;
+    process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
+
+    const orgsData: CreatedOrg[] = [
+      {
+        orgId: 'org-id',
+        name: GITLAB_ORG_NAME,
+        groupId: 'group-id',
+        origName: GITLAB_ORG_NAME,
+        integrations: {},
+        sourceOrgId: 'source-org-id',
+      },
+    ];
+
+    expect(
+      generateTargetsImportDataFile(
+        SupportedIntegrationTypesToGenerateImportData.GITLAB,
+        orgsData,
+        SupportedIntegrationTypesToGenerateImportData.GITLAB,
+        GITLAB_BASE_URL,
+      ),
+    ).rejects.toThrow(
+      'No targets could be generated. Check the error output & try again.',
+    );
+  }, 10000);
+  it('Duplicate orgs are ignored', async () => {
+    const GITLAB_BASE_URL = process.env.TEST_GITLAB_BASE_URL;
+    const GITLAB_ORG_NAME = process.env.TEST_GITLAB_ORG_NAME as string;
+    process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
+
+    filesToDelete.push(path.resolve(__dirname + '/gitlab-import-targets.json'));
+    const orgsData: CreatedOrg[] = [
+      {
+        orgId: 'org-id',
+        name: GITLAB_ORG_NAME,
+        groupId: 'group-id',
+        origName: GITLAB_ORG_NAME,
+        integrations: {
+          gitlab: 'gitlab-********-********',
+        },
+        sourceOrgId: 'source-org-id',
+      },
+
+      // same again!
+      {
+        orgId: 'org-id',
+        name: GITLAB_ORG_NAME,
+        groupId: 'group-id',
+        origName: GITLAB_ORG_NAME,
+        integrations: {
+          gitlab: 'gitlab-********-********',
+        },
+        sourceOrgId: 'source-org-id',
+      },
+    ];
+
+    const res = await generateTargetsImportDataFile(
+      SupportedIntegrationTypesToGenerateImportData.GITLAB,
+      orgsData,
+      SupportedIntegrationTypesToGenerateImportData.GITLAB,
+      GITLAB_BASE_URL
+    );
+    expect(res.fileName).toEqual('gitlab-import-targets.json');
+    expect(res.targets.length > 0).toBeTruthy();
+    expect(_.uniqBy(res.targets, 'target.name')).toBeTruthy();
+    expect(res.targets[0]).toEqual({
+      target: {
+        id: expect.any(Number),
+        branch: expect.any(String),
+        name: expect.any(String),
+        fork: expect.any(Boolean),
+      },
+      integrationId: expect.any(String),
+      orgId: expect.any(String),
+    });
+  }, 10000);
+});

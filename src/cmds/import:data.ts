@@ -4,7 +4,7 @@ const debug = debugLib('snyk:generate-data-script');
 
 import {
   CreatedOrg,
-  SupportedIntegrationTypesToGenerateImportData,
+  SupportedIntegrationTypesImportData,
 } from '../lib/types';
 import { loadFile } from '../load-file';
 import { generateTargetsImportDataFile } from '../scripts/generate-targets-data';
@@ -20,10 +20,10 @@ export const builder = {
   },
   source: {
     required: true,
-    default: SupportedIntegrationTypesToGenerateImportData.GITHUB,
-    choices: [...Object.values(SupportedIntegrationTypesToGenerateImportData)],
+    default: SupportedIntegrationTypesImportData.GITHUB,
+    choices: [...Object.values(SupportedIntegrationTypesImportData)],
     desc:
-      'The source of the targets to be imported e.g. Github, Github Enterprise. This will be used to make an API call to list all available entities per org',
+      'The source of the targets to be imported e.g. Github, Github Enterprise, Gitlab. This will be used to make an API call to list all available entities per org',
   },
   sourceUrl: {
     required: false,
@@ -34,23 +34,24 @@ export const builder = {
   integrationType: {
     required: true,
     default: undefined,
-    choices: [...Object.values(SupportedIntegrationTypesToGenerateImportData)],
+    choices: [...Object.values(SupportedIntegrationTypesImportData)],
     desc:
       'The configured integration type on the created Snyk Org to use for generating import targets data. Applies to all targets.',
   },
 };
 
 const entityName: {
-  [source in SupportedIntegrationTypesToGenerateImportData]: string;
+  [source in SupportedIntegrationTypesImportData]: string;
 } = {
   github: 'org',
   'github-enterprise': 'org',
+  'gitlab': 'group',
 };
 
 export async function handler(argv: {
-  source: SupportedIntegrationTypesToGenerateImportData;
+  source: SupportedIntegrationTypesImportData;
   orgsData: string;
-  integrationType: SupportedIntegrationTypesToGenerateImportData;
+  integrationType: SupportedIntegrationTypesImportData;
   sourceUrl: string;
 }): Promise<void> {
   try {
@@ -65,11 +66,11 @@ export async function handler(argv: {
       orgsDataJson = [...orgsJson.orgData];
     } catch (e) {
       throw new Error(
-        `Failed to parse organizations from ${orgsData}. ERROR: ${e.message}`,
+        `Failed to parse ${entityName[source]}s from ${orgsData}. ERROR: ${e.message}`,
       );
     }
     if (orgsDataJson.length === 0) {
-      throw new Error(`No organizations could be loaded from ${orgsData}.`);
+      throw new Error(`No ${entityName[source]}s could be loaded from ${orgsData}.`);
     }
     const res = await generateTargetsImportDataFile(
       source,

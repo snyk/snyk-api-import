@@ -71,8 +71,16 @@ export interface PollImportResponse {
 }
 
 // used to generate import data by connecting to the source via API
-// and listing all orgs + repos / targets
-export enum SupportedIntegrationTypesToGenerateImportData {
+// and listing all repos / targets per given org
+export enum SupportedIntegrationTypesImportData {
+  GITHUB = 'github',
+  GHE = 'github-enterprise',
+  GITLAB = 'gitlab',
+}
+
+// used to generate import data by connecting to the source via API
+// and listing all orgs
+export enum SupportedIntegrationTypesImportOrgData {
   GITHUB = 'github',
   GHE = 'github-enterprise',
 }
