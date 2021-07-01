@@ -1,12 +1,39 @@
 # To kick off an import
 Any logs will be generated at `SNYK_LOG_PATH` directory.
 
-### 1. Create the `import-projects.json` file:
+### 1. Create the `import-projects.json` file
+
+The file is expected to have a **required** `targets` top level key which is an array of **import targets**. 
+```
+{
+  targets: [
+    {..},
+    {..}
+  ],
+}
+```
+
+Each **import target** has the following keys:
+```
+{
+  // required
+  "orgId": "<public_snyk_org_id>",
+  "integrationId": <"public_snyk_integration_id>",
+  "target": {..} // the identifier of where the projects can be found (for example branch, repo name and owner for Github)
+   
+   // optional
+  "files": [], 
+  "exclusionGlobs": [],
+
+}
+```
   - `orgId` - Can be found in https://app.snyk.io/org/YOUR_ORG/manage/settings
   - `integrationId` - Can be found in Integrations menu for each SCM https://app.snyk.io/org/YOUR_ORG/manage/settings
   - `target`, `files`, `exclusionGlobs` - see our [Import API documentation](https://snyk.docs.apiary.io/#reference/integrations/import-projects/import) for more info.
 
-  *Note*: For a repo that may have 200+ manifest files it is recommended to split this import into multiple by targeting specific files. Importing hundreds of files at once from 1 repo can cause the import to result in some errors/failures. Splitting it into to target some files, or some folders only will benefit from the re-tries and yield a smaller load on the source control management system being used. Populate the the `files` property to accomplish this in the import JSON.
+  *Note*: For a repo that may have 200+ manifest files it is recommended to split this import into multiple by targeting specific files. Importing hundreds of files at once from 1 repo can cause the import to result in some errors/failures. 
+
+Splitting it to target some files, or some folders only will benefit from the re-tries and yield a smaller load on the source control management system being used. Populate the the `files` property to accomplish this in the import JSON.
 
   If you have any tests ot fixtures that should be ignored, please set the `exclusionGLobs` property:
   > a comma-separated list of up to 10 folder names to exclude from scanning. If not specified, it will default to "fixtures, tests, __tests__, node_modules". If an empty string is provided - no folders will be excluded
@@ -85,7 +112,7 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
   ]
 }
 ```
-### 2. Set the env vars mentioned:
+### 2. Set the env vars:
   - `SNYK_IMPORT_PATH`- the path to the import file
   - `SNYK_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
   - `SNYK_LOG_PATH` - the path to folder where all logs should be saved,it is recommended creating a dedicated logs folder per import you have running. (Note: all logs will append)
