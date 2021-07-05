@@ -8,7 +8,7 @@ describe('`snyk-api-import help <...>`', () => {
   afterAll(async () => {
     process.env = { ...OLD_ENV };
   });
-  it('Shows help text as expected', async (done) => {
+  it('Shows help text as expected', (done) => {
     return exec(`node ${main} orgs:create help`, (err, stdout) => {
       if (err) {
         throw err;
@@ -18,7 +18,7 @@ describe('`snyk-api-import help <...>`', () => {
       done();
     });
   });
-  it('Fails to create an org as expected', async (done) => {
+  it('Fails to create an org as expected', (done) => {
     const pathToBadJson = path.resolve(
       __dirname + '/fixtures/create-orgs/fails-to-create/1-org.json',
     );
@@ -48,7 +48,7 @@ describe('`snyk-api-import help <...>`', () => {
     );
   });
 
-  it('Fail to create orgs in strict mode when org already exists ', async (done) => {
+  it('Fail to create orgs in strict mode when org already exists ', (done) => {
     const pathToBadJson = path.resolve(
       __dirname + '/fixtures/create-orgs/fails-to-create/1-org.json',
     );

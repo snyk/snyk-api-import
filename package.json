@@ -11,7 +11,7 @@
     "lint": "npm run format:check && npm run lint:eslint",
     "lint:eslint": "eslint --cache '{lib,test}/**/*.ts'",
     "test": "npm run lint && npm run build && npm run test:unit",
-    "test:unit": "jest --runInBand --ci --silent",
+    "test:unit": "jest --runInBand --ci --silent --clearCache",
     "test:unit:debug": "npm run build && DEBUG=* jest",
     "test:coverage": "npm run test:unit -- --coverage",
     "test:watch": "tsc-watch --onSuccess 'npm run test:unit'",
@@ -52,10 +52,10 @@
     "snyk-request-manager": "1.4.1",
     "source-map-support": "^0.5.16",
     "split": "1.0.1",
-    "tslib": "^1.10.0",
     "yargs": "16.2.0"
   },
   "devDependencies": {
+    "@octokit/types": "6.14.2",
     "@semantic-release/exec": "5.0.0",
     "@types/bunyan": "1.8.6",
     "@types/debug": "4.1.5",
@@ -63,19 +63,18 @@
     "@types/lodash": "^4.14.149",
     "@types/needle": "2.0.4",
     "@types/node": "^12.12.26",
-    "@octokit/types": "6.14.2",
     "@types/parse-link-header": "1.0.0",
     "@types/split": "1.0.0",
-    "@typescript-eslint/eslint-plugin": "^2.18.0",
-    "@typescript-eslint/parser": "^2.18.0",
-    "eslint": "^6.8.0",
+    "@typescript-eslint/eslint-plugin": "4.28.1",
+    "@typescript-eslint/parser": "4.28.1",
+    "eslint": "7.30.0",
     "eslint-config-prettier": "^6.10.0",
-    "jest": "^25.1.0",
+    "jest": "27.0.6",
     "prettier": "^1.19.1",
     "semantic-release": "17.3.0",
-    "ts-jest": "^25.1.0",
+    "ts-jest": "27.0.3",
     "tsc-watch": "^4.1.0",
-    "typescript": "^3.7.5"
+    "typescript": "4.3.5"
   },
   "pkg": {
     "scripts": [
