@@ -8,7 +8,7 @@ describe('`snyk-api-import orgs:data <...>`', () => {
   afterAll(async () => {
     process.env = { ...OLD_ENV };
   });
-  it('Shows help text as expected', async (done) => {
+  it('Shows help text as expected', (done) => {
     return exec(
       `node ${main} orgs:data help`,
       {
@@ -29,7 +29,7 @@ describe('`snyk-api-import orgs:data <...>`', () => {
     );
   });
 
-  it('Generates orgs data as expected', async (done) => {
+  it('Generates orgs data as expected', (done) => {
     const groupId = 'hello';
     return exec(
       `node ${main} orgs:data --source=github --groupId=${groupId}`,
@@ -51,7 +51,7 @@ describe('`snyk-api-import orgs:data <...>`', () => {
       },
     );
   }, 20000);
-  it('Shows error when missing groupId', async (done) => {
+  it('Shows error when missing groupId', (done) => {
     return exec(`node ${main} orgs:data --source=github`, (err, stdout) => {
       expect(err).toMatchSnapshot();
       expect(stdout).toEqual('');

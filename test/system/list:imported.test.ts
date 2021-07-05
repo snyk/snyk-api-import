@@ -14,7 +14,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
   afterAll(async () => {
     process.env = { ...OLD_ENV };
   });
-  it('Shows help text as expected', async (done) => {
+  it('Shows help text as expected', (done) => {
     return exec(`node ${main} list:imported help`, (err, stdout) => {
       if (err) {
         throw err;
@@ -25,7 +25,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
     });
   });
 
-  it('Generates Snyk imported targets data as expected for github + Group', async (done) => {
+  it('Generates Snyk imported targets data as expected for github + Group', (done) => {
     return exec(
       `node ${main} list:imported --integrationType=github --groupId=${GROUP_ID}`,
       {
@@ -53,7 +53,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
     );
   }, 20000);
 
-  it('Generates Snyk imported targets data as expected for all integrations by default for an Org', async (done) => {
+  it('Generates Snyk imported targets data as expected for all integrations by default for an Org', (done) => {
     return exec(
       `node ${main} list:imported --orgId=${ORG_ID}`,
       {
@@ -81,7 +81,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
     );
   }, 10000);
 
-  it('Generates Snyk imported targets data as expected for multiple integrations for an Org', async (done) => {
+  it('Generates Snyk imported targets data as expected for multiple integrations for an Org', (done) => {
     return exec(
       `node ${main} list:imported --integrationType=github --integrationType=github-enterprise --orgId=${ORG_ID}`,
       {
@@ -109,7 +109,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
     );
   }, 10000);
 
-  it('Generates Snyk imported targets data as expected for an Org', async (done) => {
+  it('Generates Snyk imported targets data as expected for an Org', (done) => {
     return exec(
       `node ${main} list:imported --integrationType=github --orgId=${ORG_ID}`,
       {
@@ -136,7 +136,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
       },
     );
   }, 10000);
-  it('Shows error when missing groupId & orgId', async (done) => {
+  it('Shows error when missing groupId & orgId', (done) => {
     return exec(
       `node ${main} list:imported --integrationType=github`,
       {
@@ -148,14 +148,16 @@ describe('`snyk-api-import list:imported <...>`', () => {
         },
       },
       (err, stdout, stderr) => {
-        expect(stderr).toMatch('Missing required parameters: orgId or groupId must be provided.');
+        expect(stderr).toMatch(
+          'Missing required parameters: orgId or groupId must be provided.',
+        );
         expect(err).toBe(null);
         expect(stdout).toEqual('');
         done();
       },
     );
   });
-  it('Shows error when missing groupId & orgId', async (done) => {
+  it('Shows error when missing groupId & orgId', (done) => {
     return exec(
       `node ${main} list:imported --integrationType=github --orgId=foo --groupId=bar`,
       {
@@ -167,7 +169,9 @@ describe('`snyk-api-import list:imported <...>`', () => {
         },
       },
       (err, stdout, stderr) => {
-        expect(stderr).toMatch('Too many parameters: orgId or groupId must be provided, not both');
+        expect(stderr).toMatch(
+          'Too many parameters: orgId or groupId must be provided, not both',
+        );
         expect(err).toBe(null);
         expect(stdout).toEqual('');
         done();

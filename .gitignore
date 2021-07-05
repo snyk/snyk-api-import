@@ -4,6 +4,7 @@ npm-debug.log
 dist
 .DS_Store
 *.log
+.dccache
 *import-job-results.json
 package-lock.json
 yarn.lock

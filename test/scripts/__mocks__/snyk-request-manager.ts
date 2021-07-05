@@ -1,13 +1,12 @@
-
-
-// eslint-disable-next-line @typescript-eslint/class-name-casing
 export class requestsManager {
-  params: any;
-  constructor(params: any = {}) {
+  params: unknown;
+  constructor(params: unknown = {}) {
     this.params = params;
   }
 
-  request = (request: any): Promise<any> => {
+  request = (request: {
+    verb: string,
+  }): Promise<unknown> => {
     return new Promise((resolve, reject) => {
       if (request.verb === 'get') {
         return reject({

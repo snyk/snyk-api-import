@@ -17,7 +17,7 @@ describe('`snyk-api-import import`', () => {
   afterEach(async () => {
     deleteFiles(logs);
   });
-  it('Import is default command', async (done) => {
+  it('Import is default command', (done) => {
     const testRoot = __dirname + '/fixtures/single-project';
     const logFiles = generateLogsPaths(testRoot, ORG_ID);
     logs = Object.values(logFiles);
@@ -48,7 +48,7 @@ Check the logs for any failures located at:`);
       },
     );
   }, 240000);
-  it('import triggers the API import', async (done) => {
+  it('import triggers the API import', (done) => {
     const testRoot = __dirname + '/fixtures';
     const logFiles = generateLogsPaths(testRoot, ORG_ID);
     logs = Object.values(logFiles);

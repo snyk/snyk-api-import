@@ -10,7 +10,7 @@ describe('`snyk-api-import help <...>`', () => {
   afterAll(async () => {
     process.env = { ...OLD_ENV };
   });
-  it('Shows help text as expected', async (done) => {
+  it('Shows help text as expected', (done) => {
     return exec(`node ${main} help`, (err, stdout) => {
       if (err) {
         throw err;
