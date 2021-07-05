@@ -24,7 +24,7 @@ describe('`snyk-api-import import`', () => {
 
     const importFile = path.resolve(testRoot + '/import-projects-single.json');
     const logPath = path.resolve(testRoot);
-    return exec(
+    exec(
       `node ${main}`,
       {
         env: {
@@ -56,7 +56,7 @@ Check the logs for any failures located at:`);
     const importFile = path.resolve(testRoot + '/import-projects.json');
     const logPath = path.resolve(testRoot);
 
-    return exec(
+    exec(
       `node ${main} import`,
       {
         env: {

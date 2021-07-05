@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import * as path from 'path';
 import {
   CreatedOrg,
-  SupportedIntegrationTypesToGenerateImportData,
+  SupportedIntegrationTypesImportData,
 } from '../../src/lib/types';
 import { generateTargetsImportDataFile } from '../../src/scripts/generate-targets-data';
 import { deleteFiles } from '../delete-files';
@@ -33,9 +33,9 @@ describe('generateTargetsImportDataFile Github script', () => {
     ];
 
     const res = await generateTargetsImportDataFile(
-      SupportedIntegrationTypesToGenerateImportData.GITHUB,
+      SupportedIntegrationTypesImportData.GITHUB,
       orgsData,
-      SupportedIntegrationTypesToGenerateImportData.GITHUB,
+      SupportedIntegrationTypesImportData.GITHUB,
     );
     expect(res.fileName).toEqual('github-import-targets.json');
     expect(res.targets.length > 0).toBeTruthy();
@@ -70,9 +70,9 @@ describe('generateTargetsImportDataFile Github script', () => {
     ];
 
     const res = await generateTargetsImportDataFile(
-      SupportedIntegrationTypesToGenerateImportData.GHE,
+      SupportedIntegrationTypesImportData.GHE,
       orgsData,
-      SupportedIntegrationTypesToGenerateImportData.GHE,
+      SupportedIntegrationTypesImportData.GHE,
       GHE_URL,
     );
     expect(res.fileName).toEqual('github-enterprise-import-targets.json');
@@ -104,9 +104,9 @@ describe('generateTargetsImportDataFile Github script', () => {
 
     expect(
       generateTargetsImportDataFile(
-        SupportedIntegrationTypesToGenerateImportData.GITHUB,
+        SupportedIntegrationTypesImportData.GITHUB,
         orgsData,
-        SupportedIntegrationTypesToGenerateImportData.GITHUB,
+        SupportedIntegrationTypesImportData.GITHUB,
       ),
     ).rejects.toThrow(
       'No targets could be generated. Check the error output & try again.',
@@ -142,9 +142,9 @@ describe('generateTargetsImportDataFile Github script', () => {
     ];
 
     const res = await generateTargetsImportDataFile(
-      SupportedIntegrationTypesToGenerateImportData.GITHUB,
+      SupportedIntegrationTypesImportData.GITHUB,
       orgsData,
-      SupportedIntegrationTypesToGenerateImportData.GITHUB,
+      SupportedIntegrationTypesImportData.GITHUB,
     );
     expect(res.fileName).toEqual('github-import-targets.json');
     expect(res.targets.length > 0).toBeTruthy();
@@ -190,9 +190,9 @@ describe('generateTargetsImportDataFile Gitlab script', () => {
     ];
 
     const res = await generateTargetsImportDataFile(
-      SupportedIntegrationTypesToGenerateImportData.GITLAB,
+      SupportedIntegrationTypesImportData.GITLAB,
       orgsData,
-      SupportedIntegrationTypesToGenerateImportData.GITLAB,
+      SupportedIntegrationTypesImportData.GITLAB,
       GITLAB_BASE_URL,
     );
     expect(res.fileName).toEqual('gitlab-import-targets.json');
@@ -227,9 +227,9 @@ describe('generateTargetsImportDataFile Gitlab script', () => {
 
     expect(
       generateTargetsImportDataFile(
-        SupportedIntegrationTypesToGenerateImportData.GITLAB,
+        SupportedIntegrationTypesImportData.GITLAB,
         orgsData,
-        SupportedIntegrationTypesToGenerateImportData.GITLAB,
+        SupportedIntegrationTypesImportData.GITLAB,
         GITLAB_BASE_URL,
       ),
     ).rejects.toThrow(
@@ -268,9 +268,9 @@ describe('generateTargetsImportDataFile Gitlab script', () => {
     ];
 
     const res = await generateTargetsImportDataFile(
-      SupportedIntegrationTypesToGenerateImportData.GITLAB,
+      SupportedIntegrationTypesImportData.GITLAB,
       orgsData,
-      SupportedIntegrationTypesToGenerateImportData.GITLAB,
+      SupportedIntegrationTypesImportData.GITLAB,
       GITLAB_BASE_URL
     );
     expect(res.fileName).toEqual('gitlab-import-targets.json');
