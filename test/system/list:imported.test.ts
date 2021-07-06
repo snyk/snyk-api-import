@@ -36,10 +36,11 @@ describe('`snyk-api-import list:imported <...>`', () => {
           SNYK_LOG_PATH: __dirname,
         },
       },
-      (err, stdout) => {
+      (err, stdout, stderr) => {
         if (err) {
           throw err;
         }
+        expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatch(
           `repo(s). Written the data to file: ${path.resolve(
@@ -64,10 +65,11 @@ describe('`snyk-api-import list:imported <...>`', () => {
           SNYK_LOG_PATH: __dirname,
         },
       },
-      (err, stdout) => {
+      (err, stdout, stderr) => {
         if (err) {
           throw err;
         }
+        expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatch(
           `target(s). Written the data to file: ${path.resolve(
@@ -92,10 +94,11 @@ describe('`snyk-api-import list:imported <...>`', () => {
           SNYK_LOG_PATH: __dirname,
         },
       },
-      (err, stdout) => {
+      (err, stdout, stderr) => {
         if (err) {
           throw err;
         }
+        expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatch(
           `target(s). Written the data to file: ${path.resolve(
@@ -120,10 +123,11 @@ describe('`snyk-api-import list:imported <...>`', () => {
           SNYK_LOG_PATH: __dirname,
         },
       },
-      (err, stdout) => {
+      (err, stdout, stderr) => {
         if (err) {
           throw err;
         }
+        expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatch(
           `repo(s). Written the data to file: ${path.resolve(

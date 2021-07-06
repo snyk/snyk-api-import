@@ -18,10 +18,11 @@ describe('`snyk-api-import orgs:data <...>`', () => {
           SNYK_LOG_PATH: __dirname,
         },
       },
-      (err, stdout) => {
+      (err, stdout, stderr) => {
         if (err) {
           throw err;
         }
+        expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
         done();
@@ -40,10 +41,11 @@ describe('`snyk-api-import orgs:data <...>`', () => {
           SNYK_LOG_PATH: __dirname,
         },
       },
-      (err, stdout) => {
+      (err, stdout, stderr) => {
         if (err) {
           throw err;
         }
+        expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
         deleteFiles([`group-${groupId}-github-com-orgs.json`]);
