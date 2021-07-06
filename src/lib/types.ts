@@ -83,6 +83,7 @@ export enum SupportedIntegrationTypesImportData {
 export enum SupportedIntegrationTypesImportOrgData {
   GITHUB = 'github',
   GHE = 'github-enterprise',
+  GITLAB = 'gitlab',
 }
 
 // used to generate imported targets that exist in Snyk
@@ -92,7 +93,7 @@ export enum SupportedIntegrationTypesToListSnykTargets {
   GHE = 'github-enterprise',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
   GCR = 'gcr',
-  DOCKER_HUB = 'docker-hub'
+  DOCKER_HUB = 'docker-hub',
 }
 interface ImportingUser {
   id: string;

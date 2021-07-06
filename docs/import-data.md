@@ -10,7 +10,7 @@ This is a util that can help generate the import json data needed by the import 
 
 
 # `import:data`
-### Github.com / Github Enterprise
+## Github.com / Github Enterprise
 1. set the [Github.com personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) as an environment variable: `export GITHUB_TOKEN=your_personal_access_token`
 2. You will need to have the organizations data in json as an input to this command to help map Snyk organization IDs and Integration Ids that must be used during import against individual targets to be imported. The following format is required:
   ```
@@ -40,7 +40,7 @@ This is a util that can help generate the import json data needed by the import 
 
 4. Use the generated data to feed into [import] command (/import.md) to generate kick off the import.
 
-### Gitlab.com / Hosted Gitlab
+## Gitlab.com / Hosted Gitlab
 1. set the [Gitlab personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) as an environment variable: `export GITLAB_TOKEN=your_personal_access_token`
 2. You will need to have the organizations data in json as an input to this command to help map Snyk organization IDs and Integration Ids that must be used during import against individual targets to be imported. The following format is required:
   ```

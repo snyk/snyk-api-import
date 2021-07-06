@@ -137,3 +137,98 @@ describe('generateOrgImportDataFile Github script', () => {
     });
   }, 50000);
 });
+
+describe('generateOrgImportDataFile Gitlab script', () => {
+  const OLD_ENV = process.env;
+  process.env.SNYK_LOG_PATH = __dirname;
+  const filesToCleanup: string[] = [
+    __dirname + '/group-groupIdExample-gitlab-orgs.json',
+  ];
+  afterAll(async () => {
+    process.env = { ...OLD_ENV };
+  });
+
+  afterEach(async () => {
+    await deleteFiles(filesToCleanup);
+  });
+
+  it('generate Gitlab Orgs data', async () => {
+    process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
+    const GITLAB_URL = process.env.TEST_GITLAB_BASE_URL;
+
+    const groupId = 'groupIdExample';
+    const res = await generateOrgImportDataFile(
+      SupportedIntegrationTypesImportOrgData.GITLAB,
+      groupId,
+      undefined,
+      GITLAB_URL,
+    );
+    expect(res.fileName).toEqual(
+      'group-groupIdExample-gitlab-orgs.json',
+    );
+    expect(res.orgs.length > 0).toBeTruthy();
+    expect(res.skippedEmptyOrgs).toHaveLength(0);
+    expect(res.orgs[0]).toEqual({
+      name: expect.any(String),
+      groupId,
+    });
+  }, 50000);
+
+  it('generate Gitlab Orgs data and skips empty orgs', async () => {
+    process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
+    const GITLAB_URL = process.env.TEST_GITLAB_BASE_URL;
+
+    const groupId = 'groupIdExample';
+    const sourceOrgId = 'sourceOrgIdExample';
+
+    const res = await generateOrgImportDataFile(
+      SupportedIntegrationTypesImportOrgData.GITLAB,
+      groupId,
+      sourceOrgId,
+      GITLAB_URL,
+      true,
+    );
+    expect(res.fileName).toEqual('group-groupIdExample-gitlab-orgs.json');
+    expect(res.orgs.length > 0).toBeTruthy();
+    expect(res.skippedEmptyOrgs.length).toBeGreaterThanOrEqual(0);
+    expect(res.orgs[0]).toEqual({
+      name: expect.any(String),
+      groupId,
+      sourceOrgId,
+    });
+  });
+  it('generate Gitlab Orgs data without sourceOrgId', async () => {
+    process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
+    const GITLAB_URL = process.env.TEST_GITLAB_BASE_URL;
+
+    const groupId = 'groupIdExample';
+
+    const res = await generateOrgImportDataFile(
+      SupportedIntegrationTypesImportOrgData.GITLAB,
+      groupId,
+      undefined,
+      GITLAB_URL
+    );
+    expect(res.fileName).toEqual('group-groupIdExample-gitlab-orgs.json');
+    expect(res.orgs.length > 0).toBeTruthy();
+    expect(res.skippedEmptyOrgs).toHaveLength(0);
+    expect(res.orgs[0]).toEqual({
+      name: expect.any(String),
+      groupId,
+    });
+  });
+
+  it('throws an error when Gitlab Orgs requested without sourceUrl', async () => {
+    process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
+    const groupId = 'groupIdExample';
+
+    expect(
+      generateOrgImportDataFile(
+        SupportedIntegrationTypesImportOrgData.GITLAB,
+        groupId,
+      ),
+    ).rejects.toThrow(
+      '401 (Unauthorized)',
+    );
+  });
+});

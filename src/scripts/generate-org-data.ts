@@ -5,6 +5,7 @@ import {
   githubOrganizations,
   SnykOrgData,
 } from '../lib/source-handlers/github';
+import { listGitlabGroups, gitlabGroupIsEmpty } from '../lib/source-handlers/gitlab';
 import {
   CreateOrgData,
   SupportedIntegrationTypesImportOrgData,
@@ -12,6 +13,7 @@ import {
 import { writeFile } from '../write-file';
 
 const sourceGenerators = {
+  [SupportedIntegrationTypesImportOrgData.GITLAB]: listGitlabGroups,
   [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizations,
   [SupportedIntegrationTypesImportOrgData.GHE]: githubEnterpriseOrganizations,
 };
@@ -19,6 +21,7 @@ const sourceGenerators = {
 const sourceNotEmpty = {
   [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizationIsEmpty,
   [SupportedIntegrationTypesImportOrgData.GHE]: githubOrganizationIsEmpty,
+  [SupportedIntegrationTypesImportOrgData.GITLAB]: gitlabGroupIsEmpty,
 };
 
 export const entityName: {
@@ -26,6 +29,15 @@ export const entityName: {
 } = {
   github: 'organization',
   'github-enterprise': 'organization',
+  gitlab: 'group',
+};
+
+const exportFileName: {
+  [source in SupportedIntegrationTypesImportOrgData]: string;
+} = {
+  github: 'github-com',
+  'github-enterprise': 'github-enterprise',
+  gitlab: 'gitlab',
 };
 
 export async function generateOrgImportDataFile(
@@ -69,9 +81,7 @@ export async function generateOrgImportDataFile(
     { concurrency: 10 },
   );
 
-  const fileName = `group-${groupId}-${
-    sourceUrl ? 'github-enterprise' : 'github-com'
-  }-orgs.json`;
+  const fileName = `group-${groupId}-${exportFileName[source]}-orgs.json`;
   await writeFile(fileName, ({
     orgs: orgData,
   } as unknown) as JSON);
