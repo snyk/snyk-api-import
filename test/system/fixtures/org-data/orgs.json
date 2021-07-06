@@ -1,0 +1,11 @@
+{
+  "orgData": [
+    {
+      "name": "snyk-fixtures",
+      "orgId": "<snyk_org_id>",
+      "integrations": {
+        "gitlab": "<snyk_org_integration_id>"
+      }
+    }
+  ]
+}

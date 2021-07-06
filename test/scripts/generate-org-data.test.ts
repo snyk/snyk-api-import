@@ -1,4 +1,4 @@
-import { SupportedIntegrationTypesToGenerateImportData } from '../../src/lib/types';
+import { SupportedIntegrationTypesImportOrgData } from '../../src/lib/types';
 import { generateOrgImportDataFile } from '../../src/scripts/generate-org-data';
 import { deleteFiles } from '../delete-files';
 
@@ -22,7 +22,7 @@ describe('generateOrgImportDataFile Github script', () => {
     const sourceOrgId = 'sourceOrgIdExample';
 
     const res = await generateOrgImportDataFile(
-      SupportedIntegrationTypesToGenerateImportData.GITHUB,
+      SupportedIntegrationTypesImportOrgData.GITHUB,
       groupId,
       sourceOrgId,
       undefined,
@@ -43,7 +43,7 @@ describe('generateOrgImportDataFile Github script', () => {
     const sourceOrgId = 'sourceOrgIdExample';
 
     const res = await generateOrgImportDataFile(
-      SupportedIntegrationTypesToGenerateImportData.GITHUB,
+      SupportedIntegrationTypesImportOrgData.GITHUB,
       groupId,
       sourceOrgId,
       undefined,
@@ -63,7 +63,7 @@ describe('generateOrgImportDataFile Github script', () => {
     const groupId = 'groupIdExample';
 
     const res = await generateOrgImportDataFile(
-      SupportedIntegrationTypesToGenerateImportData.GITHUB,
+      SupportedIntegrationTypesImportOrgData.GITHUB,
       groupId,
     );
     expect(res.fileName).toEqual('group-groupIdExample-github-com-orgs.json');
@@ -81,7 +81,7 @@ describe('generateOrgImportDataFile Github script', () => {
 
     expect(
       generateOrgImportDataFile(
-        SupportedIntegrationTypesToGenerateImportData.GHE,
+        SupportedIntegrationTypesImportOrgData.GHE,
         groupId,
       ),
     ).rejects.toThrow(
@@ -94,7 +94,7 @@ describe('generateOrgImportDataFile Github script', () => {
 
     const groupId = 'groupIdExample';
     const res = await generateOrgImportDataFile(
-      SupportedIntegrationTypesToGenerateImportData.GHE,
+      SupportedIntegrationTypesImportOrgData.GHE,
       groupId,
       undefined,
       GHE_URL,
@@ -115,7 +115,7 @@ describe('generateOrgImportDataFile Github script', () => {
 
     const groupId = 'groupIdExample';
     const res = await generateOrgImportDataFile(
-      SupportedIntegrationTypesToGenerateImportData.GHE,
+      SupportedIntegrationTypesImportOrgData.GHE,
       groupId,
       undefined,
       GHE_URL,

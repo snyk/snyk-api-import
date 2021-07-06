@@ -7,29 +7,29 @@ import {
 } from '../lib/source-handlers/github';
 import {
   CreateOrgData,
-  SupportedIntegrationTypesToGenerateImportData,
+  SupportedIntegrationTypesImportOrgData,
 } from '../lib/types';
 import { writeFile } from '../write-file';
 
 const sourceGenerators = {
-  [SupportedIntegrationTypesToGenerateImportData.GITHUB]: githubOrganizations,
-  [SupportedIntegrationTypesToGenerateImportData.GHE]: githubEnterpriseOrganizations,
+  [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizations,
+  [SupportedIntegrationTypesImportOrgData.GHE]: githubEnterpriseOrganizations,
 };
 
 const sourceNotEmpty = {
-  [SupportedIntegrationTypesToGenerateImportData.GITHUB]: githubOrganizationIsEmpty,
-  [SupportedIntegrationTypesToGenerateImportData.GHE]: githubOrganizationIsEmpty,
+  [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizationIsEmpty,
+  [SupportedIntegrationTypesImportOrgData.GHE]: githubOrganizationIsEmpty,
 };
 
 export const entityName: {
-  [source in SupportedIntegrationTypesToGenerateImportData]: string;
+  [source in SupportedIntegrationTypesImportOrgData]: string;
 } = {
   github: 'organization',
   'github-enterprise': 'organization',
 };
 
 export async function generateOrgImportDataFile(
-  source: SupportedIntegrationTypesToGenerateImportData,
+  source: SupportedIntegrationTypesImportOrgData,
   groupId: string,
   sourceOrgId?: string,
   sourceUrl?: string,

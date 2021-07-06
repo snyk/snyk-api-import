@@ -24,7 +24,7 @@ describe('`snyk-api-import import`', () => {
 
     const importFile = path.resolve(testRoot + '/import-projects-single.json');
     const logPath = path.resolve(testRoot);
-    return exec(
+    exec(
       `node ${main}`,
       {
         env: {
@@ -36,10 +36,11 @@ describe('`snyk-api-import import`', () => {
           ORG_ID: process.env.TEST_ORG_ID
         },
       },
-      (err, stdout) => {
+      (err, stdout, stderr) => {
         if (err) {
           throw err;
         }
+        expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatch(`project(s)
 Processed 1 out of a total of 1 targets
@@ -56,7 +57,7 @@ Check the logs for any failures located at:`);
     const importFile = path.resolve(testRoot + '/import-projects.json');
     const logPath = path.resolve(testRoot);
 
-    return exec(
+    exec(
       `node ${main} import`,
       {
         env: {
@@ -68,11 +69,12 @@ Check the logs for any failures located at:`);
           ORG_ID: process.env.TEST_ORG_ID
         },
       },
-      (err, stdout) => {
+      (err, stdout, stderr) => {
         if (err) {
           throw err;
         }
         expect(err).toBeNull();
+        expect(stderr).toEqual('');
         expect(stdout.trim()).toMatch(`project(s)
 Processed 1 out of a total of 1 targets
 Check the logs for any failures located at:`);

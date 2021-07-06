@@ -3,15 +3,15 @@ import * as _ from 'lodash';
 import {
   CreatedOrg,
   ImportTarget,
-  SupportedIntegrationTypesToGenerateImportData,
+  SupportedIntegrationTypesImportData,
 } from '../lib/types';
 import { writeFile } from '../write-file';
-import { GithubRepoData, listGithubRepos } from '../lib';
-
-async function githubRepos(orgName: string): Promise<GithubRepoData[]> {
-  const ghRepos: GithubRepoData[] = await listGithubRepos(orgName);
-  return ghRepos;
-}
+import {
+  GithubRepoData,
+  listGithubRepos,
+  listGitlabRepos,
+  GitlabRepoData,
+} from '../lib';
 
 async function githubEnterpriseRepos(
   orgName: string,
@@ -27,8 +27,9 @@ async function githubEnterpriseRepos(
 }
 
 const sourceGenerators = {
-  [SupportedIntegrationTypesToGenerateImportData.GITHUB]: githubRepos,
-  [SupportedIntegrationTypesToGenerateImportData.GHE]: githubEnterpriseRepos,
+  [SupportedIntegrationTypesImportData.GITHUB]: listGithubRepos,
+  [SupportedIntegrationTypesImportData.GHE]: githubEnterpriseRepos,
+  [SupportedIntegrationTypesImportData.GITLAB]: listGitlabRepos,
 };
 
 function validateRequiredOrgData(
@@ -53,22 +54,22 @@ function validateRequiredOrgData(
   if (
     _.intersection(
       Object.keys(integrations),
-      Object.values(SupportedIntegrationTypesToGenerateImportData),
+      Object.values(SupportedIntegrationTypesImportData),
     ).length === 0
   ) {
     throw new Error(
       'At least one supported integration is expected in `integrations` field.' +
         `Supported integrations are: ${Object.values(
-          SupportedIntegrationTypesToGenerateImportData,
+          SupportedIntegrationTypesImportData,
         ).join(',')}`,
     );
   }
 }
 
 export async function generateTargetsImportDataFile(
-  source: SupportedIntegrationTypesToGenerateImportData,
+  source: SupportedIntegrationTypesImportData,
   orgsData: CreatedOrg[],
-  integrationType: SupportedIntegrationTypesToGenerateImportData,
+  integrationType: SupportedIntegrationTypesImportData,
   sourceUrl?: string,
 ): Promise<{ targets: ImportTarget[]; fileName: string }> {
   const targetsData: ImportTarget[] = [];
@@ -78,10 +79,9 @@ export async function generateTargetsImportDataFile(
     const { name, integrations, orgId } = topLevelEntity;
     try {
       validateRequiredOrgData(name, integrations, orgId);
-      const entities = await sourceGenerators[source](
-        topLevelEntity.name,
-        sourceUrl,
-      );
+      const entities: Array<
+        GithubRepoData | GitlabRepoData
+      > = await sourceGenerators[source](topLevelEntity.name, sourceUrl);
       entities.forEach((entity) => {
         targetsData.push({
           target: entity,

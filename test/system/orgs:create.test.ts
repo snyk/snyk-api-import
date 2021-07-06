@@ -9,7 +9,7 @@ describe('`snyk-api-import help <...>`', () => {
     process.env = { ...OLD_ENV };
   });
   it('Shows help text as expected', (done) => {
-    return exec(`node ${main} orgs:create help`, (err, stdout) => {
+    exec(`node ${main} orgs:create help`, (err, stdout) => {
       if (err) {
         throw err;
       }
@@ -26,7 +26,7 @@ describe('`snyk-api-import help <...>`', () => {
       __dirname + '/fixtures/create-orgs/fails-to-create/',
     );
 
-    return exec(
+    exec(
       `node ${main} orgs:create --file=${pathToBadJson}`,
       {
         env: {
@@ -55,7 +55,7 @@ describe('`snyk-api-import help <...>`', () => {
     const logPath = path.resolve(
       __dirname + '/fixtures/create-orgs/fails-to-create/',
     );
-    return exec(
+    exec(
       `node ${main} orgs:create --file=${pathToBadJson} --noDuplicateNames`,
       {
         env: {
