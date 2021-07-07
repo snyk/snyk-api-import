@@ -14,7 +14,7 @@ export async function githubOrganizationIsEmpty(
   const githubToken = getGithubToken();
   const baseUrl = getGithubBaseUrl(host);
   const octokit: Octokit = new Octokit({ baseUrl, auth: githubToken });
-  debug(`Fetching all repos data for org: ${orgName}`);
+  debug(`Fetching 1 page of repos data for org: ${orgName}`);
   const perPage = 1;
   const { repos } = await fetchReposForPage(octokit, orgName, undefined, perPage);
   if (!repos || repos.length === 0) {

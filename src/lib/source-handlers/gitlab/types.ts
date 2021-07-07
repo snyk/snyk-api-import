@@ -4,3 +4,9 @@ export interface GitlabRepoData {
   id: number;
   name: string;
 }
+
+export interface GitlabGroupData {
+  name: string;
+  id: number;
+  url: string;
+}

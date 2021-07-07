@@ -2,6 +2,8 @@
 
 exports[`\`snyk-api-import orgs:data <...>\` Generates orgs data as expected 1`] = `"Found 9 organization(s). Written the data to file: group-hello-github-com-orgs.json"`;
 
+exports[`\`snyk-api-import orgs:data <...>\` Generates orgs data as expected for Gitlab 1`] = `"Found 14 group(s). Written the data to file: group-hello-gitlab-orgs.json"`;
+
 exports[`\`snyk-api-import orgs:data <...>\` Shows error when missing groupId 1`] = `
 [Error: Command failed: node ./dist/index.js orgs:data --source=github
 index.js orgs:data

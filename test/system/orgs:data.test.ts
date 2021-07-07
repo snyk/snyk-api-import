@@ -53,6 +53,29 @@ describe('`snyk-api-import orgs:data <...>`', () => {
       },
     );
   }, 20000);
+  it('Generates orgs data as expected for Gitlab', (done) => {
+    const groupId = 'hello';
+    exec(
+      `node ${main} orgs:data --source=gitlab --groupId=${groupId} --sourceUrl=${process.env.TEST_GITLAB_BASE_URL}`,
+      {
+        env: {
+          PATH: process.env.PATH,
+          GITLAB_TOKEN: process.env.TEST_GITLAB_TOKEN,
+          SNYK_LOG_PATH: __dirname,
+        },
+      },
+      (err, stdout, stderr) => {
+        if (err) {
+          throw err;
+        }
+        expect(stderr).toEqual('');
+        expect(err).toBeNull();
+        expect(stdout.trim()).toMatchSnapshot();
+        deleteFiles([`group-${groupId}-gitlab-orgs.json`]);
+        done();
+      },
+    );
+  }, 20000);
   it('Shows error when missing groupId', (done) => {
     exec(`node ${main} orgs:data --source=github`, (err, stdout) => {
       expect(err).toMatchSnapshot();
