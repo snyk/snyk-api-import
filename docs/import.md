@@ -3,7 +3,7 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
 
 ### 1. Create the `import-projects.json` file
 
-The file is expected to have a **required** `targets` top level key which is an array of **import targets**. 
+The file is expected to have a **required** `targets` top level key which is an array of **import targets**.
 ```
 {
   targets: [
@@ -20,9 +20,9 @@ Each **import target** has the following keys:
   "orgId": "<public_snyk_org_id>",
   "integrationId": <"public_snyk_integration_id>",
   "target": {..} // the identifier of where the projects can be found (for example branch, repo name and owner for Github)
-   
+
    // optional
-  "files": [ "full/path/to/file1", "full/path/to/file2"], 
+  "files": [ "full/path/to/file1", "full/path/to/file2"],
   "exclusionGlobs": "fixtures, tests, __tests__, node_modules",
 }
 ```
@@ -34,7 +34,7 @@ Each **import target** has the following keys:
 
 
 
-  *Note*: For a repo that may have 200+ manifest files it is recommended to split this import into multiple by targeting specific files. Importing hundreds of files at once from 1 repo can cause the import to result in some errors/failures. 
+  *Note*: For a repo that may have 200+ manifest files it is recommended to split this import into multiple by targeting specific files. Importing hundreds of files at once from 1 repo can cause the import to result in some errors/failures.
 
 Splitting it to target some files, or some folders only will benefit from the re-tries and yield a smaller load on the source control management system being used. Populate the the `files` property to accomplish this in the import JSON.
 
@@ -131,14 +131,14 @@ Splitting it to target some files, or some folders only will benefit from the re
 }
 ```
 ### 2. Set the env vars:
-  - `SNYK_IMPORT_PATH`- the path to the import file
+  - `SNYK_IMPORT_PATH`- the path to the import file or use `--file` parameter
   - `SNYK_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
   - `SNYK_LOG_PATH` - the path to folder where all logs should be saved,it is recommended creating a dedicated logs folder per import you have running. (Note: all logs will append)
   - `CONCURRENT_IMPORTS` (optional) defaults to 15 repos at a time, which is the recommended amount to import at once as a max.  Just 1 repo may have many projects inside which can trigger a many files at once to be requested from the user's SCM instance and some may have rate limiting in place. This script aims to help reduce the risk of hitting a rate limit.
   - `SNYK_API` (optional) defaults to `https://snyk.io/api/v1`
 
 ### 3. Download & run
-Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos`
+Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/imported-targets.json`
 
 ## To skip all previously imported targets
 This can be used to skip previously imported targets (repos) so only remaining targets will be imported.
