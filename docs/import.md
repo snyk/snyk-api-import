@@ -22,14 +22,17 @@ Each **import target** has the following keys:
   "target": {..} // the identifier of where the projects can be found (for example branch, repo name and owner for Github)
    
    // optional
-  "files": [], 
-  "exclusionGlobs": [],
-
+  "files": [ "full/path/to/file1", "full/path/to/file2"], 
+  "exclusionGlobs": "fixtures, tests, __tests__, node_modules",
 }
 ```
   - `orgId` - Can be found in https://app.snyk.io/org/YOUR_ORG/manage/settings
   - `integrationId` - Can be found in Integrations menu for each SCM https://app.snyk.io/org/YOUR_ORG/manage/settings
-  - `target`, `files`, `exclusionGlobs` - see our [Import API documentation](https://snyk.docs.apiary.io/#reference/integrations/import-projects/import) for more info.
+  - `target`, `files`, `exclusionGlobs` - see our [Import API documentation](https://snyk.docs.apiary.io/#reference/integrations/import-projects/import) for more info
+    - `exclusionGlobs` a comma-separated list of up to 10 folder names to exclude from scanning (each folder name must not exceed 100 characters). If not specified, it will default to "fixtures, tests, __tests__, node_modules". If an empty string is provided - no folders will be excluded
+    - `files` is a string array, each path must be the full relative path to file from the root of the target. Only those files will be imported if located at that location.
+
+
 
   *Note*: For a repo that may have 200+ manifest files it is recommended to split this import into multiple by targeting specific files. Importing hundreds of files at once from 1 repo can cause the import to result in some errors/failures. 
 
@@ -108,6 +111,21 @@ Splitting it to target some files, or some folders only will benefit from the re
         "branch": "master"
       },
       "exclusionGlobs": "fixtures, test"
+    }
+  ]
+}
+```
+
+#### Example: Google Container Registry
+```
+{
+  "targets": [
+    {
+      "orgId": "******",
+      "integrationId": "******",
+      "target": {
+        "name": "projectId/repository:tag"
+      },
     }
   ]
 }
