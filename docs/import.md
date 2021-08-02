@@ -41,6 +41,8 @@ Splitting it to target some files, or some folders only will benefit from the re
   If you have any tests ot fixtures that should be ignored, please set the `exclusionGLobs` property:
   > a comma-separated list of up to 10 folder names to exclude from scanning. If not specified, it will default to "fixtures, tests, __tests__, node_modules". If an empty string is provided - no folders will be excluded
 
+**Note: snyk-api-import supports 100% of the same integration types and project sources as the [Import API documentation](https://snyk.docs.apiary.io/#reference/integrations/import-projects/import). If an example is not present below for your use case please see the API documentation**
+
 #### Example: Gitlab
 
 ```
@@ -130,6 +132,23 @@ Splitting it to target some files, or some folders only will benefit from the re
   ]
 }
 ```
+#### Example: Azure Container Registry, Elastic Container Registry, Artifactory Container Registry
+
+```
+{
+  "targets": [
+    {
+      "orgId": "******",
+      "integrationId": "******",
+      "target": {
+        "name": "repository:tag"
+      },
+    }
+  ]
+}
+```
+
+
 ### 2. Set the env vars:
   - `SNYK_IMPORT_PATH`- the path to the import file or use `--file` parameter
   - `SNYK_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
