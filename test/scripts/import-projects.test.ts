@@ -200,6 +200,7 @@ describe('Error handling', () => {
   const OLD_ENV = process.env;
   process.env.SNYK_API = SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+  process.env.SNYK_LOG_PATH = __dirname;
 
   afterAll(async () => {
     process.env = { ...OLD_ENV };
@@ -211,11 +212,12 @@ describe('Error handling', () => {
     ).rejects.toThrow('File can not be found at location');
   }, 300);
   it('shows correct error when input is invalid json', async () => {
-    expect(
-      importProjects(
-        path.resolve(__dirname + '/fixtures/import-projects-invalid.json'),
-      ),
-    ).rejects.toThrow('Failed to parse targets from');
+    const file = path.resolve(
+      __dirname + '/fixtures/import-projects-invalid.json',
+    );
+    expect(importProjects(file)).rejects.toThrow(
+      `Failed to parse targets from ${file}:\nUnexpected token } in JSON at position 120`,
+    );
   }, 300);
 
   it('shows correct error when SNYK_LOG_PATH is not set', async () => {
