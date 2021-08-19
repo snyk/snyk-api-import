@@ -118,7 +118,9 @@ export async function importProjects(
   try {
     targets.push(...JSON.parse(content).targets);
   } catch (e) {
-    throw new Error(`Failed to parse targets from ${fileName}`);
+    throw new Error(
+      `Failed to parse targets from ${fileName}:\n${e.message}`,
+    );
   }
   console.log(
     `Loaded ${targets.length} target(s) to import | ${new Date(
