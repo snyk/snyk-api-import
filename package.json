@@ -45,7 +45,7 @@
     "bunyan": "1.8.15",
     "debug": "4.3.2",
     "lodash": "4.17.21",
-    "needle": "2.7.0",
+    "needle": "2.8.0",
     "p-map": "4.0.0",
     "parse-link-header": "1.0.1",
     "sleep-promise": "8.0.1",
