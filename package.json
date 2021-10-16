@@ -39,7 +39,7 @@
   "homepage": "https://github.com/snyk-tech-services/snyk-api-import#readme",
   "dependencies": {
     "@gitbeaker/node": "30.5.0",
-    "@octokit/rest": "18.11.0",
+    "@octokit/rest": "18.11.1",
     "@snyk/configstore": "^3.2.0-rc1",
     "axios": "^0.21.0",
     "bunyan": "1.8.15",
