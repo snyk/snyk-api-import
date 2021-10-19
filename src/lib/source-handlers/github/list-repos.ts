@@ -47,31 +47,32 @@ export async function fetchReposForPage(
 async function fetchAllRepos(
   octokit: Octokit,
   orgName: string,
-  page = 0,
+  page = 1,
 ): Promise<GithubRepoData[]> {
   const repoData: GithubRepoData[] = [];
+  const MAX_RETRIES = 3;
+
   let currentPage = page;
   let hasMorePages = true;
+  let retries = 0;
   while (hasMorePages) {
     try {
-      currentPage = currentPage + 1;
       debug(`Fetching page: ${currentPage}`);
       const { repos, hasNextPage } = await fetchReposForPage(
         octokit,
         orgName,
         currentPage,
       );
+      currentPage = currentPage + 1;
       hasMorePages = hasNextPage;
       repoData.push(...repos);
     } catch (e) {
       debug(`Failed to fetch page: ${currentPage}`, e);
-
-      if (e.status === 403) {
+      if ([403, 500].includes(e.status) && retries < MAX_RETRIES) {
+        retries = retries + 1;
         const sleepTime = 120000; // 2 mins
         console.error(`Sleeping for ${sleepTime} ms`);
         await new Promise((r) => setTimeout(r, sleepTime));
-        // try the same page again
-        currentPage = currentPage - 1;
       } else {
         throw e;
       }
