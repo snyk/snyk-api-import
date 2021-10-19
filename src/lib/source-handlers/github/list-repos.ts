@@ -63,6 +63,7 @@ async function fetchAllRepos(
         orgName,
         currentPage,
       );
+      retries = 0;
       currentPage = currentPage + 1;
       hasMorePages = hasNextPage;
       repoData.push(...repos);
