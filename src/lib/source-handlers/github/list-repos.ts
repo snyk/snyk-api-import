@@ -53,15 +53,28 @@ async function fetchAllRepos(
   let currentPage = page;
   let hasMorePages = true;
   while (hasMorePages) {
-    currentPage = currentPage + 1;
-    debug(`Fetching page: ${currentPage}`);
-    const { repos, hasNextPage } = await fetchReposForPage(
-      octokit,
-      orgName,
-      currentPage,
-    );
-    hasMorePages = hasNextPage;
-    repoData.push(...repos);
+    try {
+      currentPage = currentPage + 1;
+      debug(`Fetching page: ${currentPage}`);
+      const { repos, hasNextPage } = await fetchReposForPage(
+        octokit,
+        orgName,
+        currentPage,
+      );
+      hasMorePages = hasNextPage;
+      repoData.push(...repos);
+    } catch (e) {
+      if (e.status === 403) {
+        const sleepTime = 120000; // 2 mins
+        console.error(`Sleeping for ${sleepTime} ms`);
+        await new Promise((r) => setTimeout(r, sleepTime));
+        // try the same page again
+        currentPage = currentPage - 1;
+      } else {
+        debug(`Failed to fetch page: ${currentPage}`, e);
+        throw e;
+      }
+    }
   }
   return repoData;
 }

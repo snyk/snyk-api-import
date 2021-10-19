@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import * as debugLib from 'debug';
 
 import {
   CreatedOrg,
@@ -12,6 +13,8 @@ import {
   listGitlabRepos,
   GitlabRepoData,
 } from '../lib';
+
+const debug = debugLib('snyk:generate-targets-data');
 
 async function githubEnterpriseRepos(
   orgName: string,
@@ -77,6 +80,7 @@ export async function generateTargetsImportDataFile(
   const orgsDataUnique = _.uniqBy(orgsData, 'orgId');
   for (const topLevelEntity of orgsDataUnique) {
     const { name, integrations, orgId } = topLevelEntity;
+    debug(`Processing ${name}`);
     try {
       validateRequiredOrgData(name, integrations, orgId);
       const entities: Array<
