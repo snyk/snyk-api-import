@@ -26,6 +26,14 @@ describe('listGithubOrgs script', () => {
       url: expect.any(String),
     });
   });
+});
+
+describe('listGithubRepos script', () => {
+  const OLD_ENV = process.env;
+
+  afterEach(async () => {
+    process.env = { ...OLD_ENV };
+  });
   it('list repos', async () => {
     const GITHUB_ORG_NAME = process.env.TEST_GH_ORG_NAME;
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
@@ -38,13 +46,15 @@ describe('listGithubOrgs script', () => {
       fork: expect.any(Boolean),
     });
   });
-
   it('list GHE repos', async () => {
     const GITHUB_ORG_NAME = process.env.TEST_GH_ORG_NAME;
     const GHE_URL = process.env.TEST_GHE_URL;
     process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
 
-    const orgs = await listGithubRepos(GITHUB_ORG_NAME as string, GHE_URL);
+    const orgs = await github.listGithubRepos(
+      GITHUB_ORG_NAME as string,
+      GHE_URL,
+    );
     expect(orgs[0]).toEqual({
       name: expect.any(String),
       owner: expect.any(String),
