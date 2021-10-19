@@ -11,7 +11,7 @@ export async function fetchReposForPage(
   octokit: Octokit,
   orgName: string,
   pageNumber = 1,
-  perPage = 50,
+  perPage = 100,
 ): Promise<{
   repos: GithubRepoData[];
   hasNextPage: boolean;
@@ -64,7 +64,7 @@ async function fetchAllRepos(
       hasMorePages = hasNextPage;
       repoData.push(...repos);
     } catch (e) {
-      if (e.status === 403 || e.status >= 500) {
+      if (e.status === 403) {
         const sleepTime = 120000; // 2 mins
         console.error(`Sleeping for ${sleepTime} ms`);
         await new Promise((r) => setTimeout(r, sleepTime));
