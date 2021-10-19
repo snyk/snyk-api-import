@@ -64,6 +64,8 @@ async function fetchAllRepos(
       hasMorePages = hasNextPage;
       repoData.push(...repos);
     } catch (e) {
+      debug(`Failed to fetch page: ${currentPage}`, e);
+
       if (e.status === 403) {
         const sleepTime = 120000; // 2 mins
         console.error(`Sleeping for ${sleepTime} ms`);
@@ -71,7 +73,6 @@ async function fetchAllRepos(
         // try the same page again
         currentPage = currentPage - 1;
       } else {
-        debug(`Failed to fetch page: ${currentPage}`, e);
         throw e;
       }
     }
