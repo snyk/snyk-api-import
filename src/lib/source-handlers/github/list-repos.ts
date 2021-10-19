@@ -69,7 +69,7 @@ async function fetchAllRepos(
       repoData.push(...repos);
     } catch (e) {
       debug(`Failed to fetch page: ${currentPage}`, e);
-      if ([403, 500].includes(e.status) && retries < MAX_RETRIES) {
+      if ([403, 500, 502].includes(e.status) && retries < MAX_RETRIES) {
         retries = retries + 1;
         const sleepTime = 120000; // 2 mins
         console.error(`Sleeping for ${sleepTime} ms`);
