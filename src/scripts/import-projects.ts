@@ -4,8 +4,6 @@ import { requestsManager } from 'snyk-request-manager';
 import * as pMap from 'p-map';
 import * as fs from 'fs';
 import split = require('split');
-
-import { loadFile } from '../load-file';
 import {
   importTargets,
   pollImportUrls,
@@ -113,14 +111,16 @@ export async function importProjects(
   filteredTargets: ImportTarget[];
   targets: ImportTarget[];
 }> {
-  const content = await loadFile(fileName);
-  const targets: ImportTarget[] = [];
+  const targetsFilePath = path.resolve(process.cwd(), loggingPath, fileName);
+  if (!fs.existsSync(targetsFilePath)) {
+    throw new Error(`File not found ${targetsFilePath}`);
+  }
+
+  let targets: ImportTarget[] = [];
   try {
-    targets.push(...JSON.parse(content).targets);
+    targets = await parseTargetData(fileName);
   } catch (e) {
-    throw new Error(
-      `Failed to parse targets from ${fileName}:\n${e.message}`,
-    );
+    throw new Error(`Failed to parse targets from ${fileName}:\n${e.message}`);
   }
   console.log(
     `Loaded ${targets.length} target(s) to import | ${new Date(
@@ -179,4 +179,30 @@ export async function importProjects(
     projects.push(...res.projects);
   }
   return { projects, skippedTargets, filteredTargets, targets };
+}
+
+export async function parseTargetData(
+  logFile: string,
+): Promise<ImportTarget[]> {
+  return new Promise((resolve, reject) => {
+    let targets: ImportTarget[] = [];
+    fs.createReadStream(logFile)
+      .on('data', (lineObj) => {
+        if (!lineObj) {
+          return;
+        }
+        try {
+          targets = JSON.parse(lineObj).targets;
+        } catch (e) {
+          console.log(e);
+        }
+      })
+      .on('error', (err) => {
+        console.error('Failed to createReadStream for file: ' + err);
+        return reject(err);
+      })
+      .on('end', async () => {
+        return resolve(targets);
+      });
+  });
 }
