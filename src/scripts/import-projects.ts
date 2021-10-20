@@ -187,6 +187,7 @@ export async function parseTargetData(
   return new Promise((resolve, reject) => {
     let targets: ImportTarget[] = [];
     fs.createReadStream(logFile)
+      .pipe(split())
       .on('data', (lineObj) => {
         if (!lineObj) {
           return;
