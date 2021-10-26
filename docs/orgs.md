@@ -44,6 +44,19 @@ Use the generated data to feed into Snyk [Orgs API](https://snyk.docs.apiary.io/
 2. Run the command to create Orgs:
 `snyk-api-import orgs:create --file=group-<snyk_group_id>-github-<com|enterprise>-orgs.json`
 
+The file format required for this looks like so:
+```
+"orgs": [
+  {
+    "groupId": "<public_snyk_group_id>",
+    "name": "<name_of_the_organization>",
+    "sourceOrgId": "<public_snyk_organization_id>"
+  }
+]
+```
+- `groupId` - public id of the Snyk Group where the organization is to be created
+- `name` - name to use when creating the organization
+- `sourceOrgI` - **optional** public id of a Snyk organization to copy settings from
 
 ## Recommendations
 - have [notifications disabled](https://snyk.docs.apiary.io/#reference/organizations/notification-settings/set-notification-settings) for emails etc to avoid receiving import notifications
