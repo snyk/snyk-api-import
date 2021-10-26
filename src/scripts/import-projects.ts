@@ -150,7 +150,10 @@ export async function importProjects(
   }
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import',
+    period: 1000,
+    maxRetryCount: 5
   });
+
   for (
     let targetIndex = 0;
     targetIndex < filteredTargets.length;
