@@ -1,7 +1,7 @@
 import * as debugLib from 'debug';
 import * as path from 'path';
+import * as fs from 'fs';
 
-import { loadFile } from '../load-file';
 import { CreatedOrgResponse, createOrg, filterOutExistingOrgs } from '../lib';
 import { getLoggingPath } from './../lib';
 import { listIntegrations, setNotificationPreferences } from '../lib/api/org';
@@ -11,6 +11,7 @@ import { logCreatedOrg } from '../loggers/log-created-org';
 import { writeFile } from '../write-file';
 import { FAILED_ORG_LOG_NAME } from '../common';
 import { logFailedOrg } from '../loggers/log-failed-org';
+import { streamData } from '../stream-data';
 
 const debug = debugLib('snyk:create-orgs-script');
 interface NewOrExistingOrg extends CreatedOrgResponse {
@@ -119,12 +120,15 @@ export async function createOrgs(
   existing: Partial<NewOrExistingOrg>[];
 }> {
   const { includeExistingOrgsInOutput, noDuplicateNames } = options;
-  const content = await loadFile(filePath);
-  const orgsData: CreateOrgData[] = [];
   const failedOrgs: CreateOrgData[] = [];
+  let orgsData: CreateOrgData[];
 
+  const orgsFilePath = path.resolve(process.cwd(), loggingPath, filePath);
+  if (!fs.existsSync(orgsFilePath)) {
+    throw new Error(`File not found ${orgsFilePath}`);
+  }
   try {
-    orgsData.push(...JSON.parse(content).orgs);
+    orgsData = await streamData<CreateOrgData>(orgsFilePath, 'orgs');
   } catch (e) {
     throw new Error(`Failed to parse organizations from ${filePath}`);
   }
