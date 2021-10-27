@@ -48,11 +48,12 @@ export async function importTarget(
     };
     getSnykHost();
 
-    const res = await requestManager.request({
-      verb: 'post',
-      url: `/org/${orgId.trim()}/integrations/${integrationId}/import`,
-      body: JSON.stringify(body),
-    });
+    const res = await requestWithRateLimitHandling(
+      requestManager,
+      `/org/${orgId.trim()}/integrations/${integrationId}/import`,
+      'post',
+      body,
+    );
     if (res.statusCode && res.statusCode !== 201) {
       throw new Error(
         'Expected a 201 response, instead received: ' +
@@ -111,6 +112,40 @@ export async function importTarget(
     );
     throw err;
   }
+}
+
+async function requestWithRateLimitHandling(
+  requestManager: requestsManager,
+  url: string,
+  verb: string,
+  body = {},
+): Promise<any> {
+  const maxRetries = 7;
+  let attempt = 0;
+  let res;
+  debug('Requesting import with retry')
+
+  while (attempt < maxRetries) {
+    try {
+      res = await requestManager.request({
+        verb,
+        url,
+        body: JSON.stringify(body),
+      });
+      break;
+    } catch (e) {
+      res = e;
+      debug('Failed:' + JSON.stringify(e))
+      if (e.data.code === 429) {
+        attempt += 1;
+        const sleepTime = 120000 * attempt; // 2 mins x attempt
+        console.error(`Received a rate limit error, sleeping for ${sleepTime} ms (attempt # ${attempt})`);
+        await new Promise((r) => setTimeout(r, sleepTime));
+      }
+    }
+  }
+
+  return res;
 }
 
 export async function importTargets(

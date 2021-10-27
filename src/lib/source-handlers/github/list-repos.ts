@@ -70,8 +70,8 @@ async function fetchAllRepos(
     } catch (e) {
       debug(`Failed to fetch page: ${currentPage}`, e);
       if ([403, 500, 502].includes(e.status) && retries < MAX_RETRIES) {
+        const sleepTime = 120000 * retries; // 2 mins x retry attempt
         retries = retries + 1;
-        const sleepTime = 120000; // 2 mins
         console.error(`Sleeping for ${sleepTime} ms`);
         await new Promise((r) => setTimeout(r, sleepTime));
       } else {
