@@ -36,6 +36,7 @@ const entityName: {
   github: 'repo',
   'github-enterprise': 'repo',
   'bitbucket-cloud': 'repo',
+  'gitlab': 'repo',
   gcr: 'images',
   'docker-hub': 'images',
 };

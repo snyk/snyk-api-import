@@ -92,6 +92,7 @@ export enum SupportedIntegrationTypesToListSnykTargets {
   GITHUB = 'github',
   GHE = 'github-enterprise',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
+  GITLAB = 'gitlab',
   GCR = 'gcr',
   DOCKER_HUB = 'docker-hub',
 }

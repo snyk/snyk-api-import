@@ -53,6 +53,7 @@ const targetGenerators = {
   [SupportedIntegrationTypesToListSnykTargets.GITHUB]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.GHE]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD]: projectToTarget,
+  [SupportedIntegrationTypesToListSnykTargets.GITLAB]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.GCR]: imageProjectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.DOCKER_HUB]: imageProjectToTarget,
 };
