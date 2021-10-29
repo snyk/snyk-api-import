@@ -28,7 +28,7 @@ async function fetchOrgsForPage(
 
     orgsData.push(
       ...orgs.map((org: any) => ({
-        name: org.path,
+        name: org.full_path,
         id: org.id,
         url: org.web_url,
       })),
