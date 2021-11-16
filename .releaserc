@@ -17,6 +17,11 @@
       "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t linux-x64-12.16.2 -o snyk-api-import-linux"
     },
     {
+      "//": "build the alpine",
+      "path": "@semantic-release/exec",
+      "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t alpine-x64-12.9.1 -o snyk-api-import-alpine"
+    },
+    {
       "//": "build the windows binaries",
       "path": "@semantic-release/exec",
       "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t windows-x64-10.16.0 -o snyk-api-import-win.exe"
@@ -24,7 +29,7 @@
     {
       "//": "shasum all binaries",
       "path": "@semantic-release/exec",
-      "cmd": "shasum -a 256 snyk-api-import-linux > snyk-api-import-linux.sha256 && shasum -a 256 snyk-api-import-macos > snyk-api-import-macos.sha256 && shasum -a 256 snyk-api-import-win.exe > snyk-api-import-win.exe.sha256"
+      "cmd": "shasum -a 256 snyk-api-import-linux > snyk-api-import-linux.sha256 && shasum -a 256 snyk-api-import-macos > snyk-api-import-macos.sha256 && shasum -a 256 snyk-api-import-win.exe > snyk-api-import-win.exe.sha256 && shasum -a 256 snyk-api-import-alpine > snyk-api-import-alpine.sha256"
     },
     {
       "//": "removes the file we use to identify a build as a standalone binary",
@@ -46,6 +51,16 @@
           "path": "./snyk-api-import-linux.sha256",
           "name": "snyk-api-import-linux.sha256",
           "label": "snyk-api-import-linux.sha256"
+        },
+        {
+          "path": "./snyk-api-import-alpine",
+          "name": "snyk-api-import-alpine",
+          "label": "snyk-api-import-alpine"
+        },
+        {
+          "path": "./snyk-api-import-alpine.sha256",
+          "name": "snyk-api-import-alpine.sha256",
+          "label": "snyk-api-import-alpine.sha256"
         },
         {
           "path": "./snyk-api-import-macos",
