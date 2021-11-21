@@ -1,4 +1,3 @@
-
 import * as path from 'path';
 import * as fs from 'fs';
 jest.mock('snyk-request-manager');
@@ -11,7 +10,7 @@ import { deleteFiles } from '../delete-files';
 
 const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
-const IMPORT_PROJECTS_FILE_NAME= 'import-projects.json';
+const IMPORT_PROJECTS_FILE_NAME = 'import-projects.json';
 
 describe('Logs failed polls', () => {
   const discoveredProjects: Project[] = [];
@@ -28,7 +27,7 @@ describe('Logs failed polls', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
-  })
+  });
 
   it('Fails to import targets from file', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
@@ -49,6 +48,8 @@ describe('Logs failed polls', () => {
     }
     await new Promise((r) => setTimeout(r, 300));
     const failedLog = fs.readFileSync(failedPollsLogName, 'utf8');
-    expect(failedLog).toMatch(`"level":50,"orgId":"ORG-ID","locationUrl":"https://app.snyk.io/api/v1/org/ORG-ID/integrations/INTEGRATION-ID/import/IMPORT-ID","errorMessage":{"statusCode":500,"error":{"message":"Error calling Snyk api"}},"msg":"Failed to poll url"`)
+    expect(failedLog).toMatch(
+      `"level":50,"orgId":"ORG-ID","locationUrl":"https://app.snyk.io/api/v1/org/ORG-ID/integrations/INTEGRATION-ID/import/IMPORT-ID","errorMessage":{"statusCode":500,"error":{"message":"Error calling Snyk api"}},"msg":"Failed to poll url"`,
+    );
   }, 240000);
 });

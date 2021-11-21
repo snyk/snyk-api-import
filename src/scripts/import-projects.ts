@@ -151,7 +151,7 @@ export async function importProjects(
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import',
     period: 1000,
-    maxRetryCount: 5
+    maxRetryCount: 5,
   });
 
   for (

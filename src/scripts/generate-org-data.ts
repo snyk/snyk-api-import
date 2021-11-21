@@ -5,7 +5,10 @@ import {
   githubOrganizations,
   SnykOrgData,
 } from '../lib/source-handlers/github';
-import { listGitlabGroups, gitlabGroupIsEmpty } from '../lib/source-handlers/gitlab';
+import {
+  listGitlabGroups,
+  gitlabGroupIsEmpty,
+} from '../lib/source-handlers/gitlab';
 import {
   CreateOrgData,
   SupportedIntegrationTypesImportOrgData,

@@ -26,10 +26,7 @@ export async function logImportedProjects(
           },
         ],
       });
-      debug(
-        { orgId, locationUrl, projectId, ...project },
-        'Imported project',
-      );
+      debug({ orgId, locationUrl, projectId, ...project }, 'Imported project');
       log.info(
         { orgId, locationUrl, projectId, ...project },
         'Imported project',

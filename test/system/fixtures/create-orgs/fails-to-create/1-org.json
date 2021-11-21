@@ -1,6 +1,8 @@
 {
-  "orgs": [{
-    "groupId": "abc",
-    "name": ""
-  }]
+  "orgs": [
+    {
+      "groupId": "abc",
+      "name": ""
+    }
+  ]
 }

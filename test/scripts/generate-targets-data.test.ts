@@ -271,7 +271,7 @@ describe('generateTargetsImportDataFile Gitlab script', () => {
       SupportedIntegrationTypesImportData.GITLAB,
       orgsData,
       SupportedIntegrationTypesImportData.GITLAB,
-      GITLAB_BASE_URL
+      GITLAB_BASE_URL,
     );
     expect(res.fileName).toEqual('gitlab-import-targets.json');
     expect(res.targets.length > 0).toBeTruthy();

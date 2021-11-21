@@ -123,7 +123,7 @@ async function requestWithRateLimitHandling(
   const maxRetries = 7;
   let attempt = 0;
   let res;
-  debug('Requesting import with retry')
+  debug('Requesting import with retry');
 
   while (attempt < maxRetries) {
     try {
@@ -135,11 +135,13 @@ async function requestWithRateLimitHandling(
       break;
     } catch (e) {
       res = e;
-      debug('Failed:' + JSON.stringify(e))
+      debug('Failed:' + JSON.stringify(e));
       if (e.data.code === 429) {
         attempt += 1;
         const sleepTime = 120000 * attempt; // 2 mins x attempt
-        console.error(`Received a rate limit error, sleeping for ${sleepTime} ms (attempt # ${attempt})`);
+        console.error(
+          `Received a rate limit error, sleeping for ${sleepTime} ms (attempt # ${attempt})`,
+        );
         await new Promise((r) => setTimeout(r, sleepTime));
       }
     }
