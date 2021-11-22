@@ -40,4 +40,3 @@ export async function filterOutExistingOrgs(
 
   return { existingOrgs: groupOrgs, newOrgs };
 }
-

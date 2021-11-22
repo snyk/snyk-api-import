@@ -48,6 +48,8 @@ describe('getImportProjectsFile', () => {
   it('If path / file does not exist throws error', () => {
     expect(() => {
       getImportProjectsFile('/fixtures/non-existent.json');
-    }).toThrow('Please set the SNYK_IMPORT_PATH e.g. export SNYK_IMPORT_PATH=\'~/my/path/to/import-projects.json\'');
+    }).toThrow(
+      "Please set the SNYK_IMPORT_PATH e.g. export SNYK_IMPORT_PATH='~/my/path/to/import-projects.json'",
+    );
   });
 });

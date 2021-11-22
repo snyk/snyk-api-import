@@ -7,7 +7,6 @@ import { CreatedOrgResponse } from '../lib';
 
 const debug = debugLib('snyk:create-orgs-script');
 
-
 export async function logCreatedOrg(
   groupId: string,
   origName: string,
@@ -20,10 +19,12 @@ export async function logCreatedOrg(
   const log = bunyan.createLogger({
     name: 'snyk:create-orgs-script',
     level: 'info',
-    streams: [{
-      level: 'info',
-      path: `${loggingPath}/${groupId}.${CREATED_ORG_LOG_NAME}`,
-    }],
+    streams: [
+      {
+        level: 'info',
+        path: `${loggingPath}/${groupId}.${CREATED_ORG_LOG_NAME}`,
+      },
+    ],
   });
 
   try {
@@ -31,9 +32,13 @@ export async function logCreatedOrg(
       (i) => `${i}:${integrationsData[i]}`,
     );
     const { id, name, created } = orgData;
-    log.info({ origName, id, name, created, integrations } , 'Created org');
+    log.info({ origName, id, name, created, integrations }, 'Created org');
   } catch (e) {
-    debug('Failed to log created organizations at location: ', `${loggingPath}/${groupId}.${CREATED_ORG_LOG_NAME}`, e);
+    debug(
+      'Failed to log created organizations at location: ',
+      `${loggingPath}/${groupId}.${CREATED_ORG_LOG_NAME}`,
+      e,
+    );
     // do nothing
   }
 }

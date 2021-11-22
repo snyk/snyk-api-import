@@ -163,9 +163,7 @@ describe('generateOrgImportDataFile Gitlab script', () => {
       undefined,
       GITLAB_URL,
     );
-    expect(res.fileName).toEqual(
-      'group-groupIdExample-gitlab-orgs.json',
-    );
+    expect(res.fileName).toEqual('group-groupIdExample-gitlab-orgs.json');
     expect(res.orgs.length > 0).toBeTruthy();
     expect(res.skippedEmptyOrgs).toHaveLength(0);
     expect(res.orgs[0]).toEqual({
@@ -207,7 +205,7 @@ describe('generateOrgImportDataFile Gitlab script', () => {
       SupportedIntegrationTypesImportOrgData.GITLAB,
       groupId,
       undefined,
-      GITLAB_URL
+      GITLAB_URL,
     );
     expect(res.fileName).toEqual('group-groupIdExample-gitlab-orgs.json');
     expect(res.orgs.length > 0).toBeTruthy();
@@ -227,8 +225,6 @@ describe('generateOrgImportDataFile Gitlab script', () => {
         SupportedIntegrationTypesImportOrgData.GITLAB,
         groupId,
       ),
-    ).rejects.toThrow(
-      '401 (Unauthorized)',
-    );
+    ).rejects.toThrow('401 (Unauthorized)');
   });
 });

@@ -1,7 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import * as debugLib from 'debug';
 import { getGithubToken } from './get-github-token';
-
 import { getGithubBaseUrl } from './github-base-url';
 import { GithubRepoData } from './types';
 
@@ -18,7 +17,6 @@ export async function fetchReposForPage(
 }> {
   const repoData: GithubRepoData[] = [];
   const params = {
-    // eslint-disable-next-line @typescript-eslint/camelcase
     per_page: perPage,
     page: pageNumber,
     org: orgName,

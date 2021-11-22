@@ -40,7 +40,9 @@ describe('`snyk-api-import help <...>`', () => {
         if (err) {
           throw err;
         }
-        expect(stderr).toMatch('All requested organizations failed to be created. Review the errors in');
+        expect(stderr).toMatch(
+          'All requested organizations failed to be created. Review the errors in',
+        );
         expect(err).toBeNull();
         expect(stdout).toEqual('');
         done();
@@ -69,7 +71,9 @@ describe('`snyk-api-import help <...>`', () => {
         if (err) {
           throw err;
         }
-        expect(stderr).toMatch('All requested organizations failed to be created. Review the errors in');
+        expect(stderr).toMatch(
+          'All requested organizations failed to be created. Review the errors in',
+        );
         expect(err).toBeNull();
         expect(stdout).toEqual('');
         done();

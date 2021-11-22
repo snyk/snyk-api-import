@@ -16,7 +16,12 @@ export async function gitlabGroupIsEmpty(
   const client = new Gitlab({ host: baseUrl, token });
   debug(`Fetching 1 page of projects data for group: ${groupName}`);
   const perPage = 1;
-  const { repos } = await fetchGitlabReposForPage(client, groupName, undefined, perPage);
+  const { repos } = await fetchGitlabReposForPage(
+    client,
+    groupName,
+    undefined,
+    perPage,
+  );
   if (!repos || repos.length === 0) {
     return true;
   }

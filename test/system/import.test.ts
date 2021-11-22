@@ -33,7 +33,7 @@ describe('`snyk-api-import import`', () => {
           SNYK_API: process.env.SNYK_API_TEST,
           SNYK_IMPORT_PATH: importFile,
           SNYK_LOG_PATH: logPath,
-          ORG_ID: process.env.TEST_ORG_ID
+          ORG_ID: process.env.TEST_ORG_ID,
         },
       },
       (err, stdout, stderr) => {
@@ -66,7 +66,7 @@ Check the logs for any failures located at:`);
           SNYK_API: process.env.SNYK_API_TEST,
           SNYK_IMPORT_PATH: importFile,
           SNYK_LOG_PATH: logPath,
-          ORG_ID: process.env.TEST_ORG_ID
+          ORG_ID: process.env.TEST_ORG_ID,
         },
       },
       (err, stdout, stderr) => {

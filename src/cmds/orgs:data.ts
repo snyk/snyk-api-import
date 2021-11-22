@@ -3,7 +3,10 @@ const debug = debugLib('snyk:generate-data-script');
 
 import { getLoggingPath } from '../lib/get-logging-path';
 import { SupportedIntegrationTypesImportOrgData } from '../lib/types';
-import { entityName, generateOrgImportDataFile } from '../scripts/generate-org-data';
+import {
+  entityName,
+  generateOrgImportDataFile,
+} from '../scripts/generate-org-data';
 
 export const command = ['orgs:data'];
 export const desc =

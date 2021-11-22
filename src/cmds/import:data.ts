@@ -2,10 +2,7 @@ import * as debugLib from 'debug';
 import { getLoggingPath } from '../lib/get-logging-path';
 const debug = debugLib('snyk:generate-data-script');
 
-import {
-  CreatedOrg,
-  SupportedIntegrationTypesImportData,
-} from '../lib/types';
+import { CreatedOrg, SupportedIntegrationTypesImportData } from '../lib/types';
 import { loadFile } from '../load-file';
 import { generateTargetsImportDataFile } from '../scripts/generate-targets-data';
 
@@ -45,7 +42,7 @@ const entityName: {
 } = {
   github: 'org',
   'github-enterprise': 'org',
-  'gitlab': 'group',
+  gitlab: 'group',
 };
 
 export async function handler(argv: {
@@ -70,7 +67,9 @@ export async function handler(argv: {
       );
     }
     if (orgsDataJson.length === 0) {
-      throw new Error(`No ${entityName[source]}s could be loaded from ${orgsData}.`);
+      throw new Error(
+        `No ${entityName[source]}s could be loaded from ${orgsData}.`,
+      );
     }
     const res = await generateTargetsImportDataFile(
       source,

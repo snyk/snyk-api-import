@@ -11,7 +11,10 @@ describe('listGitlabRepos', () => {
     const GITLAB_ORG_NAME = process.env.TEST_GITLAB_ORG_NAME;
     process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
 
-    const repos = await listGitlabRepos(GITLAB_ORG_NAME as string, GITLAB_BASE_URL);
+    const repos = await listGitlabRepos(
+      GITLAB_ORG_NAME as string,
+      GITLAB_BASE_URL,
+    );
     expect(repos.length >= 1).toBeTruthy();
     expect(repos[0]).toEqual({
       name: expect.any(String),

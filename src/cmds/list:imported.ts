@@ -78,7 +78,9 @@ export async function handler(argv: {
 
     if (failedOrgs.length > 0) {
       console.warn(
-        `Failed to process the following orgs: ${failedOrgs.map(org => org.id).join(',')}`,
+        `Failed to process the following orgs: ${failedOrgs
+          .map((org) => org.id)
+          .join(',')}`,
       );
     }
     console.log(targetsMessage);
