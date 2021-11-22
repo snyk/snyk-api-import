@@ -14,6 +14,7 @@ import { getLoggingPath } from '../lib';
 import { logImportedBatch } from '../loggers/log-imported-batch';
 import { IMPORT_LOG_NAME } from '../common';
 import { generateTargetId } from '../generate-target-id';
+import { streamData } from '../stream-data';
 
 const debug = debugLib('snyk:import-projects-script');
 
@@ -118,7 +119,7 @@ export async function importProjects(
 
   let targets: ImportTarget[] = [];
   try {
-    targets = await parseTargetData(fileName);
+    targets = await streamData<ImportTarget>(fileName, 'targets');
   } catch (e) {
     throw new Error(`Failed to parse targets from ${fileName}:\n${e.message}`);
   }
@@ -182,31 +183,4 @@ export async function importProjects(
     projects.push(...res.projects);
   }
   return { projects, skippedTargets, filteredTargets, targets };
-}
-
-export async function parseTargetData(
-  logFile: string,
-): Promise<ImportTarget[]> {
-  return new Promise((resolve, reject) => {
-    let targets: ImportTarget[] = [];
-    fs.createReadStream(logFile)
-      .pipe(split())
-      .on('data', (lineObj) => {
-        if (!lineObj) {
-          return;
-        }
-        try {
-          targets = JSON.parse(lineObj).targets;
-        } catch (e) {
-          console.log(e);
-        }
-      })
-      .on('error', (err) => {
-        console.error('Failed to createReadStream for file: ' + err);
-        return reject(err);
-      })
-      .on('end', async () => {
-        return resolve(targets);
-      });
-  });
 }
