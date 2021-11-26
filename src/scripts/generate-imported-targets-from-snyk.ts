@@ -41,6 +41,18 @@ export function projectToTarget(
   };
 }
 
+export function gitlabProjectToImportLogTarget(
+  project: Pick<SnykProject, 'name' | 'branch'>,
+): Target {
+  // Gitlab target is only `id` & branch and the Snyk API does not return the id.
+  // However we are already logging `name` which for Gitlab is "owner/repo", branch & id so if we use the same name we can match on it
+  const name = project.name.split(':')[0];
+  return {
+    branch: project.branch || undefined, // TODO: make it not optional
+    name,
+  };
+}
+
 export function imageProjectToTarget(
   project: Pick<SnykProject, 'name'>,
 ): Target {
@@ -51,6 +63,7 @@ export function imageProjectToTarget(
 
 const targetGenerators = {
   [SupportedIntegrationTypesToListSnykTargets.GITHUB]: projectToTarget,
+  [SupportedIntegrationTypesToListSnykTargets.GITLAB]: gitlabProjectToImportLogTarget,
   [SupportedIntegrationTypesToListSnykTargets.GHE]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.GCR]: imageProjectToTarget,
