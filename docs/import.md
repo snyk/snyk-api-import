@@ -196,6 +196,7 @@ Supported integration types:
 
 - Github.com `github`
 - Github Enterprise `github-enterprise`
+- Gitlab `gitlab`
 - Bitbucket Cloud `bitbucket-cloud`
 - Google Cloud Registry `gcr`
 - DockerHub registry `docker-hub`

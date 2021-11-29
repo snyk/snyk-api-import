@@ -149,7 +149,38 @@ describe('Generate imported targets based on Snyk data', () => {
   }, 240000);
   it.todo('One org failed to be processed');
 
-  it('succeed to convert Github project name to target', async () => {
+  it('succeeds to generate targets for Org + Gitlab', async () => {
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
+    logs = Object.values(logFiles);
+    const {
+      targets,
+      failedOrgs,
+      fileName,
+    } = await generateSnykImportedTargets({ orgId: ORG_ID }, [
+      SupportedIntegrationTypesToListSnykTargets.GITHUB,
+    ]);
+    expect(failedOrgs).toEqual([]);
+    expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
+    expect(targets[0]).toMatchObject({
+      integrationId: expect.any(String),
+      orgId: expect.any(String),
+      target: {
+        branch: expect.any(String),
+        name: expect.any(String),
+        owner: expect.any(String),
+      },
+    });
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 20000));
+    const importedTargetsLog = fs.readFileSync(logFiles.importLogPath, 'utf8');
+    expect(importedTargetsLog).toMatch(targets[0].target.owner as string);
+    expect(importedTargetsLog).toMatch(targets[0].orgId);
+    expect(importedTargetsLog).toMatch(targets[0].integrationId);
+  }, 240000);
+});
+
+describe('projectToTarget', () => {
+  it('succeed to convert Github / Gitlab project name to target', async () => {
     const project = {
       name: 'lili-snyk/huge-monorepo:cockroach/build/builder/Dockerfile',
       branch: 'main',

@@ -20,14 +20,14 @@ export interface CreatedOrg {
 
 // also must update targetProps if any new props are added
 export interface Target {
-  name?: string; // Gitlab, GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos, Bitbucket Server, Azure Container Registry, Elastic Container Registry, Artifactory Container Registry, Docker Hub
+  name?: string; // GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos, Bitbucket Server, Azure Container Registry, Elastic Container Registry, Artifactory Container Registry, Docker Hub
   appId?: string; // Heroku, CloudFoundry, Pivotal & IBM Cloud
   functionId?: string; // AWS Labmda
   slugId?: string; // Heroku
   projectKey?: string; // Bitbucket Server
   repoSlug?: string; // Bitbucket Server
   id?: number; // Gitlab
-  owner?: string; // Gitlab, GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos
+  owner?: string; // GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos
   // if not set default branch will be picked
   branch?: string; // Gitlab, GitHub, GH Enterprise, Bitbucket Cloud and Azure Repos
 }
@@ -94,6 +94,7 @@ export enum SupportedIntegrationTypesToListSnykTargets {
   BITBUCKET_CLOUD = 'bitbucket-cloud',
   GCR = 'gcr',
   DOCKER_HUB = 'docker-hub',
+  GITLAB = 'gitlab',
 }
 interface ImportingUser {
   id: string;

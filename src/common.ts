@@ -15,7 +15,7 @@ export const targetProps = [
   'slugId',
   'projectKey',
   'repoSlug',
-  'id',
+  // 'id', skip Gitlab ID so we can match against Snyk project data where ID is never returned by Snyk APIs
   'owner',
   'branch',
 ];

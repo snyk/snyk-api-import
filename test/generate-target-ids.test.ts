@@ -12,7 +12,7 @@ describe('generateTargetId', () => {
     };
     const targetId = generateTargetId(orgId, integrationId, target);
     expect(targetId).toEqual(
-      'org-public-id:integration-public-id:monorepo:123:snyk:main',
+      'org-public-id:integration-public-id:monorepo:snyk:main',
     );
   });
 
