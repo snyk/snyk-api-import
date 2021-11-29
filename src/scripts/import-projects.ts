@@ -63,7 +63,7 @@ export async function shouldSkipTarget(
   }
 }
 
-async function filterOutImportedTargets(
+export async function filterOutImportedTargets(
   targets: ImportTarget[],
   loggingPath: string,
 ): Promise<ImportTarget[]> {

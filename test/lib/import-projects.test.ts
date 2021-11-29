@@ -98,4 +98,25 @@ describe('Skip target if found in log', () => {
     const shouldSkip = await shouldSkipTarget(importTarget, importedTargetIds);
     expect(shouldSkip).toBeFalsy();
   });
+
+  it('Gitlab target with repo ID should be skipped', async () => {
+    const target = {
+      name: 'composer-with-vulns',
+      owner: 'snyk-fixtures',
+      branch: 'master',
+      forked: true,
+      isPrivate: false,
+      id: 123,
+    };
+    const importTarget = {
+      integrationId: 'INTEGRATION_ID_NEW',
+      orgId: 'ORG_ID_NEW',
+      target,
+    };
+
+    const logPath = path.resolve(__dirname + `/fixtures/non-empty.logx`);
+    const importedTargetIds = await parseLogIntoTargetIds(logPath);
+    const shouldSkip = await shouldSkipTarget(importTarget, importedTargetIds);
+    expect(shouldSkip).toBeFalsy();
+  });
 });
