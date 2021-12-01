@@ -134,10 +134,10 @@ async function requestWithRateLimitHandling(
       });
       break;
     } catch (e) {
+      attempt += 1;
       res = e;
       debug('Failed:' + JSON.stringify(e));
       if (e.data.code === 429) {
-        attempt += 1;
         const sleepTime = 120000 * attempt; // 2 mins x attempt
         console.error(
           `Received a rate limit error, sleeping for ${sleepTime} ms (attempt # ${attempt})`,
@@ -189,7 +189,7 @@ export async function importTargets(
             `Every import in this batch failed, stopping as this is unexpected! Please check if everything is configured ok and review the logs located at ${loggingPath}/*. If everything looks OK re-start the import, previously imported targets will be skipped.`,
           );
           // die immediately
-          return process.exit(1);
+          process.exit(1);
         }
       }
     },
