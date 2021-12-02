@@ -20,7 +20,7 @@ export const builder = {
     default: SupportedIntegrationTypesImportData.GITHUB,
     choices: [...Object.values(SupportedIntegrationTypesImportData)],
     desc:
-      'The source of the targets to be imported e.g. Github, Github Enterprise, Gitlab. This will be used to make an API call to list all available entities per org',
+      'The source of the targets to be imported e.g. Github, Github Enterprise, Gitlab, Azure. This will be used to make an API call to list all available entities per org',
   },
   sourceUrl: {
     required: false,
@@ -43,6 +43,7 @@ const entityName: {
   github: 'org',
   'github-enterprise': 'org',
   gitlab: 'group',
+  'azure-repos': 'org',
 };
 
 export async function handler(argv: {

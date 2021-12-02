@@ -13,3 +13,4 @@ export * from './filter-out-existing-orgs';
 
 export * from './source-handlers/github';
 export * from './source-handlers/gitlab';
+export * from './source-handlers/azure';

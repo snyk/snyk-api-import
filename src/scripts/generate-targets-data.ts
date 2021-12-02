@@ -12,6 +12,8 @@ import {
   listGithubRepos,
   listGitlabRepos,
   GitlabRepoData,
+  listAzureRepos,
+  AzureRepoData,
 } from '../lib';
 
 const debug = debugLib('snyk:generate-targets-data');
@@ -33,6 +35,7 @@ const sourceGenerators = {
   [SupportedIntegrationTypesImportData.GITHUB]: listGithubRepos,
   [SupportedIntegrationTypesImportData.GHE]: githubEnterpriseRepos,
   [SupportedIntegrationTypesImportData.GITLAB]: listGitlabRepos,
+  [SupportedIntegrationTypesImportData.AZURE_REPOS]: listAzureRepos,
 };
 
 function validateRequiredOrgData(
@@ -84,8 +87,8 @@ export async function generateTargetsImportDataFile(
     try {
       validateRequiredOrgData(name, integrations, orgId);
       const entities: Array<
-        GithubRepoData | GitlabRepoData
-      > = await sourceGenerators[source](topLevelEntity.name, sourceUrl);
+        GithubRepoData | GitlabRepoData | AzureRepoData
+      > = await sourceGenerators[source](topLevelEntity.name, sourceUrl!);
       entities.forEach((entity) => {
         targetsData.push({
           target: entity,

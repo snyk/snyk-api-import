@@ -102,7 +102,7 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 }
 ```
 
-#### Example: Github.com | Github Enterprise
+#### Example: Github.com | Github Enterprise | dev.azure.com | Hosted Azure Repos
 
 ```
 {
@@ -200,3 +200,4 @@ Supported integration types:
 - Bitbucket Cloud `bitbucket-cloud`
 - Google Cloud Registry `gcr`
 - DockerHub registry `docker-hub`
+- Azure repos `azure-repos`

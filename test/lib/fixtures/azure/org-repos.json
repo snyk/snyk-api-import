@@ -1,0 +1,65 @@
+{
+  "value": [
+    {
+      "id": "123",
+      "name": "Test1",
+      "url": "https://dev.azure.com/someURL",
+      "project": {
+        "id": "1234",
+        "name": "Test1",
+        "url": "https://dev.azure.com/projectUrl",
+        "state": "wellFormed",
+        "revision": 1055,
+        "visibility": "public",
+        "lastUpdateTime": "2021-11-08T14:38:17.79Z"
+      },
+      "defaultBranch": "refs/heads/master",
+      "size": 4106387,
+      "remoteUrl": "https://dev.azure.com/remoteUrl",
+      "sshUrl": "",
+      "webUrl": "https://dev.azure.com/remoteUrl",
+      "isDisabled": false
+    },
+    {
+      "id": "1234",
+      "name": "Test2",
+      "url": "https://dev.azure.com/someURL",
+      "project": {
+        "id": "1234",
+        "name": "Test1",
+        "url": "https://dev.azure.com/projectUrl",
+        "state": "wellFormed",
+        "revision": 1055,
+        "visibility": "public",
+        "lastUpdateTime": "2021-11-08T14:38:17.79Z"
+      },
+      "defaultBranch": "refs/heads/master",
+      "size": 4106387,
+      "remoteUrl": "https://dev.azure.com/remoteUrl",
+      "sshUrl": "",
+      "webUrl": "https://dev.azure.com/remoteUrl",
+      "isDisabled": false
+    },
+    {
+      "id": "12345",
+      "name": "Test3",
+      "url": "https://dev.azure.com/someURL",
+      "project": {
+        "id": "1234",
+        "name": "Test1",
+        "url": "https://dev.azure.com/projectUrl",
+        "state": "wellFormed",
+        "revision": 1055,
+        "visibility": "public",
+        "lastUpdateTime": "2021-11-08T14:38:17.79Z"
+      },
+      "defaultBranch": "refs/heads/master",
+      "size": 4106387,
+      "remoteUrl": "https://dev.azure.com/remoteUrl",
+      "sshUrl": "",
+      "webUrl": "https://dev.azure.com/remoteUrl",
+      "isDisabled": false
+    }
+  ],
+  "count": 3
+}

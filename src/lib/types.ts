@@ -76,6 +76,7 @@ export enum SupportedIntegrationTypesImportData {
   GITHUB = 'github',
   GHE = 'github-enterprise',
   GITLAB = 'gitlab',
+  AZURE_REPOS = 'azure-repos',
 }
 
 // used to generate import data by connecting to the source via API
