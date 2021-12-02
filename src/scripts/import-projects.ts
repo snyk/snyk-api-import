@@ -119,7 +119,7 @@ export async function importProjects(
 
   let targets: ImportTarget[] = [];
   try {
-    targets = await streamData<ImportTarget>(fileName, 'targets');
+    targets = await streamData<ImportTarget>(fileName, 'targets') ?? [];
   } catch (e) {
     throw new Error(`Failed to parse targets from ${fileName}:\n${e.message}`);
   }

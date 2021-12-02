@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import split = require('split');
 
 const debug = debugLib('streamData:load-file');
+const debugSnyk = debugLib('snyk:load-file');
 
 export async function streamData<DataType>(
   file: string,
@@ -37,7 +38,8 @@ export async function streamMinifiedJson<DataType>(
           const json = JSON.parse(lineObj);
           data = json[arrayKey];
         } catch (e) {
-          debug('ERROR parsing line: ', e);
+          debugSnyk(`ERROR: Could not find "${arrayKey}" key in json. Make sure the JSON is valid and the key is present`)
+          debug(e.message);
         }
       })
       .on('error', (err) => {

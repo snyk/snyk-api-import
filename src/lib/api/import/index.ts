@@ -54,13 +54,13 @@ export async function importTarget(
       'post',
       body,
     );
-    if (res.statusCode && res.statusCode !== 201) {
+    if (!res.statuscode || res.statusCode !== 201) {
       throw new Error(
         'Expected a 201 response, instead received: ' +
           JSON.stringify(res.data),
       );
     }
-    const locationUrl = res.headers['location'];
+    const locationUrl = res.headers?.['location'];
     if (!locationUrl) {
       throw new Error(
         'No import location url returned. Please re-try the import.',
@@ -105,7 +105,7 @@ export async function importTarget(
         target,
       )}.\nERROR name: ${
         error.name
-      } msg: ${errorMessage}. See more information in logs located at ${path.join(
+      } msg: ${errorMessage} See more information in logs located at ${path.join(
         logPath,
         orgId,
       )}.${FAILED_LOG_NAME} or re-start in DEBUG mode.`,
@@ -134,8 +134,12 @@ async function requestWithRateLimitHandling(
       });
       break;
     } catch (e) {
-      attempt += 1;
       res = e;
+      if (e.data.code === 401) {
+        console.error(`ERROR: ${e.data.message}. Please check the token and try again.`)
+        break;
+      }
+      attempt += 1;
       debug('Failed:' + JSON.stringify(e));
       if (e.data.code === 429) {
         const sleepTime = 120000 * attempt; // 2 mins x attempt

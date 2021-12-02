@@ -32,6 +32,6 @@ export function getImportProjectsFile(filePath?: string): string {
   }
 
   throw new Error(
-    `Please set the SNYK_IMPORT_PATH e.g. export SNYK_IMPORT_PATH='~/my/path/to/import-projects.json'`,
+    `Could not find the import file, locations tried:${[process.env.SNYK_IMPORT_PATH, filePath, defaultFile].join(',')}. Please set the location via --file or SNYK_IMPORT_PATH e.g. export SNYK_IMPORT_PATH='~/my/path/to/import-projects.json'`,
   );
 }
