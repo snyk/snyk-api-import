@@ -54,10 +54,10 @@ export async function importTarget(
       'post',
       body,
     );
-    if (!res.statuscode || res.statusCode !== 201) {
+    if (!res.statusCode || res.statusCode !== 201) {
       throw new Error(
         'Expected a 201 response, instead received: ' +
-          JSON.stringify(res.data),
+          JSON.stringify({ data: res.data, statusCode: res.statusCode}),
       );
     }
     const locationUrl = res.headers?.['location'];
