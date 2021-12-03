@@ -179,7 +179,9 @@ export async function importProjects(
       batch,
       loggingPath,
     );
+    debug(`Received ${pollingUrlsAndContext.length} polling URLs`);
     const res = await pollImportUrls(requestManager, pollingUrlsAndContext);
+    debug(`Finished polling, discovered ${res.projects?.length} projects`);
     projects.push(...res.projects);
   }
   return { projects, skippedTargets, filteredTargets, targets };
