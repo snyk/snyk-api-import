@@ -17,6 +17,8 @@ import { generateTargetId } from '../generate-target-id';
 import { streamData } from '../stream-data';
 
 const debug = debugLib('snyk:import-projects-script');
+const debugSkipTargets = debugLib('skipping-targets');
+
 
 export async function parseLogIntoTargetIds(
   logFile: string,
@@ -85,14 +87,13 @@ export async function filterOutImportedTargets(
     );
     return targets;
   }
-  const totalTargets = targets.length;
+  debugSkipTargets(`Checking if any targets should be skipped`);
   await pMap(
     targets,
-    async (targetItem, index) => {
-      debug(`Checking target should be skipped: ${index}/${totalTargets}`);
+    async (targetItem) => {
       const shouldSkip = await shouldSkipTarget(targetItem, importedTargets);
       if (shouldSkip) {
-        debug('Skipping target', JSON.stringify(targetItem));
+        debugSkipTargets('Skipping target', JSON.stringify(targetItem));
       } else {
         filterOutImportedTargets.push(targetItem);
       }
@@ -179,7 +180,9 @@ export async function importProjects(
       batch,
       loggingPath,
     );
+    debug(`Received ${pollingUrlsAndContext.length} polling URLs`);
     const res = await pollImportUrls(requestManager, pollingUrlsAndContext);
+    debug(`Finished polling, discovered ${res.projects?.length} projects`);
     projects.push(...res.projects);
   }
   return { projects, skippedTargets, filteredTargets, targets };
