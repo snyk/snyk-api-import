@@ -68,6 +68,7 @@ const targetGenerators = {
   [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.GCR]: imageProjectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.DOCKER_HUB]: imageProjectToTarget,
+  [SupportedIntegrationTypesToListSnykTargets.AZURE_REPOS]: projectToTarget,
 };
 
 interface SnykOrg {

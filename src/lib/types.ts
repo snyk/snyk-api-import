@@ -95,6 +95,7 @@ export enum SupportedIntegrationTypesToListSnykTargets {
   GCR = 'gcr',
   DOCKER_HUB = 'docker-hub',
   GITLAB = 'gitlab',
+  AZURE_REPOS = 'azure-repos',
 }
 interface ImportingUser {
   id: string;
