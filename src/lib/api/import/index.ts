@@ -54,7 +54,8 @@ export async function importTarget(
       'post',
       body,
     );
-    if (!res.statusCode || res.statusCode !== 201) {
+    const statusCode = res.statusCode || res.status;
+    if (!statusCode || statusCode !== 201) {
       throw new Error(
         'Expected a 201 response, instead received: ' +
           JSON.stringify({ data: res.data, statusCode: res.statusCode}),

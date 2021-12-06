@@ -41,10 +41,11 @@ export async function pollImportUrl(
       body: JSON.stringify({}),
     });
     const importStatus: PollImportResponse = res.data;
-    if (res.statusCode && res.statusCode !== 200) {
+    const statusCode = res.statusCode || res.status;
+    if (!statusCode || statusCode !== 200) {
       throw new Error(
         'Expected a 200 response, instead received: ' +
-          JSON.stringify(res.data),
+          JSON.stringify({ data: res.data, status: statusCode }),
       );
     }
     debug(`Import task status is "${importStatus.status}"`);

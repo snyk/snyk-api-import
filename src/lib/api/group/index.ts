@@ -42,9 +42,11 @@ export async function createOrg(
     url: `/group/${groupId}/org`,
     body: JSON.stringify(body),
   });
-  if (res.statusCode && res.statusCode !== 200) {
+  const statusCode = res.statusCode || res.status;
+  if (!statusCode || statusCode !== 200) {
     throw new Error(
-      'Expected a 200 response, instead received: ' + JSON.stringify(res),
+      'Expected a 200 response, instead received: ' +
+        JSON.stringify({ data: res.data, status: statusCode }),
     );
   }
   return res.data;
@@ -75,7 +77,8 @@ export async function listOrgs(
     url: `/group/${groupId}/orgs?query=${query}`,
     body: JSON.stringify({}),
   });
-  if (res.statusCode && res.statusCode !== 200) {
+  const statusCode = res.statusCode || res.status;
+  if (statusCode || statusCode !== 200) {
     throw new Error(
       'Expected a 200 response, instead received: ' + JSON.stringify(res),
     );
