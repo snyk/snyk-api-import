@@ -32,10 +32,11 @@ export async function listIntegrations(
     body: JSON.stringify({}),
   });
 
-  if (res.statusCode && res.statusCode !== 201) {
+  const statusCode = res.statusCode || res.status;
+  if (!statusCode || statusCode !== 201) {
     throw new Error(
       'Expected a 201 response, instead received: ' +
-        JSON.stringify(res.data || res.body),
+        JSON.stringify({ data: res.data || res.body, status: statusCode }),
     );
   }
   return res.data || {};
@@ -89,10 +90,11 @@ export async function setNotificationPreferences(
       body: JSON.stringify(settings),
     });
 
-    if (res.statusCode && res.statusCode !== 201) {
+    const statusCode = res.statusCode || res.status;
+    if (!statusCode || statusCode !== 201) {
       throw new Error(
         'Expected a 201 response, instead received: ' +
-          JSON.stringify(res.data || res.data),
+          JSON.stringify({ data: res.data, status: statusCode }),
       );
     }
     return res.data || {};
@@ -121,10 +123,11 @@ export async function deleteOrg(
     url: `/org/${orgId}`,
     body: JSON.stringify({}),
   });
-
-  if (res.statusCode && res.statusCode !== 204) {
+  const statusCode = res.statusCode || res.status;
+  if (!statusCode || statusCode !== 204) {
     throw new Error(
-      'Expected a 204 response, instead received: ' + JSON.stringify(res.data),
+      'Expected a 204 response, instead received: ' +
+        JSON.stringify({ data: res.data, status: statusCode }),
     );
   }
   return res.data;
@@ -161,10 +164,11 @@ export async function listProjects(
       body: JSON.stringify(filters),
     });
 
-    if (res.statusCode && res.statusCode !== 201) {
+    const statusCode = res.statusCode || res.status;
+    if (!statusCode || statusCode !== 201) {
       throw new Error(
         'Expected a 201 response, instead received: ' +
-          JSON.stringify(res.data || res.data),
+          JSON.stringify({ data: res.data, status: statusCode }),
       );
     }
     return res.data || {};

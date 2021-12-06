@@ -36,7 +36,8 @@ export async function deleteProjects(
         },
       },
     );
-    if (res.statusCode !== 200) {
+    const statusCode = res.statusCode;
+    if (!statusCode || statusCode !== 200) {
       throw new Error(
         `Expected a 200 response, instead received statusCode: ${
           res.statusCode
