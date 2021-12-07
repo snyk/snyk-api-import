@@ -12,7 +12,7 @@ export const desc = 'Kick off API powered import';
 export const builder = {
   file: {
     required: false,
-    default: 'import-projects.json',
+    default: undefined,
     desc: 'Path to json file that contains the targets to be imported',
   },
 };
