@@ -1,5 +1,5 @@
 import * as debugLib from 'debug';
-const debug = debugLib('snyk:generate-data-script');
+const debug = debugLib('snyk:orgs-create-script');
 
 import { getLoggingPath } from '../lib';
 import { createOrgs } from '../scripts/create-orgs';

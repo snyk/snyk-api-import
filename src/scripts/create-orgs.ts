@@ -155,8 +155,10 @@ export async function createOrgs(
 
   for (const groupId in orgsPerGroup) {
     let orgsToCreate = orgsPerGroup[groupId];
+    debug(`Finding existing organizations in group ${groupId}`);
     const res = await filterOutExistingOrgs(requestManager, orgsData, groupId);
     existingOrgs.push(...res.existingOrgs);
+    debug(`Found ${existingOrgs.length} existing organizations`);
 
     if (noDuplicateNames) {
       orgsToCreate = res.newOrgs;
@@ -166,9 +168,9 @@ export async function createOrgs(
           name: o.name,
         })),
       );
+      debug(`Found ${failedOrgs.length} duplicate organizations`);
     }
     debug(`Creating ${orgsToCreate.length} new organizations`);
-
     const { failed, created } = await createNewOrgs(
       loggingPath,
       requestManager,
