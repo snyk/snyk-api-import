@@ -6,6 +6,7 @@ This is a util that can help generate the import json data needed by the import 
 - Usage
   - [Github](#githubcom--github-enterprise)
   - [Gitlab](#gitlabcom--hosted-gitlab)
+  - [Azure-Repos](#devazurecom--hosted-azure)
 - [Recommendations](#recommendations)
 
 
@@ -65,6 +66,36 @@ This is a util that can help generate the import json data needed by the import 
 3. Run the command to generate import data:
  - **Gitlab.com:** `DEBUG=snyk* GITLAB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=gitlab --integrationType=gitlab`
  - **Hosted Gitlab:** `DEBUG=snyk* GITLAB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=gitlab --integrationType=gitlab --sourceUrl=https://gitlab.custom.com`
+
+4. Use the generated data to feed into [import] command (/import.md) to generate kick off the import.
+
+
+## dev.azure.com / Hosted Azure
+*Please note that this tool uses Azure API version 4.1*
+1. Set the [Azure personal access token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) as an environment variable: `export AZURE_TOKEN=your_personal_access_token`
+2. You will need to have the organizations data in json as an input to this command to help map Snyk organization IDs and Integration Ids that must be used during import against individual targets to be imported. The following format is required:
+  ```
+  {
+    "orgData": [
+      {
+        "name": "<org_name_in_azure_used_to_list_repos>",
+        "orgId": "<snyk_org_id>",
+        "integrations": {
+          "azure-repos": "<snyk_org_integration_id>",
+        },
+      },
+      {...}
+    ]
+  }
+  ```
+  Note: the "name" of the Azure Organization is required in order to list all projects and repos belonging to that Organization via Azure API, the Snyk specific data accompanying that Organization name will be used as the information to generate import data assuming all projects in that Organization will be imported into a given Snyk organization. This is opinionated! If you want to customize this please manually craft the import data described in [import.md](/docs/import.md)
+  - Your Org name in Azure is listed on the left pane in the [Azure-Devops-site](https://dev.azure.com/)
+  - Integrations can be listed via [Snyk Integrations API](https://snyk.docs.apiary.io/#reference/integrations/integrations/list)
+  - All organization IDs can be found by listing all organizations a group admin belongs to via [Snyk Organizations API](https://snyk.docs.apiary.io/#reference/groups/list-all-organizations-in-a-group/list-all-organizations-in-a-group)
+
+3. Run the command to generate import data:
+ - **dev.azure.com:** `DEBUG=snyk* AZURE_TOKEN=*** SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=azure-repos --integrationType=azure-repos`
+ - **Hosted Azure:** `DEBUG=snyk* AZURE_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=azure-repos --integrationType=azure-repos --sourceUrl=https://azure.custom.com`
 
 4. Use the generated data to feed into [import] command (/import.md) to generate kick off the import.
 

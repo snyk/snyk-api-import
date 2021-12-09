@@ -1,0 +1,95 @@
+{
+  "count": 10,
+  "value": [
+    {
+      "id": "371efd3e-3e86-4d33-846d-e5e46397dd91",
+      "name": "Test68",
+      "url": "https://dev.azure.com/ilantorbaty/_apis/projects/371efd3e-3e86-4d33-846d-e5e46397dd91",
+      "state": "wellFormed",
+      "revision": 555,
+      "visibility": "private",
+      "lastUpdateTime": "2021-04-05T18:20:39.37Z"
+    },
+    {
+      "id": "5bdff632-3ff7-4378-9d25-1c6355885b0f",
+      "name": "Test27",
+      "url": "https://dev.azure.com/ilantorbaty/_apis/projects/5bdff632-3ff7-4378-9d25-1c6355885b0f",
+      "state": "wellFormed",
+      "revision": 227,
+      "visibility": "private",
+      "lastUpdateTime": "2021-04-05T18:07:53.72Z"
+    },
+    {
+      "id": "9bf8aab6-8ae1-48d3-a19f-2541fb325d7d",
+      "name": "Test103",
+      "url": "https://dev.azure.com/ilantorbaty/_apis/projects/9bf8aab6-8ae1-48d3-a19f-2541fb325d7d",
+      "state": "wellFormed",
+      "revision": 835,
+      "visibility": "private",
+      "lastUpdateTime": "2021-04-06T05:46:43.277Z"
+    },
+    {
+      "id": "fec060ec-a6a0-452f-b650-c4fbee4499a9",
+      "name": "Test102",
+      "url": "https://dev.azure.com/ilantorbaty/_apis/projects/fec060ec-a6a0-452f-b650-c4fbee4499a9",
+      "state": "wellFormed",
+      "revision": 827,
+      "visibility": "private",
+      "lastUpdateTime": "2021-04-06T05:46:31Z"
+    },
+    {
+      "id": "06fae37f-a730-4265-9908-fc9ac3fad9a5",
+      "name": "Test117",
+      "url": "https://dev.azure.com/ilantorbaty/_apis/projects/06fae37f-a730-4265-9908-fc9ac3fad9a5",
+      "state": "wellFormed",
+      "revision": 947,
+      "visibility": "private",
+      "lastUpdateTime": "2021-04-06T05:49:37.6Z"
+    },
+    {
+      "id": "369cd140-6b15-4937-adf6-b251c57ed6d5",
+      "name": "Test72",
+      "url": "https://dev.azure.com/ilantorbaty/_apis/projects/369cd140-6b15-4937-adf6-b251c57ed6d5",
+      "state": "wellFormed",
+      "revision": 587,
+      "visibility": "private",
+      "lastUpdateTime": "2021-04-05T18:24:44.787Z"
+    },
+    {
+      "id": "fc1f134d-02f8-4575-96a8-9c31954234c2",
+      "name": "Test97",
+      "url": "https://dev.azure.com/ilantorbaty/_apis/projects/fc1f134d-02f8-4575-96a8-9c31954234c2",
+      "state": "wellFormed",
+      "revision": 787,
+      "visibility": "private",
+      "lastUpdateTime": "2021-04-05T18:32:33.29Z"
+    },
+    {
+      "id": "e7750c1e-b400-4ccd-9995-836d850c2dfa",
+      "name": "Test98",
+      "url": "https://dev.azure.com/ilantorbaty/_apis/projects/e7750c1e-b400-4ccd-9995-836d850c2dfa",
+      "state": "wellFormed",
+      "revision": 795,
+      "visibility": "private",
+      "lastUpdateTime": "2021-04-05T18:32:46.287Z"
+    },
+    {
+      "id": "2d5eccfc-bb6b-4f89-b77f-36a875b5e4e9",
+      "name": "Test74",
+      "url": "https://dev.azure.com/ilantorbaty/_apis/projects/2d5eccfc-bb6b-4f89-b77f-36a875b5e4e9",
+      "state": "wellFormed",
+      "revision": 603,
+      "visibility": "private",
+      "lastUpdateTime": "2021-04-05T18:26:04.753Z"
+    },
+    {
+      "id": "1e8621c5-2d46-49bb-bd1c-c6914013ed58",
+      "name": "Test109",
+      "url": "https://dev.azure.com/ilantorbaty/_apis/projects/1e8621c5-2d46-49bb-bd1c-c6914013ed58",
+      "state": "wellFormed",
+      "revision": 883,
+      "visibility": "private",
+      "lastUpdateTime": "2021-04-06T05:47:57.977Z"
+    }
+  ]
+}
