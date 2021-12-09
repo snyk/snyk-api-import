@@ -43,9 +43,12 @@ async function createNewOrgs(
   for (const orgData of orgsToCreate) {
     const { name, sourceOrgId } = orgData;
     try {
-      const org = await createOrg(requestManager, groupId, name, sourceOrgId);
+      debug(`Creating new "${name}" organization`);
+      const org = await createOrg(requestManager, groupId, name, sourceOrgId);      debug(`Creating new "${name}" organization`);
+      debug(`Listing integrations for new "${name}" organization`);
       const integrations =
         (await listIntegrations(requestManager, org.id)) || {};
+      debug(`Setting notification settings for new "${name}" organization`);
       await setNotificationPreferences(requestManager, org.id, org.name);
       created.push({
         ...org,
