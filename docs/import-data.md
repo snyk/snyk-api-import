@@ -71,7 +71,7 @@ This is a util that can help generate the import json data needed by the import 
 
 
 ## dev.azure.com / Hosted Azure
-*Please note that thos tool uses Azure APi verion 4.1*
+*Please note that this tool uses Azure API version 4.1*
 1. Set the [Azure personal access token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) as an environment variable: `export AZURE_TOKEN=your_personal_access_token`
 2. You will need to have the organizations data in json as an input to this command to help map Snyk organization IDs and Integration Ids that must be used during import against individual targets to be imported. The following format is required:
   ```
