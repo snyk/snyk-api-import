@@ -78,9 +78,9 @@ export async function listOrgs(
     body: JSON.stringify({}),
   });
   const statusCode = res.statusCode || res.status;
-  if (statusCode || statusCode !== 200) {
+  if (!statusCode || statusCode !== 200) {
     throw new Error(
-      'Expected a 200 response, instead received: ' + JSON.stringify(res),
+      'Expected a 200 response, instead received: ' + JSON.stringify({statusCode, data: res.data}),
     );
   }
 
