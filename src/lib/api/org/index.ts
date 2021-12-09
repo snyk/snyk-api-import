@@ -165,9 +165,9 @@ export async function listProjects(
     });
 
     const statusCode = res.statusCode || res.status;
-    if (!statusCode || statusCode !== 201) {
+    if (!statusCode || statusCode !== 200) {
       throw new Error(
-        'Expected a 201 response, instead received: ' +
+        'Expected a 200 response, instead received: ' +
           JSON.stringify({ data: res.data, status: statusCode }),
       );
     }
