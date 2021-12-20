@@ -51,7 +51,7 @@
     "needle": "2.9.1",
     "nock": "^13.2.1",
     "p-map": "4.0.0",
-    "parse-link-header": "1.0.1",
+    "parse-link-header": "2.0.0",
     "sleep-promise": "8.0.1",
     "snyk-config": "^4.0.0",
     "snyk-request-manager": "1.4.3",
