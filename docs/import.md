@@ -180,7 +180,6 @@ Example:
 Note:
 
 - The same target imported into a different organization will be allowed to be imported
-- The same target (but different branch) will be allowed to be imported
 - The same target from a differed source be allowed to be imported (For example the same repo is present in Github and now it being imported via Github Enterprise into the same org)
 
 Command to run:
