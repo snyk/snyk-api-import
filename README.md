@@ -7,7 +7,7 @@
 Snyk helps you find, fix and monitor for known vulnerabilities in your dependencies, both on an ad hoc basis and as part of your CI (Build) system.
 
 # Snyk api import
-Snyk API project importer. This script is intended to help import projects into Snyk with a controlled pace utilizing available [Snyk APIs](https://snyk.docs.apiary.io/) to avoid rate limiting from Github/Gitlab/Bitbucket etc and to provide a stable import. The script will kick off an import in batches, wait for completion and then keep going. Any failed requests will be retried before they are considered a failure and logged. 
+Snyk API project importer. This script is intended to help import projects into Snyk with a controlled pace utilizing available [Snyk APIs](https://snyk.docs.apiary.io/) to avoid rate limiting from Github/Gitlab/Bitbucket etc and to provide a stable import. The script will kick off an import in batches, wait for completion and then keep going. Any failed requests will be retried before they are considered a failure and logged.
 
 If you need to adjust concurrency you can stop the script, change the concurrency variable and start again. It will skip previous repos/targets that have been requested for import.
 
@@ -16,6 +16,34 @@ What you will need to have setup in advance:
 - your Snyk organizations configured with some connection to SCM (Github/Gitlab/Bitbucket etc) as you will need the `integrationId` to generate the import files.
 - Recommended: have [notifications disabled](https://snyk.docs.apiary.io/#reference/organizations/notification-settings/set-notification-settings) for emails etc to avoid receiving import notifications
 - Recommended: have the [fix PRs and PR checks disabled](https://snyk.docs.apiary.io/#reference/integrations/integration-settings/update) until import is complete to avoid sending extra requests to SCMs (Github/Gitlab/Bitbucket etc)
+
+# Installation
+Snyk snyk-api-import CLI can be installed through multiple channels.
+
+## Standalone executables (macOS, Linux, Windows)
+
+Use [GitHub Releases](https://github.com/snyk-tech-services/snyk-api-import/releases) to download a standalone executable of Snyk CLI for your platform.
+
+## More installation methods
+
+<details>
+  <summary>Install with npm or Yarn</summary>
+
+### Install with npm or Yarn
+
+[Snyk snyk-api-import CLI is available as an npm package](https://www.npmjs.com/package/snyk-api-import). If you have Node.js installed locally, you can install it by running:
+
+```bash
+npm install snyk-api-import@latest -g
+```
+
+or if you are using Yarn:
+
+```bash
+yarn global add snyk-api-import
+```
+
+</details>
 
 # Usage
 By default the `import` command will run if no command specified.
