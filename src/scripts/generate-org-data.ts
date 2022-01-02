@@ -10,6 +10,10 @@ import {
   gitlabGroupIsEmpty,
 } from '../lib/source-handlers/gitlab';
 import {
+  bitbucketServerProjectIsEmpty,
+  listBitbucketServerProjects,
+} from '../lib/source-handlers/bitbucket-server/';
+import {
   CreateOrgData,
   SupportedIntegrationTypesImportOrgData,
 } from '../lib/types';
@@ -19,12 +23,14 @@ const sourceGenerators = {
   [SupportedIntegrationTypesImportOrgData.GITLAB]: listGitlabGroups,
   [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizations,
   [SupportedIntegrationTypesImportOrgData.GHE]: githubEnterpriseOrganizations,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]: listBitbucketServerProjects,
 };
 
 const sourceNotEmpty = {
   [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizationIsEmpty,
   [SupportedIntegrationTypesImportOrgData.GHE]: githubOrganizationIsEmpty,
   [SupportedIntegrationTypesImportOrgData.GITLAB]: gitlabGroupIsEmpty,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]: bitbucketServerProjectIsEmpty,
 };
 
 export const entityName: {
@@ -33,6 +39,7 @@ export const entityName: {
   github: 'organization',
   'github-enterprise': 'organization',
   gitlab: 'group',
+  'bitbucket-server': 'project',
 };
 
 const exportFileName: {
@@ -41,6 +48,7 @@ const exportFileName: {
   github: 'github-com',
   'github-enterprise': 'github-enterprise',
   gitlab: 'gitlab',
+  'bitbucket-server': 'bitbucket-server',
 };
 
 export async function generateOrgImportDataFile(
