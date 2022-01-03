@@ -4,6 +4,7 @@
 - Generating the data to create Organizations in Snyk
   - [Github](#githubcom--github-enterprise)
   - [Gitlab](#gitlabcom--hosted-gitlab)
+  - [Bitbucket-cloud](#bitbucket-cloud)
 - [Creating the organizations](#creating-organizations-in-snyk-1)
   - [via the API](#via-api)
   - [via the `orgs:create` util](#via-orgscreate-util)
@@ -14,8 +15,8 @@ Before an import can begin Snyk needs to be setup with the Organizations you wil
 It is recommended to have as many Organizations in Snyk as you have in the source you are importing from. So for Github this would mean mirroring the Github organizations in Snyk. The tool provides a utility that can be used to make this simpler when using Groups & Organizations in Snyk.
 
 # Generating the data required to create Organizations in Snyk with `orgs:data` util
-This util helps generate data needed to mirror the Github.com / Github Enterprise organization structure in Snyk.
-This is an opinionated util and will assume every organization in Github.com / Github Enterprise should become an organization in Snyk. If this is not what you are looking for, please look at using the [Organizations API](https://snyk.docs.apiary.io/#reference/groups/organizations-in-a-group/create-a-new-organization-in-a-group) directly to create the structure you need.
+This util helps generate data needed to mirror the Github.com / Github Enterprise / Bitbucket Cloud organization structure in Snyk.
+This is an opinionated util and will assume every organization in Github.com / Github Enterprise / Bitbucket Cloud should become an organization in Snyk. If this is not what you are looking for, please look at using the [Organizations API](https://snyk.docs.apiary.io/#reference/groups/organizations-in-a-group/create-a-new-organization-in-a-group) directly to create the structure you need.
 
 ## Github.com / Github Enterprise
 1. set the [Github.com personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) as an environment variable: `export GITHUB_TOKEN=your_personal_access_token`
@@ -33,6 +34,15 @@ This will create the organization data in a file `group-<snyk_group_id>-github-<
  - **Hosted Gitlab:** `snyk-api-import orgs:data --source=gitlab --groupId=<snyk_group_id> -- sourceUrl=https://gitlab.custom.com`
 
 This will create the organization data in a file `group-<snyk_group_id>-gitlab-orgs.json`
+
+
+## Bitbucket Cloud
+1. set the bitbucket Cloud Username and Password as an environment variables: `export BITBUCKET_CLOUD_USERNAME=your_bitbucket_cloud_username` and `export BITBUCKET_CLOUD_PASSWORD=your_bitbucket_cloud_password`
+2. Run the command to generate organization data:
+ - `snyk-api-import orgs:data --source=bitbucket-cloud --groupId=<snyk_group_id>`
+
+This will create the organization data in a file `group-<snyk_group_id>-bitbucket-cloud-orgs.json`
+
 
 # Creating Organizations in Snyk
 Use the generated data file to help create the organizations via API or use the provided util.
