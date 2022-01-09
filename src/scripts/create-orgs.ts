@@ -44,7 +44,8 @@ async function createNewOrgs(
     const { name, sourceOrgId } = orgData;
     try {
       debug(`Creating new "${name}" organization`);
-      const org = await createOrg(requestManager, groupId, name, sourceOrgId);      debug(`Creating new "${name}" organization`);
+      const org = await createOrg(requestManager, groupId, name, sourceOrgId);
+      debug(`Creating new "${name}" organization`);
       debug(`Listing integrations for new "${name}" organization`);
       const integrations =
         (await listIntegrations(requestManager, org.id)) || {};
@@ -196,7 +197,7 @@ export async function createOrgs(
   const { existing } = await listExistingOrgsData(requestManager, existingOrgs);
   debug('Saving results');
   const allOrgs: Partial<NewOrExistingOrg>[] = [...createdOrgs];
-  if (includeExistingOrgsInOutput) {
+  if (includeExistingOrgsInOutput === true) {
     allOrgs.push(...existing);
   }
   const fileName = await saveCreatedOrgData(allOrgs);

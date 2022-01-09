@@ -1,9 +1,8 @@
 import * as needle from 'needle';
 import * as debugLib from 'debug';
 import Bottleneck from 'bottleneck';
-import { repoListApiResponse, BitbucketServerRepoData } from './types';
+import { BitbucketServerRepoData } from './types';
 import { getBitbucketServerToken } from './get-bitbucket-server-token';
-import { listBitbucketServerProjects } from './list-projects';
 
 const debug = debugLib('snyk:bitbucket-server');
 
@@ -29,43 +28,49 @@ export const fetchAllRepos = async (
   url: string,
   projectKey: string,
   token: string,
-): Promise<unknown[]> => {
+): Promise<BitbucketServerRepoData[]> => {
   let isLastPage = false;
-  let values: unknown[] = [];
+  const repos: BitbucketServerRepoData[] = [];
   let pageCount = 1;
   let start = 0;
   const limit = 100;
   while (!isLastPage) {
     debug(`Fetching page ${pageCount} for ${projectKey}\n`);
-    const response = await limiter.schedule(() =>
+    const { body, statusCode } = await limiter.schedule(() =>
       needle(
         'get',
-        `${url}/rest/api/1.0/projects/${projectKey}/repos/?start=${start}&limit=${limit}`,
+        `${url}/rest/api/1.0/repos?projectname=${projectKey}&state=AVAILABLE&start=${start}&limit=${limit}`,
         {
           headers: { Authorization: 'Bearer ' + token },
         },
       ),
     );
-    if (response.statusCode != 200) {
-      if (response.statusCode == 429) {
+    if (statusCode != 200) {
+      if (statusCode == 429) {
         debug(
-          `Failed to fetch page: ${url}\n, Response Status: ${response.body}\nToo many requests \nWaiting for 3 minutes before resuming`,
+          `Failed to fetch page: ${url}/rest/api/1.0/repos?projectname=${projectKey}&state=AVAILABLE&start=${start}&limit=${limit}\n, Response Status: ${JSON.stringify(
+            body,
+          )}\nToo many requests \nWaiting for 3 minutes before resuming`,
         );
         await sleepNow(180000);
         isLastPage = false;
       } else {
         debug(
-          `Failed to fetch page: ${url}\n, Response Status: ${response.statusCode}\nResponse Status Text: ${response.body} `,
+          `Failed to fetch page: ${url}/rest/api/1.0/repos?projectname=${projectKey}&state=AVAILABLE&start=${start}&limit=${limit}\n, Response Status: ${
+            statusCode
+          }\nResponse Status Text: ${JSON.stringify(body)} `,
         );
       }
     }
-    const apiResponse = response.body['values'] as repoListApiResponse;
-    values = values.concat(apiResponse);
-    isLastPage = response.body['isLastPage'];
-    start = response.body['nextPageStart'] || -1;
+    const apiResponse = body['values'];
+    for (const repo of apiResponse) {
+      repos.push({ projectKey: repo.project.key, repoSlug: repo.name });
+    }
+    isLastPage = body['isLastPage'];
+    start = body['nextPageStart'] || -1;
     pageCount++;
   }
-  return values;
+  return repos;
 };
 
 const sleepNow = (delay: number): unknown =>
@@ -83,12 +88,8 @@ export async function listBitbucketServerRepos(
   }
   const repoList: BitbucketServerRepoData[] = [];
   debug(`Fetching all repos data for org: ${projectName}`);
-    repoList.push(
-      ...((await fetchAllRepos(
-        host,
-        projectName,
-        bitbucketServerToken,
-      )) as BitbucketServerRepoData[]),
-    );
+  repoList.push(
+    ...(await fetchAllRepos(host, projectName, bitbucketServerToken)),
+  );
   return repoList;
 }

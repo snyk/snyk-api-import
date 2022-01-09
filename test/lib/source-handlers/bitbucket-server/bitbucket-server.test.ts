@@ -7,7 +7,7 @@ describe('listBitbucketServerProjects script', () => {
   process.env.BITBUCKET_SERVER_TOKEN = process.env.BBS_TOKEN;
   const sourceUrl = process.env.BBS_SOURCE_URL!.toString();
   const bitbucketServerTestOrgName = process.env.BBS_TEST_ORG_NAME!.toString();
-  
+
   it('listBitbucketServerProjects script', async () => {
     const projects = await listBitbucketServerProjects(sourceUrl);
     expect(projects).toBeTruthy();
@@ -16,9 +16,12 @@ describe('listBitbucketServerProjects script', () => {
     expect(projects[0]).toHaveProperty('name', expect.any(String));
   });
   it('listBitbucketServerRepos script', async () => {
-    const repos = await listBitbucketServerRepos(bitbucketServerTestOrgName, sourceUrl);
+    const repos = await listBitbucketServerRepos(
+      bitbucketServerTestOrgName,
+      sourceUrl,
+    );
     expect(repos).toBeTruthy();
-    expect(repos[0]).toHaveProperty('name', expect.any(String));
-    expect(repos[0]).toHaveProperty('project.key', expect.any(String));
+    expect(repos[0]).toHaveProperty('repoSlug', expect.any(String));
+    expect(repos[0]).toHaveProperty('projectKey', expect.any(String));
   });
 });

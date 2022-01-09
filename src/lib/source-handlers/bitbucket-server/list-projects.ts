@@ -19,7 +19,7 @@ limiter.on('failed', async (error, jobInfo) => {
   console.warn(`Job ${id} failed: ${error}`);
   if (jobInfo.retryCount === 0) {
     // Here we only retry once
-    console.log(`Retrying job ${id} in 25ms!`);
+    debug(`Retrying job ${id} in 25ms!`);
     return 25;
   }
 });
@@ -27,15 +27,15 @@ limiter.on('failed', async (error, jobInfo) => {
 export const fetchAllProjects = async (
   url: string,
   token: string,
-): Promise<unknown[]> => {
+): Promise<BitbucketServerProjectData[]> => {
   let isLastPage = false;
-  let values: unknown[] = [];
+  let projects: BitbucketServerProjectData[] = [];
   let pageCount = 1;
   let start = 0;
   const limit = 100;
   while (!isLastPage) {
     debug(`Fetching page ${pageCount} for projects\n`);
-    const response = await limiter.schedule(() =>
+    const { body, statusCode } = await limiter.schedule(() =>
       needle(
         'get',
         `${url}/rest/api/1.0/projects?start=${start}&limit=${limit}`,
@@ -44,26 +44,30 @@ export const fetchAllProjects = async (
         },
       ),
     );
-    if (response.statusCode != 200) {
-      if (response.statusCode == 429) {
+    if (statusCode != 200) {
+      if (statusCode == 429) {
         debug(
-          `Failed to fetch page: ${url}\n, Response Status: ${response.body}\nToo many requests \nWaiting for 3 minutes before resuming`,
+          `Failed to fetch page: ${url}/rest/api/1.0/projects?start=${start}&limit=${limit}\n, Response Status: ${JSON.stringify(
+            body,
+          )}\nToo many requests \nWaiting for 3 minutes before resuming`,
         );
         await sleepNow(180000);
         isLastPage = false;
       } else {
-        debug(
-          `Failed to fetch page: ${url}\n, Response Status: ${response.statusCode}\nResponse Status Text: ${response.body} `,
+        throw new Error(
+          `Failed to fetch page: ${url}/rest/api/1.0/projects?start=${start}&limit=${limit}\n, Response Status: ${
+            statusCode
+          }\nResponse Status Text: ${JSON.stringify(body)} `,
         );
       }
     }
-    const apiResponse = response.body['values'];
-    values = values.concat(apiResponse);
-    isLastPage = response.body['isLastPage'];
-    start = response.body['nextPageStart'] || -1;
+    const apiResponse = body['values'];
+    projects = projects.concat(apiResponse);
+    isLastPage = body['isLastPage'];
+    start = body['nextPageStart'] || -1;
     pageCount++;
   }
-  return values;
+  return projects;
 };
 
 const sleepNow = (delay: number): unknown =>
@@ -79,9 +83,6 @@ export async function listBitbucketServerProjects(
     );
   }
   debug(`Fetching all projects data`);
-  const projects = (await fetchAllProjects(
-    sourceUrl,
-    bitbucketServerToken,
-  )) as BitbucketServerProjectData[];
+  const projects = await fetchAllProjects(sourceUrl, bitbucketServerToken);
   return projects;
 }
