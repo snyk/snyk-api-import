@@ -14,8 +14,8 @@ export async function streamData<DataType>(
   debug('Trying streamMinifiedJson');
   res = await streamMinifiedJson<DataType>(file, jsonKey);
   if (!res) {
-    debug(
-      `Failed to load as minified JSON, trying to load as beautified JSON with spaces`,
+    debugSnyk(
+      `Warning: Failed to load as minified JSON, trying to load as beautified JSON with spaces`,
     );
     res = await streamBeautifiedJson<DataType>(file, jsonKey);
   }
@@ -38,7 +38,7 @@ export async function streamMinifiedJson<DataType>(
           const json = JSON.parse(lineObj);
           data = json[arrayKey];
         } catch (e) {
-          debugSnyk(`ERROR: Could not find "${arrayKey}" key in json. Make sure the JSON is valid and the key is present`)
+          debug(`ERROR: Could not find "${arrayKey}" key in json. Make sure the JSON is valid and the key is present`)
           debug(e.message);
         }
       })
