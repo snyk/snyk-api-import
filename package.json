@@ -7,11 +7,11 @@
   },
   "scripts": {
     "format:check": "prettier --check '{''{lib,test}/!(test/**/fixtures)/**/*,*}.{js,ts,json,yml}'",
-    "format": "prettier --write '{''{src,test}/!(test/**/fixtures)/**/*,*}.{js,ts,json,yml}'",
+    "format": "prettier --write '{''{src,test}/!(fixtures)/**/*,*}.{js,ts,json,yml}'",
     "lint": "npm run format:check && npm run lint:eslint",
     "lint:eslint": "eslint --cache '{lib,test}/**/*.ts'",
     "test": "npm run lint && npm run build && npm run test:unit",
-    "test:unit": "jest --runInBand --ci --silent --clearCache",
+    "test:unit": "jest --runInBand --ci",
     "test:unit:debug": "npm run build && DEBUG=* jest",
     "test:coverage": "npm run test:unit -- --coverage",
     "test:watch": "tsc-watch --onSuccess 'npm run test:unit'",
