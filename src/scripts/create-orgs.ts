@@ -152,7 +152,7 @@ export async function createOrgs(
   });
 
   const createdOrgs: NewOrExistingOrg[] = [];
-  const existingOrgs: Org[] = [];
+  const allExistingOrgs: Org[] = [];
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import',
   });
@@ -167,8 +167,7 @@ export async function createOrgs(
       groupId,
       orgsToCreate,
     );
-
-    existingOrgs.push(...existingOrgs);
+    allExistingOrgs.push(...existingOrgs);
     debug(`Found ${existingOrgs.length} existing organizations`);
 
     if (noDuplicateNames) {
@@ -210,17 +209,19 @@ export async function createOrgs(
       )}/<groupId>.${FAILED_ORG_LOG_NAME}`,
     );
   }
-  debug(`Getting existing ${existingOrgs.length} orgs data`);
-  const { existing } = await listExistingOrgsData(requestManager, existingOrgs);
-  debug('Saving results');
+  debug(`Getting existing ${allExistingOrgs.length} orgs data`);
   const allOrgs: Partial<NewOrExistingOrg>[] = [...createdOrgs];
+  let existing: Partial<NewOrExistingOrg>[] = [];
+
   if (includeExistingOrgsInOutput) {
+    const res = await listExistingOrgsData(requestManager, allExistingOrgs);
+    existing = res.existing;
     allOrgs.push(...existing);
   }
   const fileName = await saveCreatedOrgData(allOrgs);
   return {
     orgs: createdOrgs,
-    existing: includeExistingOrgsInOutput ? existing : [],
+    existing,
     failed: failedOrgs,
     fileName,
     totalOrgs: orgsData.length,
@@ -233,17 +234,8 @@ async function separateExistingOrganizations(
   groupId: string,
   orgsPerGroup: CreateOrgData[],
 ): Promise<{ existingOrgs: Org[]; newOrgs: CreateOrgData[] }> {
-  let existingOrgs: Org[] = [];
-  let newOrgs: CreateOrgData[] = [];
-
   try {
-    const res = await filterOutExistingOrgs(
-      requestManager,
-      orgsPerGroup,
-      groupId,
-    );
-    existingOrgs = res.existingOrgs;
-    newOrgs = res.newOrgs;
+    return await filterOutExistingOrgs(requestManager, orgsPerGroup, groupId);
   } catch (e) {
     for (const org of orgsPerGroup) {
       const { name } = org;
@@ -263,6 +255,4 @@ async function separateExistingOrganizations(
       )}/<groupId>.${FAILED_ORG_LOG_NAME}`,
     );
   }
-
-  return { existingOrgs, newOrgs };
 }
