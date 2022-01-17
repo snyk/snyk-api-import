@@ -215,9 +215,12 @@ describe('Error handling', () => {
     const file = path.resolve(
       __dirname + '/fixtures/import-projects-invalid.json',
     );
-    expect(importProjects(file)).rejects.toThrow(
-      `Failed to parse targets from ${file}:\nUnexpected token } in JSON at position 120`,
-    );
+    expect(await importProjects(file)).toEqual({
+      filteredTargets: [],
+      projects: [],
+      skippedTargets: 0,
+      targets: [],
+    });
   }, 300);
 
   it('shows correct error when SNYK_LOG_PATH is not set', async () => {
