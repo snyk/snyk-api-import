@@ -259,7 +259,7 @@ describe('No projects scenarios', () => {
     );
     expect(projects.length === 0).toBeTruthy();
     // give file a little time to be finished to be written
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 3000));
     const logFile = fs.readFileSync(logFiles.importJobsLogPath, 'utf8');
     expect(logFile).toMatch(`"status":"complete","projects":[]}`);
     expect(logFile).toMatch(`"logs":[{"name":"snyk-fixtures/empty-repo"`);
