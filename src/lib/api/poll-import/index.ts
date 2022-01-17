@@ -118,7 +118,7 @@ export async function pollImportUrls(
         await logImportedProjects(locationUrl, projects);
         projectsArray.push(...projects);
       } catch (error) {
-        logFailedPollUrls(locationUrl, {
+        await logFailedPollUrls(locationUrl, {
           errorMessage:
             _.get(error, 'innerError.message') ||
             error.innerError ||

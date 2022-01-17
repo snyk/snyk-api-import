@@ -48,7 +48,7 @@ export async function handler(argv: {
   } catch (e) {
     debug('Failed to create organizations.\n' + e);
     console.error(
-      `ERROR! Failed to create organizations. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e}`,
+      `${e}.\nTry running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e}`,
     );
   }
 }

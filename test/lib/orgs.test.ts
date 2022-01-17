@@ -11,7 +11,6 @@ jest.requireActual('snyk-request-manager');
 
 describe('Orgs API', () => {
   const OLD_ENV = process.env;
-  process.env.GROUP_;
   process.env.SNYK_API = SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
   const requestManager = new requestsManager({

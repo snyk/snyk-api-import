@@ -44,12 +44,11 @@ describe('createOrgs script', () => {
     );
     const logPath = path.resolve(__dirname + '/fixtures/create-orgs/1-org/');
     process.env.SNYK_LOG_PATH = logPath;
-    filesToDelete.push(path.resolve(logPath + `/abc.${CREATED_ORG_LOG_NAME}`));
+    filesToDelete.push(path.resolve(logPath + `/${GROUP_ID}.${CREATED_ORG_LOG_NAME}`));
 
     const { fileName, orgs, existing } = await createOrgs(importFile);
     createdOrgs.push(...orgs.map((o) => o.orgId));
     const log = path.resolve(logPath, fileName);
-
     filesToDelete.push(log);
     expect(orgs).not.toBeNull();
     expect(orgs[0]).toMatchObject({

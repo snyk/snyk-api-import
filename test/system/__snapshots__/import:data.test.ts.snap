@@ -14,16 +14,16 @@ Options:
   --orgsData         Path to organizations data file generated with "orgs:data"
                      command                                          [required]
   --source           The source of the targets to be imported e.g. Github,
-                     Github Enterprise, Gitlab. This will be used to make an API
-                     call to list all available entities per org
-         [required] [choices: "github", "github-enterprise", "gitlab"] [default:
-                                                                       "github"]
+                     Github Enterprise, Gitlab, Azure. This will be used to make
+                     an API call to list all available entities per org
+    [required] [choices: "github", "github-enterprise", "gitlab", "azure-repos"]
+                                                             [default: "github"]
   --sourceUrl        Custom base url for the source API that can list
                      organizations (e.g. Github Enterprise url)
   --integrationType  The configured integration type on the created Snyk Org to
                      use for generating import targets data. Applies to all
                      targets.
-                   [required] [choices: "github", "github-enterprise", "gitlab"]
+    [required] [choices: "github", "github-enterprise", "gitlab", "azure-repos"]
 
 Missing required arguments: orgsData, integrationType
 ]
@@ -42,16 +42,16 @@ Options:
   --orgsData         Path to organizations data file generated with \\"orgs:data\\"
                      command                                          [required]
   --source           The source of the targets to be imported e.g. Github,
-                     Github Enterprise, Gitlab. This will be used to make an API
-                     call to list all available entities per org
-         [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\"] [default:
-                                                                       \\"github\\"]
+                     Github Enterprise, Gitlab, Azure. This will be used to make
+                     an API call to list all available entities per org
+    [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\", \\"azure-repos\\"]
+                                                             [default: \\"github\\"]
   --sourceUrl        Custom base url for the source API that can list
                      organizations (e.g. Github Enterprise url)
   --integrationType  The configured integration type on the created Snyk Org to
                      use for generating import targets data. Applies to all
                      targets.
-                   [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\"]
+    [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\", \\"azure-repos\\"]
 
 Missing required arguments: orgsData, integrationType
 "
@@ -70,14 +70,14 @@ Options:
   --orgsData         Path to organizations data file generated with \\"orgs:data\\"
                      command                                          [required]
   --source           The source of the targets to be imported e.g. Github,
-                     Github Enterprise, Gitlab. This will be used to make an API
-                     call to list all available entities per org
-         [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\"] [default:
-                                                                       \\"github\\"]
+                     Github Enterprise, Gitlab, Azure. This will be used to make
+                     an API call to list all available entities per org
+    [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\", \\"azure-repos\\"]
+                                                             [default: \\"github\\"]
   --sourceUrl        Custom base url for the source API that can list
                      organizations (e.g. Github Enterprise url)
   --integrationType  The configured integration type on the created Snyk Org to
                      use for generating import targets data. Applies to all
                      targets.
-                   [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\"]"
+    [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\", \\"azure-repos\\"]"
 `;

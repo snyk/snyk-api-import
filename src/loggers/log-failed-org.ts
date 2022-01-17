@@ -24,7 +24,7 @@ export async function logFailedOrg(
   });
 
   try {
-    log.info({ origName, groupId, errorMessage }, 'Failed to create org');
+    log.error({ origName, groupId, errorMessage }, 'Failed to create org');
   } catch (e) {
     debug('Failed to log failed organizations at location: ', e);
     // do nothing

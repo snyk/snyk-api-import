@@ -7,9 +7,9 @@ describe('filterOutImportedTargets', () => {
       {
         orgId: 'ORG_ID',
         integrationId: 'INTEGRATION_ID',
+        // this is how the target is written during `import:data` command
         target: {
-          name: 'debug',
-          owner: 'snyk',
+          name: 'snyk/debug',
           branch: 'develop',
           id: 123,
         },
@@ -30,8 +30,8 @@ describe('filterOutImportedTargets', () => {
         orgId: 'ORG_ID',
         integrationId: 'INTEGRATION_ID',
         target: {
-          name: 'debug',
-          owner: 'snyk',
+          // this is how the target is written during `import:data` command
+          name: 'snyk/debug',
           branch: 'develop',
           id: 123,
         },

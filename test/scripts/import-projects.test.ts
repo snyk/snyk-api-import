@@ -215,9 +215,12 @@ describe('Error handling', () => {
     const file = path.resolve(
       __dirname + '/fixtures/import-projects-invalid.json',
     );
-    expect(importProjects(file)).rejects.toThrow(
-      `Failed to parse targets from ${file}:\nUnexpected token } in JSON at position 120`,
-    );
+    expect(await importProjects(file)).toEqual({
+      filteredTargets: [],
+      projects: [],
+      skippedTargets: 0,
+      targets: [],
+    });
   }, 300);
 
   it('shows correct error when SNYK_LOG_PATH is not set', async () => {
@@ -259,7 +262,7 @@ describe('No projects scenarios', () => {
     );
     expect(projects.length === 0).toBeTruthy();
     // give file a little time to be finished to be written
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 3000));
     const logFile = fs.readFileSync(logFiles.importJobsLogPath, 'utf8');
     expect(logFile).toMatch(`"status":"complete","projects":[]}`);
     expect(logFile).toMatch(`"logs":[{"name":"snyk-fixtures/empty-repo"`);

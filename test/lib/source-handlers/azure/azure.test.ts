@@ -17,7 +17,6 @@ beforeEach(() => {
     .reply(
       200,
       (uri: string) => {
-        console.log('URI = ' + uri);
         switch (uri) {
           case '/testOrg/_apis/projects?stateFilter=wellFormed&continuationToken=&api-version=4.1':
             return JSON.parse(
@@ -47,7 +46,6 @@ beforeEach(() => {
     .persist()
     .get(/.*/)
     .reply(200, (uri: string) => {
-      console.log('URI = ' + uri);
       switch (uri) {
         case '/reposTestOrg/_apis/projects?stateFilter=wellFormed&continuationToken=&api-version=4.1':
           return JSON.parse(
