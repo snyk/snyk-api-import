@@ -40,8 +40,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
         if (err) {
           throw err;
         }
-        // TODO: maybe ditch if orgs persist?
-        expect(stderr).toEqual('');
+        expect(stderr).toMatch('No projects in org');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatch(
           `repo(s). Written the data to file: ${path.resolve(
