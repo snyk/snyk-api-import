@@ -25,5 +25,6 @@ Commands:
 
 Options:
   --version  Show version number                                       [boolean]
-  --help     Show help                                                 [boolean]"
+  --help     Show help                                                 [boolean]
+  --file     Path to json file that contains the targets to be imported"
 `;

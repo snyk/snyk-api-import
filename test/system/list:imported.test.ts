@@ -40,6 +40,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
         if (err) {
           throw err;
         }
+        // TODO: maybe ditch if orgs persist?
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatch(
