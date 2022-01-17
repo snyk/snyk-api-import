@@ -1,5 +1,4 @@
-import { listGithubOrgs } from '../../../../src/lib/source-handlers/github/list-organizations';
-import { listGithubRepos } from '../../../../src/lib/source-handlers/github/list-repos';
+import * as github from '../../../../src/lib/source-handlers/github';
 
 describe('listGithubOrgs script', () => {
   const OLD_ENV = process.env;
@@ -9,7 +8,7 @@ describe('listGithubOrgs script', () => {
   });
   it('list orgs', async () => {
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
-    const orgs = await listGithubOrgs();
+    const orgs = await github.listGithubOrgs();
     expect(orgs[0]).toEqual({
       name: expect.any(String),
       id: expect.any(Number),
@@ -19,7 +18,7 @@ describe('listGithubOrgs script', () => {
   it('list orgs GHE', async () => {
     process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
     const GHE_URL = process.env.TEST_GHE_URL;
-    const orgs = await listGithubOrgs(GHE_URL);
+    const orgs = await github.listGithubOrgs(GHE_URL);
     expect(orgs[0]).toEqual({
       name: expect.any(String),
       id: expect.any(Number),
@@ -38,7 +37,7 @@ describe('listGithubRepos script', () => {
     const GITHUB_ORG_NAME = process.env.TEST_GH_ORG_NAME;
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
 
-    const orgs = await listGithubRepos(GITHUB_ORG_NAME as string);
+    const orgs = await github.listGithubRepos(GITHUB_ORG_NAME as string);
     expect(orgs[0]).toEqual({
       name: expect.any(String),
       owner: expect.any(String),
