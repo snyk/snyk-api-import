@@ -44,7 +44,8 @@ async function createNewOrgs(
     const { name, sourceOrgId } = orgData;
     try {
       debug(`Creating new "${name}" organization`);
-      const org = await createOrg(requestManager, groupId, name, sourceOrgId);      debug(`Creating new "${name}" organization`);
+      const org = await createOrg(requestManager, groupId, name, sourceOrgId);
+      debug(`Creating new "${name}" organization`);
       debug(`Listing integrations for new "${name}" organization`);
       const integrations =
         (await listIntegrations(requestManager, org.id)) || {};
@@ -62,7 +63,7 @@ async function createNewOrgs(
     } catch (e) {
       failed.push({ groupId, name, sourceOrgId });
       const errorMessage = e.data ? e.data.message : e.message;
-      logFailedOrg(
+      await logFailedOrg(
         groupId,
         name,
         errorMessage || 'Failed to create org, please try again in DEBUG mode.',
@@ -159,19 +160,36 @@ export async function createOrgs(
   for (const groupId in orgsPerGroup) {
     let orgsToCreate = orgsPerGroup[groupId];
     debug(`Finding existing organizations in group ${groupId}`);
-    const res = await filterOutExistingOrgs(requestManager, orgsData, groupId);
-    existingOrgs.push(...res.existingOrgs);
+
+    const { newOrgs, existingOrgs } = await separateExistingOrganizations(
+      loggingPath,
+      requestManager,
+      groupId,
+      orgsToCreate,
+    );
+
+    existingOrgs.push(...existingOrgs);
     debug(`Found ${existingOrgs.length} existing organizations`);
 
     if (noDuplicateNames) {
-      orgsToCreate = res.newOrgs;
-      failedOrgs.push(
-        ...res.existingOrgs.map((o) => ({
-          groupId: o.group.id,
-          name: o.name,
-        })),
+      let duplicates = 0;
+      const uniqueOrgNames: Set<string> = new Set(
+        existingOrgs.map((org) => org.name),
       );
-      debug(`Found ${failedOrgs.length} duplicate organizations`);
+      for (const org of orgsToCreate) {
+        const { name } = org;
+        if (uniqueOrgNames.has(name)) {
+          duplicates += 1;
+          failedOrgs.push(org);
+          await logFailedOrg(
+            groupId,
+            name,
+            'Refusing to create a duplicate organization with option --noDuplicateNames enabled.',
+          );
+        }
+      }
+      debug(`Skipping ${duplicates} duplicate organizations`);
+      orgsToCreate = newOrgs;
     }
     debug(`Creating ${orgsToCreate.length} new organizations`);
     const { failed, created } = await createNewOrgs(
@@ -207,4 +225,44 @@ export async function createOrgs(
     fileName,
     totalOrgs: orgsData.length,
   };
+}
+
+async function separateExistingOrganizations(
+  loggingPath: string,
+  requestManager: requestsManager,
+  groupId: string,
+  orgsPerGroup: CreateOrgData[],
+): Promise<{ existingOrgs: Org[]; newOrgs: CreateOrgData[] }> {
+  let existingOrgs: Org[] = [];
+  let newOrgs: CreateOrgData[] = [];
+
+  try {
+    const res = await filterOutExistingOrgs(
+      requestManager,
+      orgsPerGroup,
+      groupId,
+    );
+    existingOrgs = res.existingOrgs;
+    newOrgs = res.newOrgs;
+  } catch (e) {
+    for (const org of orgsPerGroup) {
+      const { name } = org;
+      await logFailedOrg(
+        groupId,
+        name,
+        e.data
+          ? e.data.message
+          : e.message ||
+              'Failed to create org, please try again in DEBUG mode.',
+      );
+    }
+    throw new Error(
+      `All requested organizations failed to be created. Review the errors in ${path.resolve(
+        __dirname,
+        loggingPath,
+      )}/<groupId>.${FAILED_ORG_LOG_NAME}`,
+    );
+  }
+
+  return { existingOrgs, newOrgs };
 }

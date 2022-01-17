@@ -1,9 +1,13 @@
+import * as fs from 'fs';
 import { exec } from 'child_process';
 import * as path from 'path';
+import { FAILED_ORG_LOG_NAME } from '../../src/common';
+import { deleteFiles } from '../delete-files';
 const main = './dist/index.js'.replace(/\//g, path.sep);
 
 describe('`snyk-api-import help <...>`', () => {
   const OLD_ENV = process.env;
+  const GROUP_ID = process.env.TEST_GROUP_ID as string;
 
   afterAll(async () => {
     process.env = { ...OLD_ENV };
@@ -18,7 +22,7 @@ describe('`snyk-api-import help <...>`', () => {
       done();
     });
   });
-  it('Fails to create an org as expected', (done) => {
+  it('Fails to create an org as expected for non existing group ID `abc`', (done) => {
     const pathToBadJson = path.resolve(
       __dirname + '/fixtures/create-orgs/fails-to-create/1-org.json',
     );
@@ -45,17 +49,23 @@ describe('`snyk-api-import help <...>`', () => {
         );
         expect(err).toBeNull();
         expect(stdout).toEqual('');
+        const file = fs.readFileSync(
+          path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`),
+          'utf8',
+        )
+        expect(file).toContain('group not found');
+        deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
         done();
       },
     );
-  });
+  }, 10000);
 
-  it('Fail to create orgs in strict mode when org already exists ', (done) => {
+  it('Fails to create orgs in --noDuplicateNames mode when org already exists ', (done) => {
     const pathToBadJson = path.resolve(
-      __dirname + '/fixtures/create-orgs/fails-to-create/1-org.json',
+      __dirname + '/fixtures/create-orgs/fails-to-create/already-exists/1-org.json',
     );
     const logPath = path.resolve(
-      __dirname + '/fixtures/create-orgs/fails-to-create/',
+      __dirname + '/fixtures/create-orgs/fails-to-create/already-exists',
     );
     exec(
       `node ${main} orgs:create --file=${pathToBadJson} --noDuplicateNames`,
@@ -76,8 +86,14 @@ describe('`snyk-api-import help <...>`', () => {
         );
         expect(err).toBeNull();
         expect(stdout).toEqual('');
+        const file = fs.readFileSync(
+          path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`),
+          'utf8',
+        )
+        expect(file).toContain('Refusing to create a duplicate organization');
+        deleteFiles([path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`)]);
         done();
       },
     );
-  });
+  }, 10000);
 });
