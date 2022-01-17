@@ -72,4 +72,9 @@ describe('Testing azure-devops interaction', () => {
     const repos = await listAzureRepos('reposTestOrg', 'https://azure-tests');
     expect(repos).toHaveLength(3);
   });
+  test('listAzureRepos to fail', async () => {
+    expect(async () => {
+      await listAzureRepos('non-existing-org', 'https://non-existing-url')}
+      ).rejects.toThrow();
+  });
 });

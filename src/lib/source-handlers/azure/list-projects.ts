@@ -35,23 +35,27 @@ async function fetchAllProjects(
   let nextPage: string | undefined;
   while (hasMorePages) {
     debug(`Fetching page ${displayPageNumber} for Azure projects`);
-    const { projects, continueFrom } = await getProjects(
-      orgName,
-      host,
-      nextPage,
-    );
-    if (continueFrom && projects.length > 0) {
-      nextPage = continueFrom;
-      displayPageNumber++;
-    } else {
-      hasMorePages = false;
-    }
-    projects.map((project) => {
-      const { name, id } = project;
-      if (name && id) {
-        projectList.push({ id, name });
+    try {
+      const { projects, continueFrom } = await getProjects(
+        orgName,
+        host,
+        nextPage,
+      );
+      if (continueFrom && projects.length > 0) {
+        nextPage = continueFrom;
+        displayPageNumber++;
+      } else {
+        hasMorePages = false;
       }
-    });
+      projects.map((project) => {
+        const { name, id } = project;
+        if (name && id) {
+          projectList.push({ id, name });
+        }
+      });
+    } catch (err) {
+      throw new Error(JSON.stringify(err));
+    }
   }
   return projectList;
 }
