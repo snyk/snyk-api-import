@@ -115,7 +115,7 @@ export async function importProjects(
 }> {
   const targetsFilePath = path.resolve(process.cwd(), loggingPath, fileName);
   if (!fs.existsSync(targetsFilePath)) {
-    throw new Error(`File not found ${targetsFilePath}`);
+    throw new Error(`File can not be found at location ${targetsFilePath}`);
   }
 
   let targets: ImportTarget[] = [];
