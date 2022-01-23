@@ -31,6 +31,21 @@ export async function fetchAllRepos(
   token: string,
 ): Promise<AzureRepoData[]> {
   debug('Fetching repos for ' + project);
+  let repoList: AzureRepoData[] = [];
+  try {
+    repoList = await getRepos(url, orgName, project, token);
+  } catch (err) {
+    throw new Error(JSON.stringify(err));
+  }
+  return repoList;
+}
+
+async function getRepos(
+  url: string,
+  orgName: string,
+  project: string,
+  token: string,
+): Promise<AzureRepoData[]> {
   const repoList: AzureRepoData[] = [];
   const data = await limiter.schedule(() =>
     needle(
