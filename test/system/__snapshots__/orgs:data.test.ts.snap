@@ -25,8 +25,8 @@ Options:
                        Github Organization does not have any repos)
   --source             The source of the targets to be imported e.g. Github,
                        Github Enterprise
-         [required] [choices: "github", "github-enterprise", "gitlab"] [default:
-                                                                       "github"]
+                   [required] [choices: "github", "github-enterprise", "gitlab",
+                                         "bitbucket-server"] [default: "github"]
 
 Missing required argument: groupId
 ]
@@ -52,6 +52,6 @@ Options:
                        Github Organization does not have any repos)
   --source             The source of the targets to be imported e.g. Github,
                        Github Enterprise
-         [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\"] [default:
-                                                                       \\"github\\"]"
+                   [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\",
+                                         \\"bitbucket-server\\"] [default: \\"github\\"]"
 `;
