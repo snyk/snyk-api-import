@@ -53,6 +53,29 @@ describe('`snyk-api-import import:data <...>`', () => {
       },
     );
   }, 20000);
+  it('Generates repo data as expected for Bitbucket Server', (done) => {
+    const orgDataFile = 'test/system/fixtures/org-data/orgs.json';
+    exec(
+      `node ${main} import:data --source=bitbucket-server --integrationType=bitbucket-server --sourceUrl=${process.env.BBS_SOURCE_URL} --orgsData=${orgDataFile}`,
+      {
+        env: {
+          PATH: process.env.PATH,
+          BITBUCKET_SERVER_TOKEN: process.env.BBS_TOKEN,
+          SNYK_LOG_PATH: __dirname,
+        },
+      },
+      (err, stdout, stderr) => {
+        if (err) {
+          throw err;
+        }
+        expect(err).toBeNull();
+        expect(stderr).toEqual('');
+        expect(stdout.trim()).toMatch('Written the data to file');
+        deleteFiles([join(__dirname, 'bitbucket-server-import-targets.json')]);
+        done();
+      },
+    );
+  }, 20000);
   it('Shows error when missing ', (done) => {
     exec(`node ${main} import:data --source=github`, (err, stdout, stderr) => {
       expect(err).toMatchSnapshot();

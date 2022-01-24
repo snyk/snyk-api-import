@@ -13,7 +13,8 @@ export const builder = {
   orgsData: {
     required: true,
     default: undefined,
-    desc: 'Path to organizations data file generated with "orgs:data" command',
+    desc:
+      'Path to organizations data file generated with "orgs:create" command',
   },
   source: {
     required: true,
@@ -44,6 +45,7 @@ const entityName: {
   'github-enterprise': 'org',
   gitlab: 'group',
   'azure-repos': 'org',
+  'bitbucket-server': 'project',
 };
 
 export async function handler(argv: {

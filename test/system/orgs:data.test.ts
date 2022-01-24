@@ -76,6 +76,29 @@ describe('`snyk-api-import orgs:data <...>`', () => {
       },
     );
   }, 20000);
+  it('Generates orgs data as expected for Bitbucket Server', (done) => {
+    const groupId = 'hello';
+    exec(
+      `node ${main} orgs:data --source=bitbucket-server --groupId=${groupId} --sourceUrl=${process.env.BBS_SOURCE_URL}`,
+      {
+        env: {
+          PATH: process.env.PATH,
+          BITBUCKET_SERVER_TOKEN: process.env.BBS_TOKEN,
+          SNYK_LOG_PATH: __dirname,
+        },
+      },
+      (err, stdout, stderr) => {
+        if (err) {
+          throw err;
+        }
+        expect(stderr).toEqual('');
+        expect(err).toBeNull();
+        expect(stdout.trim()).toMatchSnapshot();
+        deleteFiles([`group-${groupId}-bitbucket-server-orgs.json`]);
+        done();
+      },
+    );
+  }, 20000);
   it('Shows error when missing groupId', (done) => {
     exec(`node ${main} orgs:data --source=github`, (err, stdout) => {
       expect(err).toMatchSnapshot();

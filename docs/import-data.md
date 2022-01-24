@@ -7,6 +7,7 @@ This is a util that can help generate the import json data needed by the import 
   - [Github](#githubcom--github-enterprise)
   - [Gitlab](#gitlabcom--hosted-gitlab)
   - [Azure-Repos](#devazurecom--hosted-azure)
+  - [Bitbucket-Server](#bitbucket-server)
 - [Recommendations](#recommendations)
 
 
@@ -96,6 +97,35 @@ This is a util that can help generate the import json data needed by the import 
 3. Run the command to generate import data:
  - **dev.azure.com:** `DEBUG=snyk* AZURE_TOKEN=*** SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=azure-repos --integrationType=azure-repos`
  - **Hosted Azure:** `DEBUG=snyk* AZURE_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=azure-repos --integrationType=azure-repos --sourceUrl=https://azure.custom.com`
+
+4. Use the generated data to feed into [import] command (/import.md) to generate kick off the import.
+
+
+## Bitbucket Server
+*Please note that this tool uses Bitbucket server API version 1.0*
+1. Set the [Bitbucket Server personal access token](https://www.jetbrains.com/help/youtrack/standalone/integration-with-bitbucket-server.html#enable-youtrack-integration-bbserver) as an environment variable: `export BITBUCKET_SERVER_TOKEN=your_personal_access_token`
+2. You will need to have the organizations data in json as an input to this command to help map Snyk organization IDs and Integration Ids that must be used during import against individual targets to be imported. The following format is required:
+  ```
+  {
+    "orgData": [
+      {
+        "name": "<project_name_in_bitbucket_server_used_to_list_repos>",
+        "orgId": "<snyk_org_id>",
+        "integrations": {
+          "bitbucket-server": "<snyk_org_integration_id>",
+        },
+      },
+      {...}
+    ]
+  }
+  ```
+  Note: the "name" of the Bitbucket server project is required in order to list all repos belonging to that Project via Bibucket server API, the Snyk specific data accompanying that Project name will be used as the information to generate import data assuming all repos in that Project will be imported into a given Snyk organization. This is opinionated! If you want to customize this please manually craft the import data described in [import.md](/docs/import.md)
+  - Bitbucket Server Projects can be listed using the [/projects API](https://docs.atlassian.com/bitbucket-server/rest/7.19.2/bitbucket-rest.html#:~:text=409%20%2D%20application/json%20(errors)%20%5Bexpand%5D-,GET,-/rest/api/1.0/projects%3Fname)
+  - Integrations can be listed via [Snyk Integrations API](https://snyk.docs.apiary.io/#reference/integrations/integrations/list)
+  - All organization IDs can be found by listing all organizations a group admin belongs to via [Snyk Organizations API](https://snyk.docs.apiary.io/#reference/groups/list-all-organizations-in-a-group/list-all-organizations-in-a-group)
+
+3. Run the command to generate import data:
+ - **Bitbucket Server:** `DEBUG=snyk* BITBUCKET_SERVER_TOKEN=*** SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=bitbucket-server --integrationType=bitbucket-server --sourceUrl=https://bitbucket-server.dev.example.com`
 
 4. Use the generated data to feed into [import] command (/import.md) to generate kick off the import.
 

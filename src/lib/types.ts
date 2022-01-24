@@ -77,6 +77,7 @@ export enum SupportedIntegrationTypesImportData {
   GHE = 'github-enterprise',
   GITLAB = 'gitlab',
   AZURE_REPOS = 'azure-repos',
+  BITBUCKET_SERVER = 'bitbucket-server',
 }
 
 // used to generate import data by connecting to the source via API
@@ -85,6 +86,7 @@ export enum SupportedIntegrationTypesImportOrgData {
   GITHUB = 'github',
   GHE = 'github-enterprise',
   GITLAB = 'gitlab',
+  BITBUCKET_SERVER = 'bitbucket-server',
 }
 
 // used to generate imported targets that exist in Snyk
