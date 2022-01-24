@@ -8,7 +8,6 @@ exports[`\`snyk-api-import orgs:data <...>\` Generates orgs data as expected for
 
 exports[`\`snyk-api-import orgs:data <...>\` Shows error when missing groupId 1`] = `
 [Error: Command failed: node ./dist/index.js orgs:data --source=github
-Debugger attached.
 index.js orgs:data
 
 Generate data required for Orgs to be created via API by mirroring a given
@@ -32,7 +31,6 @@ Options:
                                          "bitbucket-server"] [default: "github"]
 
 Missing required argument: groupId
-Waiting for the debugger to disconnect...
 ]
 `;
 

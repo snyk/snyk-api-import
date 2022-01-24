@@ -2,7 +2,6 @@
 
 exports[`\`snyk-api-import import:data <...>\` Shows error when missing  1`] = `
 [Error: Command failed: node ./dist/index.js import:data --source=github
-Debugger attached.
 index.js import:data
 
 Generate data required for targets to be imported via API to create Snyk
@@ -28,13 +27,11 @@ Options:
                                                              "bitbucket-server"]
 
 Missing required arguments: orgsData, integrationType
-Waiting for the debugger to disconnect...
 ]
 `;
 
 exports[`\`snyk-api-import import:data <...>\` Shows error when missing  2`] = `
-"Debugger attached.
-index.js import:data
+"index.js import:data
 
 Generate data required for targets to be imported via API to create Snyk
 projects.
@@ -59,7 +56,6 @@ Options:
                                                              \\"bitbucket-server\\"]
 
 Missing required arguments: orgsData, integrationType
-Waiting for the debugger to disconnect...
 "
 `;
 
