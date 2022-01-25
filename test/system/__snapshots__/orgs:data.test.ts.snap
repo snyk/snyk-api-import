@@ -2,6 +2,8 @@
 
 exports[`\`snyk-api-import orgs:data <...>\` Generates orgs data as expected 1`] = `"Found 9 organization(s). Written the data to file: group-hello-github-com-orgs.json"`;
 
+exports[`\`snyk-api-import orgs:data <...>\` Generates orgs data as expected for Bitbucket Server 1`] = `"Found 144 project(s). Written the data to file: group-hello-bitbucket-server-orgs.json"`;
+
 exports[`\`snyk-api-import orgs:data <...>\` Generates orgs data as expected for Gitlab 1`] = `"Found 14 group(s). Written the data to file: group-hello-gitlab-orgs.json"`;
 
 exports[`\`snyk-api-import orgs:data <...>\` Shows error when missing groupId 1`] = `
@@ -25,8 +27,8 @@ Options:
                        Github Organization does not have any repos)
   --source             The source of the targets to be imported e.g. Github,
                        Github Enterprise
-         [required] [choices: "github", "github-enterprise", "gitlab"] [default:
-                                                                       "github"]
+                   [required] [choices: "github", "github-enterprise", "gitlab",
+                                         "bitbucket-server"] [default: "github"]
 
 Missing required argument: groupId
 ]
@@ -52,6 +54,6 @@ Options:
                        Github Organization does not have any repos)
   --source             The source of the targets to be imported e.g. Github,
                        Github Enterprise
-         [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\"] [default:
-                                                                       \\"github\\"]"
+                   [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\",
+                                         \\"bitbucket-server\\"] [default: \\"github\\"]"
 `;
