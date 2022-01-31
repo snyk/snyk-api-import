@@ -53,7 +53,7 @@
     "parse-link-header": "2.0.0",
     "sleep-promise": "8.0.1",
     "snyk-config": "^4.0.0",
-    "snyk-request-manager": "1.4.3",
+    "snyk-request-manager": "1.4.4",
     "source-map-support": "^0.5.16",
     "split": "1.0.1",
     "yargs": "16.2.0"
