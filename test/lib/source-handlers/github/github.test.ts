@@ -14,7 +14,7 @@ describe('listGithubOrgs script', () => {
       id: expect.any(Number),
       url: expect.any(String),
     });
-  }, 20000);
+  }, 30000);
   it('list orgs GHE', async () => {
     process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
     const GHE_URL = process.env.TEST_GHE_URL;
@@ -24,7 +24,7 @@ describe('listGithubOrgs script', () => {
       id: expect.any(Number),
       url: expect.any(String),
     });
-  }, 20000);
+  }, 30000);
 });
 
 describe('listGithubRepos script', () => {
@@ -44,7 +44,7 @@ describe('listGithubRepos script', () => {
       branch: expect.any(String),
       fork: expect.any(Boolean),
     });
-  }, 20000);
+  }, 30000);
   it('list GHE repos', async () => {
     const GITHUB_ORG_NAME = process.env.TEST_GH_ORG_NAME;
     const GHE_URL = process.env.TEST_GHE_URL;
@@ -60,5 +60,5 @@ describe('listGithubRepos script', () => {
       branch: expect.any(String),
       fork: expect.any(Boolean),
     });
-  }, 20000);
+  }, 30000);
 });

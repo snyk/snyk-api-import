@@ -49,7 +49,7 @@ describe('generateTargetsImportDataFile Github script', () => {
       integrationId: 'github-********-********-********',
       orgId: 'org-id',
     });
-  }, 10000);
+  }, 30000);
 
   it('generate Github Enterprise repo data', async () => {
     process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
@@ -87,7 +87,7 @@ describe('generateTargetsImportDataFile Github script', () => {
       integrationId: 'github-enterprise-********-********',
       orgId: 'org-id',
     });
-  }, 10000);
+  }, 30000);
 
   it('generate Github repo data when no integrations are available', async () => {
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
@@ -111,7 +111,7 @@ describe('generateTargetsImportDataFile Github script', () => {
     ).rejects.toThrow(
       'No targets could be generated. Check the error output & try again.',
     );
-  }, 10000);
+  }, 30000);
   it('Duplicate orgs are ignored', async () => {
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     filesToDelete.push(path.resolve(__dirname + '/github-import-targets.json'));
@@ -159,7 +159,7 @@ describe('generateTargetsImportDataFile Github script', () => {
       integrationId: expect.any(String),
       orgId: expect.any(String),
     });
-  }, 10000);
+  }, 30000);
 });
 
 describe('generateTargetsImportDataFile Gitlab script', () => {
