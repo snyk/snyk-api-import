@@ -140,10 +140,13 @@ async function requestWithRateLimitHandling(
         console.error(`ERROR: ${e.data.message}. Please check the token and try again.`)
         break;
       }
+      if (e.data.code === 404) {
+        break;
+      }
       attempt += 1;
       debug('Failed:' + JSON.stringify(e));
       if (e.data.code === 429) {
-        const sleepTime = 600000 * attempt; // 10 mins x attempt with a max of ~ 1hr
+        const sleepTime = 600_000 * attempt; // 10 mins x attempt with a max of ~ 1hr
         console.error(
           `Received a rate limit error, sleeping for ${sleepTime} ms (attempt # ${attempt})`,
         );
