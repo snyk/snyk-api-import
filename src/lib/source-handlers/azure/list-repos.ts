@@ -6,6 +6,7 @@ import { getAzureToken } from './get-azure-token';
 import * as needle from 'needle';
 import { listAzureProjects } from './list-projects';
 import { getBaseUrl } from './get-base-url';
+import { requestWithRateLimitRetries } from './list-projects';
 
 const debug = debugLib('snyk:azure');
 
@@ -59,7 +60,17 @@ async function getRepos(
     ),
   );
   if (data.statusCode != 200) {
-    new Error(`Failed to fetch page: ${url}\n${data.body}`);
+    if (data.statusCode === 429) {
+      requestWithRateLimitRetries(
+        'get',
+        `${url}/${orgName}/` +
+          encodeURIComponent(project) +
+          '/_apis/git/repositories?api-version=4.1',
+        '{ Authorization: ' + `Basic ${base64.encode(':' + token)}`,
+      );
+    } else {
+      new Error(`Failed to fetch page: ${url}\n${data.body}`);
+    }
   }
   const repos = data.body['value'];
 

@@ -68,6 +68,7 @@ async function getProjects(
   projects: Project[];
   continueFrom?: string;
 }> {
+  let data;
   const azureToken = getAzureToken();
   const params = {
     stateFilter: 'wellFormed',
@@ -75,7 +76,7 @@ async function getProjects(
     'api-version': '4.1',
   };
   const query = qs.stringify(params);
-  const data = await limiter.schedule(() =>
+  data = await limiter.schedule(() =>
     needle(
       'get',
       `${host}/${orgName}/_apis/projects?${query}`, //document the version somewhere
@@ -85,13 +86,43 @@ async function getProjects(
     ),
   );
   if (data.statusCode != 200) {
-    throw new Error(`Failed to fetch page: ${host}\n${data.body}`);
+    if (data.statusCode === 429) {
+      data = await requestWithRateLimitRetries(
+        'get',
+        `${host}/${orgName}/_apis/projects?${query}`,
+        `{ Authorization: 'Basic ' + base64.encode(':' + azureToken) }`,
+      );
+    } else {
+      throw new Error(`Failed to fetch page: ${host}\n${data.body}`);
+    }
   }
   const { value: projects } = data.body;
   return {
     projects,
     continueFrom: data.headers['x-ms-continuationtoken'] as string,
   };
+}
+
+export async function requestWithRateLimitRetries(
+  verb: needle.NeedleHttpVerbs,
+  url: string,
+  headers: string,
+): Promise<any> {
+  let data;
+  const maxRetries = 7;
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    data = await limiter.schedule(() => needle(verb, url, headers));
+    if (data.statusCode === 429) {
+      const sleepTime = 600000 * attempt; // 10 mins x attempt with a max of ~ 1hr
+      console.error(
+        `Received a rate limit error, sleeping for ${sleepTime} ms (attempt # ${attempt})`,
+      );
+      await new Promise((r) => setTimeout(r, sleepTime));
+    }
+    attempt += 1;
+  }
+  return data;
 }
 
 export async function listAzureProjects(
