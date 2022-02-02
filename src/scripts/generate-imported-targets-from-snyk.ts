@@ -40,6 +40,15 @@ export function projectToTarget(
     name,
   };
 }
+export function bitbucketServerProjectToTarget(
+  project: Pick<SnykProject, 'name' | 'branch'>,
+): Target {
+  const [projectKey, repoSlug] = project.name.split(':')[0].split('/');
+  return {
+    projectKey,
+    repoSlug,
+  };
+}
 
 export function gitlabProjectToImportLogTarget(
   project: Pick<SnykProject, 'name' | 'branch'>,
@@ -69,6 +78,7 @@ const targetGenerators = {
   [SupportedIntegrationTypesToListSnykTargets.GCR]: imageProjectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.DOCKER_HUB]: imageProjectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.AZURE_REPOS]: projectToTarget,
+  [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_SERVER]: bitbucketServerProjectToTarget,
 };
 
 interface SnykOrg {

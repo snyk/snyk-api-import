@@ -54,7 +54,8 @@ describe('`snyk-api-import import:data <...>`', () => {
     );
   }, 20000);
   it('Generates repo data as expected for Bitbucket Server', (done) => {
-    const orgDataFile = 'test/system/fixtures/org-data/orgs.json';
+    const orgDataFile =
+      'test/system/fixtures/org-data/bitbucket-server-orgs.json';
     exec(
       `node ${main} import:data --source=bitbucket-server --integrationType=bitbucket-server --sourceUrl=${process.env.BBS_SOURCE_URL} --orgsData=${orgDataFile}`,
       {
@@ -75,7 +76,7 @@ describe('`snyk-api-import import:data <...>`', () => {
         done();
       },
     );
-  }, 20000);
+  }, 50000);
   it('Shows error when missing ', (done) => {
     exec(`node ${main} import:data --source=github`, (err, stdout, stderr) => {
       expect(err).toMatchSnapshot();

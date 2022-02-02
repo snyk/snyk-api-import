@@ -99,6 +99,7 @@ export enum SupportedIntegrationTypesToListSnykTargets {
   DOCKER_HUB = 'docker-hub',
   GITLAB = 'gitlab',
   AZURE_REPOS = 'azure-repos',
+  BITBUCKET_SERVER = 'bitbucket-server',
 }
 interface ImportingUser {
   id: string;

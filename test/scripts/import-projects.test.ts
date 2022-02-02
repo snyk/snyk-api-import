@@ -114,7 +114,7 @@ describe('Skips & logs issues', () => {
     await new Promise((r) => setTimeout(r, 500));
     const failedLog = fs.readFileSync(logFiles.failedImportLogPath, 'utf8');
     expect(failedLog).toMatch('ruby-with-versions');
-  }, 3000);
+  }, 5000);
 
   it('Logs failed when API errors', async () => {
     // this folder does not exist and will be created on run

@@ -68,4 +68,45 @@ describe('filterOutImportedTargets', () => {
     );
     expect(filteredTargets).toEqual(targets);
   });
+
+  it('filterOutImportedTargets skips Bitbucket Server targets with projectKey and repoSlug as expected', async () => {
+    const targets: ImportTarget[] = [
+      {
+        orgId: 'ORG_ID',
+        integrationId: 'INTEGRATION_ID',
+        // this is how the target is written during `import:data` command
+        target: {
+          projectKey: 'AT',
+          repoSlug: 'GoofTest'
+        },
+        files: [{ path: 'package.json' }],
+      },
+    ];
+    const loggingPath = `${__dirname}/fixtures/bitbucket-server`;
+    const filteredTargets = await filterOutImportedTargets(
+      targets,
+      loggingPath,
+    );
+    expect(filteredTargets).toEqual([]);
+  });
+
+  it('filterOutImportedTargets returns all Bitbucket Server targets when no import log found', async () => {
+    const targets: ImportTarget[] = [
+      {
+        orgId: 'org-A',
+        integrationId: 'integration-A',
+        target: {
+          projectKey: 'AT',
+          repoSlug: 'GoofTest'
+        },
+        files: [{ path: 'package.json' }],
+      },
+    ];
+    const loggingPath = `${__dirname}/fixtures/bitbucket-server/non-existent`;
+    const filteredTargets = await filterOutImportedTargets(
+      targets,
+      loggingPath,
+    );
+    expect(filteredTargets).toEqual(targets);
+  });
 });

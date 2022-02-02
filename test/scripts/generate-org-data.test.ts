@@ -35,7 +35,7 @@ describe('generateOrgImportDataFile Github script', () => {
       groupId,
       sourceOrgId,
     });
-  });
+  }, 20000);
 
   it('generate Github Orgs data and skips empty orgs', async () => {
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
@@ -108,7 +108,7 @@ describe('generateOrgImportDataFile Github script', () => {
       name: expect.any(String),
       groupId,
     });
-  }, 180000);
+  }, 160000);
   it('generate Github Enterprise Orgs data & skips empty Orgs', async () => {
     process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
     const GHE_URL = process.env.TEST_GHE_URL;
@@ -135,7 +135,7 @@ describe('generateOrgImportDataFile Github script', () => {
       name: expect.any(String),
       groupId,
     });
-  }, 180000);
+  }, 160000);
 });
 
 describe('generateOrgImportDataFile Gitlab script', () => {
@@ -170,7 +170,7 @@ describe('generateOrgImportDataFile Gitlab script', () => {
       name: expect.any(String),
       groupId,
     });
-  }, 180000);
+  }, 160000);
 
   it('generate Gitlab Orgs data and skips empty orgs', async () => {
     process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;

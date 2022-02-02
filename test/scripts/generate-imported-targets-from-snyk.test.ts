@@ -7,6 +7,7 @@ import {
   generateSnykImportedTargets,
   projectToTarget,
   imageProjectToTarget,
+  bitbucketServerProjectToTarget,
 } from '../../src/scripts/generate-imported-targets-from-snyk';
 import { IMPORT_LOG_NAME } from '../../src/common';
 import { SupportedIntegrationTypesToListSnykTargets } from '../../src/lib/types';
@@ -235,6 +236,62 @@ describe('Generate imported targets based on Snyk data', () => {
     expect(importedTargetsLog).toMatch(targets[0].orgId);
     expect(importedTargetsLog).toMatch(targets[0].integrationId);
   }, 240000);
+
+  it('succeeds to generate targets for Group for Bitbucket server', async () => {
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
+    logs = Object.values(logFiles);
+    const {
+      targets,
+      failedOrgs,
+      fileName,
+    } = await generateSnykImportedTargets({ groupId: GROUP_ID }, [
+      SupportedIntegrationTypesToListSnykTargets.BITBUCKET_SERVER,
+    ]);
+    expect(failedOrgs).toEqual([]);
+    expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
+    expect(targets[0]).toMatchObject({
+      integrationId: expect.any(String),
+      orgId: expect.any(String),
+      target: {
+        projectKey: expect.any(String),
+        repoSlug: expect.any(String),
+      },
+    });
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 20000));
+    const importedTargetsLog = fs.readFileSync(logFiles.importLogPath, 'utf8');
+    expect(importedTargetsLog).toMatch(targets[0].target.projectKey as string);
+    expect(importedTargetsLog).toMatch(targets[0].orgId);
+    expect(importedTargetsLog).toMatch(targets[0].integrationId);
+  }, 240000);
+
+  it('succeeds to generate targets for Org + Bitbucket server', async () => {
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
+    logs = Object.values(logFiles);
+    const {
+      targets,
+      failedOrgs,
+      fileName,
+    } = await generateSnykImportedTargets({ orgId: ORG_ID }, [
+      SupportedIntegrationTypesToListSnykTargets.BITBUCKET_SERVER,
+    ]);
+    expect(failedOrgs).toEqual([]);
+    expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
+    expect(targets[0]).toMatchObject({
+      integrationId: expect.any(String),
+      orgId: expect.any(String),
+      target: {
+        projectKey: expect.any(String),
+        repoSlug: expect.any(String),
+      },
+    });
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 20000));
+    const importedTargetsLog = fs.readFileSync(logFiles.importLogPath, 'utf8');
+    expect(importedTargetsLog).toMatch(targets[0].target.projectKey as string);
+    expect(importedTargetsLog).toMatch(targets[0].orgId);
+    expect(importedTargetsLog).toMatch(targets[0].integrationId);
+  }, 240000);
 });
 
 describe('projectToTarget', () => {
@@ -271,6 +328,18 @@ describe('projectToTarget', () => {
       branch: 'master',
       name: 'goof.git',
       owner: 'Test 105',
+    });
+  });
+
+  it('succeed to convert Bitbucket server project name to target', async () => {
+    const project = {
+      name: 'antoine-snyk-demo/TestRepoAntoine:goof/package.json',
+      branch: 'master',
+    };
+    const target = bitbucketServerProjectToTarget(project);
+    expect(target).toEqual({
+      projectKey: 'antoine-snyk-demo',
+      repoSlug: 'TestRepoAntoine',
     });
   });
 });

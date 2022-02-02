@@ -21,6 +21,7 @@ Options:
                      --integrationType=github
                      --integrationType=github-enterprise
    [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\", \\"gcr\\",
-  \\"docker-hub\\", \\"gitlab\\", \\"azure-repos\\"] [default: [\\"github\\",\\"github-enterprise\\"
-                  ,\\"bitbucket-cloud\\",\\"gcr\\",\\"docker-hub\\",\\"gitlab\\",\\"azure-repos\\"]]"
+            \\"docker-hub\\", \\"gitlab\\", \\"azure-repos\\", \\"bitbucket-server\\"] [default:
+  [\\"github\\",\\"github-enterprise\\",\\"bitbucket-cloud\\",\\"gcr\\",\\"docker-hub\\",\\"gitlab\\",\\"a
+                                                zure-repos\\",\\"bitbucket-server\\"]]"
 `;
