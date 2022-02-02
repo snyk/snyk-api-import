@@ -28,7 +28,7 @@ describe('createOrgs script', () => {
   afterEach(async () => {
     process.env = { ...OLD_ENV };
     await deleteFiles(filesToDelete);
-  }, 10000);
+  }, 20000);
 
   afterAll(async () => {
     process.env = { ...OLD_ENV };

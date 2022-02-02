@@ -40,6 +40,7 @@ const entityName: {
   'docker-hub': 'images',
   gitlab: 'repo',
   'azure-repos': 'repo',
+  'bitbucket-server': 'repo',
 };
 
 export async function handler(argv: {

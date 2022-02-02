@@ -49,7 +49,7 @@ describe('generateTargetsImportDataFile Github script', () => {
       integrationId: 'github-********-********-********',
       orgId: 'org-id',
     });
-  }, 30000);
+  }, 20000);
 
   it('generate Github Enterprise repo data', async () => {
     process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
@@ -87,7 +87,7 @@ describe('generateTargetsImportDataFile Github script', () => {
       integrationId: 'github-enterprise-********-********',
       orgId: 'org-id',
     });
-  }, 30000);
+  }, 20000);
 
   it('generate Github repo data when no integrations are available', async () => {
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
