@@ -1,6 +1,6 @@
 import * as debugLib from 'debug';
 import { Gitlab } from '@gitbeaker/node';
-import * as types from '@gitbeaker/core/dist/types';
+import * as types from '@gitbeaker/core';
 
 import { getToken } from './get-token';
 import { getBaseUrl } from './get-base-url';

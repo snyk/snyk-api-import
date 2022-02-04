@@ -12,7 +12,8 @@ import { getLoggingPath } from '../../get-logging-path';
 import { logFailedImports } from '../../../loggers/log-failed-imports';
 import { logImportJobsPerOrg } from '../../../loggers/log-import-jobs';
 import { getConcurrentImportsNumber } from '../../get-concurrent-imports-number';
-import { FAILED_LOG_NAME } from '../../../common';
+import { FAILED_LOG_NAME, targetPropsWithId } from '../../../common';
+import { requestWithRateLimitHandling } from './request-with-rate-limit';
 
 const debug = debugLib('snyk:api-import');
 
@@ -31,6 +32,7 @@ export async function importTarget(
   integrationId: string;
 }> {
   const logPath = loggingPath || getLoggingPath();
+  const sanitizeTarget = Boolean(process.env.SANITIZE_IMPORT_TARGET);
   getApiToken();
   debug('Importing:', JSON.stringify({ orgId, integrationId, target }));
 
@@ -42,7 +44,7 @@ export async function importTarget(
   }
   try {
     const body = {
-      target,
+      target: sanitizeTarget ? _.pick(target, ...targetPropsWithId) : target,
       files,
       exclusionGlobs,
     };
@@ -58,7 +60,7 @@ export async function importTarget(
     if (!statusCode || statusCode !== 201) {
       throw new Error(
         'Expected a 201 response, instead received: ' +
-          JSON.stringify({ data: res.data, statusCode: res.statusCode}),
+          JSON.stringify({ data: res.data, statusCode: res.statusCode }),
       );
     }
     const locationUrl = res.headers?.['location'];
@@ -113,49 +115,6 @@ export async function importTarget(
     );
     throw err;
   }
-}
-
-async function requestWithRateLimitHandling(
-  requestManager: requestsManager,
-  url: string,
-  verb: string,
-  body = {},
-): Promise<any> {
-  const maxRetries = 7;
-  let attempt = 0;
-  let res;
-  debug('Requesting import with retry');
-
-  while (attempt < maxRetries) {
-    try {
-      res = await requestManager.request({
-        verb,
-        url,
-        body: JSON.stringify(body),
-      });
-      break;
-    } catch (e) {
-      res = e;
-      if (e.data.code === 401) {
-        console.error(`ERROR: ${e.data.message}. Please check the token and try again.`)
-        break;
-      }
-      if (e.data.code === 404) {
-        break;
-      }
-      attempt += 1;
-      debug('Failed:' + JSON.stringify(e));
-      if (e.data.code === 429) {
-        const sleepTime = 600_000 * attempt; // 10 mins x attempt with a max of ~ 1hr
-        console.error(
-          `Received a rate limit error, sleeping for ${sleepTime} ms (attempt # ${attempt})`,
-        );
-        await new Promise((r) => setTimeout(r, sleepTime));
-      }
-    }
-  }
-
-  return res;
 }
 
 export async function importTargets(
