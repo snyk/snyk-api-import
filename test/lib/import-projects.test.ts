@@ -1,10 +1,18 @@
 import * as path from 'path';
-
+import { requestsManager } from 'snyk-request-manager';
+import { importTarget } from '../../src/lib';
+import * as request from '../../src/lib/api/import/request-with-rate-limit';
 import {
   parseLogIntoTargetIds,
   shouldSkipTarget,
 } from '../../src/scripts/import-projects';
 
+const requestWithRateLimitHandlingStub = jest
+  .spyOn(request, 'requestWithRateLimitHandling')
+  .mockResolvedValue({
+    statusCode: 201,
+    headers: { location: 'https://app.snyk.io/location' },
+  });
 describe('Skip target if found in log', () => {
   it('Target and empty log should not be skipped', async () => {
     const target = {
@@ -118,5 +126,73 @@ describe('Skip target if found in log', () => {
     const importedTargetIds = await parseLogIntoTargetIds(logPath);
     const shouldSkip = await shouldSkipTarget(importTarget, importedTargetIds);
     expect(shouldSkip).toBeFalsy();
+  });
+});
+
+describe('importTarget()', () => {
+  const OLD_ENV = process.env;
+  process.env.SNYK_API = process.env.SNYK_API_TEST as string;
+  process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+  process.env.SNYK_LOG_PATH = path.resolve(__dirname + `/fixtures/`);
+  const requestManager = new requestsManager({
+    userAgentPrefix: 'snyk-api-import:tests',
+  });
+  afterAll(async () => {
+    process.env = { ...OLD_ENV };
+  });
+  it('SANITIZE target if process.env.SANITIZE_IMPORT_TARGET is set', async () => {
+    process.env.SANITIZE_IMPORT_TARGET = 'yes';
+
+    const target = {
+      name: 'composer-with-vulns',
+      owner: 'snyk-fixtures',
+      branch: 'master',
+      fork: true,
+    };
+    await importTarget(requestManager, 'ORG_ID', 'INTEGRATION_ID', target);
+    expect(requestWithRateLimitHandlingStub).toHaveBeenCalled();
+    expect(requestWithRateLimitHandlingStub).lastCalledWith(
+      expect.any(Object),
+      '/org/ORG_ID/integrations/INTEGRATION_ID/import',
+      'post',
+      {
+        exclusionGlobs: undefined,
+        files: undefined,
+        target: {
+          branch: 'master',
+          name: 'composer-with-vulns',
+          owner: 'snyk-fixtures',
+        },
+      },
+    );
+  });
+
+  it('send target as if process.env.SANITIZE_IMPORT_TARGET is not set', async () => {
+    delete process.env.SANITIZE_IMPORT_TARGET;
+    const target = {
+      name: 'composer-with-vulns',
+      owner: 'snyk-fixtures',
+      branch: 'master',
+      fork: true,
+      random: 'yay'
+    };
+    await importTarget(requestManager, 'ORG_ID', 'INTEGRATION_ID', target);
+    expect(requestWithRateLimitHandlingStub).toHaveBeenCalled();
+    expect(requestWithRateLimitHandlingStub).lastCalledWith(
+      expect.any(Object),
+      '/org/ORG_ID/integrations/INTEGRATION_ID/import',
+      'post',
+      {
+        exclusionGlobs: undefined,
+        files: undefined,
+        target: {
+          branch: 'master',
+          name: 'composer-with-vulns',
+          owner: 'snyk-fixtures',
+          fork: true,
+          random: 'yay'
+        },
+      },
+    );
   });
 });

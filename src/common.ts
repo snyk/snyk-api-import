@@ -19,3 +19,4 @@ export const targetProps = [
   'owner',
   'branch',
 ];
+export const targetPropsWithId = [...targetProps, 'id'];
