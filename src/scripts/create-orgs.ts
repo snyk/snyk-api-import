@@ -201,7 +201,7 @@ export async function createOrgs(
     createdOrgs.push(...created);
   }
 
-  if (createdOrgs.length === 0) {
+  if (createdOrgs.length === 0 && !includeExistingOrgsInOutput) {
     throw new Error(
       `All requested organizations failed to be created. Review the errors in ${path.resolve(
         __dirname,

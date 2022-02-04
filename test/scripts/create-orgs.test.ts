@@ -35,7 +35,7 @@ describe('createOrgs script', () => {
     for (const orgId of createdOrgs) {
       await deleteOrg(requestManager, orgId);
     }
-  });
+  }, 20000);
 
   // too flaky to run every time
   it('create 1 org', async () => {
@@ -44,7 +44,9 @@ describe('createOrgs script', () => {
     );
     const logPath = path.resolve(__dirname + '/fixtures/create-orgs/1-org/');
     process.env.SNYK_LOG_PATH = logPath;
-    filesToDelete.push(path.resolve(logPath + `/${GROUP_ID}.${CREATED_ORG_LOG_NAME}`));
+    filesToDelete.push(
+      path.resolve(logPath + `/${GROUP_ID}.${CREATED_ORG_LOG_NAME}`),
+    );
 
     const { fileName, orgs, existing } = await createOrgs(importFile);
     createdOrgs.push(...orgs.map((o) => o.orgId));
@@ -127,7 +129,7 @@ describe('createOrgs script', () => {
     );
     process.env.SNYK_LOG_PATH = logPath;
     const noDuplicateNames = true;
-    const includeExistingOrgsInOutput = true;
+    const includeExistingOrgsInOutput = false;
 
     // first create the org
     const { fileName, orgs, failed, totalOrgs, existing } = await createOrgs(
@@ -163,6 +165,57 @@ describe('createOrgs script', () => {
     ).rejects.toThrow(
       'All requested organizations failed to be created. Review the errors in',
     );
+  }, 70000);
+  it('creating an org with the same name as an org in the Group does not fail with --includeExistingOrgsInOutput', async () => {
+    const importFile = path.resolve(
+      __dirname + '/fixtures/create-orgs/unique-org/1-org.json',
+    );
+    const logPath = path.resolve(
+      __dirname + '/fixtures/create-orgs/unique-org/',
+    );
+
+    process.env.SNYK_LOG_PATH = logPath;
+    const noDuplicateNames = true;
+    const includeExistingOrgsInOutput = true;
+
+    // first create the org
+    const {
+      fileName,
+      orgs,
+      failed,
+      totalOrgs,
+      existing,
+    } = await createOrgs(importFile, {
+      noDuplicateNames,
+      includeExistingOrgsInOutput,
+    });
+    // cleanup
+    const log = path.resolve(logPath, fileName);
+    filesToDelete.push(path.resolve(logPath, fileName));
+    filesToDelete.push(path.resolve(logPath + `/abc.${CREATED_ORG_LOG_NAME}`));
+
+    expect(failed).toHaveLength(1);
+    expect(orgs).toHaveLength(0);
+    expect(totalOrgs >= 1).toBeTruthy();
+
+    expect(existing).not.toBeNull();
+    expect(existing.length >= 1).toBeTruthy();
+    expect(existing.filter((o) => o.name === ORG_NAME)[0]).toMatchObject({
+      // created: expect.any(String), not always there?  flaky
+      groupId: GROUP_ID,
+      id: expect.any(String),
+      integrations: expect.any(Object),
+      name: ORG_NAME,
+      orgId: expect.any(String),
+      origName: ORG_NAME,
+      slug: expect.any(String),
+      url: expect.any(String),
+      group: expect.any(Object),
+    });
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 1000));
+    const logFile = fs.readFileSync(log, 'utf8');
+    expect(logFile).toMatch(ORG_NAME);
   }, 70000);
 
   it.todo('creating multiple orgs');

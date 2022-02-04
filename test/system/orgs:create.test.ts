@@ -58,7 +58,7 @@ describe('`snyk-api-import help <...>`', () => {
         done();
       },
     );
-  }, 10000);
+  }, 20000);
 
   it('Fails to create orgs in --noDuplicateNames mode when org already exists ', (done) => {
     const pathToBadJson = path.resolve(
@@ -68,7 +68,7 @@ describe('`snyk-api-import help <...>`', () => {
       __dirname + '/fixtures/create-orgs/fails-to-create/already-exists',
     );
     exec(
-      `node ${main} orgs:create --file=${pathToBadJson} --noDuplicateNames`,
+      `node ${main} orgs:create --file=${pathToBadJson} --noDuplicateNames --no-includeExistingOrgsInOutput`,
       {
         env: {
           PATH: process.env.PATH,
@@ -95,5 +95,5 @@ describe('`snyk-api-import help <...>`', () => {
         done();
       },
     );
-  }, 10000);
+  }, 20000);
 });
