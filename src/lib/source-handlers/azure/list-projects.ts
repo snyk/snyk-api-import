@@ -1,29 +1,15 @@
 import * as qs from 'querystring';
 import base64 = require('base-64');
-import Bottleneck from 'bottleneck';
-import * as needle from 'needle';
 import * as debugLib from 'debug';
+import { OutgoingHttpHeaders } from 'http2';
 import { AzureProjectData } from './types';
 import { getAzureToken } from './get-azure-token';
 import { getBaseUrl } from './get-base-url';
 import { AzureProjectData as Project } from './types';
+import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
+import { limiterForScm } from '../../limiters';
 
 const debug = debugLib('snyk:azure');
-
-const limiter = new Bottleneck({
-  maxConcurrent: 1,
-  minTime: 500,
-});
-
-limiter.on('failed', async (error, jobInfo) => {
-  const id = jobInfo.options.id;
-  debug(`Job ${id} failed: ${error}`);
-  if (jobInfo.retryCount === 0) {
-    // Here we only retry once
-    debug(`Retrying job ${id} in 25ms!`);
-    return 25;
-  }
-});
 
 async function fetchAllProjects(
   orgName: string,
@@ -75,17 +61,21 @@ async function getProjects(
     'api-version': '4.1',
   };
   const query = qs.stringify(params);
-  const data = await limiter.schedule(() =>
-    needle(
-      'get',
-      `${host}/${orgName}/_apis/projects?${query}`, //document the version somewhere
-      {
-        headers: { Authorization: 'Basic ' + base64.encode(':' + azureToken) },
-      },
-    ),
+  const headers: OutgoingHttpHeaders = {
+    Authorization: `Basic ${base64.encode(':' + azureToken)}`,
+  };
+  const limiter = await limiterForScm(1, 500);
+  const data = await limiterWithRateLimitRetries(
+    'get',
+    `${host}/${orgName}/_apis/projects?${query}`,
+    headers,
+    limiter,
+    60000,
   );
   if (data.statusCode != 200) {
-    throw new Error(`Failed to fetch page: ${host}\n${data.body}`);
+    throw new Error(`Failed to fetch projects for ${host}/${orgName}/_apis/projects?${query}\n
+    Status Code: ${data.statusCode}\n
+    Response body: ${JSON.stringify(data.body)}`);
   }
   const { value: projects } = data.body;
   return {
