@@ -12,12 +12,6 @@ export interface CreatedOrgResponse {
   id: string;
   name: string;
   created: string;
-  slug: string;
-  url: string;
-  group: {
-    name: string;
-    id: string;
-  }
 }
 
 export async function createOrg(
