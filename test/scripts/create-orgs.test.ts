@@ -85,7 +85,7 @@ describe('createOrgs script', () => {
     const logFile = fs.readFileSync(log, 'utf8');
     expect(logFile).toMatch(ORG_NAME);
   }, 50000);
-  it('create 1 org and do not list existing', async () => {
+  it.only('create 1 org and do not list existing', async () => {
     const importFile = path.resolve(
       __dirname + '/fixtures/create-orgs/1-org/1-org.json',
     );
@@ -117,6 +117,8 @@ describe('createOrgs script', () => {
     // give file a little time to be finished to be written
     await new Promise((r) => setTimeout(r, 1000));
     const logFile = fs.readFileSync(log, 'utf8');
+    console.log(logFile);
+    console.log(logFile);
     expect(logFile).not.toMatch(ORG_NAME);
   }, 50000);
 
@@ -179,16 +181,13 @@ describe('createOrgs script', () => {
     const includeExistingOrgsInOutput = true;
 
     // first create the org
-    const {
-      fileName,
-      orgs,
-      failed,
-      totalOrgs,
-      existing,
-    } = await createOrgs(importFile, {
-      noDuplicateNames,
-      includeExistingOrgsInOutput,
-    });
+    const { fileName, orgs, failed, totalOrgs, existing } = await createOrgs(
+      importFile,
+      {
+        noDuplicateNames,
+        includeExistingOrgsInOutput,
+      },
+    );
     // cleanup
     const log = path.resolve(logPath, fileName);
     filesToDelete.push(path.resolve(logPath, fileName));
