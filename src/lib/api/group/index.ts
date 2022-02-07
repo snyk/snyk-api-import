@@ -32,14 +32,16 @@ export async function createOrg(
   }
   const body: {
     name: string;
+    groupId: string;
     sourceOrgId?: string;
   } = {
     name,
+    groupId,
     sourceOrgId,
   };
   const res = await requestManager.request({
     verb: 'post',
-    url: `/group/${groupId}/org`,
+    url: `/org`,
     body: JSON.stringify(body),
   });
   const statusCode = res.statusCode || res.status;
@@ -80,7 +82,8 @@ export async function listOrgs(
   const statusCode = res.statusCode || res.status;
   if (!statusCode || statusCode !== 200) {
     throw new Error(
-      'Expected a 200 response, instead received: ' + JSON.stringify({statusCode, data: res.data}),
+      'Expected a 200 response, instead received: ' +
+        JSON.stringify({ statusCode, data: res.data }),
     );
   }
 
