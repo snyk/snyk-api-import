@@ -1,28 +1,14 @@
 import { AzureRepoData } from './types';
-import Bottleneck from 'bottleneck';
 import base64 = require('base-64');
 import * as debugLib from 'debug';
+import { OutgoingHttpHeaders } from 'http2';
 import { getAzureToken } from './get-azure-token';
-import * as needle from 'needle';
 import { listAzureProjects } from './list-projects';
 import { getBaseUrl } from './get-base-url';
+import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
+import { limiterForScm } from '../../limiters';
 
 const debug = debugLib('snyk:azure');
-
-const limiter = new Bottleneck({
-  maxConcurrent: 1,
-  minTime: 500,
-});
-
-limiter.on('failed', async (error, jobInfo) => {
-  const id = jobInfo.options.id;
-  debug(`Job ${id} failed: ${error}`);
-  if (jobInfo.retryCount === 0) {
-    // Here we only retry once
-    debug(`Retrying job ${id} in 25ms!`);
-    return 25;
-  }
-});
 
 export async function fetchAllRepos(
   url: string,
@@ -47,22 +33,27 @@ async function getRepos(
   token: string,
 ): Promise<AzureRepoData[]> {
   const repoList: AzureRepoData[] = [];
-  const data = await limiter.schedule(() =>
-    needle(
-      'get',
-      `${url}/${orgName}/` +
-        encodeURIComponent(project) +
-        '/_apis/git/repositories?api-version=4.1',
-      {
-        headers: { Authorization: `Basic ${base64.encode(':' + token)}` },
-      },
-    ),
+  const headers: OutgoingHttpHeaders = {
+    Authorization: `Basic ${base64.encode(':' + token)}`,
+  };
+  const limiter = await limiterForScm(1, 500);
+  const data = await limiterWithRateLimitRetries(
+    'get',
+    `${url}/${orgName}/` +
+      encodeURIComponent(project) +
+      '/_apis/git/repositories?api-version=4.1',
+    headers,
+    limiter,
+    60000,
   );
   if (data.statusCode != 200) {
-    new Error(`Failed to fetch page: ${url}\n${data.body}`);
+    throw new Error(`Failed to fetch repos for ${url}/${orgName}/${encodeURIComponent(
+      project,
+    )}/_apis/git/repositories?api-version=4.1\n
+    Status Code: ${data.statusCode}\n
+    Response body: ${JSON.stringify(data.body)}`);
   }
   const repos = data.body['value'];
-
   repos.map(
     (repo: {
       name: string;
