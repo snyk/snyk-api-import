@@ -16,6 +16,7 @@ import {
   AzureRepoData,
   listBitbucketServerRepos,
   BitbucketServerRepoData,
+  listBitbucketCloudRepos,
 } from '../lib';
 
 const debug = debugLib('snyk:generate-targets-data');
@@ -39,6 +40,7 @@ const sourceGenerators = {
   [SupportedIntegrationTypesImportData.GITLAB]: listGitlabRepos,
   [SupportedIntegrationTypesImportData.AZURE_REPOS]: listAzureRepos,
   [SupportedIntegrationTypesImportData.BITBUCKET_SERVER]: listBitbucketServerRepos,
+  [SupportedIntegrationTypesImportData.BITBUCKET_CLOUD]: listBitbucketCloudRepos,
 };
 
 function validateRequiredOrgData(

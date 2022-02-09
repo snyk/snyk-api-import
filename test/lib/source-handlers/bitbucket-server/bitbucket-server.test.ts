@@ -1,4 +1,3 @@
-import { string } from 'yargs';
 import { listBitbucketServerProjects } from '../../../../src/lib/source-handlers/bitbucket-server/list-projects';
 import { listBitbucketServerRepos } from '../../../../src/lib/source-handlers/bitbucket-server/list-repos';
 

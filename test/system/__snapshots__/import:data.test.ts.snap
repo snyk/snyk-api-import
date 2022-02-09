@@ -17,14 +17,14 @@ Options:
                      Github Enterprise, Gitlab, Azure. This will be used to make
                      an API call to list all available entities per org
     [required] [choices: "github", "github-enterprise", "gitlab", "azure-repos",
-                                         "bitbucket-server"] [default: "github"]
+                      "bitbucket-server", "bitbucket-cloud"] [default: "github"]
   --sourceUrl        Custom base url for the source API that can list
                      organizations (e.g. Github Enterprise url)
   --integrationType  The configured integration type on the created Snyk Org to
                      use for generating import targets data. Applies to all
                      targets.
     [required] [choices: "github", "github-enterprise", "gitlab", "azure-repos",
-                                                             "bitbucket-server"]
+                                          "bitbucket-server", "bitbucket-cloud"]
 
 Missing required arguments: orgsData, integrationType
 ]
@@ -46,14 +46,14 @@ Options:
                      Github Enterprise, Gitlab, Azure. This will be used to make
                      an API call to list all available entities per org
     [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\", \\"azure-repos\\",
-                                         \\"bitbucket-server\\"] [default: \\"github\\"]
+                      \\"bitbucket-server\\", \\"bitbucket-cloud\\"] [default: \\"github\\"]
   --sourceUrl        Custom base url for the source API that can list
                      organizations (e.g. Github Enterprise url)
   --integrationType  The configured integration type on the created Snyk Org to
                      use for generating import targets data. Applies to all
                      targets.
     [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\", \\"azure-repos\\",
-                                                             \\"bitbucket-server\\"]
+                                          \\"bitbucket-server\\", \\"bitbucket-cloud\\"]
 
 Missing required arguments: orgsData, integrationType
 "
@@ -75,12 +75,12 @@ Options:
                      Github Enterprise, Gitlab, Azure. This will be used to make
                      an API call to list all available entities per org
     [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\", \\"azure-repos\\",
-                                         \\"bitbucket-server\\"] [default: \\"github\\"]
+                      \\"bitbucket-server\\", \\"bitbucket-cloud\\"] [default: \\"github\\"]
   --sourceUrl        Custom base url for the source API that can list
                      organizations (e.g. Github Enterprise url)
   --integrationType  The configured integration type on the created Snyk Org to
                      use for generating import targets data. Applies to all
                      targets.
     [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\", \\"azure-repos\\",
-                                                             \\"bitbucket-server\\"]"
+                                          \\"bitbucket-server\\", \\"bitbucket-cloud\\"]"
 `;

@@ -33,7 +33,9 @@ export async function limiterWithRateLimitRetries(
     }
     if (data.statusCode === 401) {
       console.error(
-        `ERROR: ${data.body}. Please check the token and try again.`,
+        `ERROR: ${JSON.stringify(
+          data.body,
+        )}. Please check the token and try again.`,
       );
       break;
     }
