@@ -43,10 +43,10 @@ describe('Import projects script', () => {
     });
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
     expect(logFile).toMatch(
-      `"target":{"name":"ruby-with-versions","owner":"snyk-fixtures","branch":"master"}`,
+      `"target":{"name":"ruby-with-versions","owner":"api-import-circle-test","branch":"master"}`,
     );
     discoveredProjects.push(...projects);
-  }, 240000);
+  }, 2400000);
 });
 
 describe('Import skips previously imported', () => {
@@ -72,7 +72,7 @@ describe('Import skips previously imported', () => {
     // give file a little time to be finished to be written
     await new Promise((r) => setTimeout(r, 1000));
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
-    expect(logFile).toMatch('composer-with-vulns:snyk-fixtures:master');
+    expect(logFile).toMatch('composer-with-vulns:api-import-circle-test:master');
   }, 240000);
 });
 
@@ -148,7 +148,7 @@ describe('Skips & logs issues', () => {
       // ignore
     }
   }, 240000);
-  it('Logs failed projects', async () => {
+  it.only('Logs failed projects', async () => {
     const logRoot = __dirname + '/fixtures/projects-with-errors/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
@@ -193,7 +193,7 @@ describe('Skips & logs issues', () => {
     );
     expect(importedProjectsLog).not.toBeNull();
     discoveredProjects.push(...projects);
-  }, 50000);
+  }, 500000);
 });
 
 describe('Error handling', () => {
@@ -262,11 +262,11 @@ describe('No projects scenarios', () => {
     );
     expect(projects.length === 0).toBeTruthy();
     // give file a little time to be finished to be written
-    await new Promise((r) => setTimeout(r, 3000));
+    await new Promise((r) => setTimeout(r, 30000));
     const logFile = fs.readFileSync(logFiles.importJobsLogPath, 'utf8');
     expect(logFile).toMatch(`"status":"complete","projects":[]}`);
-    expect(logFile).toMatch(`"logs":[{"name":"snyk-fixtures/empty-repo"`);
-  }, 30000);
+    expect(logFile).toMatch(`"logs":[{"name":"api-import-circle-test/empty-repo"`);
+  }, 3000000);
 
   it('succeeds to complete import from repo with no supported manifests', async () => {
     const testName = 'no-supported-manifests';
@@ -287,7 +287,7 @@ describe('No projects scenarios', () => {
     const logFile = fs.readFileSync(logFiles.importJobsLogPath, 'utf8');
     expect(logFile).toMatch(`"status":"complete","projects":[]}`);
     expect(logFile).toMatch(
-      `"logs":[{"name":"snyk-fixtures/no-supported-manifests"`,
+      `"logs":[{"name":"api-import-circle-test/no-supported-manifests"`,
     );
-  }, 30000);
+  }, 300000);
 });

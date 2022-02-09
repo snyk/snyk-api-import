@@ -1,7 +1,7 @@
 {
   "orgData": [
     {
-      "name": "snyk-fixtures",
+      "name": "api-import-circle-test",
       "orgId": "<snyk_org_id>",
       "integrations": {
         "gitlab": "<snyk_org_integration_id>"

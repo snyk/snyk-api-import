@@ -85,7 +85,7 @@ describe('createOrgs script', () => {
     const logFile = fs.readFileSync(log, 'utf8');
     expect(logFile).toMatch(ORG_NAME);
   }, 50000);
-  it.only('create 1 org and do not list existing', async () => {
+  it('create 1 org and do not list existing', async () => {
     const importFile = path.resolve(
       __dirname + '/fixtures/create-orgs/1-org/1-org.json',
     );
