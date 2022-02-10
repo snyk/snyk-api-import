@@ -2,7 +2,7 @@
   "orgs": [
     {
       "groupId": "abc",
-      "name": ""
+      "name": "some-name"
     }
   ]
 }
