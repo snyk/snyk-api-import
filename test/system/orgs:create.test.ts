@@ -31,7 +31,7 @@ describe('`snyk-api-import help <...>`', () => {
     );
 
     exec(
-      `node ${main} orgs:create --file=${pathToBadJson}`,
+      `node ${main} orgs:create --file=${pathToBadJson} --noDuplicateNames --no-includeExistingOrgsInOutput`,
       {
         env: {
           PATH: process.env.PATH,
@@ -52,17 +52,18 @@ describe('`snyk-api-import help <...>`', () => {
         const file = fs.readFileSync(
           path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`),
           'utf8',
-        )
-        expect(file).toContain('group not found');
+        );
+        expect(file).toContain('Please provide the group public id');
         deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
         done();
       },
     );
-  }, 20000);
+  }, 40000);
 
   it('Fails to create orgs in --noDuplicateNames mode when org already exists ', (done) => {
     const pathToBadJson = path.resolve(
-      __dirname + '/fixtures/create-orgs/fails-to-create/already-exists/1-org.json',
+      __dirname +
+        '/fixtures/create-orgs/fails-to-create/already-exists/1-org.json',
     );
     const logPath = path.resolve(
       __dirname + '/fixtures/create-orgs/fails-to-create/already-exists',
@@ -89,9 +90,11 @@ describe('`snyk-api-import help <...>`', () => {
         const file = fs.readFileSync(
           path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`),
           'utf8',
-        )
+        );
         expect(file).toContain('Refusing to create a duplicate organization');
-        deleteFiles([path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`)]);
+        deleteFiles([
+          path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`),
+        ]);
         done();
       },
     );

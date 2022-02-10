@@ -13,6 +13,7 @@ jobs:
                 message: Starting snyk-api-import build-test-monitor job
             - checkout
             - run: npm install
+            - run: npx jest --clearCache
             - run: npm test
             - snyk/scan:
                 fail-on-issues: true
