@@ -4,7 +4,7 @@
       "orgId": "74e2f385-a54f-491e-9034-76c53e72927a",
       "target": {
         "name": "ruby-with-versions",
-        "owner": "snyk-fixtures",
+        "owner": "api-import-circle-test",
         "branch": "master"
       }
     }

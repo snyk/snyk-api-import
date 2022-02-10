@@ -52,7 +52,7 @@ describe('`snyk-api-import import:data <...>`', () => {
         done();
       },
     );
-  }, 20000);
+  }, 200000);
   it('Generates repo data as expected for Bitbucket Server', (done) => {
     const orgDataFile =
       'test/system/fixtures/org-data/bitbucket-server-orgs.json';
