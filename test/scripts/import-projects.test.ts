@@ -25,7 +25,7 @@ describe('Import projects script', () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
     await deleteFiles(logs);
     process.env = { ...OLD_ENV };
-  }, 5000);
+  }, 10000);
 
   it('succeeds to import targets from file', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
@@ -88,7 +88,7 @@ describe('Skips & logs issues', () => {
   afterEach(async () => {
     await deleteFiles(logs);
     process.env = { ...OLD_ENV };
-  }, 1000);
+  }, 10000);
 
   afterAll(async () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
@@ -204,7 +204,7 @@ describe('Error handling', () => {
 
   afterAll(async () => {
     process.env = { ...OLD_ENV };
-  }, 1000);
+  }, 10000);
 
   it('shows correct error when input can not be loaded', async () => {
     expect(
@@ -247,7 +247,7 @@ describe('No projects scenarios', () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
     await deleteFiles(logs);
     process.env = { ...OLD_ENV };
-  });
+  }, 10000);
   it('succeeds to complete import targets from empty repo', async () => {
     const testName = 'empty-target';
     const logPath = path.resolve(__dirname + '/fixtures/' + testName);
