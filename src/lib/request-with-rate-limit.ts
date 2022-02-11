@@ -5,14 +5,22 @@ import { OutgoingHttpHeaders } from 'http2';
 
 const debug = debugLib('snyk:limiter');
 
-export async function limiterWithRateLimitRetries(
+export async function limiterWithRateLimitRetries<ResponseType>(
   verb: needle.NeedleHttpVerbs,
   url: string,
   headers: OutgoingHttpHeaders,
   limiter: Bottleneck,
   rateLimitSleepTime: number,
-): Promise<any> {
-  let data;
+): Promise<{
+  statusCode: number;
+  body: ResponseType;
+  headers: Record<string, unknown>;
+}> {
+  let data: {
+    statusCode: number;
+    body: ResponseType;
+    headers: Record<string, unknown>;
+  };
   const maxRetries = 7;
   let attempt = 0;
   limiter.on('failed', async (error, jobInfo) => {
@@ -25,9 +33,13 @@ export async function limiterWithRateLimitRetries(
     }
   });
   while (attempt < maxRetries) {
-    data = await limiter.schedule(() =>
+    data = (await limiter.schedule(() =>
       needle(verb, url, { headers: headers }),
-    );
+    )) as {
+      statusCode: number;
+      body: ResponseType;
+      headers: Record<string, unknown>;
+    };
     if ([404, 200].includes(Number(data.statusCode))) {
       break;
     }
@@ -48,5 +60,6 @@ export async function limiterWithRateLimitRetries(
     }
     attempt += 1;
   }
-  return data;
+
+  return data!;
 }

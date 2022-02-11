@@ -10,6 +10,13 @@ import { limiterForScm } from '../../limiters';
 
 const debug = debugLib('snyk:azure');
 
+interface AzureReposResponse {
+  value: {
+    name: string;
+    project: { name: string };
+    defaultBranch: string;
+  }[];
+}
 export async function fetchAllRepos(
   url: string,
   orgName: string,
@@ -37,7 +44,9 @@ async function getRepos(
     Authorization: `Basic ${base64.encode(':' + token)}`,
   };
   const limiter = await limiterForScm(1, 500);
-  const data = await limiterWithRateLimitRetries(
+  const { body, statusCode } = await limiterWithRateLimitRetries<
+    AzureReposResponse
+  >(
     'get',
     `${url}/${orgName}/` +
       encodeURIComponent(project) +
@@ -46,30 +55,24 @@ async function getRepos(
     limiter,
     60000,
   );
-  if (data.statusCode != 200) {
+  if (statusCode != 200) {
     throw new Error(`Failed to fetch repos for ${url}/${orgName}/${encodeURIComponent(
       project,
     )}/_apis/git/repositories?api-version=4.1\n
-    Status Code: ${data.statusCode}\n
-    Response body: ${JSON.stringify(data.body)}`);
+    Status Code: ${statusCode}\n
+    Response body: ${JSON.stringify(body)}`);
   }
-  const repos = data.body['value'];
-  repos.map(
-    (repo: {
-      name: string;
-      project: { name: string };
-      defaultBranch: string;
-    }) => {
-      const { name, project, defaultBranch } = repo;
-      if (name && project && project.name) {
-        repoList.push({
-          name,
-          owner: project.name,
-          branch: defaultBranch || '',
-        });
-      }
-    },
-  );
+  const { value: repos } = body;
+  repos.map((repo) => {
+    const { name, project, defaultBranch } = repo;
+    if (name && project && project.name && defaultBranch) {
+      repoList.push({
+        name,
+        owner: project.name,
+        branch: defaultBranch,
+      });
+    }
+  });
   return repoList;
 }
 

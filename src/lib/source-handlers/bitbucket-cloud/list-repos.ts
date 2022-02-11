@@ -9,6 +9,20 @@ import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
 
 const debug = debugLib('snyk:bitbucket-cloud');
 
+interface BitbucketReposResponse {
+  values: {
+    mainbranch: {
+      name: string;
+    };
+    slug: string;
+    workspace: {
+      slug: string;
+      uuid: string;
+    };
+  }[];
+  next?: string;
+}
+
 export const fetchAllBitbucketCloudRepos = async (
   workspace: string,
   username: string,
@@ -17,11 +31,14 @@ export const fetchAllBitbucketCloudRepos = async (
   let lastPage = false;
   let reposList: BitbucketCloudRepoData[] = [];
   let pageCount = 1;
-  let nextPage = '';
+  let nextPage;
   while (!lastPage) {
     debug(`Fetching page ${pageCount} for ${workspace}\n`);
     try {
-      const { repos, next } = await getRepos(
+      const {
+        repos,
+        next,
+      }: { repos: BitbucketCloudRepoData[]; next?: string } = await getRepos(
         workspace,
         username,
         password,
@@ -44,34 +61,40 @@ const getRepos = async (
   workspace: string,
   username: string,
   password: string,
-  nextPage: string,
-): Promise<{ repos: BitbucketCloudRepoData[]; next: string }> => {
+  nextPageLink?: string,
+): Promise<{ repos: BitbucketCloudRepoData[]; next?: string }> => {
   const repos: BitbucketCloudRepoData[] = [];
   const headers: OutgoingHttpHeaders = {
     Authorization: `Basic ${base64.encode(username + ':' + password)}`,
   };
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
-  const { statusCode, body } = await limiterWithRateLimitRetries(
+  const { statusCode, body } = await limiterWithRateLimitRetries<
+    BitbucketReposResponse
+  >(
     'get',
-    nextPage ?? `https://bitbucket.org/api/2.0/repositories/${workspace}`,
+    nextPageLink ?? `https://bitbucket.org/api/2.0/repositories/${workspace}`,
     headers,
     limiter,
     60000,
   );
   if (statusCode != 200) {
-    throw new Error(`Failed to fetch projects for ${nextPage ??
-      `https://bitbucket.org/api/2.0/repositories/${workspace}`}\n
+    throw new Error(`Failed to fetch projects for ${
+      nextPageLink != ''
+        ? nextPageLink
+        : `https://bitbucket.org/api/2.0/repositories/${workspace}`
+    }\n
       Status Code: ${statusCode}\n
       Response body: ${JSON.stringify(body)}`);
   }
-  const values = body['values'];
-  const next = body['next'] ?? '';
+  const { next, values } = body;
   for (const repo of values) {
-    repos.push({
-      owner: repo.workspace.slug ? repo.workspace.slug : repo.workspace.uuid,
-      name: repo.slug,
-      branch: repo.mainbranch.name ? repo.mainbranch.name : '',
-    });
+    const { workspace, mainbranch, slug } = repo;
+    if (mainbranch.name && workspace && slug)
+      repos.push({
+        owner: workspace.slug ? workspace.slug : repo.workspace.uuid,
+        name: slug,
+        branch: mainbranch.name,
+      });
   }
   return { repos, next };
 };

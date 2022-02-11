@@ -39,7 +39,7 @@ export const builder = {
     default: SupportedIntegrationTypesImportOrgData.GITHUB,
     choices: [...Object.values(SupportedIntegrationTypesImportOrgData)],
     desc:
-      'The source of the targets to be imported e.g. Github, Github Enterprise, Gitlab, Bitbucket-server',
+      'The source of the targets to be imported e.g. Github, Github Enterprise, Gitlab, Bitbucket Server',
   },
 };
 

@@ -9,6 +9,13 @@ import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
 
 const debug = debugLib('snyk:bitbucket-cloud');
 
+interface BitbucketWorkspacesResponse {
+  values: {
+    slug: string;
+    uuid: string;
+  }[];
+  next?: string;
+}
 export async function fetchAllWorkspaces(
   username: string,
   password: string,
@@ -16,19 +23,21 @@ export async function fetchAllWorkspaces(
   let lastPage = false;
   let workspacesList: BitbucketCloudWorkspaceData[] = [];
   let pageCount = 1;
-  let nextPage = '';
+  let nextPageLink: string | undefined = undefined;
   while (!lastPage) {
     debug(`Fetching page ${pageCount}\n`);
     try {
-      const { workspaces, next } = await getWorkspaces(
-        username,
-        password,
-        nextPage,
-      );
+      const {
+        workspaces,
+        next,
+      }: {
+        workspaces: BitbucketCloudWorkspaceData[];
+        next?: string;
+      } = await getWorkspaces(username, password, nextPageLink);
       workspacesList = workspacesList.concat(workspaces);
       next
-        ? ((lastPage = false), (nextPage = next))
-        : ((lastPage = true), (nextPage = ''));
+        ? ((lastPage = false), (nextPageLink = next))
+        : ((lastPage = true), (nextPageLink = ''));
       pageCount++;
     } catch (err) {
       throw new Error(JSON.stringify(err));
@@ -40,30 +49,26 @@ export async function fetchAllWorkspaces(
 export async function getWorkspaces(
   username: string,
   password: string,
-  nextPage: string,
-): Promise<{ workspaces: BitbucketCloudWorkspaceData[]; next: string }> {
+  nextPageLink?: string,
+): Promise<{ workspaces: BitbucketCloudWorkspaceData[]; next?: string }> {
   const workspaces: BitbucketCloudWorkspaceData[] = [];
   const headers: OutgoingHttpHeaders = {
     Authorization: `Basic ${base64.encode(username + ':' + password)}`,
   };
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
-  let next = '';
-  const { statusCode, body } = await limiterWithRateLimitRetries(
-    'get',
-    nextPage != '' ? nextPage : 'https://bitbucket.org/api/2.0/workspaces',
-    headers,
-    limiter,
-    60000,
-  );
+  const workspacesUrl =
+    nextPageLink ?? 'https://bitbucket.org/api/2.0/workspaces';
+  const { statusCode, body } = await limiterWithRateLimitRetries<
+    BitbucketWorkspacesResponse
+  >('get', workspacesUrl, headers, limiter, 60000);
+
   if (statusCode != 200) {
-    throw new Error(`Failed to fetch projects for ${
-      nextPage != '' ? nextPage : 'https://bitbucket.org/api/2.0/workspaces'
-    }\n
+    throw new Error(`Failed to fetch ${workspacesUrl}\n
       Status Code: ${statusCode}\n
       Response body: ${JSON.stringify(body)}`);
   }
-  const values = body['values'];
-  next = body['next'];
+  const { values, next } = body;
+
   for (const workspace of values) {
     workspaces.push({
       name: workspace.slug,

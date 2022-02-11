@@ -7,6 +7,11 @@ import { limiterForScm } from '../../limiters';
 
 const debug = debugLib('snyk:bitbucket-server');
 
+interface BitbucketProjectsResponse {
+  values: BitbucketServerProjectData[];
+  nextPageStart: number;
+  isLastPage: boolean;
+}
 const fetchAllProjects = async (
   url: string,
   token: string,
@@ -46,12 +51,11 @@ const getProjects = async (
   isLastPage: boolean;
   start: number;
 }> => {
-  let isLastPage = false;
-  let start = 0;
-  let projects: BitbucketServerProjectData[] = [];
   const headers: OutgoingHttpHeaders = { Authorization: `Bearer ${token}` };
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
-  const { body, statusCode } = await limiterWithRateLimitRetries(
+  const { body, statusCode } = await limiterWithRateLimitRetries<
+    BitbucketProjectsResponse
+  >(
     'get',
     `${url}/rest/api/1.0/projects?start=${startFrom}&limit=${limit}`,
     headers,
@@ -63,9 +67,8 @@ const getProjects = async (
     Status Code: ${statusCode}\n
     Response body: ${JSON.stringify(body)}`);
   }
-  projects = body['values'];
-  isLastPage = body['isLastPage'];
-  start = body['nextPageStart'] || -1;
+  const { values: projects = [], nextPageStart, isLastPage } = body;
+  const start = nextPageStart || -1;
   return { projects, isLastPage, start };
 };
 

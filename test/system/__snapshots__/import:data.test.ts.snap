@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`\`snyk-api-import import:data <...>\` Shows error when missing  1`] = `
+exports[`\`snyk-api-import import:data <...>\` Shows error when missing source type 1`] = `
 [Error: Command failed: node ./dist/index.js import:data --source=github
 index.js import:data
 
@@ -30,7 +30,7 @@ Missing required arguments: orgsData, integrationType
 ]
 `;
 
-exports[`\`snyk-api-import import:data <...>\` Shows error when missing  2`] = `
+exports[`\`snyk-api-import import:data <...>\` Shows error when missing source type 2`] = `
 "index.js import:data
 
 Generate data required for targets to be imported via API to create Snyk

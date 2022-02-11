@@ -1,7 +1,6 @@
 import * as nock from 'nock';
 import Bottleneck from 'bottleneck';
 import { limiterWithRateLimitRetries } from '../../src/lib/request-with-rate-limit';
-import { limiterForScm } from '../../src/lib/limiters';
 
 beforeEach(() => {
   return nock('https://testUrlOkResponse')
@@ -40,6 +39,6 @@ describe('Testing requestWithRateLimitRetries', () => {
       limiter,
       600,
     );
-    expect(data.body.toString()).toEqual('Rate limit reached');
+    expect((data as any).body.toString()).toEqual('Rate limit reached');
   }, 20000);
 });

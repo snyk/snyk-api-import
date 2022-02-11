@@ -6,7 +6,16 @@ import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
 import { limiterForScm } from '../../limiters';
 
 const debug = debugLib('snyk:bitbucket-server');
-
+interface BitbucketServeRepoData {
+  values: {
+    name: string;
+    project: {
+      key: string;
+    };
+  }[];
+  isLastPage: boolean;
+  nextPageStart: number;
+}
 export const fetchAllRepos = async (
   url: string,
   projectKey: string,
@@ -49,12 +58,13 @@ const getRepos = async (
   isLastPage: boolean;
   start: number;
 }> => {
-  let isLastPage = false;
   let start = 0;
   const repos: BitbucketServerRepoData[] = [];
   const headers: OutgoingHttpHeaders = { Authorization: `Bearer ${token}` };
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
-  const { body, statusCode } = await limiterWithRateLimitRetries(
+  const { body, statusCode } = await limiterWithRateLimitRetries<
+    BitbucketServeRepoData
+  >(
     'get',
     `${url}/rest/api/1.0/repos?projectname=${projectKey}&state=AVAILABLE&start=${startFrom}&limit=${limit}`,
     headers,
@@ -66,9 +76,8 @@ const getRepos = async (
     Status Code: ${statusCode}\n
     Response body: ${JSON.stringify(body)}`);
   }
-  const values = body['values'];
-  isLastPage = body['isLastPage'];
-  start = body['nextPageStart'] || -1;
+  const { values, isLastPage, nextPageStart } = body;
+  start = nextPageStart || -1;
   for (const repo of values) {
     repos.push({ projectKey: repo.project.key, repoSlug: repo.name });
   }
