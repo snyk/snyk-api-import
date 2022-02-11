@@ -56,6 +56,7 @@ export async function importTarget(
       'post',
       body,
     );
+
     const statusCode = res.statusCode || res.status;
     if (!statusCode || statusCode !== 201) {
       throw new Error(

@@ -179,16 +179,13 @@ describe('createOrgs script', () => {
     const includeExistingOrgsInOutput = true;
 
     // first create the org
-    const {
-      fileName,
-      orgs,
-      failed,
-      totalOrgs,
-      existing,
-    } = await createOrgs(importFile, {
-      noDuplicateNames,
-      includeExistingOrgsInOutput,
-    });
+    const { fileName, orgs, failed, totalOrgs, existing } = await createOrgs(
+      importFile,
+      {
+        noDuplicateNames,
+        includeExistingOrgsInOutput,
+      },
+    );
     // cleanup
     const log = path.resolve(logPath, fileName);
     filesToDelete.push(path.resolve(logPath, fileName));
@@ -220,6 +217,9 @@ describe('createOrgs script', () => {
 
   it.todo('creating multiple orgs');
   it('creating an org fails', async () => {
+    const noDuplicateNames = true;
+    const includeExistingOrgsInOutput = false;
+
     const importFile = path.resolve(
       __dirname + '/fixtures/create-orgs/fails-to-create/1-org.json',
     );
@@ -229,8 +229,8 @@ describe('createOrgs script', () => {
     process.env.SNYK_LOG_PATH = logPath;
     process.env.SNYK_TOKEN = 'bad-token';
 
-    expect(createOrgs(importFile)).rejects.toThrow(
-      'fails-to-create/<groupId>.failed-to-create-orgs.log',
-    );
+    expect(
+      createOrgs(importFile, { noDuplicateNames, includeExistingOrgsInOutput }),
+    ).rejects.toThrow('fails-to-create/<groupId>.failed-to-create-orgs.log');
   }, 70000);
 });

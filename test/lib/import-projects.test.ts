@@ -17,7 +17,7 @@ describe('Skip target if found in log', () => {
   it('Target and empty log should not be skipped', async () => {
     const target = {
       name: 'composer-with-vulns',
-      owner: 'snyk-fixtures',
+      owner: 'api-import-circle-test',
       branch: 'master',
     };
     const importTarget = {
@@ -40,7 +40,7 @@ describe('Skip target if found in log', () => {
   it('Target already in log twice should be skipped', async () => {
     const target = {
       name: 'composer-with-vulns',
-      owner: 'snyk-fixtures',
+      owner: 'api-import-circle-test',
       branch: 'master',
     };
     const importTarget = {
@@ -56,7 +56,7 @@ describe('Skip target if found in log', () => {
   it('Target not in log should not be skipped', async () => {
     const target = {
       name: 'composer-with-vulns',
-      owner: 'snyk-fixtures',
+      owner: 'api-import-circle-test',
       branch: 'develop',
     };
     const importTarget = {
@@ -72,7 +72,7 @@ describe('Skip target if found in log', () => {
   it('Target with extra meta but already in log should be skipped', async () => {
     const target = {
       name: 'composer-with-vulns',
-      owner: 'snyk-fixtures',
+      owner: 'api-import-circle-test',
       branch: 'master',
       forked: true,
       isPrivate: false,
@@ -90,7 +90,7 @@ describe('Skip target if found in log', () => {
   it('Same target but for different org should not be skipped', async () => {
     const target = {
       name: 'composer-with-vulns',
-      owner: 'snyk-fixtures',
+      owner: 'api-import-circle-test',
       branch: 'master',
       forked: true,
       isPrivate: false,
@@ -110,7 +110,7 @@ describe('Skip target if found in log', () => {
   it('Gitlab target with repo ID should be skipped', async () => {
     const target = {
       name: 'composer-with-vulns',
-      owner: 'snyk-fixtures',
+      owner: 'api-import-circle-test',
       branch: 'master',
       forked: true,
       isPrivate: false,
@@ -145,7 +145,7 @@ describe('importTarget()', () => {
 
     const target = {
       name: 'composer-with-vulns',
-      owner: 'snyk-fixtures',
+      owner: 'api-import-circle-test',
       branch: 'master',
       fork: true,
     };
@@ -161,7 +161,7 @@ describe('importTarget()', () => {
         target: {
           branch: 'master',
           name: 'composer-with-vulns',
-          owner: 'snyk-fixtures',
+          owner: 'api-import-circle-test',
         },
       },
     );
@@ -171,7 +171,7 @@ describe('importTarget()', () => {
     delete process.env.SANITIZE_IMPORT_TARGET;
     const target = {
       name: 'composer-with-vulns',
-      owner: 'snyk-fixtures',
+      owner: 'api-import-circle-test',
       branch: 'master',
       fork: true,
       random: 'yay'
@@ -188,7 +188,7 @@ describe('importTarget()', () => {
         target: {
           branch: 'master',
           name: 'composer-with-vulns',
-          owner: 'snyk-fixtures',
+          owner: 'api-import-circle-test',
           fork: true,
           random: 'yay'
         },

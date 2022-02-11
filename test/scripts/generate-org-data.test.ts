@@ -194,7 +194,7 @@ describe('generateOrgImportDataFile Gitlab script', () => {
       groupId,
       sourceOrgId,
     });
-  });
+  }, 10000);
   it('generate Gitlab Orgs data without sourceOrgId', async () => {
     process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
     const GITLAB_URL = process.env.TEST_GITLAB_BASE_URL;

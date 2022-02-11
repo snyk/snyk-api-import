@@ -81,8 +81,8 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
       "orgId": "******",
       "integrationId": "******",
       "target": {
-        "repoSlug": "snyk-fixtures",
-        "name": "Snyk snyk-fixtures",
+        "repoSlug": "api-import-circle-test",
+        "name": "Snyk api-import-circle-test",
         "projectKey": "PROJECT"
       },
       "files": [
@@ -112,7 +112,7 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
       "integrationId": "******",
       "target": {
         "name": "shallow-goof-policy",
-        "owner": "snyk-fixtures",
+        "owner": "api-import-circle-test",
         "branch": "master"
       },
       "exclusionGlobs": "fixtures, test"

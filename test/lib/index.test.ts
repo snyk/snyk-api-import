@@ -35,7 +35,7 @@ describe('Single target', () => {
       INTEGRATION_ID,
       {
         name: 'ruby-with-versions',
-        owner: 'snyk-fixtures',
+        owner: 'api-import-circle-test',
         branch: 'master',
       },
     );
@@ -74,7 +74,7 @@ describe('Multiple targets', () => {
         integrationId: INTEGRATION_ID,
         target: {
           name: 'ruby-with-versions',
-          owner: 'snyk-fixtures',
+          owner: 'api-import-circle-test',
           branch: 'master',
         },
       },
@@ -83,7 +83,7 @@ describe('Multiple targets', () => {
         integrationId: INTEGRATION_ID,
         target: {
           name: 'composer-with-vulns',
-          owner: 'snyk-fixtures',
+          owner: 'api-import-circle-test',
           branch: 'master',
         },
       },

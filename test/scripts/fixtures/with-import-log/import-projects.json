@@ -5,7 +5,7 @@
       "integrationId": "INTEGRATION_ID",
       "target": {
         "name": "composer-with-vulns",
-        "owner": "snyk-fixtures",
+        "owner": "api-import-circle-test",
         "branch": "master"
       }
     }
