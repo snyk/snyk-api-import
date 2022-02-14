@@ -60,6 +60,44 @@ describe('`snyk-api-import help <...>`', () => {
     );
   }, 400000);
 
+  it('Fails to create an org as expected for non existing group ID `abc` file not in the same location as logs', (done) => {
+    const pathToBadJson = path.resolve(
+      __dirname + '/fixtures/create-orgs/fails-to-create/1-org.json',
+    );
+    const logPath = path.resolve(
+      __dirname + '/fixtures/create-orgs/fails-to-create-logPath/',
+    );
+
+    exec(
+      `node ${main} orgs:create --file=${pathToBadJson} --noDuplicateNames --no-includeExistingOrgsInOutput`,
+      {
+        env: {
+          PATH: process.env.PATH,
+          SNYK_TOKEN: process.env.SNYK_TOKEN_TEST,
+          SNYK_API: process.env.SNYK_API_TEST,
+          SNYK_LOG_PATH: logPath,
+        },
+      },
+      (err, stdout, stderr) => {
+        if (err) {
+          throw err;
+        }
+        expect(stderr).toMatch(
+          'All requested organizations failed to be created. Review the errors in',
+        );
+        expect(err).toBeNull();
+        expect(stdout).toEqual('');
+        const file = fs.readFileSync(
+          path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`),
+          'utf8',
+        );
+        expect(file).toContain('Please provide the group public id');
+        deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
+        done();
+      },
+    );
+  }, 400000);
+
   it('Fails to create orgs in --noDuplicateNames mode when org already exists ', (done) => {
     const pathToBadJson = path.resolve(
       __dirname +
