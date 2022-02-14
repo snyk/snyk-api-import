@@ -127,7 +127,7 @@ export async function createOrgs(
   const failedOrgs: CreateOrgData[] = [];
   let orgsData: CreateOrgData[];
 
-  const orgsFilePath = path.resolve(process.cwd(), loggingPath, filePath);
+  const orgsFilePath = path.resolve(process.cwd(), filePath);
   if (!fs.existsSync(orgsFilePath)) {
     throw new Error(`File not found ${orgsFilePath}`);
   }
