@@ -77,7 +77,32 @@ describe('`snyk-api-import import:data <...>`', () => {
       },
     );
   }, 50000);
-  it('Shows error when missing ', (done) => {
+  it('Generates repo data as expected for Bitbucket Cloud', (done) => {
+    const orgDataFile =
+      'test/system/fixtures/org-data/bitbucket-cloud-orgs.json';
+    exec(
+      `node ${main} import:data --source=bitbucket-cloud --integrationType=bitbucket-cloud --orgsData=${orgDataFile}`,
+      {
+        env: {
+          PATH: process.env.PATH,
+          BITBUCKET_CLOUD_USERNAME: process.env.BBC_USERNAME,
+          BITBUCKET_CLOUD_PASSWORD: process.env.BBC_PASSWORD,
+          SNYK_LOG_PATH: __dirname,
+        },
+      },
+      (err, stdout, stderr) => {
+        if (err) {
+          throw err;
+        }
+        expect(err).toBeNull();
+        expect(stderr).toEqual('');
+        expect(stdout.trim()).toMatch('Written the data to file');
+        deleteFiles([join(__dirname, 'bitbucket-cloud-import-targets.json')]);
+        done();
+      },
+    );
+  }, 50000);
+  it('Shows error when missing source type', (done) => {
     exec(`node ${main} import:data --source=github`, (err, stdout, stderr) => {
       expect(err).toMatchSnapshot();
       expect(stderr).toMatchSnapshot();

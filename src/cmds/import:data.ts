@@ -46,6 +46,7 @@ const entityName: {
   gitlab: 'group',
   'azure-repos': 'org',
   'bitbucket-server': 'project',
+  'bitbucket-cloud': 'workspace',
 };
 
 export async function handler(argv: {

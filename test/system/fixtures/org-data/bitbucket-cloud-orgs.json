@@ -1,0 +1,11 @@
+{
+  "orgData": [
+    {
+      "name": "snyktestscmgroup",
+      "orgId": "<snyk_org_id>",
+      "integrations": {
+        "bitbucket-cloud": "<snyk_org_integration_id>"
+      }
+    }
+  ]
+}

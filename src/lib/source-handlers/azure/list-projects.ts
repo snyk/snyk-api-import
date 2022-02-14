@@ -2,20 +2,23 @@ import * as qs from 'querystring';
 import base64 = require('base-64');
 import * as debugLib from 'debug';
 import { OutgoingHttpHeaders } from 'http2';
-import { AzureProjectData } from './types';
 import { getAzureToken } from './get-azure-token';
 import { getBaseUrl } from './get-base-url';
-import { AzureProjectData as Project } from './types';
+import { AzureProjectData } from './types';
 import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
 import { limiterForScm } from '../../limiters';
 
 const debug = debugLib('snyk:azure');
 
+interface AzureProjectsResponse {
+  value: AzureProjectData[];
+}
+
 async function fetchAllProjects(
   orgName: string,
   host: string,
-): Promise<Project[]> {
-  const projectList: Project[] = [];
+): Promise<AzureProjectData[]> {
+  const projectList: AzureProjectData[] = [];
   let hasMorePages = true;
   let displayPageNumber = 1;
   let nextPage: string | undefined;
@@ -51,7 +54,7 @@ async function getProjects(
   host: string,
   continueFrom?: string,
 ): Promise<{
-  projects: Project[];
+  projects: AzureProjectData[];
   continueFrom?: string;
 }> {
   const azureToken = getAzureToken();
@@ -65,22 +68,26 @@ async function getProjects(
     Authorization: `Basic ${base64.encode(':' + azureToken)}`,
   };
   const limiter = await limiterForScm(1, 500);
-  const data = await limiterWithRateLimitRetries(
+  const {
+    body,
+    statusCode,
+    headers: responseHeaders,
+  } = await limiterWithRateLimitRetries<AzureProjectsResponse>(
     'get',
     `${host}/${orgName}/_apis/projects?${query}`,
     headers,
     limiter,
     60000,
   );
-  if (data.statusCode != 200) {
+  if (statusCode != 200) {
     throw new Error(`Failed to fetch projects for ${host}/${orgName}/_apis/projects?${query}\n
-    Status Code: ${data.statusCode}\n
-    Response body: ${JSON.stringify(data.body)}`);
+    Status Code: ${statusCode}\n
+    Response body: ${JSON.stringify(body)}`);
   }
-  const { value: projects } = data.body;
+  const { value: projects } = body;
   return {
     projects,
-    continueFrom: data.headers['x-ms-continuationtoken'] as string,
+    continueFrom: responseHeaders['x-ms-continuationtoken'] as string,
   };
 }
 
