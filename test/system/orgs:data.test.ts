@@ -25,9 +25,11 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   });
 
   it('Generates orgs data as expected', (done) => {
@@ -49,9 +51,11 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
         deleteFiles([`group-${groupId}-github-com-orgs.json`]);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 20000);
   it('Generates orgs data as expected for Gitlab', (done) => {
     const groupId = 'hello';
@@ -72,9 +76,11 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
         deleteFiles([`group-${groupId}-gitlab-orgs.json`]);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 20000);
   it('Generates orgs data as expected for Bitbucket Server', (done) => {
     const groupId = 'hello';
@@ -95,14 +101,18 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
         deleteFiles([`group-${groupId}-bitbucket-server-orgs.json`]);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 20000);
   it('Shows error when missing groupId', (done) => {
     exec(`node ${main} orgs:data --source=github`, (err, stdout) => {
       expect(err).toMatchSnapshot();
       expect(stdout).toEqual('');
+    }).on('exit', (code) => {
+      expect(code).toEqual(1);
       done();
     });
   });

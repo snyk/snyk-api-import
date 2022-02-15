@@ -21,6 +21,8 @@ describe('`snyk-api-import list:imported <...>`', () => {
       }
       expect(err).toBeNull();
       expect(stdout.trim()).toMatchSnapshot();
+    }).on('exit', (code) => {
+      expect(code).toEqual(0);
       done();
     });
   });
@@ -49,9 +51,11 @@ describe('`snyk-api-import list:imported <...>`', () => {
           )}`,
         );
         deleteFiles([path.resolve(__dirname, IMPORT_LOG_NAME)]);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 20000);
 
   it('Generates Snyk imported targets data as expected for all integrations by default for an Org', (done) => {
@@ -78,9 +82,11 @@ describe('`snyk-api-import list:imported <...>`', () => {
           )}`,
         );
         deleteFiles([path.resolve(__dirname, IMPORT_LOG_NAME)]);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 10000);
 
   it('Generates Snyk imported targets data as expected for multiple integrations for an Org', (done) => {
@@ -107,9 +113,11 @@ describe('`snyk-api-import list:imported <...>`', () => {
           )}`,
         );
         deleteFiles([path.resolve(__dirname, IMPORT_LOG_NAME)]);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 10000);
 
   it('Generates Snyk imported targets data as expected for an Org', (done) => {
@@ -136,9 +144,11 @@ describe('`snyk-api-import list:imported <...>`', () => {
           )}`,
         );
         deleteFiles([path.resolve(__dirname, IMPORT_LOG_NAME)]);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 10000);
   it('Shows error when missing groupId & orgId', (done) => {
     exec(
@@ -157,9 +167,11 @@ describe('`snyk-api-import list:imported <...>`', () => {
         );
         expect(err).toBe(null);
         expect(stdout).toEqual('');
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   });
   it('Shows error when missing groupId & orgId', (done) => {
     exec(
@@ -178,8 +190,10 @@ describe('`snyk-api-import list:imported <...>`', () => {
         );
         expect(err).toBe(null);
         expect(stdout).toEqual('');
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   });
 });
