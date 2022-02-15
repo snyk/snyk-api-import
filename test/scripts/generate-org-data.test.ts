@@ -228,3 +228,92 @@ describe('generateOrgImportDataFile Gitlab script', () => {
     ).rejects.toThrow('401 (Unauthorized)');
   });
 });
+
+describe('generateOrgImportDataFile Bitbucket Cloud script', () => {
+  const OLD_ENV = process.env;
+  process.env.SNYK_LOG_PATH = __dirname;
+  const filesToCleanup: string[] = [
+    __dirname + '/group-groupIdExample-bitbucket-cloud-orgs.json',
+  ];
+  afterAll(async () => {
+    process.env = { ...OLD_ENV };
+  });
+
+  afterEach(async () => {
+    await deleteFiles(filesToCleanup);
+  });
+
+  it('generate Bitbucket Cloud Orgs data', async () => {
+    process.env.BITBUCKET_CLOUD_USERNAME = process.env.BBC_USERNAME;
+    process.env.BITBUCKET_CLOUD_PASSWORD = process.env.BBC_PASSWORD;
+
+    const groupId = 'groupIdExample';
+    const res = await generateOrgImportDataFile(
+      SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD,
+      groupId,
+      undefined,
+    );
+    expect(res.fileName).toEqual('group-groupIdExample-bitbucket-cloud-orgs.json');
+    expect(res.orgs.length > 0).toBeTruthy();
+    expect(res.skippedEmptyOrgs).toHaveLength(0);
+    expect(res.orgs[0]).toEqual({
+      name: expect.any(String),
+      groupId,
+    });
+  }, 160000);
+
+  it('generate Bitbucket cloud Orgs data and skips empty orgs', async () => {
+    process.env.BITBUCKET_CLOUD_USERNAME = process.env.BBC_USERNAME;
+    process.env.BITBUCKET_CLOUD_PASSWORD = process.env.BBC_PASSWORD;
+
+    const groupId = 'groupIdExample';
+    const sourceOrgId = 'sourceOrgIdExample';
+
+    const res = await generateOrgImportDataFile(
+      SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD,
+      groupId,
+      sourceOrgId,
+      undefined,
+      true,
+    );
+    expect(res.fileName).toEqual('group-groupIdExample-bitbucket-cloud-orgs.json');
+    expect(res.orgs.length > 0).toBeTruthy();
+    expect(res.skippedEmptyOrgs.length).toBeGreaterThanOrEqual(0);
+    expect(res.orgs[0]).toEqual({
+      name: expect.any(String),
+      groupId,
+      sourceOrgId,
+    });
+  }, 10000);
+  it('generate Bitbucket cloud Orgs data without sourceOrgId', async () => {
+    process.env.BITBUCKET_CLOUD_USERNAME = process.env.BBC_USERNAME;
+    process.env.BITBUCKET_CLOUD_PASSWORD = process.env.BBC_PASSWORD;
+
+    const groupId = 'groupIdExample';
+
+    const res = await generateOrgImportDataFile(
+      SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD,
+      groupId,
+      undefined,
+    );
+    expect(res.fileName).toEqual('group-groupIdExample-bitbucket-cloud-orgs.json');
+    expect(res.orgs.length > 0).toBeTruthy();
+    expect(res.skippedEmptyOrgs).toHaveLength(0);
+    expect(res.orgs[0]).toEqual({
+      name: expect.any(String),
+      groupId,
+    });
+  });
+
+  it('Bitbucket cloud script to fail on bad credentials', async () => {
+    process.env.BITBUCKET_CLOUD_USERNAME = process.env.BBC_USERNAME;
+    process.env.BITBUCKET_CLOUD_PASSWORD = 'wrong_password';
+    jest.useFakeTimers()
+    const groupId = 'groupIdExample';
+
+    expect(generateOrgImportDataFile(
+      SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD,
+      groupId,
+    )).rejects.toThrow();
+  });
+});

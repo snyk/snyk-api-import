@@ -88,6 +88,7 @@ export enum SupportedIntegrationTypesImportOrgData {
   GHE = 'github-enterprise',
   GITLAB = 'gitlab',
   BITBUCKET_SERVER = 'bitbucket-server',
+  BITBUCKET_CLOUD = 'bitbucket-cloud',
 }
 
 // used to generate imported targets that exist in Snyk

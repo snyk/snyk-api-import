@@ -26,9 +26,10 @@ Options:
   --skipEmptyOrgs      Skip any organizations that do not any targets. (e.g.
                        Github Organization does not have any repos)
   --source             The source of the targets to be imported e.g. Github,
-                       Github Enterprise, Gitlab, Bitbucket Server
+                       Github Enterprise, Gitlab, Bitbucket Server, Bitbucket
+                       Cloud
                    [required] [choices: "github", "github-enterprise", "gitlab",
-                                         "bitbucket-server"] [default: "github"]
+                      "bitbucket-server", "bitbucket-cloud"] [default: "github"]
 
 Missing required argument: groupId
 ]
@@ -53,7 +54,8 @@ Options:
   --skipEmptyOrgs      Skip any organizations that do not any targets. (e.g.
                        Github Organization does not have any repos)
   --source             The source of the targets to be imported e.g. Github,
-                       Github Enterprise, Gitlab, Bitbucket Server
+                       Github Enterprise, Gitlab, Bitbucket Server, Bitbucket
+                       Cloud
                    [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\",
-                                         \\"bitbucket-server\\"] [default: \\"github\\"]"
+                      \\"bitbucket-server\\", \\"bitbucket-cloud\\"] [default: \\"github\\"]"
 `;
