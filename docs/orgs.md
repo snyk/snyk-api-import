@@ -4,7 +4,7 @@
 - Generating the data to create Organizations in Snyk
   - [Github](#githubcom--github-enterprise)
   - [Gitlab](#gitlabcom--hosted-gitlab)
-  - [Bitbucket-Server](#bitbucket-server)
+  - [Bitbucket Server](#bitbucket-server)
 - [Creating the organizations](#creating-organizations-in-snyk-1)
   - [via the API](#via-api)
   - [via the `orgs:create` util](#via-orgscreate-util)
@@ -56,7 +56,7 @@ This will create the organization data in a file `group-<snyk_group_id>-gitlab-o
 ## Bitbucket Server
 1. set the [Bitbucket Server access token](https://www.jetbrains.com/help/youtrack/standalone/integration-with-bitbucket-server.html#enable-youtrack-integration-bbserver) as an environment variable: `export BITBUCKET_SERVER_TOKEN=your_personal_access_token`
 2. Run the command to generate organization data:
- - `snyk-api-import orgs:data --source=bitbucket-server --groupId=<snyk_group_id> -- sourceUrl=https://bitbucket-server.custom.com`
+ - `snyk-api-import orgs:data --source=bitbucket-server --groupId=<snyk_group_id> --sourceUrl=https://bitbucket-server.custom.com`
 
 This will create the organization data in a file `group-<snyk_group_id>-bitbucket-server-orgs.json`
 
