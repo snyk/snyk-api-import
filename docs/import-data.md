@@ -6,8 +6,9 @@ This is a util that can help generate the import json data needed by the import 
 - Usage
   - [Github](#githubcom--github-enterprise)
   - [Gitlab](#gitlabcom--hosted-gitlab)
-  - [Azure-Repos](#devazurecom--hosted-azure)
-  - [Bitbucket-Server](#bitbucket-server)
+  - [Azure Repos](#devazurecom--hosted-azure)
+  - [Bitbucket Server](#bitbucket-server)
+  - [Bitbucket Cloud](#bitbucket-cloud)
 - [Recommendations](#recommendations)
 
 
@@ -128,6 +129,39 @@ This is a util that can help generate the import json data needed by the import 
  - **Bitbucket Server:** `DEBUG=snyk* BITBUCKET_SERVER_TOKEN=*** SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=bitbucket-server --integrationType=bitbucket-server --sourceUrl=https://bitbucket-server.dev.example.com`
 
 4. Use the generated data to feed into [import] command (/import.md) to generate kick off the import.
+
+
+## Bitbucket Cloud
+*Please note that this tool uses Bitbucket Cloud API version 2.0*
+1. Set the username and password credentials for your Bitbucket Cloud as environment variables:
+```
+export BITBUCKET_CLOUD_USERNAME=your_bitbucket_cloud_username
+export BITBUCKET_CLOUD_PASSWORD=your_bitbucket_cloud_password
+```
+2. You will need to have the organizations data in json as an input to this command to help map Snyk organization IDs and Integration Ids that must be used during import against individual targets to be imported. The following format is required:
+  ```
+  {
+    "orgData": [
+      {
+        "name": "<workspace_name_in_bitbucket_cloud_used_to_list_repos>",
+        "orgId": "<snyk_org_id>",
+        "integrations": {
+          "bitbucket-cloud": "<snyk_org_integration_id>",
+        },
+      },
+      {...}
+    ]
+  }
+  ```
+  Note: the "name" of the Bitbucket Cloud workspace is required in order to list all repos belonging to that workspace via Bibucket Cloud API, the Snyk specific data accompanying that workspace name will be used as the information to generate import data assuming all repos in that workspace will be imported into a given Snyk organization. This is opinionated! If you want to customize this please manually craft the import data described in [import.md](/docs/import.md)
+  - Bitbucket Cloud workspaces can be listed using the [/workspaces API](https://bitbucket.org/api/2.0/workspaces)
+  - Integrations can be listed via [Snyk Integrations API](https://snyk.docs.apiary.io/#reference/integrations/integrations/list)
+  - All organization IDs can be found by listing all organizations a group admin belongs to via [Snyk Organizations API](https://snyk.docs.apiary.io/#reference/groups/list-all-organizations-in-a-group/list-all-organizations-in-a-group)
+
+3. Run the command to generate import data:
+ - **Bitbucket Cloud:** `DEBUG=snyk* BITBUCKET_CLOUD_USERNAME=*** BITBUCKET_CLOUD_PASSWORD=*** SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=bitbucket-cloud --integrationType=bitbucket-cloud`
+
+4. Use the generated data to feed into [import command](/import.md) to generate kick off the import.
 
 
 ## Recommendations

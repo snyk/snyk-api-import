@@ -54,6 +54,7 @@ This will create the organization data in a file `group-<snyk_group_id>-gitlab-o
 
 
 ## Bitbucket Server
+**Please note that Bitbucket Server is a hosted environment and you must provide the custom URL for your Bitbucket Server instance in the command**
 1. set the [Bitbucket Server access token](https://www.jetbrains.com/help/youtrack/standalone/integration-with-bitbucket-server.html#enable-youtrack-integration-bbserver) as an environment variable: `export BITBUCKET_SERVER_TOKEN=your_personal_access_token`
 2. Run the command to generate organization data:
  - `snyk-api-import orgs:data --source=bitbucket-server --groupId=<snyk_group_id> --sourceUrl=https://bitbucket-server.custom.com`
