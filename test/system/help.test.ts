@@ -18,6 +18,8 @@ describe('`snyk-api-import help <...>`', () => {
       expect(err).toBeNull();
       expect(stderr).toEqual('');
       expect(stdout.trim()).toMatchSnapshot();
+    }).on('exit', (code) => {
+      expect(code).toEqual(0);
       done();
     });
   });
