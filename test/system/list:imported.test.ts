@@ -25,7 +25,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
       expect(code).toEqual(0);
       done();
     });
-  });
+  }, 20000);
 
   it('Generates Snyk imported targets data as expected for github + Group', (done) => {
     exec(
@@ -172,7 +172,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
       expect(code).toEqual(0);
       done();
     });
-  });
+  }, 20000);
   it('Shows error when missing groupId & orgId', (done) => {
     exec(
       `node ${main} list:imported --integrationType=github --orgId=foo --groupId=bar`,
@@ -195,5 +195,5 @@ describe('`snyk-api-import list:imported <...>`', () => {
       expect(code).toEqual(0);
       done();
     });
-  });
+  }, 20000);
 });

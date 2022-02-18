@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
-import { sep } from 'path';
+import * as path from 'path';
 import { deleteFiles } from '../delete-files';
-const main = './dist/index.js'.replace(/\//g, sep);
+const main = './dist/index.js'.replace(/\//g, path.sep);
 
 describe('`snyk-api-import orgs:data <...>`', () => {
   const OLD_ENV = process.env;
@@ -50,7 +50,9 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
-        deleteFiles([`group-${groupId}-github-com-orgs.json`]);
+        deleteFiles([
+          path.resolve(__dirname, `group-${groupId}-github-com-orgs.json`),
+        ]);
       },
     ).on('exit', (code) => {
       expect(code).toEqual(0);
@@ -75,7 +77,9 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
-        deleteFiles([`group-${groupId}-gitlab-orgs.json`]);
+        deleteFiles([
+          path.resolve(__dirname, `group-${groupId}-gitlab-orgs.json`),
+        ]);
       },
     ).on('exit', (code) => {
       expect(code).toEqual(0);
@@ -100,7 +104,12 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
-        deleteFiles([`group-${groupId}-bitbucket-server-orgs.json`]);
+        deleteFiles([
+          path.resolve(
+            __dirname,
+            `group-${groupId}-bitbucket-server-orgs.json`,
+          ),
+        ]);
       },
     ).on('exit', (code) => {
       expect(code).toEqual(0);
