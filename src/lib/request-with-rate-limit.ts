@@ -23,6 +23,7 @@ export async function limiterWithRateLimitRetries<ResponseType>(
   };
   const maxRetries = 7;
   let attempt = 0;
+  const encodedUrl = encodeURI(url);
   limiter.on('failed', async (error, jobInfo) => {
     const id = jobInfo.options.id;
     debug(`Job ${id} failed: ${error}`);
@@ -34,7 +35,7 @@ export async function limiterWithRateLimitRetries<ResponseType>(
   });
   while (attempt < maxRetries) {
     data = (await limiter.schedule(() =>
-      needle(verb, url, { headers: headers }),
+      needle(verb, encodedUrl, { headers: headers }),
     )) as {
       statusCode: number;
       body: ResponseType;
