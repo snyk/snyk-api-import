@@ -29,7 +29,7 @@ export async function handler(argv: {
   file: string;
   includeExistingOrgsInOutput: boolean;
   noDuplicateNames?: boolean;
-}): Promise<void> {
+}): Promise< string | undefined > {
   try {
     getLoggingPath();
     const { file, noDuplicateNames, includeExistingOrgsInOutput } = argv;
@@ -45,6 +45,8 @@ export async function handler(argv: {
         : `⚠ No organization(s) created!`;
 
     console.log(orgsMessage);
+
+    return res.fileName
   } catch (e) {
     debug('Failed to create organizations.\n' + e);
     console.error(
