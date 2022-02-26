@@ -116,13 +116,16 @@ export async function generateSnykImportedTargets(
     ? await getAllOrgs(requestManager, groupId)
     : [{ id: orgId! }];
   const failedOrgs: SnykOrg[] = [];
+  const projectFilters = {
+    origin: integrationTypes.length > 1 ? undefined : integrationTypes[0]
+  }
   await pMap(
     groupOrgs,
     async (org: SnykOrg) => {
       const { id: orgId, name, slug } = org;
       try {
         const [resProjects, resIntegrations] = await Promise.all([
-          listProjects(requestManager, orgId),
+          listProjects(requestManager, orgId, projectFilters),
           listIntegrations(requestManager, orgId),
         ]);
         const { projects } = resProjects;

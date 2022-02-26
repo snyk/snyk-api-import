@@ -1,4 +1,4 @@
-import { generateTargetId } from '../src/generate-target-id';
+import { generateTargetId } from '../../src/generate-target-id';
 
 describe('generateTargetId', () => {
   it('correctly generates Gitlab target ID', () => {

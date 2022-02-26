@@ -22,7 +22,7 @@ export const builder = {
       'Public id of the organization in Snyk (available in organization settings)',
   },
   integrationType: {
-    required: true,
+    required: true, // TODO: allow to not set any type to return all
     default: [...Object.values(SupportedIntegrationTypesToListSnykTargets)],
     choices: [...Object.values(SupportedIntegrationTypesToListSnykTargets)],
     desc:
