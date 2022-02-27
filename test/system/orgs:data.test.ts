@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
-import { sep } from 'path';
+import * as path from 'path';
 import { deleteFiles } from '../delete-files';
-const main = './dist/index.js'.replace(/\//g, sep);
+const main = './dist/index.js'.replace(/\//g, path.sep);
 
 describe('`snyk-api-import orgs:data <...>`', () => {
   const OLD_ENV = process.env;
@@ -25,9 +25,11 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   });
 
   it('Generates orgs data as expected', (done) => {
@@ -48,10 +50,14 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
-        deleteFiles([`group-${groupId}-github-com-orgs.json`]);
-        done();
+        deleteFiles([
+          path.resolve(__dirname, `group-${groupId}-github-com-orgs.json`),
+        ]);
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 20000);
   it('Generates orgs data as expected for Gitlab', (done) => {
     const groupId = 'hello';
@@ -71,10 +77,14 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
-        deleteFiles([`group-${groupId}-gitlab-orgs.json`]);
-        done();
+        deleteFiles([
+          path.resolve(__dirname, `group-${groupId}-gitlab-orgs.json`),
+        ]);
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 20000);
   it('Generates orgs data as expected for Bitbucket Server', (done) => {
     const groupId = 'hello';
@@ -94,15 +104,24 @@ describe('`snyk-api-import orgs:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout.trim()).toMatchSnapshot();
-        deleteFiles([`group-${groupId}-bitbucket-server-orgs.json`]);
-        done();
+        deleteFiles([
+          path.resolve(
+            __dirname,
+            `group-${groupId}-bitbucket-server-orgs.json`,
+          ),
+        ]);
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 20000);
   it('Shows error when missing groupId', (done) => {
     exec(`node ${main} orgs:data --source=github`, (err, stdout) => {
       expect(err).toMatchSnapshot();
       expect(stdout).toEqual('');
+    }).on('exit', (code) => {
+      expect(code).toEqual(1);
       done();
     });
   });

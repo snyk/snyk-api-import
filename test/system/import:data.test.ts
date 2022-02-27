@@ -1,4 +1,5 @@
 import { exec } from 'child_process';
+
 import { sep, join } from 'path';
 import { deleteFiles } from '../delete-files';
 const main = './dist/index.js'.replace(/\//g, sep);
@@ -25,9 +26,11 @@ describe('`snyk-api-import import:data <...>`', () => {
         expect(err).toBeNull();
         expect(stderr).toEqual('');
         expect(stdout.trim()).toMatchSnapshot();
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   });
 
   it('Generates repo data as expected for Gitlab', (done) => {
@@ -49,9 +52,11 @@ describe('`snyk-api-import import:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(stdout.trim()).toMatch('Written the data to file');
         deleteFiles([join(__dirname, 'gitlab-import-targets.json')]);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 200000);
   it('Generates repo data as expected for Bitbucket Server', (done) => {
     const orgDataFile =
@@ -73,9 +78,11 @@ describe('`snyk-api-import import:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(stdout.trim()).toMatch('Written the data to file');
         deleteFiles([join(__dirname, 'bitbucket-server-import-targets.json')]);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 50000);
   it('Generates repo data as expected for Bitbucket Cloud', (done) => {
     const orgDataFile =
@@ -98,15 +105,19 @@ describe('`snyk-api-import import:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(stdout.trim()).toMatch('Written the data to file');
         deleteFiles([join(__dirname, 'bitbucket-cloud-import-targets.json')]);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 50000);
   it('Shows error when missing source type', (done) => {
     exec(`node ${main} import:data --source=github`, (err, stdout, stderr) => {
       expect(err).toMatchSnapshot();
       expect(stderr).toMatchSnapshot();
       expect(stdout).toEqual('');
+    }).on('exit', (code) => {
+      expect(code).toEqual(1);
       done();
     });
   });

@@ -45,9 +45,11 @@ describe('`snyk-api-import import`', () => {
         expect(stdout.trim()).toMatch(`project(s)
 Processed 1 out of a total of 1 targets
 Check the logs for any failures located at:`);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 240000);
   it('`import` command triggers the API import', (done) => {
     const testRoot = __dirname + '/fixtures';
@@ -78,8 +80,10 @@ Check the logs for any failures located at:`);
         expect(stdout.trim()).toMatch(`project(s)
 Processed 1 out of a total of 1 targets
 Check the logs for any failures located at:`);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 500000);
 });
