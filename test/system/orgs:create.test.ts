@@ -19,11 +19,9 @@ describe('`snyk-api-import help <...>`', () => {
       }
       expect(err).toBeNull();
       expect(stdout.trim()).toMatchSnapshot();
-    }).on('exit', (code) => {
-      expect(code).toEqual(0);
       done();
     });
-  }, 10000);
+  });
   it('Fails to create an org as expected for non existing group ID `abc`', (done) => {
     const pathToBadJson = path.resolve(
       __dirname + '/fixtures/create-orgs/fails-to-create/1-org.json',
@@ -57,12 +55,10 @@ describe('`snyk-api-import help <...>`', () => {
         );
         expect(file).toContain('Please provide the group public id');
         deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
+        done();
       },
-    ).on('exit', (code) => {
-      expect(code).toEqual(0);
-      done();
-    });
-  }, 10000);
+    );
+  }, 400000);
 
   it('Fails to create an org as expected for non existing group ID `abc` file not in the same location as logs', (done) => {
     const pathToBadJson = path.resolve(
@@ -97,12 +93,10 @@ describe('`snyk-api-import help <...>`', () => {
         );
         expect(file).toContain('Please provide the group public id');
         deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
+        done();
       },
-    ).on('exit', (code) => {
-      expect(code).toEqual(0);
-      done();
-    });
-  }, 10000);
+    );
+  }, 400000);
 
   it('Fails to create orgs in --noDuplicateNames mode when org already exists ', (done) => {
     const pathToBadJson = path.resolve(
@@ -139,10 +133,8 @@ describe('`snyk-api-import help <...>`', () => {
         deleteFiles([
           path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`),
         ]);
+        done();
       },
-    ).on('exit', (code) => {
-      expect(code).toEqual(0);
-      done();
-    });
-  }, 10000);
+    );
+  }, 20000);
 });
