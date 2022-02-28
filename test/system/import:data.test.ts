@@ -113,8 +113,8 @@ describe('`snyk-api-import import:data <...>`', () => {
   }, 50000);
   it('Shows error when missing source type', (done) => {
     exec(`node ${main} import:data --source=github`, (err, stdout, stderr) => {
-      expect(err).toMatchSnapshot();
-      expect(stderr).toMatchSnapshot();
+      expect(err!.message).toMatch(`Missing required arguments: orgsData, integrationType`);
+      expect(stderr).toMatch(`Missing required arguments: orgsData, integrationType`);
       expect(stdout).toEqual('');
     }).on('exit', (code) => {
       expect(code).toEqual(1);

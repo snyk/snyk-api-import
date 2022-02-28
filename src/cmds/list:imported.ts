@@ -1,5 +1,6 @@
 import * as debugLib from 'debug';
 import * as _ from 'lodash';
+import * as yargs from 'yargs';
 import { getLoggingPath } from '../lib/get-logging-path';
 import { SupportedIntegrationTypesToListSnykTargets } from '../lib/types';
 const debug = debugLib('snyk:generate-data-script');
@@ -88,9 +89,10 @@ export async function handler(argv: {
     }
     console.log(targetsMessage);
   } catch (e) {
+    const errorMessage = `ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`;
+
     debug('Failed to list all imported targets in Snyk.\n' + e);
-    console.error(
-      `ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`,
-    );
+    console.error(errorMessage);
+    yargs.exit(1, new Error(errorMessage));
   }
 }

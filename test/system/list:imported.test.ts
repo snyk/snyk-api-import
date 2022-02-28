@@ -20,7 +20,32 @@ describe('`snyk-api-import list:imported <...>`', () => {
         throw err;
       }
       expect(err).toBeNull();
-      expect(stdout.trim()).toMatchSnapshot();
+      expect(stdout).toMatchInlineSnapshot(`
+        "index.js list:imported
+
+        List all targets imported in Snyk for a given group & source type. An analysis
+        is performed on all current organizations and their projects to generate this.
+        The generated file can be used to skip previously imported targets when running
+        the \`import\` command
+
+        Options:
+          --version          Show version number                               [boolean]
+          --help             Show help                                         [boolean]
+          --groupId          Public id of the group in Snyk (available on group
+                             settings)
+          --orgId            Public id of the organization in Snyk (available in
+                             organization settings)
+          --integrationType  The configured integration type (source of the projects in
+                             Snyk e.g. Github, Github Enterprise.). This will be used to
+                             pick the correct integrationID from each org in Snyk E.g.
+                             --integrationType=github
+                             --integrationType=github-enterprise
+           [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\", \\"gcr\\",
+                    \\"docker-hub\\", \\"gitlab\\", \\"azure-repos\\", \\"bitbucket-server\\"] [default:
+          [\\"github\\",\\"github-enterprise\\",\\"bitbucket-cloud\\",\\"gcr\\",\\"docker-hub\\",\\"gitlab\\",\\"a
+                                                        zure-repos\\",\\"bitbucket-server\\"]]
+        "
+      `);
     }).on('exit', (code) => {
       expect(code).toEqual(0);
       done();
@@ -162,18 +187,26 @@ describe('`snyk-api-import list:imported <...>`', () => {
         },
       },
       (err, stdout, stderr) => {
-        expect(stderr).toMatch(
-          'Missing required parameters: orgId or groupId must be provided.',
-        );
-        expect(err).toBe(null);
+        expect(stderr).toMatchInlineSnapshot(`
+          "ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.
+          ERROR: Missing required parameters: orgId or groupId must be provided.
+          "
+        `);
+        expect(err).toMatchInlineSnapshot(`
+          [Error: Command failed: node ./dist/index.js list:imported --integrationType=github
+          ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.
+          ERROR: Missing required parameters: orgId or groupId must be provided.
+          ]
+        `);
+
         expect(stdout).toEqual('');
       },
     ).on('exit', (code) => {
-      expect(code).toEqual(0);
+      expect(code).toEqual(1);
       done();
     });
   }, 20000);
-  it('Shows error when missing groupId & orgId', (done) => {
+  it('Shows error when both groupId & orgId provided', (done) => {
     exec(
       `node ${main} list:imported --integrationType=github --orgId=foo --groupId=bar`,
       {
@@ -185,14 +218,21 @@ describe('`snyk-api-import list:imported <...>`', () => {
         },
       },
       (err, stdout, stderr) => {
-        expect(stderr).toMatch(
-          'Too many parameters: orgId or groupId must be provided, not both',
-        );
-        expect(err).toBe(null);
+        expect(stderr).toMatchInlineSnapshot(`
+"ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.
+ERROR: Too many parameters: orgId or groupId must be provided, not both.
+"
+`);
+        expect(err).toMatchInlineSnapshot(`
+[Error: Command failed: node ./dist/index.js list:imported --integrationType=github --orgId=foo --groupId=bar
+ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.
+ERROR: Too many parameters: orgId or groupId must be provided, not both.
+]
+`);
         expect(stdout).toEqual('');
       },
     ).on('exit', (code) => {
-      expect(code).toEqual(0);
+      expect(code).toEqual(1);
       done();
     });
   }, 20000);
