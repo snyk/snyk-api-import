@@ -22,5 +22,5 @@ describe('`snyk-api-import help <...>`', () => {
       expect(code).toEqual(0);
       done();
     });
-  });
+  }, 10000);
 });
