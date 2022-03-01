@@ -86,4 +86,36 @@ Check the logs for any failures located at:`);
       done();
     });
   }, 500000);
+
+  it('`import` command fails when missing import file', (done) => {
+    const testRoot = __dirname + '/fixtures';
+    const logFiles = generateLogsPaths(testRoot, ORG_ID);
+    logs = Object.values(logFiles);
+    const logPath = path.resolve(testRoot);
+
+    exec(
+      `node ${main} import --file=non-existent.json`,
+      {
+        env: {
+          PATH: process.env.PATH,
+          SNYK_TOKEN: process.env.SNYK_TOKEN_TEST,
+          SNYK_API: process.env.SNYK_API_TEST,
+          SNYK_LOG_PATH: logPath,
+          ORG_ID: process.env.TEST_ORG_ID,
+        },
+      },
+      (err, stdout, stderr) => {
+        expect(err!.message).toMatch(
+          'ERROR! Failed to kick off import with error: Could not find the import file, locations tried:',
+        );
+        expect(stderr).toMatch(
+          'ERROR! Failed to kick off import with error: Could not find the import file, locations tried:',
+        );
+        expect(stdout).toEqual('');
+      },
+    ).on('exit', (code) => {
+      expect(code).toEqual(1);
+      done();
+    });
+  }, 500000);
 });

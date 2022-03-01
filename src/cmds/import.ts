@@ -1,5 +1,6 @@
 import * as debugLib from 'debug';
 import * as _ from 'lodash';
+import * as yargs from 'yargs';
 
 const debug = debugLib('snyk:import-projects-script');
 
@@ -50,10 +51,9 @@ export async function handler(argv: { file: string }): Promise<void> {
         `\nCheck the logs for any failures located at: ${logsPath}/*`,
     );
   } catch (e) {
+    const errorMessage = `ERROR! Failed to kick off import with error: ${e.message}\n Try running with \`DEBUG=snyk* snyk-import\` for more information`;
     debug('Failed to kick off import.\n' + e);
-    console.error(
-      `ERROR! Failed to kick off import with error:
-      ${e.message}\n Try running with \`DEBUG=snyk* snyk-import\` for more information`,
-    );
+    console.error(errorMessage);
+    yargs.exit(1, new Error(errorMessage));
   }
 }
