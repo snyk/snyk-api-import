@@ -4,6 +4,7 @@ import * as debugLib from 'debug';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
 import { SnykProject } from '../../types';
+import { StringNullableChain } from 'lodash';
 
 const debug = debugLib('snyk:api-group');
 
@@ -141,9 +142,17 @@ interface ProjectsResponse {
   projects: SnykProject[];
 }
 
+interface ProjectsFilters {
+  name?: StringNullableChain; // If supplied, only projects that have a name that starts with this value will be returned
+  origin?: string; //If supplied, only projects that exactly match this origin will be returned
+  type?: string; //If supplied, only projects that exactly match this type will be returned
+  isMonitored?: boolean; // If set to true, only include projects which are monitored, if set to false, only include projects which are not monitored
+}
+
 export async function listProjects(
   requestManager: requestsManager,
   orgId: string,
+  filters?: ProjectsFilters,
 ): Promise<ProjectsResponse> {
   getApiToken();
   getSnykHost();
@@ -156,7 +165,6 @@ export async function listProjects(
     );
   }
 
-  const filters = {};
   try {
     const res = await requestManager.request({
       verb: 'post',
