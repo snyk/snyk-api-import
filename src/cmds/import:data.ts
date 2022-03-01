@@ -1,4 +1,5 @@
 import * as debugLib from 'debug';
+import * as yargs from 'yargs';
 import { getLoggingPath } from '../lib/get-logging-path';
 const debug = debugLib('snyk:generate-data-script');
 
@@ -88,9 +89,10 @@ export async function handler(argv: {
 
     console.log(targetsMessage);
   } catch (e) {
+    const errorMessage = `ERROR! Failed to generate data. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e}`;
     debug('Failed to generate data.\n' + e);
-    console.error(
-      `ERROR! Failed to generate data. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e}`,
-    );
+
+    console.error(errorMessage);
+    yargs.exit(1, new Error(errorMessage));
   }
 }
