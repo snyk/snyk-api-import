@@ -25,7 +25,31 @@ describe('`snyk-api-import import:data <...>`', () => {
         }
         expect(err).toBeNull();
         expect(stderr).toEqual('');
-        expect(stdout.trim()).toMatchSnapshot();
+        expect(stdout.trim()).toMatchInlineSnapshot(`
+          "index.js import:data
+
+          Generate data required for targets to be imported via API to create Snyk
+          projects.
+
+
+          Options:
+            --version          Show version number                               [boolean]
+            --help             Show help                                         [boolean]
+            --orgsData         Path to organizations data file generated with
+                               \\"orgs:create\\" command                            [required]
+            --source           The source of the targets to be imported e.g. Github,
+                               Github Enterprise, Gitlab, Azure. This will be used to make
+                               an API call to list all available entities per org
+              [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\", \\"azure-repos\\",
+                                \\"bitbucket-server\\", \\"bitbucket-cloud\\"] [default: \\"github\\"]
+            --sourceUrl        Custom base url for the source API that can list
+                               organizations (e.g. Github Enterprise url)
+            --integrationType  The configured integration type on the created Snyk Org to
+                               use for generating import targets data. Applies to all
+                               targets.
+              [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\", \\"azure-repos\\",
+                                                    \\"bitbucket-server\\", \\"bitbucket-cloud\\"]"
+        `);
       },
     ).on('exit', (code) => {
       expect(code).toEqual(0);
@@ -113,8 +137,12 @@ describe('`snyk-api-import import:data <...>`', () => {
   }, 50000);
   it('Shows error when missing source type', (done) => {
     exec(`node ${main} import:data --source=github`, (err, stdout, stderr) => {
-      expect(err!.message).toMatch(`Missing required arguments: orgsData, integrationType`);
-      expect(stderr).toMatch(`Missing required arguments: orgsData, integrationType`);
+      expect(err!.message).toMatch(
+        `Missing required arguments: orgsData, integrationType`,
+      );
+      expect(stderr).toMatch(
+        `Missing required arguments: orgsData, integrationType`,
+      );
       expect(stdout).toEqual('');
     }).on('exit', (code) => {
       expect(code).toEqual(1);
