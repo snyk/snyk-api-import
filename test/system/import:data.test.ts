@@ -113,10 +113,40 @@ describe('`snyk-api-import import:data <...>`', () => {
   }, 50000);
   it('Shows error when missing source type', (done) => {
     exec(`node ${main} import:data --source=github`, (err, stdout, stderr) => {
-      expect(err!.message).toMatch(`Missing required arguments: orgsData, integrationType`);
-      expect(stderr).toMatch(`Missing required arguments: orgsData, integrationType`);
+      expect(err!.message).toMatch(
+        `Missing required arguments: orgsData, integrationType`,
+      );
+      expect(stderr).toMatch(
+        `Missing required arguments: orgsData, integrationType`,
+      );
       expect(stdout).toEqual('');
     }).on('exit', (code) => {
+      expect(code).toEqual(1);
+      done();
+    });
+  });
+
+  it('Shows error when missing sourceUrl for gitlab (we try gitlab.com by default)', (done) => {
+    const orgDataFile = 'test/system/fixtures/org-data/orgs.json';
+    exec(
+      `node ${main} import:data --source=gitlab --integrationType=gitlab --orgsData=${orgDataFile}`,
+      {
+        env: {
+          PATH: process.env.PATH,
+          GITLAB_TOKEN: process.env.TEST_GITLAB_TOKEN,
+          SNYK_LOG_PATH: __dirname,
+        },
+      },
+      (err, stdout, stderr) => {
+        expect(err!.message).toMatch(
+          `No targets could be generated. Check the error output & try again.`,
+        );
+        expect(stderr).toMatch(
+          `No targets could be generated. Check the error output & try again`,
+        );
+        expect(stdout).toEqual('');
+      },
+    ).on('exit', (code) => {
       expect(code).toEqual(1);
       done();
     });

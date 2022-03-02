@@ -77,7 +77,7 @@ export async function handler(argv: {
   } catch (e) {
     debug('Failed to generate data.\n' + e);
     console.error(
-      `ERROR! Failed to generate data. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e}`,
+      `ERROR! Failed to generate data. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`,
     );
   }
 }
