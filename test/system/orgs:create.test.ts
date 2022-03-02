@@ -18,7 +18,25 @@ describe('`snyk-api-import help <...>`', () => {
         throw err;
       }
       expect(err).toBeNull();
-      expect(stdout.trim()).toMatchSnapshot();
+      expect(stdout.trim()).toMatchInlineSnapshot(`
+"index.js orgs:create
+
+Create the organizations in Snyk based on data file generated with \`orgs:data\`
+command. Output generates key data for created and existing organizations for
+use to generate project import data.
+
+Options:
+  --version                      Show version number                   [boolean]
+  --help                         Show help                             [boolean]
+  --file                         Path to data file generated with \`orgs:data\`
+                                 command                              [required]
+  --noDuplicateNames             Skip creating an organization if the given name
+                                 is already taken within the Group.
+  --includeExistingOrgsInOutput  Log existing organization information as well
+                                 as newly created                [default: true]"
+`);
+    }).on('exit', (code) => {
+      expect(code).toEqual(0);
       done();
     });
   });
@@ -53,12 +71,14 @@ describe('`snyk-api-import help <...>`', () => {
           path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`),
           'utf8',
         );
-        expect(file).toContain('Please provide the group public id');
+        expect(file).toContain('Failed to create org');
         deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
-        done();
       },
-    );
-  }, 400000);
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
+  }, 20000);
 
   it('Fails to create an org as expected for non existing group ID `abc` file not in the same location as logs', (done) => {
     const pathToBadJson = path.resolve(
@@ -91,12 +111,14 @@ describe('`snyk-api-import help <...>`', () => {
           path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`),
           'utf8',
         );
-        expect(file).toContain('Please provide the group public id');
+        expect(file).toContain('Failed to create org');
         deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
-        done();
       },
-    );
-  }, 400000);
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
+  }, 20000);
 
   it('Fails to create orgs in --noDuplicateNames mode when org already exists ', (done) => {
     const pathToBadJson = path.resolve(
@@ -133,8 +155,10 @@ describe('`snyk-api-import help <...>`', () => {
         deleteFiles([
           path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`),
         ]);
-        done();
       },
-    );
+    ).on('exit', (code) => {
+      expect(code).toEqual(0);
+      done();
+    });
   }, 20000);
 });
