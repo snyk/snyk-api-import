@@ -59,7 +59,7 @@ async function createNewOrgs(
         origName: name,
         sourceOrgId,
       });
-      logCreatedOrg(groupId, name, org, integrations, loggingPath);
+      await logCreatedOrg(groupId, name, org, integrations, loggingPath);
     } catch (e) {
       failed.push({ groupId, name, sourceOrgId });
       const errorMessage = e.data ? e.data.message : e.message;
