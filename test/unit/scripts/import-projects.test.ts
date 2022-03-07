@@ -109,4 +109,69 @@ describe('filterOutImportedTargets', () => {
     );
     expect(filteredTargets).toEqual(targets);
   });
+
+  it('filterOutImportedTargets skips Bitbucket Cloud targets with name, owner and branch as expected', async () => {
+    const targets: ImportTarget[] = [
+      {
+        orgId: 'ORG_ID',
+        integrationId: 'INTEGRATION_ID',
+        // this is how the target is written during `import:data` command
+        target: {
+          owner: 'snyk-test-scm',
+          name: 'test-spaces',
+          branch: 'master',
+        },
+        files: [{ path: 'package.json' }],
+      },
+    ];
+    const loggingPath = `${__dirname}/fixtures/bitbucket-cloud`;
+    const filteredTargets = await filterOutImportedTargets(
+      targets,
+      loggingPath,
+    );
+    expect(filteredTargets).toEqual([]);
+  });
+
+  it('filterOutImportedTargets skips Bitbucket cloud targets without owner as expected', async () => {
+    const targets: ImportTarget[] = [
+      {
+        orgId: 'ORG_ID',
+        integrationId: 'INTEGRATION_ID',
+        target: {
+          // this is how the target is written during `import:data` command
+          name: 'test-spaces',
+          branch: 'master',
+        },
+        files: [{ path: 'package.json' }],
+      },
+    ];
+    const loggingPath = `${__dirname}/fixtures/bitbucket-cloud/no-id`;
+    const filteredTargets = await filterOutImportedTargets(
+      targets,
+      loggingPath,
+    );
+    // even though the log does not contain an ID and the import target does, we match the target
+    expect(filteredTargets).toEqual([]);
+  });
+
+  it('filterOutImportedTargets returns all Bitbucket Cloud targets when no import log found', async () => {
+    const targets: ImportTarget[] = [
+      {
+        orgId: 'org-A',
+        integrationId: 'integration-A',
+        target: {
+          owner: 'snyk-test-scm',
+          name: 'test-spaces',
+          branch: 'master',
+        },
+        files: [{ path: 'package.json' }],
+      },
+    ];
+    const loggingPath = `${__dirname}/fixtures/non-existent`;
+    const filteredTargets = await filterOutImportedTargets(
+      targets,
+      loggingPath,
+    );
+    expect(filteredTargets).toEqual(targets);
+  });
 });

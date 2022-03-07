@@ -147,7 +147,66 @@ describe('Generate imported targets based on Snyk data', () => {
     expect(importedTargetsLog).toMatch(targets[0].orgId);
     expect(importedTargetsLog).toMatch(targets[0].integrationId);
   }, 240000);
+
+  it('succeeds to generate targets for Group for Bitbucket Cloud', async () => {
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
+    logs = Object.values(logFiles);
+    const {
+      targets,
+      failedOrgs,
+      fileName,
+    } = await generateSnykImportedTargets({ groupId: GROUP_ID }, [
+      SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD,
+    ]);
+    expect(failedOrgs).toEqual([]);
+    expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
+    expect(targets[0]).toMatchObject({
+      integrationId: expect.any(String),
+      orgId: expect.any(String),
+      target: {
+        name: expect.any(String),
+        owner: expect.any(String),
+        branch: expect.any(String),
+      },
+    });
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 20000));
+    const importedTargetsLog = fs.readFileSync(logFiles.importLogPath, 'utf8');
+    expect(importedTargetsLog).toMatch(targets[0].target.name as string);
+    expect(importedTargetsLog).toMatch(targets[0].orgId);
+    expect(importedTargetsLog).toMatch(targets[0].integrationId);
+  }, 240000);
+
+  it('succeeds to generate targets for Org + Bitbucket Cloud', async () => {
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
+    logs = Object.values(logFiles);
+    const {
+      targets,
+      failedOrgs,
+      fileName,
+    } = await generateSnykImportedTargets({ orgId: ORG_ID }, [
+      SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD,
+    ]);
+    expect(failedOrgs).toEqual([]);
+    expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
+    expect(targets[0]).toMatchObject({
+      integrationId: expect.any(String),
+      orgId: expect.any(String),
+      target: {
+        name: expect.any(String),
+        owner: expect.any(String),
+        branch: expect.any(String),
+      },
+    });
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 20000));
+    const importedTargetsLog = fs.readFileSync(logFiles.importLogPath, 'utf8');
+    expect(importedTargetsLog).toMatch(targets[0].target.owner as string);
+    expect(importedTargetsLog).toMatch(targets[0].orgId);
+    expect(importedTargetsLog).toMatch(targets[0].integrationId);
+  }, 240000);
 });
+
 
 describe('projectToTarget', () => {
   it('succeed to convert Github / Gitlab project name to target', async () => {
