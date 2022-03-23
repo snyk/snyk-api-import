@@ -1,4 +1,5 @@
 import * as debugLib from 'debug';
+import * as yargs from 'yargs';
 const debug = debugLib('snyk:orgs-create-script');
 
 import { getLoggingPath } from '../lib';
@@ -46,9 +47,9 @@ export async function handler(argv: {
 
     console.log(orgsMessage);
   } catch (e) {
+    const errorMessage = `ERROR! Failed to create organizations.\nTry running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`;
     debug('Failed to create organizations.\n' + e);
-    console.error(
-      `${e}.\nTry running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e}`,
-    );
+    console.error(errorMessage);
+    setTimeout(() => yargs.exit(1, new Error(errorMessage)), 3000);
   }
 }

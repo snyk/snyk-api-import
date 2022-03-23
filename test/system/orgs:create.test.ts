@@ -59,26 +59,25 @@ Options:
         },
       },
       (err, stdout, stderr) => {
-        if (err) {
-          throw err;
-        }
         expect(stderr).toMatch(
           'All requested organizations failed to be created. Review the errors in',
         );
-        expect(err).toBeNull();
-        expect(stdout).toEqual('');
-        const file = fs.readFileSync(
-          path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`),
-          'utf8',
+        expect(err!.message).toMatch(
+          'All requested organizations failed to be created. Review the errors in',
         );
-        expect(file).toContain('Failed to create org');
-        deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
+        expect(stdout).toEqual('');
       },
     ).on('exit', (code) => {
-      expect(code).toEqual(0);
+      expect(code).toEqual(1);
+      const file = fs.readFileSync(
+        path.join(logPath, `abc.${FAILED_ORG_LOG_NAME}`),
+        'utf8',
+      );
+      expect(file).toContain('Failed to create org');
+      deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
       done();
     });
-  }, 20000);
+  }, 40000);
 
   it('Fails to create an org as expected for non existing group ID `abc` file not in the same location as logs', (done) => {
     const pathToBadJson = path.resolve(
@@ -99,13 +98,12 @@ Options:
         },
       },
       (err, stdout, stderr) => {
-        if (err) {
-          throw err;
-        }
         expect(stderr).toMatch(
           'All requested organizations failed to be created. Review the errors in',
         );
-        expect(err).toBeNull();
+        expect(err!.message).toMatch(
+          'All requested organizations failed to be created. Review the errors in',
+        );
         expect(stdout).toEqual('');
         const file = fs.readFileSync(
           path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`),
@@ -115,10 +113,10 @@ Options:
         deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
       },
     ).on('exit', (code) => {
-      expect(code).toEqual(0);
+      expect(code).toEqual(1);
       done();
     });
-  }, 20000);
+  }, 40000);
 
   it('Fails to create orgs in --noDuplicateNames mode when org already exists ', (done) => {
     const pathToBadJson = path.resolve(
@@ -139,13 +137,12 @@ Options:
         },
       },
       (err, stdout, stderr) => {
-        if (err) {
-          throw err;
-        }
         expect(stderr).toMatch(
           'All requested organizations failed to be created. Review the errors in',
         );
-        expect(err).toBeNull();
+        expect(err!.message).toMatch(
+          'All requested organizations failed to be created. Review the errors in',
+        );
         expect(stdout).toEqual('');
         const file = fs.readFileSync(
           path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`),
@@ -157,8 +154,8 @@ Options:
         ]);
       },
     ).on('exit', (code) => {
-      expect(code).toEqual(0);
+      expect(code).toEqual(1);
       done();
     });
-  }, 20000);
+  }, 40000);
 });

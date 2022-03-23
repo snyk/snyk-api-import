@@ -16,7 +16,7 @@ describe('Org notification settings', () => {
   });
   afterAll(async () => {
     process.env = { ...OLD_ENV };
-  });
+  }, 1000);
   it('Can change the notification settings for org', async () => {
     const res = await setNotificationPreferences(
       requestManager,
@@ -68,7 +68,7 @@ describe('listProjects', () => {
   });
   afterAll(async () => {
     process.env = { ...OLD_ENV };
-  });
+  }, 1000);
   it('Lists projects in a given Org', async () => {
     const res = await listProjects(requestManager, ORG_ID);
     expect(res).toMatchObject({
@@ -82,5 +82,5 @@ describe('listProjects', () => {
       name: expect.any(String),
       branch: expect.any(String),
     });
-  });
+  }, 5000);
 });
