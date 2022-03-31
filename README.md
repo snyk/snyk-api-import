@@ -85,10 +85,6 @@ The logs can be explored using [Bunyan CLI](http://trentm.com/node-bunyan/bunyan
 <br/>
   <p>If your Github / Gitlab / Bitbucket / Azure is using a self signed certificate, you can configure snyk-api-import to use this certificate when calling the HTTPS APIs.</p>
   <code>export NODE_EXTRA_CA_CERTS=./path-to-ca</code>
-  <p>Some of these resources may help you bump the <b>ulimit</b>:</p>
-  <ul>
-    <li><a href="https://nodejs.org/api/cli.html#node_extra_ca_certsfile">nodejs.org</a></li>
-  </ul>
 </details>
 <details>
 <summary>Does this work with brokered integrations?</summary>
