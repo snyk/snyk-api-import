@@ -17,24 +17,22 @@ It is recommended to have as many Organizations in Snyk as you have in the sourc
 
 # Generating the data required to create Organizations in Snyk with `orgs:data` util
 This util helps generate data needed to mirror the Github.com / Github Enterprise / Gitlab / Bitbucket Server / Bitbucket Cloud organization structure in Snyk.
-This is an opinionated util and will assume every organization in Github.com / Github Enterprise / Gitlab / Bitbucket Server / Bitbucket Cloud should become an organization in Snyk. If this is not what you are looking for, please look at using the [Organizations API](https://snyk.docs.apiary.io/#reference/groups/organizations-in-a-group/create-a-new-organization-in-a-group) directly to create the structure you need.
+This is an opinionated util and will assume every organization in Github.com / Github Enterprise / Gitlab / Bitbucket Server / Bitbucket Cloud should become an organization in Snyk. If this is not what you are looking for, please look at using the [Organizations API](https://snyk.docs.apiary.io/#reference/organizations/create-organization/create-a-new-organization) directly to create the structure you need.
 
 ## Options
 ```
-  --sourceOrgPublicId  Public id of the organization in Snyk that
-                       can be used as a template to copy all
-                       supported organization settings.
+  --source             The source of the targets to be imported
+                       (e.g. Github, Github Enterprise, Gitlab,
+                       Bitbucket Server)                [required]
   --groupId            Public id of the group in Snyk (available
                        on group settings)               [required]
   --sourceUrl          Custom base url for the source API that can
-                       list organizations (e.g. Github Enterprise
-                       url)
-  --skipEmptyOrgs      Skip any organizations that do not any
-                       targets. (e.g. Github Organization does not
-                       have any repos)
-  --source             The source of the targets to be imported
-                       e.g. Github, Github Enterprise, Gitlab,
-                       Bitbucket Server
+                       list organizations (e.g. Github Enterprise url)
+  --sourceOrgPublicId  Public id of the organization in Snyk that
+                       can be used as a template to copy all
+                       supported organization settings.
+  --skipEmptyOrgs      Skip organizations that have no targets. 
+                       (e.g. Github Organizations that have no repos)
 ```
 ## Github.com / Github Enterprise
 1. set the [Github.com personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) as an environment variable: `export GITHUB_TOKEN=your_personal_access_token`
@@ -98,7 +96,7 @@ The file format required for this looks like so:
 ```
 - `groupId` - public id of the Snyk Group where the organization is to be created
 - `name` - name to use when creating the organization
-- `sourceOrgI` - **optional** public id of a Snyk organization to copy settings from
+- `sourceOrgId` - **optional** public id of a Snyk organization to copy settings from
 
 ## Recommendations
 - have [notifications disabled](https://snyk.docs.apiary.io/#reference/organizations/notification-settings/set-notification-settings) for emails etc to avoid receiving import notifications
