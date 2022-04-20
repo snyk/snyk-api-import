@@ -57,7 +57,7 @@ export async function getWorkspaces(
   };
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
   const workspacesUrl =
-    nextPageLink ?? 'https://bitbucket.org/api/2.0/workspaces';
+    nextPageLink ?? 'https://bitbucket.org/api/2.0/workspaces?pagelen=100';
   const { statusCode, body } = await limiterWithRateLimitRetries<
     BitbucketWorkspacesResponse
   >('get', workspacesUrl, headers, limiter, 60000);
