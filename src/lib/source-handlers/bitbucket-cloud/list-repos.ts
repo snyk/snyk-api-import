@@ -72,7 +72,8 @@ const getRepos = async (
     BitbucketReposResponse
   >(
     'get',
-    nextPageLink ?? `https://bitbucket.org/api/2.0/repositories/${workspace}`,
+    nextPageLink ??
+      `https://bitbucket.org/api/2.0/repositories/${workspace}?pagelen=100`,
     headers,
     limiter,
     60000,
@@ -81,7 +82,7 @@ const getRepos = async (
     throw new Error(`Failed to fetch projects for ${
       nextPageLink != ''
         ? nextPageLink
-        : `https://bitbucket.org/api/2.0/repositories/${workspace}`
+        : `https://bitbucket.org/api/2.0/repositories/${workspace}?pagelen=100`
     }\n
       Status Code: ${statusCode}\n
       Response body: ${JSON.stringify(body)}`);
