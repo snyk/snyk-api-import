@@ -3,6 +3,7 @@ import * as yargs from 'yargs';
 const debug = debugLib('snyk:orgs-create-script');
 
 import { getLoggingPath } from '../lib';
+import { CommandResult } from '../lib/types';
 import { createOrgs } from '../scripts/create-orgs';
 
 export const command = ['orgs:create'];
@@ -26,15 +27,13 @@ export const builder = {
   },
 };
 
-export async function handler(argv: {
-  file: string;
-  includeExistingOrgsInOutput: boolean;
-  noDuplicateNames?: boolean;
-}): Promise<void> {
+export async function createOrg(
+  file: string,
+  includeExistingOrgsInOutput: boolean,
+  noDuplicateNames?: boolean,
+): Promise<CommandResult> {
   try {
     getLoggingPath();
-    const { file, noDuplicateNames, includeExistingOrgsInOutput } = argv;
-    debug('ℹ️  Options: ' + JSON.stringify(argv));
     const res = await createOrgs(file, {
       noDuplicateNames,
       includeExistingOrgsInOutput,
@@ -45,11 +44,41 @@ export async function handler(argv: {
         ? `Created ${res.orgs.length} out of ${res.totalOrgs} organization(s). Written the data to file: ${res.fileName}`
         : `⚠ No organization(s) created!`;
 
-    console.log(orgsMessage);
+    return {
+      fileName: res.fileName,
+      exitCode: 0,
+      message: orgsMessage,
+    };
   } catch (e) {
     const errorMessage = `ERROR! Failed to create organizations.\nTry running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`;
-    debug('Failed to create organizations.\n' + e);
-    console.error(errorMessage);
-    setTimeout(() => yargs.exit(1, new Error(errorMessage)), 3000);
+    return {
+      fileName: undefined,
+      exitCode: 1,
+      message: errorMessage,
+    };
+  }
+}
+
+export async function handler(argv: {
+  file: string;
+  includeExistingOrgsInOutput: boolean;
+  noDuplicateNames?: boolean;
+}): Promise<void> {
+  const { file, noDuplicateNames, includeExistingOrgsInOutput } = argv;
+  debug('ℹ️  Options: ' + JSON.stringify(argv));
+
+  const res = await createOrg(
+    file,
+    includeExistingOrgsInOutput,
+    noDuplicateNames,
+  );
+
+  if (res.exitCode === 1) {
+    debug('Failed to create organizations.\n' + res.message);
+
+    console.error(res.message);
+    setTimeout(() => yargs.exit(1, new Error(res.message)), 3000);
+  } else {
+    console.log(res.message);
   }
 }
