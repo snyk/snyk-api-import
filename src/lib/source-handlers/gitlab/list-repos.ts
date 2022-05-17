@@ -29,11 +29,22 @@ export async function fetchGitlabReposForPage(
     hasNextPage = true;
     repoData.push(
       ...projects
-        .filter(
-          (project: any) =>
-            !project.archived && project.shared_with_groups?.length == 0,
-        )
-        .map((project: any) => ({
+        .filter((project) => {
+          const {
+            archived,
+            shared_with_groups,
+            default_branch,
+          } = project as types.Types.ProjectExtendedSchema;
+          if (
+            archived ||
+            !default_branch ||
+            (shared_with_groups && shared_with_groups.length > 0)
+          ) {
+            return false;
+          }
+          return true;
+        })
+        .map((project) => ({
           fork: !!project.forked_from_project,
           name: project.path_with_namespace,
           id: project.id,
