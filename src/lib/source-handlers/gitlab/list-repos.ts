@@ -29,7 +29,10 @@ export async function fetchGitlabReposForPage(
     hasNextPage = true;
     repoData.push(
       ...projects
-        .filter((project: any) => !project.archived)
+        .filter(
+          (project: any) =>
+            !project.archived && project.shared_with_groups?.length == 0,
+        )
         .map((project: any) => ({
           fork: !!project.forked_from_project,
           name: project.path_with_namespace,
