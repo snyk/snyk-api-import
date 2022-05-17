@@ -110,6 +110,12 @@ interface ImportingUser {
   email: string;
 }
 
+export interface CommandResult {
+  fileName: string | undefined;
+  exitCode: number;
+  message: string | undefined;
+}
+
 export interface SnykProject {
   name: string;
   id: string;
