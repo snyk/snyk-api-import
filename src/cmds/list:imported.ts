@@ -2,7 +2,10 @@ import * as debugLib from 'debug';
 import * as _ from 'lodash';
 import * as yargs from 'yargs';
 import { getLoggingPath } from '../lib/get-logging-path';
-import { SupportedIntegrationTypesToListSnykTargets } from '../lib/types';
+import {
+  CommandResult,
+  SupportedIntegrationTypesToListSnykTargets,
+} from '../lib/types';
 const debug = debugLib('snyk:generate-data-script');
 
 import { generateSnykImportedTargets } from '../scripts/generate-imported-targets-from-snyk';
@@ -44,26 +47,25 @@ const entityName: {
   'bitbucket-server': 'repo',
 };
 
-export async function handler(argv: {
-  groupId?: string;
-  orgId?: string;
-  integrationType: SupportedIntegrationTypesToListSnykTargets;
-}): Promise<void> {
-  getLoggingPath();
-  const { groupId, integrationType, orgId } = argv;
+export async function createListImported(
+  integrationType: SupportedIntegrationTypesToListSnykTargets,
+  groupId?: string,
+  orgId?: string,
+): Promise<CommandResult> {
   try {
+
     if (!(groupId || orgId)) {
       throw new Error(
         'Missing required parameters: orgId or groupId must be provided.',
       );
     }
-
+  
     if (groupId && orgId) {
       throw new Error(
         'Too many parameters: orgId or groupId must be provided, not both.',
       );
     }
-    debug('ℹ️  Options: ' + JSON.stringify(argv));
+
     const integrationTypes = _.castArray(integrationType);
     const { targets, fileName, failedOrgs } = await generateSnykImportedTargets(
       { groupId, orgId },
@@ -87,12 +89,43 @@ export async function handler(argv: {
           .join(',')}`,
       );
     }
-    console.log(targetsMessage);
+
+    return {
+      fileName: fileName,
+      exitCode: 0,
+      message: targetsMessage,
+    };
+
   } catch (e) {
     const errorMessage = `ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`;
-
-    debug('Failed to list all imported targets in Snyk.\n' + e);
-    console.error(errorMessage);
-    yargs.exit(1, new Error(errorMessage));
+ 
+    return {
+      fileName: undefined,
+      exitCode: 1,
+      message: errorMessage,
+    };
   }
+}
+
+export async function handler(argv: {
+  groupId?: string;
+  orgId?: string;
+  integrationType: SupportedIntegrationTypesToListSnykTargets;
+}): Promise<void> {
+  getLoggingPath();
+  const { groupId, integrationType, orgId } = argv;
+
+  debug('ℹ️  Options: ' + JSON.stringify(argv));
+
+  const res = await createListImported(integrationType, groupId, orgId)
+
+  if (res.exitCode === 1) {
+    debug('Failed to create organizations.\n' + res.message);
+
+    console.error(res.message);
+    setTimeout(() => yargs.exit(1, new Error(res.message)), 3000);
+  } else {
+    console.log(res.message);
+  }
+  
 }
