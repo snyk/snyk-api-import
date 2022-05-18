@@ -3,7 +3,11 @@ import * as yargs from 'yargs';
 import { getLoggingPath } from '../lib/get-logging-path';
 const debug = debugLib('snyk:generate-data-script');
 
-import { CreatedOrg, SupportedIntegrationTypesImportData } from '../lib/types';
+import {
+  CreatedOrg,
+  SupportedIntegrationTypesImportData,
+  CommandResult,
+} from '../lib/types';
 import { loadFile } from '../load-file';
 import { generateTargetsImportDataFile } from '../scripts/generate-targets-data';
 
@@ -50,17 +54,14 @@ const entityName: {
   'bitbucket-cloud': 'workspace',
 };
 
-export async function handler(argv: {
-  source: SupportedIntegrationTypesImportData;
-  orgsData: string;
-  integrationType: SupportedIntegrationTypesImportData;
-  sourceUrl: string;
-}): Promise<void> {
+export async function generateOrgData(
+  source: SupportedIntegrationTypesImportData,
+  orgsData: string,
+  integrationType: SupportedIntegrationTypesImportData,
+  sourceUrl: string,
+): Promise<CommandResult> {
   try {
     getLoggingPath();
-    const { source, orgsData, integrationType, sourceUrl } = argv;
-    debug('ℹ️  Options: ' + JSON.stringify(argv));
-
     const content = await loadFile(orgsData);
     let orgsDataJson: CreatedOrg[];
     try {
@@ -86,13 +87,41 @@ export async function handler(argv: {
       res.targets.length > 0
         ? `Found ${res.targets.length} ${entityName[source]}(s). Written the data to file: ${res.fileName}`
         : `⚠ No import ${entityName[source]}(s) data generated!`;
-
-    console.log(targetsMessage);
+    
+    return {
+      fileName: res.fileName,
+      exitCode: 0,
+      message: targetsMessage,
+    };
   } catch (e) {
     const errorMessage = `ERROR! Failed to generate data. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e}`;
-    debug('Failed to generate data.\n' + e);
 
-    console.error(errorMessage);
-    yargs.exit(1, new Error(errorMessage));
+    return {
+      fileName: undefined,
+      exitCode: 1,
+      message: errorMessage,
+    };
   }
+}
+
+export async function handler(argv: {
+  source: SupportedIntegrationTypesImportData;
+  orgsData: string;
+  integrationType: SupportedIntegrationTypesImportData;
+  sourceUrl: string;
+}): Promise<void> {
+
+    const { source, orgsData, integrationType, sourceUrl } = argv;
+    debug('ℹ️  Options: ' + JSON.stringify(argv));
+
+    const res = await generateOrgData(source, orgsData, integrationType, sourceUrl);
+
+    if (res.exitCode === 1) {
+      debug('Failed to create organizations.\n' + res.message);
+  
+      console.error(res.message);
+      setTimeout(() => yargs.exit(1, new Error(res.message)), 3000);
+    } else {
+      console.log(res.message);
+    }
 }
