@@ -57,7 +57,7 @@ Options:
     });
   });
 
-  it('Generates repo data as expected for Gitlab', (done) => {
+  it.only('Generates repo data as expected for Gitlab', (done) => {
     const orgDataFile = 'test/system/fixtures/org-data/orgs.json';
     exec(
       `node ${main} import:data --source=gitlab --integrationType=gitlab --sourceUrl=${process.env.TEST_GITLAB_BASE_URL} --orgsData=${orgDataFile}`,
