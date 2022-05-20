@@ -140,9 +140,7 @@ describe('importTarget()', () => {
   afterAll(async () => {
     process.env = { ...OLD_ENV };
   });
-  it('SANITIZE target if process.env.SANITIZE_IMPORT_TARGET is set', async () => {
-    process.env.SANITIZE_IMPORT_TARGET = 'yes';
-
+  it('Target is always sanitized', async () => {
     const target = {
       name: 'composer-with-vulns',
       owner: 'api-import-circle-test',
@@ -162,35 +160,6 @@ describe('importTarget()', () => {
           branch: 'master',
           name: 'composer-with-vulns',
           owner: 'api-import-circle-test',
-        },
-      },
-    );
-  });
-
-  it('send target as if process.env.SANITIZE_IMPORT_TARGET is not set', async () => {
-    delete process.env.SANITIZE_IMPORT_TARGET;
-    const target = {
-      name: 'composer-with-vulns',
-      owner: 'api-import-circle-test',
-      branch: 'master',
-      fork: true,
-      random: 'yay'
-    };
-    await importTarget(requestManager, 'ORG_ID', 'INTEGRATION_ID', target);
-    expect(requestWithRateLimitHandlingStub).toHaveBeenCalled();
-    expect(requestWithRateLimitHandlingStub).lastCalledWith(
-      expect.any(Object),
-      '/org/ORG_ID/integrations/INTEGRATION_ID/import',
-      'post',
-      {
-        exclusionGlobs: undefined,
-        files: undefined,
-        target: {
-          branch: 'master',
-          name: 'composer-with-vulns',
-          owner: 'api-import-circle-test',
-          fork: true,
-          random: 'yay'
         },
       },
     );

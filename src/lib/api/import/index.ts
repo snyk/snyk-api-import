@@ -32,7 +32,6 @@ export async function importTarget(
   integrationId: string;
 }> {
   const logPath = loggingPath || getLoggingPath();
-  const sanitizeTarget = Boolean(process.env.SANITIZE_IMPORT_TARGET);
   getApiToken();
   debug('Importing:', JSON.stringify({ orgId, integrationId, target }));
 
@@ -44,7 +43,7 @@ export async function importTarget(
   }
   try {
     const body = {
-      target: sanitizeTarget ? _.pick(target, ...targetPropsWithId) : target,
+      target: _.pick(target, ...targetPropsWithId),
       files,
       exclusionGlobs,
     };
