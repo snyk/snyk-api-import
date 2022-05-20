@@ -3,7 +3,7 @@ import * as yargs from 'yargs';
 const debug = debugLib('snyk:orgs-data-script');
 
 import { getLoggingPath } from '../lib/get-logging-path';
-import { SupportedIntegrationTypesImportOrgData } from '../lib/types';
+import { CommandResult, SupportedIntegrationTypesImportOrgData } from '../lib/types';
 import {
   entityName,
   generateOrgImportDataFile,
@@ -44,6 +44,45 @@ export const builder = {
   },
 };
 
+export async function generateOrgImportData(
+  source: SupportedIntegrationTypesImportOrgData,
+  groupId: string,
+  sourceOrgPublicId?: string,
+  sourceUrl?: string,
+  skipEmptyOrgs?: boolean): Promise<CommandResult>  {
+
+    try {
+      getLoggingPath();
+      
+      const res = await generateOrgImportDataFile(
+        source,
+        groupId,
+        sourceOrgPublicId,
+        sourceUrl,
+        skipEmptyOrgs,
+      );
+      const orgsMessage =
+        res.orgs.length > 0
+          ? `Found ${res.orgs.length} ${entityName[source]}(s). Written the data to file: ${res.fileName}`
+          : `⚠ No ${entityName[source]}(s) found!`;
+    
+      return {
+        fileName: res.fileName,
+        exitCode: 0,
+        message: orgsMessage,
+      };
+
+    } catch (e) {
+      const errorMessage = `ERROR! Failed to generate data. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`;
+      return {
+        fileName: undefined,
+        exitCode: 1,
+        message: errorMessage,
+      };
+  }
+}
+
+
 export async function handler(argv: {
   source: SupportedIntegrationTypesImportOrgData;
   groupId: string;
@@ -51,9 +90,8 @@ export async function handler(argv: {
   sourceUrl?: string;
   skipEmptyOrgs?: boolean;
 }): Promise<void> {
-  try {
-    getLoggingPath();
-    const {
+  
+  const {
       source,
       sourceOrgPublicId,
       groupId,
@@ -62,23 +100,18 @@ export async function handler(argv: {
     } = argv;
     debug('ℹ️  Options: ' + JSON.stringify(argv));
 
-    const res = await generateOrgImportDataFile(
-      source,
+  const res = await generateOrgImportData(source,
       groupId,
       sourceOrgPublicId,
       sourceUrl,
-      skipEmptyOrgs,
-    );
-    const orgsMessage =
-      res.orgs.length > 0
-        ? `Found ${res.orgs.length} ${entityName[source]}(s). Written the data to file: ${res.fileName}`
-        : `⚠ No ${entityName[source]}(s) found!`;
+      skipEmptyOrgs) 
 
-    console.log(orgsMessage);
-  } catch (e) {
-    const errorMessage = `ERROR! Failed to generate data. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`;
-    debug('Failed to generate data.\n' + e);
-    console.error(errorMessage);
-    yargs.exit(1, new Error(errorMessage));
+  if (res.exitCode === 1) {
+    debug('Failed to create organizations.\n' + res.message);
+
+    console.error(res.message);
+    setTimeout(() => yargs.exit(1, new Error(res.message)), 3000);
+  } else {
+    console.log(res.message);
   }
 }
