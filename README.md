@@ -7,18 +7,32 @@
 Snyk helps you find, fix and monitor for known vulnerabilities in your dependencies, both on an ad hoc basis and as part of your CI (Build) system.
 
 # snyk-api-import
-Snyk API project importer. This script is intended to help import projects into Snyk with a controlled pace utilizing available [Snyk APIs](https://snyk.docs.apiary.io/) to avoid rate limiting from Github/Gitlab/Bitbucket etc and to provide a stable import. The script will kick off an import in batches, wait for completion and then keep going. Any failed requests will be retried before they are considered a failure and logged.
+Snyk API project importer. This script is intended to help import projects into Snyk with a controlled pace utilizing available [Snyk APIs](https://snyk.docs.apiary.io/).
+
+What does it offer?
+- `rate limiting handling` - the script will pace requests to avoid rate limiting from Github/Gitlab/Bitbucket etc and to provide a stable import.
+- `queue` - requests to Snyk are queued to reduce failures.
+- `retries` - the script will kick off an import in batches, wait for completion and then keep going. Any failed requests will be retried before they are considered a failure and logged.
 
 If you need to adjust concurrency you can stop the script, change the concurrency variable and start again. It will skip previous repos/targets that have been requested for import.
 
-What you will need to have setup in advance:
-- your [Snyk organizations](docs/orgs.md) should be setup before running an import
-- your Snyk organizations configured with some connection to SCM (Github/Gitlab/Bitbucket etc) as you will need the `integrationId` to generate the import files.
-- Recommended: have [notifications disabled](https://snyk.docs.apiary.io/#reference/organizations/notification-settings/set-notification-settings) for emails etc to avoid receiving import notifications
-- Recommended: have the [fix PRs and PR checks disabled](https://snyk.docs.apiary.io/#reference/integrations/integration-settings/update) until import is complete to avoid sending extra requests to SCMs (Github/Gitlab/Bitbucket etc)
+# Table of Contents
+- [Installation](#installation)
+- [Usage](#usage)
+- [FAQ](#faq)
+- Utilities
+  - [Creating orgs in Snyk](docs/orgs.md)
+  - [Generating import data](docs/import-data.md)
+  - [Mirroring Github.com/Github Enterprise organizations & repos in Snyk](docs/mirror-github.md)
+  - [Mirroring Gitlab organizations & repos in Snyk](docs/mirror-gitlab.md)
+  - [Mirroring Bitbucket Server organizations & repos in Snyk](docs/mirror-bitbucket-server.md)
+  - [Mirroring Bitbucket Cloud organizations & repos in Snyk](docs/mirror-bitbucket-cloud.md)
+
+- [Kicking off an import](docs/import.md)
+- [Contributing](.github/CONTRIBUTING.md)
 
 # Installation
-Snyk snyk-api-import CLI can be installed through multiple channels.
+`snyk-api-import` CLI can be installed through multiple channels.
 
 ## Standalone executables (macOS, Linux, Windows)
 
@@ -55,18 +69,6 @@ By default the `import` command will run if no command specified.
 - `list:imported` - util to generate data to help skip previously imported targets during import.
 
 The logs can be explored using [Bunyan CLI](http://trentm.com/node-bunyan/bunyan.1.html)
-
-# Table of Contents
-- Utilities
-  - [Creating orgs in Snyk](docs/orgs.md)
-  - [Generating import data](docs/import-data.md)
-  - [Mirroring Github.com/Github Enterprise organizations & repos in Snyk](docs/mirror-github.md)
-  - [Mirroring Gitlab organizations & repos in Snyk](docs/mirror-gitlab.md)
-  - [Mirroring Bitbucket Server organizations & repos in Snyk](docs/mirror-bitbucket-server.md)
-  - [Mirroring Bitbucket Cloud organizations & repos in Snyk](docs/mirror-bitbucket-cloud.md)
-
-- [Kicking off an import](docs/import.md)
-- [Contributing](.github/CONTRIBUTING.md)
 
 # FAQ
 <details>
