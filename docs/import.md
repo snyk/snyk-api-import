@@ -1,8 +1,34 @@
-# To kick off an import
+# Import
+## Table of Contents
+- [Import](#import)
+  - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+- [Kick off an import](#kick-off-an-import)
+  - [1. Create the `import-projects.json` file](#1-create-the-import-projectsjson-file)
+    - [Example: Gitlab](#example-gitlab)
+    - [Example: Bitbucket Server](#example-bitbucket-server)
+    - [Example: Github.com | Github Enterprise | dev.azure.com | Hosted Azure Repos](#example-githubcom--github-enterprise--devazurecom--hosted-azure-repos)
+    - [Example: Google Container Registry](#example-google-container-registry)
+    - [Example: Azure Container Registry, Elastic Container Registry, Artifactory Container Registry](#example-azure-container-registry-elastic-container-registry-artifactory-container-registry)
+  - [2. Set the env vars](#2-set-the-env-vars)
+  - [3. Download & run](#3-download--run)
+- [Tips](#tips)
+  - [Skip all previously imported targets](#skip-all-previously-imported-targets)
+  - [Check how many projects successfully imported](#check-how-many-projects-successfully-imported)
+  - [Check how many projects failed to import& why](#check-how-many-projects-failed-to-import-why)
+
+
+## Prerequisites
+You will need to have setup in advance:
+- your [Snyk organizations](docs/orgs.md) should be setup before running an import
+- your Snyk organizations configured with some connection to SCM (Github/Gitlab/Bitbucket etc) as you will need the `integrationId` to generate the import files.
+- Recommended: have [notifications disabled](https://snyk.docs.apiary.io/#reference/organizations/notification-settings/set-notification-settings) for emails etc to avoid receiving import notifications
+- Recommended: have the [fix PRs and PR checks disabled](https://snyk.docs.apiary.io/#reference/integrations/integration-settings/update) until import is complete to avoid sending extra requests to SCMs (Github/Gitlab/Bitbucket etc)
 
 Any logs will be generated at `SNYK_LOG_PATH` directory.
 
-### 1. Create the `import-projects.json` file
+# Kick off an import
+## 1. Create the `import-projects.json` file
 
 The file is expected to have a **required** `targets` top level key which is an array of **import targets**.
 
@@ -37,7 +63,8 @@ Each **import target** has the following keys:
   - `files` is an object array, each path must be the full relative path to file from the root of the target. Only those files will be imported if located at that location.
 
 _Note_: For a repo that may have 200+ manifest files it is recommended to split this import into multiple by targeting specific files. Importing hundreds of files at once from 1 repo can cause the import to result in some errors/failures.
-
+_Note_: Keep in mind there is a [limit on the # or projects per Organization in Snyk](https://docs.snyk.io/getting-started/introduction-to-snyk-projects/maximum-number-of-projects-in-an-organsation).
+To reduce the chances of reaching this limit use multiple Organizations in Snyk instead of adding many repos into 1.
 Splitting it to target some files, or some folders only will benefit from the re-tries and yield a smaller load on the source control management system being used. Populate the the `files` property to accomplish this in the import JSON.
 
 If you have any tests ot fixtures that should be ignored, please set the `exclusionGLobs` property:
@@ -46,7 +73,7 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 
 **Note: snyk-api-import supports 100% of the same integration types and project sources as the [Import API documentation](https://snyk.docs.apiary.io/#reference/integrations/import-projects/import). If an example is not present below for your use case please see the API documentation**
 
-#### Example: Gitlab
+### Example: Gitlab
 
 ```
 {
@@ -72,7 +99,7 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 
 ```
 
-#### Example: Bitbucket Server
+### Example: Bitbucket Server
 
 ```
 {
@@ -102,7 +129,7 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 }
 ```
 
-#### Example: Github.com | Github Enterprise | dev.azure.com | Hosted Azure Repos
+### Example: Github.com | Github Enterprise | dev.azure.com | Hosted Azure Repos
 
 ```
 {
@@ -121,7 +148,7 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 }
 ```
 
-#### Example: Google Container Registry
+### Example: Google Container Registry
 
 ```
 {
@@ -137,7 +164,7 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 }
 ```
 
-#### Example: Azure Container Registry, Elastic Container Registry, Artifactory Container Registry
+### Example: Azure Container Registry, Elastic Container Registry, Artifactory Container Registry
 
 ```
 {
@@ -153,7 +180,7 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 }
 ```
 
-### 2. Set the env vars:
+## 2. Set the env vars
 
 - `SNYK_IMPORT_PATH`- the path to the import file or use `--file` parameter
 - `SNYK_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
@@ -161,11 +188,12 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 - `CONCURRENT_IMPORTS` (optional) defaults to 15 repos at a time, which is the recommended amount to import at once as a max. Just 1 repo may have many projects inside which can trigger a many files at once to be requested from the user's SCM instance and some may have rate limiting in place. This script aims to help reduce the risk of hitting a rate limit.
 - `SNYK_API` (optional) defaults to `https://snyk.io/api/v1`
 
-### 3. Download & run
+## 3. Download & run
 
 Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/imported-targets.json`
 
-## To skip all previously imported targets
+# Tips
+## Skip all previously imported targets
 
 This can be used to skip previously imported targets (repos) so only remaining targets will be imported.
 
@@ -200,3 +228,11 @@ Supported integration types:
 - Google Cloud Registry `gcr`
 - DockerHub registry `docker-hub`
 - Azure repos `azure-repos`
+
+## Check how many projects successfully imported
+We recommend you use [jq](https://stedolan.github.io/jq/download/), which is a lightweight and flexible command-line JSON processor:
+`jq -s length snyk-log/$SNYK_ORG_ID.imported-projects.log`
+
+## Check how many projects failed to import& why
+We recommend you use [jq](https://stedolan.github.io/jq/download/), which is a lightweight and flexible command-line JSON processor:
+`jq . snyk-log/$SNYK_ORG_ID.failed-projects.log`
