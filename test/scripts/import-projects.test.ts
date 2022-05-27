@@ -220,6 +220,7 @@ describe('Error handling', () => {
       projects: [],
       skippedTargets: 0,
       targets: [],
+      logFile: undefined,
     });
   }, 300);
 
