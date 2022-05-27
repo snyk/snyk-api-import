@@ -27,8 +27,8 @@ async function githubEnterpriseRepos(
   sourceUrl?: string,
 ): Promise<GithubRepoData[]> {
   if (!sourceUrl) {
-    throw new Error(
-      'Please provide required `sourceUrl` for Github Enterprise source',
+    console.warn(
+      'No `sourceUrl` provided for Github Enterprise source, defaulting to https://api.github.com',
     );
   }
   const ghRepos: GithubRepoData[] = await listGithubRepos(orgName, sourceUrl);

@@ -13,8 +13,8 @@ This is a util that can help generate the import json data needed by the import 
 
 
 # `import:data`
-## Github.com / Github Enterprise
-1. set the [Github.com personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) as an environment variable: `export GITHUB_TOKEN=your_personal_access_token`
+## Github.com / Github Enterprise Server / Github Enterprise Cloud
+1. set the [Github.com / Github Enterprise Server / Github Enterprise Cloud token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) as an environment variable: `export GITHUB_TOKEN=your_personal_access_token`
 2. You will need to have the organizations data in json as an input to this command to help map Snyk organization IDs and Integration Ids that must be used during import against individual targets to be imported. The following format is required:
   ```
   {
@@ -39,7 +39,8 @@ This is a util that can help generate the import json data needed by the import 
 
 3. Run the command to generate import data:
  - **Github.com:** `DEBUG=snyk* GITHUB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=github --integrationType=github`
- - **Github Enterprise:** `DEBUG=snyk* GITHUB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=github-enterprise --integrationType=github-enterprise --sourceUrl=https://ghe.custom.com`
+ - **Github Enterprise Server:** `DEBUG=snyk* GITHUB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=github-enterprise --integrationType=github-enterprise --sourceUrl=https://ghe.custom.com`
+ - **Github Enterprise Cloud:** `DEBUG=snyk* GITHUB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=github-enterprise --integrationType=github-enterprise`
 
 4. Use the generated data to feed into [import] command (/import.md) to generate kick off the import.
 

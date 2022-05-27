@@ -75,7 +75,7 @@ describe('generateOrgImportDataFile Github script', () => {
     });
   });
 
-  it('throws an error when Github Enterprise Orgs requested without sourceUrl', async () => {
+  it('throws an error when Github Enterprise Server Orgs requested without sourceUrl', async () => {
     process.env.GITHUB_TOKEN = process.env.GHE_TOKEN;
     const groupId = 'groupIdExample';
 
@@ -85,7 +85,7 @@ describe('generateOrgImportDataFile Github script', () => {
         groupId,
       ),
     ).rejects.toThrow(
-      'Please provide required `sourceUrl` for Github Enterprise source',
+      'Bad credentials',
     );
   });
   it('generate Github Enterprise Orgs data', async () => {
