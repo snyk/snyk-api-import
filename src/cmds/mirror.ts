@@ -4,6 +4,7 @@ import { CommandResult, SupportedIntegrationTypesImportData, SupportedIntegratio
 import { generateOrgImportDataFile } from "../scripts/generate-org-data";
 import { generateOrgImportData } from "./orgs:data";
 import { createOrg } from "./orgs:create";
+import { importFunction } from "./import";
 
 export const command = ['mirror'];
 export const desc =
@@ -67,7 +68,7 @@ export async function handler(argv: {
     const generateOrgImportDataResult = await generateOrgImportData(source,
         groupId,
         snykTemplateOrgPublicId,
-        sourceUrl,
+        defaultSourceUrl,
         true) 
 
     if (generateOrgImportDataResult.exitCode === 1 ) {
@@ -95,6 +96,23 @@ export async function handler(argv: {
       setTimeout(() => yargs.exit(1, new Error(createOrgFile.message)), 3000);
     } else {
       console.log(createOrgFile.message);
+    }
+
+
+    let ImportFile = {} as CommandResult
+    if (createOrgFile.fileName) {
+      ImportFile = await importFunction(
+        createOrgFile.fileName
+        );
+    }    
+  
+    if (ImportFile.exitCode === 1) {
+      debug('Failed to import projects.\n' + ImportFile.message);
+  
+      console.error(ImportFile.message);
+      setTimeout(() => yargs.exit(1, new Error(ImportFile.message)), 3000);
+    } else {
+      console.log(ImportFile.message);
     }
   }
 
