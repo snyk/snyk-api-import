@@ -61,7 +61,7 @@ yarn global add snyk-api-import
 
 # Usage
 By default the `import` command will run if no command specified.
-- `import` - kick off a an API powered import of repos/targets into existing Snyk orgs defined in [import configuration file](./docs/import.md). 100% support available for all project types supported via [Import API](https://snyk.docs.apiary.io/#reference/integrations/import-projects/import).
+- `import` - kick off a an API powered import of repos/targets into existing Snyk orgs defined in [import configuration file](./docs/import.md). 100% support available for all project types supported via [Import API](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets).
 - `help` - show help & all available commands and their options
 - `orgs:data` - util generate data required to create Orgs via API.
 - `orgs:create` - util to create the Orgs in Snyk based on data file generated with `orgs:data` command.
@@ -99,7 +99,7 @@ The logs can be explored using [Bunyan CLI](http://trentm.com/node-bunyan/bunyan
 <summary>What is supported for import command?</summary>
 <br/>
   <p>
-    snyk-api-import supports 100% of the same integration types and project sources as the <a href="https://snyk.docs.apiary.io/#reference/integrations/import-projects/import">Import API documentation</a>. If an example is not in the docs for your use case please see the API documentation
+    snyk-api-import supports 100% of the same integration types and project sources as the <a href="https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets">Import API documentation</a>. If an example is not in the docs for your use case please see the API documentation
   </p>
 </details>
 

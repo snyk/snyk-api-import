@@ -58,7 +58,7 @@ Each **import target** has the following keys:
 
 - `orgId` - Can be found in https://app.snyk.io/org/YOUR_ORG/manage/settings
 - `integrationId` - Can be found in Integrations menu for each SCM https://app.snyk.io/org/YOUR_ORG/manage/settings
-- `target`, `files`, `exclusionGlobs` - see our [Import API documentation](https://snyk.docs.apiary.io/#reference/integrations/import-projects/import) for more info
+- `target`, `files`, `exclusionGlobs` - see our [Import API documentation](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets) for more info
   - `exclusionGlobs` a comma-separated list of up to 10 folder names to exclude from scanning (each folder name must not exceed 100 characters). If not specified, it will default to "fixtures, tests, **tests**, node_modules". If an empty string is provided - no folders will be excluded
   - `files` is an object array, each path must be the full relative path to file from the root of the target. Only those files will be imported if located at that location.
 
@@ -71,7 +71,7 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 
 > a comma-separated list of up to 10 folder names to exclude from scanning. If not specified, it will default to "fixtures, tests, **tests**, node_modules". If an empty string is provided - no folders will be excluded
 
-**Note: snyk-api-import supports 100% of the same integration types and project sources as the [Import API documentation](https://snyk.docs.apiary.io/#reference/integrations/import-projects/import). If an example is not present below for your use case please see the API documentation**
+**Note: snyk-api-import supports 100% of the same integration types and project sources as the [Import API documentation](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets). If an example is not present below for your use case please see the API documentation**
 
 ### Example: Gitlab
 

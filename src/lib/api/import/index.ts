@@ -38,7 +38,7 @@ export async function importTarget(
   if (!orgId || !integrationId || Object.keys(target).length === 0) {
     throw new Error(
       `Missing required parameters. Please ensure you have set: orgId, integrationId, target.
-      \nFor more information see: https://snyk.docs.apiary.io/#reference/integrations/import-projects/import`,
+      \nFor more information see: https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets`,
     );
   }
   try {
