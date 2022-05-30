@@ -112,6 +112,7 @@ export async function importProjects(
   skippedTargets: number;
   filteredTargets: ImportTarget[];
   targets: ImportTarget[];
+  logFile: string | undefined;
 }> {
   const targetsFilePath = path.resolve(process.cwd(), loggingPath, fileName);
   if (!fs.existsSync(targetsFilePath)) {
@@ -148,13 +149,15 @@ export async function importProjects(
   }
 
   if (filteredTargets.length === 0) {
-    return { projects: [], targets, filteredTargets, skippedTargets: 0 };
+    return { projects: [], targets, filteredTargets, skippedTargets: 0, logFile: undefined };
   }
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import',
     period: 1000,
     maxRetryCount: 3,
   });
+  
+  let logFile 
 
   for (
     let targetIndex = 0;
@@ -174,7 +177,7 @@ export async function importProjects(
     const batchProgressMessages = `Importing batch ${currentTargets} - ${currentBatchEnd} out of ${fullTargetsNumber} ${
       skippedTargets > 0 ? `(skipped ${skippedTargets})` : ''
     }`;
-    logImportedBatch(batchProgressMessages);
+    logFile = await logImportedBatch(batchProgressMessages);
     const pollingUrlsAndContext = await importTargets(
       requestManager,
       batch,
@@ -185,5 +188,5 @@ export async function importProjects(
     debug(`Finished polling, discovered ${res.projects?.length} projects`);
     projects.push(...res.projects);
   }
-  return { projects, skippedTargets, filteredTargets, targets };
+  return { projects, skippedTargets, filteredTargets, targets, logFile };
 }
