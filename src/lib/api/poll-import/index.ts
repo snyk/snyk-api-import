@@ -30,7 +30,7 @@ export async function pollImportUrl(
   if (!locationUrl) {
     throw new Error(
       `Missing required parameters. Please ensure you have provided: location url.
-      \nFor more information see: https://snyk.docs.apiary.io/#reference/integrations/import-projects/import`,
+      \nFor more information see: https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets`,
     );
   }
   try {
