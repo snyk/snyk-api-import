@@ -28,8 +28,10 @@ If you need to adjust concurrency you can stop the script, change the concurrenc
   - [Mirroring Bitbucket Server organizations & repos in Snyk](docs/mirror-bitbucket-server.md)
   - [Mirroring Bitbucket Cloud organizations & repos in Snyk](docs/mirror-bitbucket-cloud.md)
 
-- [Kicking off an import](docs/import.md)
 - [Contributing](.github/CONTRIBUTING.md)
+- [Kicking off an import](docs/import.md)
+- Example workflows
+  - [AWS automation example](docs/example-workflows/aws-automation-example.md)
 
 # Installation
 `snyk-api-import` CLI can be installed through multiple channels.
