@@ -4,8 +4,9 @@
 - Generating the data to create Organizations in Snyk
   - [Github](#githubcom--github-enterprise)
   - [Gitlab](#gitlabcom--hosted-gitlab)
-  - [Bitbucket-Server](#bitbucket-server)
-  - [Bitbucket-cloud](#bitbucket-cloud)
+  - [Bitbucket Server](#bitbucket-server)
+  - [Bitbucket Cloud](#bitbucket-cloud)
+  - [Azure](#azure)
 - [Creating the organizations](#creating-organizations-in-snyk-1)
   - [via the API](#via-api)
   - [via the `orgs:create` util](#via-orgscreate-util)
@@ -68,6 +69,29 @@ This will create the organization data in a file `group-<snyk_group_id>-bitbucke
  - `snyk-api-import orgs:data --source=bitbucket-cloud --groupId=<snyk_group_id>`
 
 This will create the organization data in a file `group-<snyk_group_id>-bitbucket-cloud-orgs.json`
+
+
+## Azure
+**Please note that for Azure, this step needs to be done manually**
+Since Azure has no [API call](https://developercommunity.visualstudio.com/t/no-rest-api-for-get-all-organizations-in-azure-dev/876058) for getting the Azure Organizations, the Orgs file must be created manually for the next commands to run:
+1. The file should be formatted this way:
+```
+{
+   "orgs":[
+      {
+         "name":"THE_NAME_OF_AN_AZURE_ORG",
+         "groupId":"YOUR_SNYK_GROUP_ID",
+         "sourceOrgId":"THE_SNYK_ORG_ID_FROM_WHICH_TO_COPY_THE_SETTINGS_FROM"   // **optional**
+      },
+      {
+         "name":"THE_NAME_OF_ANOTHER_AZURE_ORG",
+         "groupId":"YOUR_SNYK_GROUP_ID",
+         "sourceOrgId":"THE_SNYK_ORG_ID_FROM_WHICH_TO_COPY_THE_SETTINGS_FROM"  // **optional**
+      }
+   ]
+}
+```
+2. Once the file is created, you can feed it to the [orgs:create command](#creating-organizations-in-snyk-1)
 
 
 # Creating Organizations in Snyk
