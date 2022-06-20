@@ -17,6 +17,7 @@ jobs:
             - snyk/scan:
                 fail-on-issues: true
                 monitor-on-build: true
+                severity-threshold: high
                 token-variable: SNYK_TOKEN_PROD
             - run: npx semantic-release
             - slack/status:
@@ -36,6 +37,7 @@ jobs:
             - snyk/scan:
                 fail-on-issues: true
                 monitor-on-build: false
+                severity-threshold: high
                 token-variable: SNYK_TOKEN_PROD
             - run: npx tsc
             - run: npm run pkg-binaries-linux
