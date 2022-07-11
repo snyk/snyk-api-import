@@ -130,20 +130,21 @@ export async function generateSnykImportedTargets(
         ]);
         const { projects } = resProjects;
         const scmTargets = projects
-          .filter((p) =>
-            integrationTypes.includes(
-              p.origin as SupportedIntegrationTypesToListSnykTargets,
-            ),
-          )
-          .map((p) => {
-            const target = targetGenerators[
-              p.origin as SupportedIntegrationTypesToListSnykTargets
-            ](p);
-            return {
-              target,
-              integrationId: resIntegrations[p.origin],
-            };
-          });
+        .filter((p) =>
+          integrationTypes.includes(
+            p.origin as SupportedIntegrationTypesToListSnykTargets,
+          ),
+        )
+        .map((p) => {
+          const target = targetGenerators[
+            p.origin as SupportedIntegrationTypesToListSnykTargets
+          ](p);
+          return {
+            target,
+            integrationId: resIntegrations[p.origin],
+          };
+        });
+
         const uniqueTargets: Set<string> = new Set();
         const orgTargets: Target[] = [];
         if (!scmTargets.length || scmTargets.length === 0) {
