@@ -74,7 +74,6 @@ describe('listProjects', () => {
     expect(res).toMatchObject({
       org: {
         id: ORG_ID,
-        name: expect.any(String),
       },
       projects: expect.any(Array),
     });

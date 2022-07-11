@@ -3,7 +3,7 @@ import { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
-import { SnykProject } from '../../types';
+import { SnykProject, v3ProjectData } from '../../types';
 import { StringNullableChain } from 'lodash';
 
 const debug = debugLib('snyk:api-group');
@@ -136,10 +136,25 @@ export async function deleteOrg(
 
 interface ProjectsResponse {
   org: {
-    name: string;
     id: string;
   };
   projects: SnykProject[];
+}
+
+
+interface v3ProjectsResponse {
+  data: v3ProjectData[];
+  jsonapi: {
+    version: string;
+  };
+  links: {
+    first: string;
+    last: string;
+    next: string;
+    prev: string;
+    related: string;
+    self: string;
+  };
 }
 
 interface ProjectsFilters {
@@ -148,6 +163,7 @@ interface ProjectsFilters {
   type?: string; //If supplied, only projects that exactly match this type will be returned
   isMonitored?: boolean; // If set to true, only include projects which are monitored, if set to false, only include projects which are not monitored
 }
+
 
 export async function listProjects(
   requestManager: requestsManager,
@@ -165,23 +181,97 @@ export async function listProjects(
     );
   }
 
-  try {
-    const res = await requestManager.request({
-      verb: 'post',
-      url: `/org/${orgId.trim()}/projects`,
-      body: JSON.stringify(filters),
-    });
-
-    const statusCode = res.statusCode || res.status;
-    if (!statusCode || statusCode !== 200) {
-      throw new Error(
-        'Expected a 200 response, instead received: ' +
-          JSON.stringify({ data: res.data, status: statusCode }),
-      );
-    }
-    return res.data || {};
-  } catch (e) {
-    debug('Failed to update notification settings for ', orgId, e);
-    throw e;
+  const projects = await listAllProjects(requestManager, orgId, filters)
+  
+  const snykProjectData: ProjectsResponse = {
+    org: {
+      id: orgId,
+    },
+    projects: projects
   }
+
+  return snykProjectData;
 }
+
+async function listAllProjects(requestManager: requestsManager,
+  orgId: string,
+  filters?: ProjectsFilters,
+  ): Promise<SnykProject[]> {
+
+    let lastPage = false;
+    let projectsList: SnykProject[] = [];
+    let pageCount = 1;
+    let nextPageLink: string | undefined = undefined;
+    while (!lastPage) {
+      try {
+        const {
+          projects,
+          next,
+        }: {
+          projects: SnykProject[];
+          next?: string;
+        } = await getProject(requestManager, orgId, filters, nextPageLink);
+
+        projectsList = projectsList.concat(projects);
+        next
+          ? ((lastPage = false), (nextPageLink = next))
+          : ((lastPage = true), (nextPageLink = ''));
+        pageCount++;
+      } catch (e) {
+        debug('Failed to update notification settings for ', orgId, e);
+        throw e;
+    }
+  }
+  return projectsList
+}
+
+async function getProject(requestManager: requestsManager,
+  orgId: string,
+  filters?: ProjectsFilters,
+  nextPageLink?: string,
+  ): Promise< { projects: SnykProject[], next?: string } > {
+  
+    const url = nextPageLink ? nextPageLink : `/orgs/${orgId.trim()}/projects?version=2022-06-08~beta`
+    const res = await requestManager.request({
+    verb: 'get',
+    url: url,
+    body: JSON.stringify(filters),
+    useRESTApi: true,
+  });
+
+  const statusCode = res.statusCode || res.status;
+  if (!statusCode || statusCode !== 200) {
+    throw new Error(
+      'Expected a 200 response, instead received: ' +
+        JSON.stringify({ data: res.data, status: statusCode }),
+    );
+  }
+  
+  const v3responseData = res.data as v3ProjectsResponse
+
+  const projects = convertToSnykProject(v3responseData.data)
+  const next =  v3responseData.links.next
+
+  return { projects, next}
+
+}
+
+function convertToSnykProject(projectData: v3ProjectData[]) : SnykProject[] {
+
+  const projects: SnykProject[] = [];
+
+  for (const project of projectData) {  
+    const projectTmp: SnykProject = {
+      id : project.id, 
+      branch : project.attributes.targetReference ,
+      created : project.attributes.created,
+      origin : project.attributes.origin,
+      name : project.attributes.name,
+      type: project.attributes.type, 
+    }
+    projects.push(projectTmp)
+  }
+  
+  return projects
+}
+

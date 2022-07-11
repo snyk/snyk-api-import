@@ -117,34 +117,14 @@ export interface CommandResult {
 }
 
 export interface SnykProject {
-  name: string;
-  id: string;
-  created: string;
-  origin: string;
-  type: string;
-  readOnly: boolean;
-  testFrequency: string;
-  isMonitored: boolean;
-  totalDependencies: number;
-  issueCountsBySeverity: {
-    low: number;
-    high: number;
-    medium: number;
-    citical: number;
-  };
-  remoteRepoUrl: string; // URL of the repo
-  lastTestedDate: string;
-  browseUrl: string;
-  owner: string | null;
-  importingUser: ImportingUser;
-  tags: unknown[];
-  attributes: {
-    criticality: unknown[];
-    lifecycle: unknown[];
-    environment: unknown[];
-  };
-  branch: string | null;
+  name: string; 
+  id: string; 
+  created: string; 
+  origin: string; 
+  type: string; 
+  branch: string | null;  
 }
+
 
 export interface Org {
   name: string;
@@ -155,4 +135,41 @@ export interface Org {
     name: string;
     id: string;
   };
+}
+
+
+export interface v3ProjectData {
+  attributes: v3ProjectsAttributes;
+  id: string;
+  relationships: v3ProjectsRelationships;
+  type: string
+}
+
+export interface v3ProjectsAttributes {
+  businessCriticality: string;
+  created: string;
+  environment: string;
+  lifecycle: string;
+  name: string;
+  origin: string;
+  status: string;
+  tags: unknown;
+  targetReference: string | null;
+  type: string;
+}
+
+export interface v3ProjectsRelationships {
+  importingUser: v3ProjectsRelashionshipData;
+  org: v3ProjectsRelashionshipData;
+  owner: v3ProjectsRelashionshipData;
+  target: v3ProjectsRelashionshipData;
+}
+
+export interface v3ProjectsRelashionshipData {
+  data: {
+    id: string;
+    type: string;
+  }
+  links: unknown;
+  meta: unknown;
 }
