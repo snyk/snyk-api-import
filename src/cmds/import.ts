@@ -77,7 +77,7 @@ export async function handler(argv: { file: string }): Promise<void> {
     const res = await importFunction(file);
 
     if (res.exitCode === 1) {
-      debug('Failed to create organizations.\n' + res.message);
+      debug('Failed to import projects.\n' + res.message);
   
       console.error(res.message);
       yargs.exit(1, new Error(res.message))
