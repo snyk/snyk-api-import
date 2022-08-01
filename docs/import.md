@@ -21,7 +21,10 @@
 ## Prerequisites
 You will need to have setup in advance:
 - your [Snyk organizations](docs/orgs.md) should be setup before running an import
-- your Snyk organizations configured with some connection to SCM (Github/Gitlab/Bitbucket etc) as you will need the `integrationId` to generate the import files.
+- your Snyk organizations configured with some connection to SCM (Github/Gitlab/Bitbucket etc) as you will need the `integrationId` to generate the import files. 
+- you will need your Snyk API token, with correct scope & [admin access for all Organizations](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets) you are importing to. **Github Integration Note**: As Github is both an auth & integration, how the integration is done has an effect on usage: 
+  - For users importing via [Github Snyk integration](https://docs.snyk.io/integrations/git-repository-scm-integrations/github-integration#setting-up-a-github-integration) use your **personal Snyk API token** (Service Accounts are not supported for Github integration imports via API as this is a personal auth token only accessible to the user)
+  - For Github Enterprise Snyk integration with a url & token (for Github.com, Github Enterprise Cloud & Github Enterprise hosted) use a **Snyk API service account token**
 - Recommended: have [notifications disabled](https://snyk.docs.apiary.io/#reference/organizations/notification-settings/set-notification-settings) for emails etc to avoid receiving import notifications
 - Recommended: have the [fix PRs and PR checks disabled](https://snyk.docs.apiary.io/#reference/integrations/integration-settings/update) until import is complete to avoid sending extra requests to SCMs (Github/Gitlab/Bitbucket etc)
 
