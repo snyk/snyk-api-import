@@ -20,22 +20,16 @@ async function fetchOrgsForPage(
     perPage: 100,
     page: pageNumber,
   };
-  let hasNextPage;
-
   const orgs = await client.Groups.all(params);
-  if (orgs.length) {
-    hasNextPage = true;
+  const hasNextPage = orgs.length ? true : false;
+  orgsData.push(
+    ...orgs.map((org: any) => ({
+      name: org.full_path,
+      id: org.id,
+      url: org.web_url,
+    })),
+  );
 
-    orgsData.push(
-      ...orgs.map((org: any) => ({
-        name: org.full_path,
-        id: org.id,
-        url: org.web_url,
-      })),
-    );
-  } else {
-    hasNextPage = false;
-  }
   return {
     orgs: orgsData,
     hasNextPage,

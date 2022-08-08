@@ -23,22 +23,18 @@ export async function fetchReposForPage(
   };
   const res = await octokit.repos.listForOrg(params);
   const repos = res && res.data;
-  let hasNextPage;
-  if (repos.length) {
-    hasNextPage = true;
-    repoData.push(
-      ...repos
-        .filter((repo) => !repo.archived)
-        .map((repo) => ({
-          fork: repo.fork,
-          name: repo.name,
-          owner: repo.owner?.login,
-          branch: repo.default_branch,
-        })),
-    );
-  } else {
-    hasNextPage = false;
-  }
+  const hasNextPage = repos.length ? true : false;
+  repoData.push(
+    ...repos
+      .filter((repo) => !repo.archived)
+      .map((repo) => ({
+        fork: repo.fork,
+        name: repo.name,
+        owner: repo.owner?.login,
+        branch: repo.default_branch,
+      })),
+  );
+
   return { repos: repoData, hasNextPage };
 }
 

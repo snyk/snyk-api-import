@@ -114,13 +114,8 @@ export async function listOrgsPerPage(
     page: pageNumber,
   };
   const orgs = await listOrgs(requestManager, groupId, params);
-  let hasNextPage;
-  if (orgs.length) {
-    hasNextPage = true;
-    data.push(...orgs);
-  } else {
-    hasNextPage = false;
-  }
+  const hasNextPage = orgs.length ? true : false;
+  data.push(...orgs);
   return { orgs: data, hasNextPage };
 }
 

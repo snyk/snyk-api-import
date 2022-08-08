@@ -27,37 +27,31 @@ export async function fetchGitlabReposForPage(
     groupName,
     params,
   )) as gitBeakerTypes.Types.ProjectExtendedSchema[];
-  let hasNextPage;
-  if (projects.length) {
-    hasNextPage = true;
+  const hasNextPage = projects.length ? true : false;
 
-    for (const project of projects) {
-      const {
-        archived,
-        shared_with_groups,
-        default_branch,
-        forked_from_project,
-        path_with_namespace,
-        id,
-      } = project;
-      if (
-        archived ||
-        !default_branch ||
-        !shared_with_groups ||
-        (shared_with_groups && shared_with_groups.length === 0)
-      ) {
-        continue;
-      }
-
-      repoData.push({
-        fork: forked_from_project ? true : false,
-        name: path_with_namespace,
-        id,
-        branch: default_branch,
-      });
+  for (const project of projects) {
+    const {
+      archived,
+      shared_with_groups,
+      default_branch,
+      forked_from_project,
+      path_with_namespace,
+      id,
+    } = project;
+    if (
+      archived ||
+      !default_branch ||
+      (shared_with_groups && shared_with_groups.length > 0)
+    ) {
+      continue;
     }
-  } else {
-    hasNextPage = false;
+
+    repoData.push({
+      fork: forked_from_project ? true : false,
+      name: path_with_namespace,
+      id,
+      branch: default_branch,
+    });
   }
   return { repos: repoData, hasNextPage };
 }
