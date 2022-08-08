@@ -1,5 +1,5 @@
 export interface GitlabRepoData {
-  // fork: boolean;
+  fork: boolean;
   branch: string;
   id: number;
   name: string;

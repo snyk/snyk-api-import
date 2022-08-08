@@ -3,13 +3,13 @@ import * as debugLib from 'debug';
 import { getToken } from './get-token';
 
 import { getBaseUrl } from './get-base-url';
-import * as types from '@gitbeaker/core/dist/types';
+import * as gitBeakerTypes from '@gitbeaker/core';
 import { GitlabRepoData } from './types';
 
 const debug = debugLib('snyk:list-repos-script');
 
 export async function fetchGitlabReposForPage(
-  client: types.Gitlab,
+  client: gitBeakerTypes.Gitlab,
   groupName: string,
   pageNumber = 1,
   perPage = 100,
@@ -23,42 +23,41 @@ export async function fetchGitlabReposForPage(
     perPage,
     page: pageNumber,
   };
-  const projects = await client.Groups.projects(groupName, params);
-  let hasNextPage;
-  if (projects.length) {
-    hasNextPage = true;
-    repoData.push(
-      ...projects
-        .filter((project) => {
-          const {
-            archived,
-            shared_with_groups,
-            default_branch,
-          } = project as types.Types.ProjectExtendedSchema;
-          if (
-            archived ||
-            !default_branch ||
-            (shared_with_groups && shared_with_groups.length > 0)
-          ) {
-            return false;
-          }
-          return true;
-        })
-        .map((project) => ({
-          fork: !!project.forked_from_project,
-          name: project.path_with_namespace,
-          id: project.id,
-          branch: project.default_branch,
-        })),
-    );
-  } else {
-    hasNextPage = false;
+  const projects = (await client.Groups.projects(
+    groupName,
+    params,
+  )) as gitBeakerTypes.Types.ProjectExtendedSchema[];
+  const hasNextPage = projects.length ? true : false;
+
+  for (const project of projects) {
+    const {
+      archived,
+      shared_with_groups,
+      default_branch,
+      forked_from_project,
+      path_with_namespace,
+      id,
+    } = project;
+    if (
+      archived ||
+      !default_branch ||
+      (shared_with_groups && shared_with_groups.length > 0)
+    ) {
+      continue;
+    }
+
+    repoData.push({
+      fork: forked_from_project ? true : false,
+      name: path_with_namespace,
+      id,
+      branch: default_branch,
+    });
   }
   return { repos: repoData, hasNextPage };
 }
 
 async function fetchAllRepos(
-  client: types.Gitlab,
+  client: gitBeakerTypes.Gitlab,
   groupName: string,
   page = 0,
 ): Promise<GitlabRepoData[]> {
