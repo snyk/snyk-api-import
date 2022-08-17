@@ -9,3 +9,9 @@ export interface BitbucketCloudRepoData {
   name: string;
   branch: string;
 }
+
+export interface BitbucketCloudProjectData {
+  key: string;
+  uuid: string;
+  name: string;
+}

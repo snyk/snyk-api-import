@@ -12,6 +12,7 @@ import {
 import {
   bitbucketCloudWorkspaceIsEmpty,
   listBitbucketCloudWorkspaces,
+  listBitbucketCloudProjects,
 } from '../lib/source-handlers/bitbucket-cloud/';
 import {
   bitbucketServerProjectIsEmpty,
@@ -28,7 +29,7 @@ const sourceGenerators = {
   [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizations,
   [SupportedIntegrationTypesImportOrgData.GHE]: githubEnterpriseOrganizations,
   [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]: listBitbucketServerProjects,
-  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD]: listBitbucketCloudWorkspaces,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD]: listBitbucketCloudProjects,
 };
 
 const sourceNotEmpty = {
@@ -46,7 +47,7 @@ export const entityName: {
   'github-enterprise': 'organization',
   gitlab: 'group',
   'bitbucket-server': 'project',
-  'bitbucket-cloud': 'workspace',
+  'bitbucket-cloud': 'project',
 };
 
 const exportFileName: {
