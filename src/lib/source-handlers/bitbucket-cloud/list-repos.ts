@@ -8,7 +8,6 @@ import { getBitbucketCloudPassword } from './get-bitbucket-cloud-password';
 import { fetchAllWorkspaces, listBitbucketCloudWorkspaces } from './list-workspaces';
 import { limiterForScm } from '../../limiters';
 import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
-import { concat } from 'lodash';
 
 const debug = debugLib('snyk:bitbucket-cloud');
 
