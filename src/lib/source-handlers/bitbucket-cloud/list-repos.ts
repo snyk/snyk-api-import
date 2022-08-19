@@ -2,10 +2,8 @@ import * as debugLib from 'debug';
 import base64 = require('base-64');
 import { OutgoingHttpHeaders } from 'http2';
 import { BitbucketCloudRepoData } from './types';
-import { BitbucketCloudWorkspaceData } from './types';
 import { getBitbucketCloudUsername } from './get-bitbucket-cloud-username';
 import { getBitbucketCloudPassword } from './get-bitbucket-cloud-password';
-import { fetchAllWorkspaces, listBitbucketCloudWorkspaces } from './list-workspaces';
 import { limiterForScm } from '../../limiters';
 import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
 
@@ -28,7 +26,7 @@ interface BitbucketReposResponse {
 // as org with project perspective mapping to SnykOrg
 export const fetchAllBitbucketCloudRepos = async (
   org: string,
-  workspaces: BitbucketCloudWorkspaceData[],
+  workspace: string,
   username: string,
   password: string,
 ): Promise<BitbucketCloudRepoData[]> => {
@@ -38,27 +36,25 @@ export const fetchAllBitbucketCloudRepos = async (
   let nextPage;
   while (!lastPage) {
     debug(`Fetching page ${pageCount} for ${org}\n`);
-    for (const workspace of workspaces) {
-      try {
-        const {
-          repos,
-          next,
-        }: { repos: BitbucketCloudRepoData[]; next?: string } = await getRepos(
-          org,
-          workspace.uuid,
-          username,
-          password,
-          nextPage,
-        );
+    try {
+      const {
+        repos,
+        next,
+      }: { repos: BitbucketCloudRepoData[]; next?: string } = await getRepos(
+        org,
+        workspace,
+        username,
+        password,
+        nextPage,
+      );
 
-        reposList = reposList.concat(repos);
-        next
-          ? ((lastPage = false), (nextPage = next))
-          : ((lastPage = true), (nextPage = ''));
-        pageCount++;
-      } catch (err) {
-        throw new Error(JSON.stringify(err));
-      }
+      reposList = reposList.concat(repos);
+      next
+        ? ((lastPage = false), (nextPage = next))
+        : ((lastPage = true), (nextPage = ''));
+      pageCount++;
+    } catch (err) {
+      throw new Error(JSON.stringify(err));
     }
   }
   return reposList;
@@ -66,7 +62,7 @@ export const fetchAllBitbucketCloudRepos = async (
 
 const getRepos = async (
   org: string,
-  workspace_uuid: string,
+  workspace: string,
   username: string,
   password: string,
   nextPageLink?: string,
@@ -75,25 +71,26 @@ const getRepos = async (
   const headers: OutgoingHttpHeaders = {
     Authorization: `Basic ${base64.encode(username + ':' + password)}`,
   };
+  if (nextPageLink != undefined && nextPageLink) {
+    nextPageLink = decodeURIComponent(nextPageLink);
+  }
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
   const { statusCode, body } = await limiterWithRateLimitRetries<
     BitbucketReposResponse
   >(
     'get',
     nextPageLink ??
-      `https://bitbucket.org/api/2.0/repositories/${workspace_uuid}?q=project.name="${org}"&pagelen=100`,
+      `https://bitbucket.org/api/2.0/repositories/${workspace}?q=project.name="${org}"&pagelen=100`,
     headers,
     limiter,
     60000,
   );
-  // will return 404 for querying a bitbucket cloud workspace uuid that does not store our orgId as its project
-  // assume orgId i.e. project name is unique across workspaces
-  // ideally switch to use project uuid
-  if (statusCode != 200 && statusCode != 404) {
+  debug(`statusCode: ${statusCode}`);
+  if (statusCode != 200) {
     throw new Error(`Failed to fetch projects for ${
       nextPageLink != ''
         ? nextPageLink
-        : `https://bitbucket.org/api/2.0/repositories/${workspace_uuid}?q=project.name="${org}"&pagelen=100`
+        : `https://bitbucket.org/api/2.0/repositories/${workspace}?q=project.name="${org}"&pagelen=100`
     }\n
       Status Code: ${statusCode}\n
       Response body: ${JSON.stringify(body)}`);
@@ -111,17 +108,16 @@ const getRepos = async (
   return { repos, next };
 };
 
-// workspace renamed as org with project perspective mapping to SnykOrg
 export async function listBitbucketCloudRepos(
   org: string,
+  workspace: string,
 ): Promise<BitbucketCloudRepoData[]> {
   const bitbucketCloudUsername = getBitbucketCloudUsername();
   const bitbucketCloudPassword = getBitbucketCloudPassword();
-  const workspacesList = await fetchAllWorkspaces(bitbucketCloudUsername, bitbucketCloudPassword);
-  debug(`Fetching all repos data for org: ${org}`);
+  debug(`Fetching all repos data for org: ${org} on workspace: ${workspace}`);
   const repoList = await fetchAllBitbucketCloudRepos(
     org,
-    workspacesList,
+    workspace,
     bitbucketCloudUsername,
     bitbucketCloudPassword,
   );
