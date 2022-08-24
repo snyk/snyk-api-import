@@ -17,7 +17,9 @@ describe('generateTargetsImportDataFile Github script', () => {
   });
   it('generate Github repo data', async () => {
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
-    filesToDelete.push(path.resolve(__dirname + '/github-enterprise-import-targets.json'));
+    filesToDelete.push(
+      path.resolve(__dirname + '/github-enterprise-import-targets.json'),
+    );
     const orgsData: CreatedOrg[] = [
       {
         orgId: 'org-id',
@@ -54,7 +56,9 @@ describe('generateTargetsImportDataFile Github script', () => {
   it('generate Github Enterprise repo data', async () => {
     process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
     const GHE_URL = process.env.TEST_GHE_URL;
-    filesToDelete.push(path.resolve(__dirname + '/github-enterprise-import-targets.json'));
+    filesToDelete.push(
+      path.resolve(__dirname + '/github-enterprise-import-targets.json'),
+    );
     const orgsData: CreatedOrg[] = [
       {
         orgId: 'org-id',

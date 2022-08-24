@@ -72,7 +72,9 @@ describe('Import skips previously imported', () => {
     // give file a little time to be finished to be written
     await new Promise((r) => setTimeout(r, 5000));
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
-    expect(logFile).toMatch('composer-with-vulns:api-import-circle-test:master');
+    expect(logFile).toMatch(
+      'composer-with-vulns:api-import-circle-test:master',
+    );
   }, 240000);
 });
 
@@ -215,13 +217,9 @@ describe('Error handling', () => {
     const file = path.resolve(
       __dirname + '/fixtures/import-projects-invalid.json',
     );
-    expect(await importProjects(file)).toEqual({
-      filteredTargets: [],
-      projects: [],
-      skippedTargets: 0,
-      targets: [],
-      logFile: undefined,
-    });
+    expect(importProjects(file)).rejects.toThrow(
+      'Could not find "targets" key in json. Make sure the JSON is valid and the key is present',
+    );
   }, 300);
 
   it('shows correct error when SNYK_LOG_PATH is not set', async () => {
@@ -266,7 +264,9 @@ describe('No projects scenarios', () => {
     await new Promise((r) => setTimeout(r, 30000));
     const logFile = fs.readFileSync(logFiles.importJobsLogPath, 'utf8');
     expect(logFile).toMatch(`"status":"complete","projects":[]}`);
-    expect(logFile).toMatch(`"logs":[{"name":"api-import-circle-test/empty-repo"`);
+    expect(logFile).toMatch(
+      `"logs":[{"name":"api-import-circle-test/empty-repo"`,
+    );
   }, 3000000);
 
   it('succeeds to complete import from repo with no supported manifests', async () => {

@@ -11,38 +11,42 @@ export async function streamData<DataType>(
   jsonKey: string,
 ): Promise<DataType[]> {
   let res;
-  debug('Trying streamMinifiedJson');
-  res = await streamMinifiedJson<DataType>(file, jsonKey);
+  let parsedJson: DataType[];
+  debug('Trying to stream as minified JSON');
+  const fileStream = fs.createReadStream(file);
+
+  res = await streamJson(fileStream.pipe(split()));
   if (!res) {
     debug(
       `Failed to load as minified JSON, trying to load as beautified JSON with spaces`,
     );
-    res = await streamBeautifiedJson<DataType>(file, jsonKey);
+    res = await streamJson(fileStream);
   }
-  return res;
+  try {
+    const json = JSON.parse(res);
+    parsedJson = json[jsonKey];
+  } catch (e) {
+    const err = `ERROR: Could not find "${jsonKey}" key in json. Make sure the JSON is valid and the key is present`;
+    debugSnyk(err);
+    debug(e.message);
+    throw new Error(err);
+  }
+  return parsedJson;
 }
 
-export async function streamMinifiedJson<DataType>(
-  file: string,
-  arrayKey: string,
-): Promise<DataType[]> {
+export async function streamJson(
+  fileStream: any,
+): Promise<string> {
+  let data = '';
   return new Promise((resolve, reject) => {
-    let data: DataType[];
-    fs.createReadStream(file)
-      .pipe(split())
-      .on('data', (lineObj) => {
+    fileStream
+      .on('data', (lineObj: string) => {
         if (!lineObj) {
           return;
         }
-        try {
-          const json = JSON.parse(lineObj);
-          data = json[arrayKey];
-        } catch (e) {
-          debugSnyk(`ERROR: Could not find "${arrayKey}" key in json. Make sure the JSON is valid and the key is present`)
-          debug(e.message);
-        }
+        data += lineObj;
       })
-      .on('error', (err) => {
+      .on('error', (err: any) => {
         debug('Failed to createReadStream for file: ' + err);
         return reject(err);
       })
@@ -50,28 +54,3 @@ export async function streamMinifiedJson<DataType>(
   });
 }
 
-export async function streamBeautifiedJson<DataType>(
-  file: string,
-  arrayKey: string,
-): Promise<DataType[]> {
-  return new Promise((resolve, reject) => {
-    let data: DataType[];
-    fs.createReadStream(file)
-      .on('data', (jsonData) => {
-        if (!jsonData) {
-          return;
-        }
-        try {
-          const json = JSON.parse(jsonData);
-          data = json[arrayKey];
-        } catch (e) {
-          debug('ERROR parsing: ', e);
-        }
-      })
-      .on('error', (err) => {
-        debug('Failed to createReadStream for file: ' + err);
-        return reject(err);
-      })
-      .on('end', async () => resolve(data));
-  });
-}
