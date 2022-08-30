@@ -4,23 +4,40 @@ import { fetchAllBitbucketCloudRepos } from './list-repos';
 import { fetchAllWorkspaces } from './list-workspaces';
 import { BitbucketCloudRepoData } from './types';
 
+// sourceUrl argument is used to specify workspace name
 export async function bitbucketCloudWorkspaceIsEmpty(
   org: string,
+  sourceUrl?: string,
 ): Promise<boolean> {
   const bitbucketCloudUsername = getBitbucketCloudUsername();
   const bitbucketCloudPassword = getBitbucketCloudPassword();
-  const workspaces = await fetchAllWorkspaces(bitbucketCloudUsername, bitbucketCloudPassword);
-  let reposList: BitbucketCloudRepoData[] = []; 
+  let repos: BitbucketCloudRepoData[] = []
+  let isEmpty = true;
 
-  // bitbucket cloud API requires workspace to query repositories
-  for (const workspace of workspaces) {
-    const repos = await fetchAllBitbucketCloudRepos(
+  if (!sourceUrl) {
+    // search all bitbucket cloud workspaces if workspace is not specified
+    const workspaces = await fetchAllWorkspaces(bitbucketCloudUsername, bitbucketCloudPassword);
+    let i = 0;
+    while (i < workspaces.length && isEmpty){
+      repos = await fetchAllBitbucketCloudRepos(
+        org,
+        workspaces[i].name,
+        bitbucketCloudUsername,
+        bitbucketCloudPassword,
+      );
+      isEmpty = (!repos || repos.length === 0);
+      i++;
+    }
+  }
+  else {
+    repos = await fetchAllBitbucketCloudRepos(
       org,
-      workspace.name,
+      sourceUrl,
       bitbucketCloudUsername,
       bitbucketCloudPassword,
     );
-    reposList = reposList.concat(repos)
+    isEmpty = (!repos || repos.length === 0);
   }
-  return !reposList || reposList.length === 0;
+
+  return isEmpty;
 }
