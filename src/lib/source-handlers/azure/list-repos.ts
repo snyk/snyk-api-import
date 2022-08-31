@@ -20,13 +20,16 @@ interface AzureReposResponse {
 export async function fetchAllRepos(
   url: string,
   orgName: string,
-  project: string,
+  project: {
+    name: string;
+    id: string;
+  },
   token: string,
 ): Promise<AzureRepoData[]> {
-  debug('Fetching repos for ' + project);
+  debug('Fetching repos for ' + project.name);
   let repoList: AzureRepoData[] = [];
   try {
-    repoList = await getRepos(url, orgName, project, token);
+    repoList = await getRepos(url, orgName, project.id, token);
   } catch (err) {
     throw new Error(JSON.stringify(err));
   }
@@ -36,7 +39,7 @@ export async function fetchAllRepos(
 async function getRepos(
   url: string,
   orgName: string,
-  project: string,
+  projectId: string,
   token: string,
 ): Promise<AzureRepoData[]> {
   const repoList: AzureRepoData[] = [];
@@ -48,17 +51,13 @@ async function getRepos(
     AzureReposResponse
   >(
     'get',
-    `${url}/${orgName}/` +
-      encodeURIComponent(project) +
-      '/_apis/git/repositories?api-version=4.1',
+    `${url}/${orgName}/${projectId}/_apis/git/repositories?api-version=4.1`,
     headers,
     limiter,
     60000,
   );
   if (statusCode != 200) {
-    throw new Error(`Failed to fetch repos for ${url}/${orgName}/${encodeURIComponent(
-      project,
-    )}/_apis/git/repositories?api-version=4.1\n
+    throw new Error(`Failed to fetch repos for ${url}/${orgName}/${projectId}/_apis/git/repositories?api-version=4.1\n
     Status Code: ${statusCode}\n
     Response body: ${JSON.stringify(body)}`);
   }
@@ -87,7 +86,12 @@ export async function listAzureRepos(
   const projectList = await listAzureProjects(orgName, baseUrl);
   for (const project of projectList) {
     repoList.push(
-      ...(await fetchAllRepos(baseUrl, orgName, project.name, azureToken)),
+      ...(await fetchAllRepos(
+        baseUrl,
+        orgName,
+        { name: project.name, id: project.id },
+        azureToken,
+      )),
     );
   }
   return repoList;
