@@ -20,3 +20,5 @@ export const targetProps = [
   'branch',
 ];
 export const targetPropsWithId = [...targetProps, 'id'];
+
+export const UPDATED_BATCHES_LOG_NAME = 'updated-batches.log';
