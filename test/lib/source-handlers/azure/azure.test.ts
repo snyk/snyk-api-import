@@ -54,7 +54,7 @@ beforeEach(() => {
               'utf8',
             ),
           );
-        case '/reposTestOrg/Test68/_apis/git/repositories?api-version=4.1':
+        case '/reposTestOrg/371efd3e-3e86-4d33-846d-e5e46397dd91/_apis/git/repositories?api-version=4.1':
           return JSON.parse(
             fs.readFileSync(fixturesFolderPath + 'org-repos.json', 'utf8'),
           );
