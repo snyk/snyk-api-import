@@ -203,6 +203,7 @@ async function listAllProjects(requestManager: requestsManager,
     let pageCount = 1;
     let nextPageLink: string | undefined = undefined;
     while (!lastPage) {
+      console.log(lastPage)
       try {
         const {
           projects,
@@ -231,7 +232,7 @@ async function getProject(requestManager: requestsManager,
   nextPageLink?: string,
   ): Promise< { projects: SnykProject[], next?: string } > {
   
-    const url = nextPageLink ? nextPageLink : `/orgs/${orgId.trim()}/projects?version=2022-06-08~beta`
+    const url = nextPageLink ? nextPageLink : `http://localhost:8000/rest/orgs/${orgId.trim()}/projects?version=2022-06-08~beta`
     const res = await requestManager.request({
     verb: 'get',
     url: url,
