@@ -268,10 +268,34 @@ function convertToSnykProject(projectData: v3ProjectData[]) : SnykProject[] {
       origin : project.attributes.origin,
       name : project.attributes.name,
       type: project.attributes.type, 
+      lastTestedDate: project.attributes.lastTestedDate,
+      testFrequency: project.attributes.testFrequency,
+    };
+    projects.push(projectTmp);
     }
-    projects.push(projectTmp)
-  }
-  
-  return projects
+  return projects;
 }
 
+export async function getSingleProject(
+  requestManager: requestsManager,
+  orgId: string,
+  projectId: string,
+): Promise<SnykProject> {
+  const res = await requestManager.request({
+    verb: 'get',
+    url: `/orgs/${orgId.trim()}/projects/${projectId}?version=2022-04-06~experimental`, //This enpoint is not returning testFrequency and lastTestedDate, yet
+    useRESTApi: true,
+  });
+
+  const statusCode = res.statusCode || res.status;
+  if (!statusCode || statusCode !== 200) {
+    throw new Error(
+      'Expected a 200 response, instead received: ' +
+        JSON.stringify({ data: res.data, status: statusCode }),
+    );
+  }
+  const v3responseData = res.data as v3ProjectsResponse;
+  const projects = convertToSnykProject(v3responseData.data);
+
+  return projects[0];
+}

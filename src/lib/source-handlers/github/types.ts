@@ -14,3 +14,13 @@ export interface GithubOrgData {
   id: number;
   url: string;
 }
+
+export interface Commits {
+  sha: string;
+}
+
+export interface CommitFiles {
+    filename?: string;
+    status?: string;
+    previous_filename?: string;
+}

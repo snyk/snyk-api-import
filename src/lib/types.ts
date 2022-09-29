@@ -123,6 +123,8 @@ export interface SnykProject {
   origin: string; 
   type: string; 
   branch: string | null;  
+  lastTestedDate: string;
+  testFrequency: string;
 }
 
 
@@ -156,6 +158,8 @@ export interface v3ProjectsAttributes {
   tags: unknown;
   targetReference: string | null;
   type: string;
+  lastTestedDate: string;
+  testFrequency: string;
 }
 
 export interface v3ProjectsRelationships {
