@@ -3,6 +3,8 @@ import * as needle from 'needle';
 import * as debugLib from 'debug';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
+import { requestsManager } from 'snyk-request-manager';
+import { SnykProject } from '../../types';
 const debug = debugLib('snyk:api-import');
 
 export async function deleteProjects(
@@ -55,4 +57,47 @@ export async function deleteProjects(
     err.innerError = error;
     throw err;
   }
+}
+
+export async function updateProject(
+  requestManager: requestsManager,
+  orgId: string,
+  projectId: string,
+  config: { branch: string},
+): Promise<SnykProject> {
+
+  getApiToken();
+  getSnykHost();
+  debug('Update project: ' + projectId);
+
+  if (!orgId || !projectId) {
+    throw new Error(
+      `Missing required parameters. Please ensure you have set: orgId and projectId.
+      \nFor more information see: https://snyk.docs.apiary.io/reference/projects/individual-project/update-a-project`,
+    );
+  }
+
+  const body = {
+    branch: config.branch,
+  };
+
+  const url = `/org/${orgId.trim()}/project/${projectId.trim()}`
+  const res = await requestManager.request({
+  verb: 'put',
+  url: url,
+  body: JSON.stringify(body),
+  useRESTApi: false,
+  });
+
+  const statusCode = res.statusCode || res.status;
+  if (!statusCode || statusCode !== 200) {
+    throw new Error(
+      'Expected a 200 response, instead received: ' +
+        JSON.stringify({ data: res.data, status: statusCode }),
+    );
+  }
+
+  const updatedProject: SnykProject = res.data
+  
+  return updatedProject;
 }
