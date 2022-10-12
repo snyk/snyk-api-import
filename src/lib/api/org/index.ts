@@ -3,8 +3,10 @@ import { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
-import { SnykProject, v3ProjectData } from '../../types';
+import { SnykProject, SnykTarget, TargetsResponse, RESTProjectData } from '../../types';
 import { StringNullableChain } from 'lodash';
+import { Console } from 'console';
+import { url } from 'inspector';
 
 const debug = debugLib('snyk:api-group');
 
@@ -142,8 +144,8 @@ interface ProjectsResponse {
 }
 
 
-interface v3ProjectsResponse {
-  data: v3ProjectData[];
+interface RESTProjectsResponse {
+  data: RESTProjectData[];
   jsonapi: {
     version: string;
   };
@@ -247,16 +249,16 @@ async function getProject(requestManager: requestsManager,
     );
   }
   
-  const v3responseData = res.data as v3ProjectsResponse
+  const RESTresponseData = res.data as RESTProjectsResponse
 
-  const projects = convertToSnykProject(v3responseData.data)
-  const next =  v3responseData.links.next
+  const projects = convertToSnykProject(RESTresponseData.data)
+  const next =  RESTresponseData.links.next
 
   return { projects, next}
 
 }
 
-function convertToSnykProject(projectData: v3ProjectData[]) : SnykProject[] {
+function convertToSnykProject(projectData: RESTProjectData[]) : SnykProject[] {
 
   const projects: SnykProject[] = [];
 
@@ -275,3 +277,111 @@ function convertToSnykProject(projectData: v3ProjectData[]) : SnykProject[] {
   return projects
 }
 
+export async function listTargets(
+  requestManager: requestsManager,
+  orgId: string,
+  config?: {
+    limit?: number,
+    isEmpty?: boolean,
+    origin?: string,
+  }
+): Promise<TargetsResponse> {
+  getApiToken();
+  getSnykHost();
+  debug(`Listing all targets for org: ${orgId}`);
+
+  if (!orgId && orgId.length > 0) {
+    throw new Error(
+      `Missing required parameters. Please ensure you have set: orgId, settings.
+        \nFor more information see: https://apidocs.snyk.io/?version=2022-09-15%7Ebeta#get-/orgs/-org_id-/targets`,
+    );
+  }
+  
+  const targets = await listAllSnykTarget(requestManager, orgId, config)
+
+  return {targets: targets};
+}
+
+export async function listAllSnykTarget(requestManager: requestsManager,
+  orgId: string,
+  config?: {
+    limit?: number,
+    isEmpty?: boolean,
+    origin?: string,
+  }
+  ): Promise<SnykTarget[]> {
+
+    let lastPage = false;
+    let SnykTargetList: SnykTarget[] = [];
+    let pageCount = 1;
+    let nextPageLink: string | undefined = undefined;
+    while (!lastPage) {
+      try {
+        debug(`Fetching page ${pageCount} of get target for ${orgId}\n`);
+        const {
+          SnykTarget,
+          next,
+        }: {
+          SnykTarget: SnykTarget[];
+          next?: string;
+        } = await getSnykTarget(requestManager, orgId, nextPageLink, config);
+
+        SnykTargetList = SnykTargetList.concat(SnykTarget);
+        next
+          ? ((lastPage = false), (nextPageLink = next))
+          : ((lastPage = true), (nextPageLink = ''));
+        pageCount++;
+      } catch (e) {
+        debug('Failed to get targets for ', orgId, e);
+        throw e;
+    }
+  }
+  return SnykTargetList
+}
+
+export async function getSnykTarget(requestManager: requestsManager,
+  orgId: string,
+  nextPageLink?: string, 
+  config?: {
+    limit?: number,
+    isEmpty?: boolean,
+    origin?: string,
+  }): Promise< { SnykTarget: SnykTarget[], next?: string } > {
+
+    const link = nextPageLink ? nextPageLink : `https://api.dev.snyk.io/rest/orgs/${orgId.trim()}/targets?version=2022-09-15~beta`
+    const url = new URL(link)
+
+    if (config) {
+      if (config.isEmpty) {
+        url.searchParams.set('isEmpty', String(config.isEmpty))
+      } 
+      if (config.limit) {
+        url.searchParams.set('limit', String(config.limit))
+      } 
+      if (config.origin) {
+        url.searchParams.set('origin', config.origin)
+      }       
+    }
+    
+    const res = await requestManager.request({
+    verb: 'get',
+    url: url.toString(),
+    body: undefined,
+    useRESTApi: true,
+  });
+
+  const statusCode = res.statusCode || res.status;
+  if (!statusCode || statusCode !== 200) {
+    throw new Error(
+      'Expected a 200 response, instead received: ' +
+        JSON.stringify({ data: res.data, status: statusCode }),
+    );
+  }
+    
+  const responseData = res.data
+  const SnykTarget = responseData.data
+  const next =  responseData.links.next
+
+  return { SnykTarget, next }
+
+}

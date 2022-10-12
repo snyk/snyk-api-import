@@ -1,3 +1,4 @@
+
 export interface ImportTarget {
   orgId: string;
   integrationId: string;
@@ -138,14 +139,14 @@ export interface Org {
 }
 
 
-export interface v3ProjectData {
-  attributes: v3ProjectsAttributes;
+export interface RESTProjectData {
+  attributes: RESTProjectsAttributes;
   id: string;
-  relationships: v3ProjectsRelationships;
+  relationships: RESTProjectsRelationships;
   type: string
 }
 
-export interface v3ProjectsAttributes {
+export interface RESTProjectsAttributes {
   businessCriticality: string;
   created: string;
   environment: string;
@@ -158,18 +159,74 @@ export interface v3ProjectsAttributes {
   type: string;
 }
 
-export interface v3ProjectsRelationships {
-  importingUser: v3ProjectsRelashionshipData;
-  org: v3ProjectsRelashionshipData;
-  owner: v3ProjectsRelashionshipData;
-  target: v3ProjectsRelashionshipData;
+export interface RESTProjectsRelationships {
+  importingUser: RESTProjectsRelashionshipData;
+  org: RESTProjectsRelashionshipData;
+  owner: RESTProjectsRelashionshipData;
+  target: RESTProjectsRelashionshipData;
 }
 
-export interface v3ProjectsRelashionshipData {
+export interface RESTProjectsRelashionshipData {
   data: {
     id: string;
     type: string;
   }
-  links: unknown;
+  links: {
+    first?: string;
+    last?: string;
+    next?: string;
+    prev?: string;
+    related?: string;
+    self?: string;
+  };
   meta: unknown;
+}
+
+export interface SnykTargetRelationships {
+  org: {
+    data : {
+      id: string;
+      type: string;
+    }
+    links: {
+      first?: string;
+      last?: string;
+      next?: string;
+      prev?: string;
+      related?: string;
+      self?: string;
+    };
+    meta: unknown;
+  }
+}
+
+export interface SnykTargetData {
+  attributes: {
+    displayName: string; 
+    isPrivate: boolean;   
+    origin: string;
+    remoteUrl: string | null;
+  }
+  id: string;    
+  relationships: SnykTargetRelationships;
+  type: string;
+}
+
+export interface SnykTarget {
+  data: SnykTargetData[];
+  jsonapi: {
+    version: string;
+  }
+  links: {
+    first?: string;
+    last?: string;
+    next?: string;
+    prev?: string;
+    related?: string;
+    self?: string;
+  };
+}
+
+export interface TargetsResponse {
+  targets: SnykTarget[]
 }

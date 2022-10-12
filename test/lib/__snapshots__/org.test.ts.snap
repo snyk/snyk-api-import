@@ -1,0 +1,689 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`listTargets list the targets in a given Org with filter - mock 1`] = `
+Object {
+  "targets": Array [
+    Object {
+      "attributes": Object {
+        "displayName": "api-import-circle-test/js-nested-manifest",
+        "isPrivate": true,
+        "origin": "github-enterprise",
+        "remoteUrl": null,
+      },
+      "id": "8d7f3e14-3e31-4f56-9b9f-5100d97bexxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "api-import-circle-test/ruby-with-versions",
+        "isPrivate": true,
+        "origin": "github-enterprise",
+        "remoteUrl": null,
+      },
+      "id": "6bc6d051-34a4-4883-becc-c0d658efexxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+  ],
+}
+`;
+
+exports[`listTargets list the targets in a given Org with pagination - mock 1`] = `
+Object {
+  "targets": Array [
+    Object {
+      "attributes": Object {
+        "displayName": "api-import-circle-test/js-nested-manifest",
+        "isPrivate": true,
+        "origin": "github-enterprise",
+        "remoteUrl": null,
+      },
+      "id": "8d7f3e14-3e31-4f56-9b9f-5100d97bexxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "api-import-circle-test/ruby-with-versions",
+        "isPrivate": true,
+        "origin": "github-enterprise",
+        "remoteUrl": null,
+      },
+      "id": "6bc6d051-34a4-4883-becc-c0d658efexxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "antoine-snyk-demo/TestRepoAntoine",
+        "isPrivate": true,
+        "origin": "bitbucket-server",
+        "remoteUrl": null,
+      },
+      "id": "5f3f0648-a18c-49eb-b415-56a591afcxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-test-scm/dotnet-mixed-manifests",
+        "isPrivate": true,
+        "origin": "bitbucket-cloud",
+        "remoteUrl": null,
+      },
+      "id": "7fab7f61-0ed9-4696-a878-8c14122b8xxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-test-scm/npm-lockfiles",
+        "isPrivate": false,
+        "origin": "bitbucket-cloud",
+        "remoteUrl": null,
+      },
+      "id": "3300bafb-cb25-45de-9833-321b3620xxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-test-scm/test-spaces",
+        "isPrivate": true,
+        "origin": "bitbucket-cloud",
+        "remoteUrl": null,
+      },
+      "id": "1fd5033d-0e55-422f-b76e-9b25d7b9xxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "Test 105/goof.git",
+        "isPrivate": false,
+        "origin": "azure-repos",
+        "remoteUrl": null,
+      },
+      "id": "72ec5dcf-9982-4bfa-86aa-06e2516axxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-fixtures/composer-with-vulns",
+        "isPrivate": false,
+        "origin": "github",
+        "remoteUrl": null,
+      },
+      "id": "da026d55-5ea5-47f8-a81c-86d9bf7fxxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-fixtures/js-nested-manifest",
+        "isPrivate": false,
+        "origin": "github",
+        "remoteUrl": "null",
+      },
+      "id": "7fe02681-8deb-4f3b-a2d3-0c9990f7xxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "api-import-circle-test/js-nested-manifest",
+        "isPrivate": true,
+        "origin": "github-enterprise",
+        "remoteUrl": null,
+      },
+      "id": "8d7f3e14-3e31-4f56-9b9f-5100d97bexxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "api-import-circle-test/ruby-with-versions",
+        "isPrivate": true,
+        "origin": "github-enterprise",
+        "remoteUrl": null,
+      },
+      "id": "6bc6d051-34a4-4883-becc-c0d658efexxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "antoine-snyk-demo/TestRepoAntoine",
+        "isPrivate": true,
+        "origin": "bitbucket-server",
+        "remoteUrl": null,
+      },
+      "id": "5f3f0648-a18c-49eb-b415-56a591afcxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-test-scm/dotnet-mixed-manifests",
+        "isPrivate": true,
+        "origin": "bitbucket-cloud",
+        "remoteUrl": null,
+      },
+      "id": "7fab7f61-0ed9-4696-a878-8c14122b8xxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-test-scm/npm-lockfiles",
+        "isPrivate": false,
+        "origin": "bitbucket-cloud",
+        "remoteUrl": null,
+      },
+      "id": "3300bafb-cb25-45de-9833-321b3620xxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-test-scm/test-spaces",
+        "isPrivate": true,
+        "origin": "bitbucket-cloud",
+        "remoteUrl": null,
+      },
+      "id": "1fd5033d-0e55-422f-b76e-9b25d7b9xxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "Test 105/goof.git",
+        "isPrivate": false,
+        "origin": "azure-repos",
+        "remoteUrl": null,
+      },
+      "id": "72ec5dcf-9982-4bfa-86aa-06e2516axxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-fixtures/composer-with-vulns",
+        "isPrivate": false,
+        "origin": "github",
+        "remoteUrl": null,
+      },
+      "id": "da026d55-5ea5-47f8-a81c-86d9bf7fxxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-fixtures/js-nested-manifest",
+        "isPrivate": false,
+        "origin": "github",
+        "remoteUrl": "null",
+      },
+      "id": "7fe02681-8deb-4f3b-a2d3-0c9990f7xxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+  ],
+}
+`;
+
+exports[`listTargets list the targets in a given Org without pagination - mock 1`] = `
+Object {
+  "targets": Array [
+    Object {
+      "attributes": Object {
+        "displayName": "api-import-circle-test/js-nested-manifest",
+        "isPrivate": true,
+        "origin": "github-enterprise",
+        "remoteUrl": null,
+      },
+      "id": "8d7f3e14-3e31-4f56-9b9f-5100d97bexxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "api-import-circle-test/ruby-with-versions",
+        "isPrivate": true,
+        "origin": "github-enterprise",
+        "remoteUrl": null,
+      },
+      "id": "6bc6d051-34a4-4883-becc-c0d658efexxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "antoine-snyk-demo/TestRepoAntoine",
+        "isPrivate": true,
+        "origin": "bitbucket-server",
+        "remoteUrl": null,
+      },
+      "id": "5f3f0648-a18c-49eb-b415-56a591afcxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-test-scm/dotnet-mixed-manifests",
+        "isPrivate": true,
+        "origin": "bitbucket-cloud",
+        "remoteUrl": null,
+      },
+      "id": "7fab7f61-0ed9-4696-a878-8c14122b8xxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-test-scm/npm-lockfiles",
+        "isPrivate": false,
+        "origin": "bitbucket-cloud",
+        "remoteUrl": null,
+      },
+      "id": "3300bafb-cb25-45de-9833-321b3620xxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-test-scm/test-spaces",
+        "isPrivate": true,
+        "origin": "bitbucket-cloud",
+        "remoteUrl": null,
+      },
+      "id": "1fd5033d-0e55-422f-b76e-9b25d7b9xxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "Test 105/goof.git",
+        "isPrivate": false,
+        "origin": "azure-repos",
+        "remoteUrl": null,
+      },
+      "id": "72ec5dcf-9982-4bfa-86aa-06e2516axxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-fixtures/composer-with-vulns",
+        "isPrivate": false,
+        "origin": "github",
+        "remoteUrl": null,
+      },
+      "id": "da026d55-5ea5-47f8-a81c-86d9bf7fxxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+    Object {
+      "attributes": Object {
+        "displayName": "snyk-fixtures/js-nested-manifest",
+        "isPrivate": false,
+        "origin": "github",
+        "remoteUrl": "null",
+      },
+      "id": "7fe02681-8deb-4f3b-a2d3-0c9990f7xxxx",
+      "relationships": Object {
+        "org": Object {
+          "data": Object {
+            "id": "e661d4ef-5ad5-4cef-ad16-5157cefa8xxx",
+            "type": "org",
+          },
+          "links": Object {
+            "self": Object {
+              "href": "/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefaxxx",
+            },
+          },
+        },
+      },
+      "type": "target",
+    },
+  ],
+}
+`;
