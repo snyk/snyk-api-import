@@ -118,12 +118,12 @@ export interface CommandResult {
 }
 
 export interface SnykProject {
-  name: string; 
-  id: string; 
-  created: string; 
-  origin: string; 
-  type: string; 
-  branch: string | null;  
+  name: string;
+  id: string;
+  created: string;
+  origin: string;
+  type: string;
+  branch: string | null;
 }
 
 
@@ -200,20 +200,20 @@ export interface SnykTargetRelationships {
   }
 }
 
-export interface SnykTargetData {
+export interface SnykTarget {
   attributes: {
-    displayName: string; 
-    isPrivate: boolean;   
+    displayName: string;
+    isPrivate: boolean;
     origin: string;
     remoteUrl: string | null;
   }
-  id: string;    
+  id: string;
   relationships: SnykTargetRelationships;
   type: string;
 }
 
-export interface SnykTarget {
-  data: SnykTargetData[];
+export interface RESTTargetResponse {
+  data: SnykTarget[];
   jsonapi: {
     version: string;
   }
@@ -225,8 +225,4 @@ export interface SnykTarget {
     related?: string;
     self?: string;
   };
-}
-
-export interface TargetsResponse {
-  targets: SnykTarget[]
 }

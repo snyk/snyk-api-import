@@ -1,12 +1,15 @@
 import 'source-map-support/register';
 import { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
+import * as qs from 'querystring';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
-import { SnykProject, SnykTarget, TargetsResponse, RESTProjectData } from '../../types';
-import { StringNullableChain } from 'lodash';
-import { Console } from 'console';
-import { url } from 'inspector';
+import {
+  SnykProject,
+  RESTTargetResponse,
+  RESTProjectData,
+  SnykTarget,
+} from '../../types';
 
 const debug = debugLib('snyk:api-group');
 
@@ -143,7 +146,6 @@ interface ProjectsResponse {
   projects: SnykProject[];
 }
 
-
 interface RESTProjectsResponse {
   data: RESTProjectData[];
   jsonapi: {
@@ -160,12 +162,11 @@ interface RESTProjectsResponse {
 }
 
 interface ProjectsFilters {
-  name?: StringNullableChain; // If supplied, only projects that have a name that starts with this value will be returned
+  name?: string; // If supplied, only projects that have a name that starts with this value will be returned
   origin?: string; //If supplied, only projects that exactly match this origin will be returned
   type?: string; //If supplied, only projects that exactly match this type will be returned
   isMonitored?: boolean; // If set to true, only include projects which are monitored, if set to false, only include projects which are not monitored
 }
-
 
 export async function listProjects(
   requestManager: requestsManager,
@@ -183,58 +184,63 @@ export async function listProjects(
     );
   }
 
-  const projects = await listAllProjects(requestManager, orgId, filters)
-  
+  const projects = await listAllProjects(requestManager, orgId, filters);
+
   const snykProjectData: ProjectsResponse = {
     org: {
       id: orgId,
     },
-    projects: projects
-  }
+    projects: projects,
+  };
 
   return snykProjectData;
 }
 
-async function listAllProjects(requestManager: requestsManager,
+async function listAllProjects(
+  requestManager: requestsManager,
   orgId: string,
   filters?: ProjectsFilters,
-  ): Promise<SnykProject[]> {
+): Promise<SnykProject[]> {
+  let lastPage = false;
+  const projectsList: SnykProject[] = [];
+  let pageCount = 1;
+  let nextPageLink: string | undefined = undefined;
+  while (!lastPage) {
+    try {
+      debug(
+        `Fetching page ${pageCount} to list all projects for org ${orgId}\n`,
+      );
+      const {
+        projects,
+        next,
+      }: {
+        projects: SnykProject[];
+        next?: string;
+      } = await getProject(requestManager, orgId, filters, nextPageLink);
 
-    let lastPage = false;
-    let projectsList: SnykProject[] = [];
-    let pageCount = 1;
-    let nextPageLink: string | undefined = undefined;
-    while (!lastPage) {
-      try {
-        const {
-          projects,
-          next,
-        }: {
-          projects: SnykProject[];
-          next?: string;
-        } = await getProject(requestManager, orgId, filters, nextPageLink);
-
-        projectsList = projectsList.concat(projects);
-        next
-          ? ((lastPage = false), (nextPageLink = next))
-          : ((lastPage = true), (nextPageLink = ''));
-        pageCount++;
-      } catch (e) {
-        debug('Failed to update notification settings for ', orgId, e);
-        throw e;
+      projectsList.push(...projects);
+      next
+        ? ((lastPage = false), (nextPageLink = next))
+        : ((lastPage = true), (nextPageLink = ''));
+      pageCount++;
+    } catch (e) {
+      debug('Failed to update notification settings for ', orgId, e);
+      throw e;
     }
   }
-  return projectsList
+  return projectsList;
 }
 
-async function getProject(requestManager: requestsManager,
+async function getProject(
+  requestManager: requestsManager,
   orgId: string,
   filters?: ProjectsFilters,
   nextPageLink?: string,
-  ): Promise< { projects: SnykProject[], next?: string } > {
-  
-    const url = nextPageLink ? nextPageLink : `/orgs/${orgId.trim()}/projects?version=2022-06-08~beta`
-    const res = await requestManager.request({
+): Promise<{ projects: SnykProject[]; next?: string }> {
+  const url = nextPageLink
+    ? nextPageLink
+    : `/orgs/${orgId.trim()}/projects?version=2022-06-08~beta`;
+  const res = await requestManager.request({
     verb: 'get',
     url: url,
     body: JSON.stringify(filters),
@@ -248,44 +254,45 @@ async function getProject(requestManager: requestsManager,
         JSON.stringify({ data: res.data, status: statusCode }),
     );
   }
-  
-  const RESTresponseData = res.data as RESTProjectsResponse
 
-  const projects = convertToSnykProject(RESTresponseData.data)
-  const next =  RESTresponseData.links.next
+  const RESTresponseData = res.data as RESTProjectsResponse;
 
-  return { projects, next}
+  const projects = convertToSnykProject(RESTresponseData.data);
+  const next = RESTresponseData.links.next;
 
+  return { projects, next };
 }
 
-function convertToSnykProject(projectData: RESTProjectData[]) : SnykProject[] {
-
+function convertToSnykProject(projectData: RESTProjectData[]): SnykProject[] {
   const projects: SnykProject[] = [];
 
-  for (const project of projectData) {  
+  for (const project of projectData) {
     const projectTmp: SnykProject = {
-      id : project.id, 
-      branch : project.attributes.targetReference ,
-      created : project.attributes.created,
-      origin : project.attributes.origin,
-      name : project.attributes.name,
-      type: project.attributes.type, 
-    }
-    projects.push(projectTmp)
+      id: project.id,
+      branch: project.attributes.targetReference,
+      created: project.attributes.created,
+      origin: project.attributes.origin,
+      name: project.attributes.name,
+      type: project.attributes.type,
+    };
+    projects.push(projectTmp);
   }
-  
-  return projects
-}
 
+  return projects;
+}
+interface TargetFilters {
+  remoteUrl?: string;
+  limit?: number;
+  isPrivate?: boolean;
+  origin?: string;
+  displayName?: string;
+  excludeEmpty?: boolean;
+}
 export async function listTargets(
   requestManager: requestsManager,
   orgId: string,
-  config?: {
-    limit?: number,
-    isEmpty?: boolean,
-    origin?: string,
-  }
-): Promise<TargetsResponse> {
+  config?: TargetFilters,
+): Promise<{ targets: SnykTarget[] }> {
   getApiToken();
   getSnykHost();
   debug(`Listing all targets for org: ${orgId}`);
@@ -296,76 +303,69 @@ export async function listTargets(
         \nFor more information see: https://apidocs.snyk.io/?version=2022-09-15%7Ebeta#get-/orgs/-org_id-/targets`,
     );
   }
-  
-  const targets = await listAllSnykTarget(requestManager, orgId, config)
 
-  return {targets: targets};
+  const targets = await listAllSnykTarget(requestManager, orgId, config);
+
+  return { targets };
 }
 
-export async function listAllSnykTarget(requestManager: requestsManager,
+export async function listAllSnykTarget(
+  requestManager: requestsManager,
   orgId: string,
-  config?: {
-    limit?: number,
-    isEmpty?: boolean,
-    origin?: string,
-  }
-  ): Promise<SnykTarget[]> {
+  config?: TargetFilters,
+): Promise<SnykTarget[]> {
+  let lastPage = false;
+  const targetsList: SnykTarget[] = [];
+  let pageCount = 1;
+  let nextPageLink: string | undefined = undefined;
+  while (!lastPage) {
+    try {
+      debug(`Fetching page ${pageCount} of get target for ${orgId}\n`);
+      const {
+        targets,
+        next,
+      }: { targets: SnykTarget[]; next?: string } = await getSnykTarget(
+        requestManager,
+        orgId,
+        nextPageLink,
+        config,
+      );
 
-    let lastPage = false;
-    let SnykTargetList: SnykTarget[] = [];
-    let pageCount = 1;
-    let nextPageLink: string | undefined = undefined;
-    while (!lastPage) {
-      try {
-        debug(`Fetching page ${pageCount} of get target for ${orgId}\n`);
-        const {
-          SnykTarget,
-          next,
-        }: {
-          SnykTarget: SnykTarget[];
-          next?: string;
-        } = await getSnykTarget(requestManager, orgId, nextPageLink, config);
-
-        SnykTargetList = SnykTargetList.concat(SnykTarget);
-        next
-          ? ((lastPage = false), (nextPageLink = next))
-          : ((lastPage = true), (nextPageLink = ''));
-        pageCount++;
-      } catch (e) {
-        debug('Failed to get targets for ', orgId, e);
-        throw e;
+      targetsList.push(...targets);
+      next
+        ? ((lastPage = false), (nextPageLink = next))
+        : ((lastPage = true), (nextPageLink = undefined));
+      pageCount++;
+    } catch (e) {
+      debug('Failed to get targets for ', orgId, e);
+      throw e;
     }
   }
-  return SnykTargetList
+  return targetsList;
 }
 
-export async function getSnykTarget(requestManager: requestsManager,
+export async function getSnykTarget(
+  requestManager: requestsManager,
   orgId: string,
-  nextPageLink?: string, 
-  config?: {
-    limit?: number,
-    isEmpty?: boolean,
-    origin?: string,
-  }): Promise< { SnykTarget: SnykTarget[], next?: string } > {
+  nextPageLink?: string,
+  config: {
+    limit?: number;
+    excludeEmpty?: boolean;
+    origin?: string;
+  } = {
+    limit: 20,
+    excludeEmpty: true,
+  },
+): Promise<{ targets: SnykTarget[]; next?: string }> {
+  const query = qs.stringify({
+    version: '2022-09-15~beta',
+    ...config,
+  });
+  const url = nextPageLink ?? `/orgs/${orgId.trim()}/targets?${query}`;
 
-    const link = nextPageLink ? nextPageLink : `https://api.dev.snyk.io/rest/orgs/${orgId.trim()}/targets?version=2022-09-15~beta`
-    const url = new URL(link)
-
-    if (config) {
-      if (config.isEmpty) {
-        url.searchParams.set('isEmpty', String(config.isEmpty))
-      } 
-      if (config.limit) {
-        url.searchParams.set('limit', String(config.limit))
-      } 
-      if (config.origin) {
-        url.searchParams.set('origin', config.origin)
-      }       
-    }
-    
-    const res = await requestManager.request({
+  const res = await requestManager.request({
     verb: 'get',
-    url: url.toString(),
+    url: url,
     body: undefined,
     useRESTApi: true,
   });
@@ -377,11 +377,10 @@ export async function getSnykTarget(requestManager: requestsManager,
         JSON.stringify({ data: res.data, status: statusCode }),
     );
   }
-    
-  const responseData = res.data
-  const SnykTarget = responseData.data
-  const next =  responseData.links.next
 
-  return { SnykTarget, next }
+  const responseData = res.data as RESTTargetResponse;
+  const targets = responseData.data;
+  const { next } = responseData.links;
 
+  return { targets, next };
 }
