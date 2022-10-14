@@ -19,8 +19,9 @@
     "check-file/folder-naming-convention": [
       "error",
       {
-        "src/**/": "CAMEL_CASE",
-        "mocks/*/": "KEBAB_CASE"
+        "src/**/": "KEBAB_CASE",
+        "test/lib/**/": "KEBAB_CASE",
+        "test/unit/**/": "KEBAB_CASE"
       }
     ],
     "@typescript-eslint/naming-convention": [
