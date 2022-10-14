@@ -2,9 +2,9 @@ import 'source-map-support/register';
 import * as pMap from 'p-map';
 import * as path from 'path';
 import * as debugLib from 'debug';
-import { requestsManager } from 'snyk-request-manager';
+import type { requestsManager } from 'snyk-request-manager';
 import * as _ from 'lodash';
-import { Target, FilePath, ImportTarget } from '../../types';
+import type { Target, FilePath, ImportTarget } from '../../types';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
 import { logImportedTargets } from '../../../loggers/log-imported-targets';
@@ -83,7 +83,7 @@ export async function importTarget(
       target,
       orgId,
     };
-  } catch (error) {
+  } catch (error: any) {
     const errorBody = error.data || error;
     const errorMessage = errorBody.message;
     const err: {
@@ -129,7 +129,7 @@ export async function importTargets(
         );
         await logImportJobsPerOrg(orgId, pollingUrl);
         pollingUrls.push(pollingUrl);
-      } catch (error) {
+      } catch (error: any) {
         failed++;
         const { orgId, integrationId, target } = t;
         await logFailedImports(

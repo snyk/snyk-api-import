@@ -1,5 +1,5 @@
 import { deleteProjects } from "../src/lib";
-import { Project } from '../src/lib/types';
+import type { Project } from '../src/lib/types';
 
 export async function deleteTestProjects(
   orgId: string,

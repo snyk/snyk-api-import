@@ -87,7 +87,7 @@ export async function generateOrgData(
       res.targets.length > 0
         ? `Found ${res.targets.length} ${entityName[source]}(s). Written the data to file: ${res.fileName}`
         : `⚠ No import ${entityName[source]}(s) data generated!`;
-    
+
     return {
       fileName: res.fileName,
       exitCode: 0,
@@ -110,18 +110,22 @@ export async function handler(argv: {
   integrationType: SupportedIntegrationTypesImportData;
   sourceUrl: string;
 }): Promise<void> {
+  const { source, orgsData, integrationType, sourceUrl } = argv;
+  debug('ℹ️  Options: ' + JSON.stringify(argv));
 
-    const { source, orgsData, integrationType, sourceUrl } = argv;
-    debug('ℹ️  Options: ' + JSON.stringify(argv));
+  const res = await generateOrgData(
+    source,
+    orgsData,
+    integrationType,
+    sourceUrl,
+  );
 
-    const res = await generateOrgData(source, orgsData, integrationType, sourceUrl);
+  if (res.exitCode === 1) {
+    debug('Failed to create organizations.\n' + res.message);
 
-    if (res.exitCode === 1) {
-      debug('Failed to create organizations.\n' + res.message);
-  
-      console.error(res.message);
-      setTimeout(() => yargs.exit(1, new Error(res.message)), 3000);
-    } else {
-      console.log(res.message);
-    }
+    console.error(res.message);
+    setTimeout(() => yargs.exit(1, new Error(res.message)), 3000);
+  } else {
+    console.log(res.message);
+  }
 }

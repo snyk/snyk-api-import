@@ -74,7 +74,7 @@ describe('Testing azure-devops interaction', () => {
   });
   test('listAzureRepos to fail', async () => {
     expect(async () => {
-      await listAzureRepos('non-existing-org', 'https://non-existing-url')}
-      ).rejects.toThrow();
+      await listAzureRepos('non-existing-org', 'https://non-existing-url');
+    }).rejects.toThrow();
   });
 });

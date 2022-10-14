@@ -1,14 +1,16 @@
 import 'source-map-support/register';
 import * as url from 'url';
-import { requestsManager } from 'snyk-request-manager';
+import type { requestsManager } from 'snyk-request-manager';
 import * as sleep from 'sleep-promise';
 import * as debugLib from 'debug';
 import * as _ from 'lodash';
 import * as pMap from 'p-map';
-import { PollImportResponse, Project } from '../../types';
+import type { PollImportResponse, Project } from '../../types';
 import { getApiToken } from '../../get-api-token';
-import {
+import type {
   FailedProject,
+} from '../../../loggers/log-failed-projects';
+import {
   logFailedProjects,
 } from '../../../loggers/log-failed-projects';
 import { logFailedPollUrls } from '../../../loggers/log-failed-polls';
@@ -64,7 +66,7 @@ export async function pollImportUrl(
     });
     await logJobResult(locationUrl, importStatus);
     return { projects };
-  } catch (error) {
+  } catch (error: any) {
     console.error(
       `Could not get status update from import job: ${locationUrl}\n ERROR: ${error.message}`,
     );
@@ -117,7 +119,7 @@ export async function pollImportUrls(
         );
         await logImportedProjects(locationUrl, projects);
         projectsArray.push(...projects);
-      } catch (error) {
+      } catch (error: any) {
         await logFailedPollUrls(locationUrl, {
           errorMessage:
             _.get(error, 'innerError.message') ||

@@ -5,7 +5,7 @@ import {
   importTargets,
   pollImportUrls,
 } from '../../src/lib';
-import { Project } from '../../src/lib/types';
+import type { Project } from '../../src/lib/types';
 import { deleteTestProjects } from '../delete-test-projects';
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteFiles } from '../delete-files';

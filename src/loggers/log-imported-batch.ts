@@ -9,9 +9,9 @@ const debug = debugLib('snyk:import-projects-script');
 export async function logImportedBatch(
   message: string,
   loggingPath: string = getLoggingPath(),
-): Promise<string| undefined> {
+): Promise<string | undefined> {
   try {
-    const fileName = `${loggingPath}/${IMPORTED_BATCHES_LOG_NAME}`
+    const fileName = `${loggingPath}/${IMPORTED_BATCHES_LOG_NAME}`;
     const log = bunyan.createLogger({
       name: 'snyk:import-projects-script',
       level: 'info',
@@ -24,8 +24,8 @@ export async function logImportedBatch(
     });
     debug({ message }, 'Kicked off import');
     log.info({ message }, 'Kicked off import');
-    
-    return fileName
+
+    return fileName;
   } catch (e) {
     // do nothing
   }

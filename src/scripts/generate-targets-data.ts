@@ -93,7 +93,11 @@ export async function generateTargetsImportDataFile(
     try {
       validateRequiredOrgData(name, integrations, orgId);
       const entities: Array<
-        GithubRepoData | GitlabRepoData | AzureRepoData | BitbucketServerRepoData | BitbucketCloudRepoData
+        | GithubRepoData
+        | GitlabRepoData
+        | AzureRepoData
+        | BitbucketServerRepoData
+        | BitbucketCloudRepoData
       > = await sourceGenerators[source](topLevelEntity.name, sourceUrl!);
       entities.forEach((entity) => {
         targetsData.push({

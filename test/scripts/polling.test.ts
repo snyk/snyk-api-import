@@ -4,7 +4,7 @@ jest.mock('snyk-request-manager');
 
 import { importProjects } from '../../src/scripts/import-projects';
 import { deleteTestProjects } from '../delete-test-projects';
-import { Project } from '../../src/lib/types';
+import type { Project } from '../../src/lib/types';
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteFiles } from '../delete-files';
 

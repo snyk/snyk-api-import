@@ -8,27 +8,26 @@ const ORG_ID = process.env.TEST_ORG_ID as string;
 jest.unmock('snyk-request-manager');
 jest.requireActual('snyk-request-manager');
 
-
 describe('UpdateProject - e2e', () => {
-    const OLD_ENV = process.env;
-    process.env.SNYK_API = SNYK_API_TEST;
-    process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
-    const requestManager = new requestsManager({
-      userAgentPrefix: 'snyk-api-import:tests',
+  const OLD_ENV = process.env;
+  process.env.SNYK_API = SNYK_API_TEST;
+  process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+  const requestManager = new requestsManager({
+    userAgentPrefix: 'snyk-api-import:tests',
+  });
+  afterAll(async () => {
+    process.env = { ...OLD_ENV };
+  }, 1000);
+
+  it('Update project branch e2e', async () => {
+    let res = await updateProject(requestManager, ORG_ID, PROJECT_ID, {
+      branch: 'newDefaultBranch',
     });
-    afterAll(async () => {
-      process.env = { ...OLD_ENV };
-    }, 1000);
+    expect(res.branch).toEqual('newDefaultBranch');
 
-    it('Update project branch e2e', async () => {
-
-        let res = await updateProject(requestManager, ORG_ID, PROJECT_ID, {branch: "newDefaultBranch"});
-        expect(res.branch).toEqual("newDefaultBranch") 
-
-        res = await updateProject(requestManager, ORG_ID, PROJECT_ID, {branch: "main"});
-        expect(res.branch).toEqual("main") 
-      
-    }, 5000);
-
-})
-
+    res = await updateProject(requestManager, ORG_ID, PROJECT_ID, {
+      branch: 'main',
+    });
+    expect(res.branch).toEqual('main');
+  }, 5000);
+});

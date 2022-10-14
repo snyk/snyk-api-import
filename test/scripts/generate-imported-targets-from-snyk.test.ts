@@ -207,7 +207,6 @@ describe('Generate imported targets based on Snyk data', () => {
   }, 240000);
 });
 
-
 describe('projectToTarget', () => {
   it('succeed to convert Github / Gitlab project name to target', async () => {
     const project = {

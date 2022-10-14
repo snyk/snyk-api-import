@@ -3,7 +3,7 @@ import * as path from 'path';
 import { deleteFiles } from '../delete-files';
 import { generateLogsPaths } from '../generate-log-file-names';
 import { deleteTestProjects } from '../delete-test-projects';
-import { Project } from '../../src/lib/types';
+import type { Project } from '../../src/lib/types';
 const main = './dist/index.js'.replace(/\//g, path.sep);
 
 const ORG_ID = process.env.TEST_ORG_ID as string;

@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { CreateOrgData } from '../../src/lib/types';
+import type { CreateOrgData } from '../../src/lib/types';
 import { streamData } from '../../src/stream-data';
 
 describe('streamData - Orgs', () => {
