@@ -1,4 +1,3 @@
-
 export interface ImportTarget {
   orgId: string;
   integrationId: string;
@@ -126,7 +125,6 @@ export interface SnykProject {
   branch: string | null;
 }
 
-
 export interface Org {
   name: string;
   id: string;
@@ -138,12 +136,11 @@ export interface Org {
   };
 }
 
-
 export interface RESTProjectData {
   attributes: RESTProjectsAttributes;
   id: string;
   relationships: RESTProjectsRelationships;
-  type: string
+  type: string;
 }
 
 export interface RESTProjectsAttributes {
@@ -170,7 +167,7 @@ export interface RESTProjectsRelashionshipData {
   data: {
     id: string;
     type: string;
-  }
+  };
   links: {
     first?: string;
     last?: string;
@@ -184,10 +181,10 @@ export interface RESTProjectsRelashionshipData {
 
 export interface SnykTargetRelationships {
   org: {
-    data : {
+    data: {
       id: string;
       type: string;
-    }
+    };
     links: {
       first?: string;
       last?: string;
@@ -197,7 +194,7 @@ export interface SnykTargetRelationships {
       self?: string;
     };
     meta: unknown;
-  }
+  };
 }
 
 export interface SnykTarget {
@@ -206,7 +203,7 @@ export interface SnykTarget {
     isPrivate: boolean;
     origin: string;
     remoteUrl: string | null;
-  }
+  };
   id: string;
   relationships: SnykTargetRelationships;
   type: string;
@@ -216,7 +213,7 @@ export interface RESTTargetResponse {
   data: SnykTarget[];
   jsonapi: {
     version: string;
-  }
+  };
   links: {
     first?: string;
     last?: string;

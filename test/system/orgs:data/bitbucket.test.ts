@@ -25,7 +25,9 @@ describe('General `snyk-api-import orgs:data <...>`', () => {
         }
         expect(stderr).toEqual('');
         expect(err).toBeNull();
-        expect(stdout).toMatch('Found 2 project(s). Written the data to file: group-hello-bitbucket-server-orgs.json');
+        expect(stdout).toMatch(
+          'Found 2 project(s). Written the data to file: group-hello-bitbucket-server-orgs.json',
+        );
         deleteFiles([
           path.resolve(
             __dirname,

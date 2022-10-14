@@ -3,7 +3,10 @@ import * as yargs from 'yargs';
 const debug = debugLib('snyk:orgs-data-script');
 
 import { getLoggingPath } from '../lib/get-logging-path';
-import { CommandResult, SupportedIntegrationTypesImportOrgData } from '../lib/types';
+import {
+  CommandResult,
+  SupportedIntegrationTypesImportOrgData,
+} from '../lib/types';
 import {
   entityName,
   generateOrgImportDataFile,
@@ -49,39 +52,37 @@ export async function generateOrgImportData(
   groupId: string,
   sourceOrgPublicId?: string,
   sourceUrl?: string,
-  skipEmptyOrgs?: boolean): Promise<CommandResult>  {
+  skipEmptyOrgs?: boolean,
+): Promise<CommandResult> {
+  try {
+    getLoggingPath();
 
-    try {
-      getLoggingPath();
-      
-      const res = await generateOrgImportDataFile(
-        source,
-        groupId,
-        sourceOrgPublicId,
-        sourceUrl,
-        skipEmptyOrgs,
-      );
-      const orgsMessage =
-        res.orgs.length > 0
-          ? `Found ${res.orgs.length} ${entityName[source]}(s). Written the data to file: ${res.fileName}`
-          : `⚠ No ${entityName[source]}(s) found!`;
-    
-      return {
-        fileName: res.fileName,
-        exitCode: 0,
-        message: orgsMessage,
-      };
+    const res = await generateOrgImportDataFile(
+      source,
+      groupId,
+      sourceOrgPublicId,
+      sourceUrl,
+      skipEmptyOrgs,
+    );
+    const orgsMessage =
+      res.orgs.length > 0
+        ? `Found ${res.orgs.length} ${entityName[source]}(s). Written the data to file: ${res.fileName}`
+        : `⚠ No ${entityName[source]}(s) found!`;
 
-    } catch (e) {
-      const errorMessage = `ERROR! Failed to generate data. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`;
-      return {
-        fileName: undefined,
-        exitCode: 1,
-        message: errorMessage,
-      };
+    return {
+      fileName: res.fileName,
+      exitCode: 0,
+      message: orgsMessage,
+    };
+  } catch (e) {
+    const errorMessage = `ERROR! Failed to generate data. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`;
+    return {
+      fileName: undefined,
+      exitCode: 1,
+      message: errorMessage,
+    };
   }
 }
-
 
 export async function handler(argv: {
   source: SupportedIntegrationTypesImportOrgData;
@@ -90,21 +91,22 @@ export async function handler(argv: {
   sourceUrl?: string;
   skipEmptyOrgs?: boolean;
 }): Promise<void> {
-  
   const {
-      source,
-      sourceOrgPublicId,
-      groupId,
-      sourceUrl,
-      skipEmptyOrgs = false,
-    } = argv;
-    debug('ℹ️  Options: ' + JSON.stringify(argv));
+    source,
+    sourceOrgPublicId,
+    groupId,
+    sourceUrl,
+    skipEmptyOrgs = false,
+  } = argv;
+  debug('ℹ️  Options: ' + JSON.stringify(argv));
 
-  const res = await generateOrgImportData(source,
-      groupId,
-      sourceOrgPublicId,
-      sourceUrl,
-      skipEmptyOrgs) 
+  const res = await generateOrgImportData(
+    source,
+    groupId,
+    sourceOrgPublicId,
+    sourceUrl,
+    skipEmptyOrgs,
+  );
 
   if (res.exitCode === 1) {
     debug('Failed to create organizations.\n' + res.message);

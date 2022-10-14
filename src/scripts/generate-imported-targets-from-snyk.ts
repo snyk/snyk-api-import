@@ -117,8 +117,8 @@ export async function generateSnykImportedTargets(
     : [{ id: orgId! }];
   const failedOrgs: SnykOrg[] = [];
   const projectFilters = {
-    origin: integrationTypes.length > 1 ? undefined : integrationTypes[0]
-  }
+    origin: integrationTypes.length > 1 ? undefined : integrationTypes[0],
+  };
   await pMap(
     groupOrgs,
     async (org: SnykOrg) => {
@@ -130,20 +130,20 @@ export async function generateSnykImportedTargets(
         ]);
         const { projects } = resProjects;
         const scmTargets = projects
-        .filter((p) =>
-          integrationTypes.includes(
-            p.origin as SupportedIntegrationTypesToListSnykTargets,
-          ),
-        )
-        .map((p) => {
-          const target = targetGenerators[
-            p.origin as SupportedIntegrationTypesToListSnykTargets
-          ](p);
-          return {
-            target,
-            integrationId: resIntegrations[p.origin],
-          };
-        });
+          .filter((p) =>
+            integrationTypes.includes(
+              p.origin as SupportedIntegrationTypesToListSnykTargets,
+            ),
+          )
+          .map((p) => {
+            const target = targetGenerators[
+              p.origin as SupportedIntegrationTypesToListSnykTargets
+            ](p);
+            return {
+              target,
+              integrationId: resIntegrations[p.origin],
+            };
+          });
 
         const uniqueTargets: Set<string> = new Set();
         const orgTargets: Target[] = [];

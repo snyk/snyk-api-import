@@ -53,13 +53,12 @@ export async function createListImported(
   orgId?: string,
 ): Promise<CommandResult> {
   try {
-
     if (!(groupId || orgId)) {
       throw new Error(
         'Missing required parameters: orgId or groupId must be provided.',
       );
     }
-  
+
     if (groupId && orgId) {
       throw new Error(
         'Too many parameters: orgId or groupId must be provided, not both.',
@@ -95,10 +94,9 @@ export async function createListImported(
       exitCode: 0,
       message: targetsMessage,
     };
-
   } catch (e) {
     const errorMessage = `ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.\nERROR: ${e.message}`;
- 
+
     return {
       fileName: undefined,
       exitCode: 1,
@@ -117,7 +115,7 @@ export async function handler(argv: {
 
   debug('ℹ️  Options: ' + JSON.stringify(argv));
 
-  const res = await createListImported(integrationType, groupId, orgId)
+  const res = await createListImported(integrationType, groupId, orgId);
 
   if (res.exitCode === 1) {
     debug('Failed to create organizations.\n' + res.message);
@@ -127,5 +125,4 @@ export async function handler(argv: {
   } else {
     console.log(res.message);
   }
-  
 }

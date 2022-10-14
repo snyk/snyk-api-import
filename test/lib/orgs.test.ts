@@ -1,6 +1,6 @@
 import { requestsManager } from 'snyk-request-manager';
 import { filterOutExistingOrgs, getAllOrgs } from '../../src/lib';
-import { CreateOrgData } from '../../src/lib/types';
+import type { CreateOrgData } from '../../src/lib/types';
 
 const GROUP_ID = process.env.TEST_GROUP_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;

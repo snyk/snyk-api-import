@@ -31,7 +31,7 @@ describe('listBitbucketServerProjects script', () => {
       await listBitbucketServerRepos(
         'non-existing-project',
         'https://non-existing-url',
-      )}
-      ).rejects.toThrow();
+      );
+    }).rejects.toThrow();
   });
 });

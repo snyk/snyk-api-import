@@ -19,7 +19,6 @@ import { streamData } from '../stream-data';
 const debug = debugLib('snyk:import-projects-script');
 const debugSkipTargets = debugLib('skipping-targets');
 
-
 export async function parseLogIntoTargetIds(
   logFile: string,
 ): Promise<string[]> {
@@ -121,7 +120,7 @@ export async function importProjects(
 
   let targets: ImportTarget[] = [];
   try {
-    targets = await streamData<ImportTarget>(fileName, 'targets') ?? [];
+    targets = (await streamData<ImportTarget>(fileName, 'targets')) ?? [];
   } catch (e) {
     throw new Error(`Failed to parse targets from ${fileName}:\n${e.message}`);
   }
@@ -149,15 +148,21 @@ export async function importProjects(
   }
 
   if (filteredTargets.length === 0) {
-    return { projects: [], targets, filteredTargets, skippedTargets: 0, logFile: undefined };
+    return {
+      projects: [],
+      targets,
+      filteredTargets,
+      skippedTargets: 0,
+      logFile: undefined,
+    };
   }
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import',
     period: 1000,
     maxRetryCount: 3,
   });
-  
-  let logFile 
+
+  let logFile;
 
   for (
     let targetIndex = 0;

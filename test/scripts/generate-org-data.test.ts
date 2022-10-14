@@ -84,9 +84,7 @@ describe('generateOrgImportDataFile Github script', () => {
         SupportedIntegrationTypesImportOrgData.GHE,
         groupId,
       ),
-    ).rejects.toThrow(
-      'Bad credentials',
-    );
+    ).rejects.toThrow('Bad credentials');
   });
   it('generate Github Enterprise Orgs data', async () => {
     process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
@@ -253,7 +251,9 @@ describe('generateOrgImportDataFile Bitbucket Cloud script', () => {
       groupId,
       undefined,
     );
-    expect(res.fileName).toEqual('group-groupIdExample-bitbucket-cloud-orgs.json');
+    expect(res.fileName).toEqual(
+      'group-groupIdExample-bitbucket-cloud-orgs.json',
+    );
     expect(res.orgs.length > 0).toBeTruthy();
     expect(res.skippedEmptyOrgs).toHaveLength(0);
     expect(res.orgs[0]).toEqual({
@@ -276,7 +276,9 @@ describe('generateOrgImportDataFile Bitbucket Cloud script', () => {
       undefined,
       true,
     );
-    expect(res.fileName).toEqual('group-groupIdExample-bitbucket-cloud-orgs.json');
+    expect(res.fileName).toEqual(
+      'group-groupIdExample-bitbucket-cloud-orgs.json',
+    );
     expect(res.orgs.length > 0).toBeTruthy();
     expect(res.skippedEmptyOrgs.length).toBeGreaterThanOrEqual(0);
     expect(res.orgs[0]).toEqual({
@@ -296,7 +298,9 @@ describe('generateOrgImportDataFile Bitbucket Cloud script', () => {
       groupId,
       undefined,
     );
-    expect(res.fileName).toEqual('group-groupIdExample-bitbucket-cloud-orgs.json');
+    expect(res.fileName).toEqual(
+      'group-groupIdExample-bitbucket-cloud-orgs.json',
+    );
     expect(res.orgs.length > 0).toBeTruthy();
     expect(res.skippedEmptyOrgs).toHaveLength(0);
     expect(res.orgs[0]).toEqual({
@@ -308,12 +312,14 @@ describe('generateOrgImportDataFile Bitbucket Cloud script', () => {
   it('Bitbucket cloud script to fail on bad credentials', async () => {
     process.env.BITBUCKET_CLOUD_USERNAME = process.env.BBC_USERNAME;
     process.env.BITBUCKET_CLOUD_PASSWORD = 'wrong_password';
-    jest.useFakeTimers()
+    jest.useFakeTimers();
     const groupId = 'groupIdExample';
 
-    expect(generateOrgImportDataFile(
-      SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD,
-      groupId,
-    )).rejects.toThrow();
+    expect(
+      generateOrgImportDataFile(
+        SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD,
+        groupId,
+      ),
+    ).rejects.toThrow();
   });
 });

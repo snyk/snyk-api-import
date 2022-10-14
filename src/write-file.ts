@@ -13,7 +13,7 @@ export async function writeFile(
   try {
     await fs.writeFileSync(filename, JSON.stringify(content));
     return filename;
-  } catch (error) {
+  } catch (error: any) {
     debug(error);
     throw new Error(`Failed to write to file: ${filename}`);
   }

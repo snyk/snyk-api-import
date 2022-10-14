@@ -21,10 +21,8 @@ export const builder = {
 
 export const aliases = ['i'];
 
-export async function importFunction(file: string) : Promise<CommandResult> {
-
+export async function importFunction(file: string): Promise<CommandResult> {
   try {
-    
     const logsPath = getLoggingPath();
     const importFile = getImportProjectsFile(file);
 
@@ -49,14 +47,13 @@ export async function importFunction(file: string) : Promise<CommandResult> {
         : ''
     }`;
 
-    const message = `${projectsMessage}${targetsMessage}\nCheck the logs for any failures located at:  ${logsPath}/*`
-      
+    const message = `${projectsMessage}${targetsMessage}\nCheck the logs for any failures located at:  ${logsPath}/*`;
+
     return {
       fileName: logFile,
       exitCode: 0,
       message: message,
     };
-
   } catch (e) {
     const errorMessage = `ERROR! Failed to kick off import with error: ${e.message}\n Try running with \`DEBUG=snyk* snyk-import\` for more information`;
 
@@ -66,23 +63,20 @@ export async function importFunction(file: string) : Promise<CommandResult> {
       message: errorMessage,
     };
   }
-
 }
 
 export async function handler(argv: { file: string }): Promise<void> {
+  const { file } = argv;
+  debug('ℹ️  Options: ' + JSON.stringify(argv));
 
-    const { file } = argv;
-    debug('ℹ️  Options: ' + JSON.stringify(argv));
-    
-    const res = await importFunction(file);
+  const res = await importFunction(file);
 
-    if (res.exitCode === 1) {
-      debug('Failed to import projects.\n' + res.message);
-  
-      console.error(res.message);
-      yargs.exit(1, new Error(res.message))
-    } else {
-      console.log(res.message);
-    }
-  
+  if (res.exitCode === 1) {
+    debug('Failed to import projects.\n' + res.message);
+
+    console.error(res.message);
+    yargs.exit(1, new Error(res.message));
+  } else {
+    console.log(res.message);
+  }
 }

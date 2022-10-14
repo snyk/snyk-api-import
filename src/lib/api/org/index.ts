@@ -1,10 +1,10 @@
 import 'source-map-support/register';
-import { requestsManager } from 'snyk-request-manager';
+import type { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 import * as qs from 'querystring';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
-import {
+import type {
   SnykProject,
   RESTTargetResponse,
   RESTProjectData,
@@ -255,10 +255,10 @@ async function getProject(
     );
   }
 
-  const RESTresponseData = res.data as RESTProjectsResponse;
+  const response = res.data as RESTProjectsResponse;
 
-  const projects = convertToSnykProject(RESTresponseData.data);
-  const next = RESTresponseData.links.next;
+  const projects = convertToSnykProject(response.data);
+  const next = response.links.next;
 
   return { projects, next };
 }

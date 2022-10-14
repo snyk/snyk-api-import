@@ -22,8 +22,8 @@ describe('listGitlabRepos', () => {
       branch: expect.any(String),
       fork: expect.any(Boolean),
     });
-    for (let i = 0; i < repos.length; i ++){
-      expect(repos[i].name).not.toContain("shared-with-group");
+    for (let i = 0; i < repos.length; i++) {
+      expect(repos[i].name).not.toContain('shared-with-group');
     }
   });
 });

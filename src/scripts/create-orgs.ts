@@ -2,11 +2,13 @@ import * as debugLib from 'debug';
 import * as path from 'path';
 import * as fs from 'fs';
 
-import { CreatedOrgResponse, createOrg, filterOutExistingOrgs } from '../lib';
+import { createOrg, filterOutExistingOrgs } from '../lib';
+import type { CreatedOrgResponse } from '../lib';
+
 import { getLoggingPath } from './../lib';
 import { listIntegrations, setNotificationPreferences } from '../lib/api/org';
 import { requestsManager } from 'snyk-request-manager';
-import { CreateOrgData, Org } from '../lib/types';
+import type { CreateOrgData, Org } from '../lib/types';
 import { logCreatedOrg } from '../loggers/log-created-org';
 import { writeFile } from '../write-file';
 import { FAILED_ORG_LOG_NAME } from '../common';

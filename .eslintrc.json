@@ -1,6 +1,6 @@
 {
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "check-file"],
   "parserOptions": {
     "ecmaVersion": 6
   },
@@ -16,15 +16,64 @@
     "prettier/@typescript-eslint"
   ],
   "rules": {
-    "@typescript-eslint/explicit-function-return-type": [
+    "check-file/folder-naming-convention": [
       "error",
       {
-        "allowExpressions": true,
-        "allowTypedFunctionExpressions": true
+        "src/**/": "CAMEL_CASE",
+        "mocks/*/": "KEBAB_CASE"
       }
     ],
-    "no-var": "error",
-    "prefer-arrow-callback": "error",
-    "prefer-const": "error"
+    "@typescript-eslint/naming-convention": [
+      "error",
+      { "selector": "default", "format": ["camelCase", "UPPER_CASE"] },
+      { "selector": "typeLike", "format": ["PascalCase"] },
+      {
+        "selector": "typeParameter",
+        "format": ["PascalCase"]
+      },
+      {
+        "selector": "interface",
+        "format": ["PascalCase"],
+        "custom": { "regex": "^I[A-Z]", "match": false }
+      }
+    ],
+    // our typing is a mess
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "types": {
+          "String": {
+            "message": "Use string instead unless you are referring to the constructor",
+            "fixWith": "string"
+          },
+          "Number": {
+            "message": "Use number instead unless you are referring to the constructor",
+            "fixWith": "number"
+          },
+          "Boolean": {
+            "message": "Use boolean instead unless you are referring to the constructor",
+            "fixWith": "boolean"
+          }
+        },
+        "extendDefaults": false
+      }
+    ],
+    "no-prototype-builtins": "off",
+    // Conventions have won, sorry linter!
+    "@typescript-eslint/no-empty-function": "off",
+    // non-null assertions compromise the type safety somewhat, but many
+    // our types are still imprecisely defined and we don"t use noImplicitAny
+    // anyway, so for the time being assertions are allowed
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-var-requires": "warn",
+    "@typescript-eslint/consistent-type-imports": "error",
+    // cares about function ordering in a file in a way we don"t care about
+    "@typescript-eslint/no-use-before-define": "off",
+    "@typescript-eslint/no-unused-vars": "error",
+    "no-buffer-constructor": "error",
+    "no-import-assign": "error"
   }
 }

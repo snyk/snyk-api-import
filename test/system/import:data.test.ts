@@ -159,13 +159,10 @@ Options:
           BITBUCKET_CLOUD_PASSWORD: process.env.BBC_PASSWORD,
           SNYK_LOG_PATH: __dirname,
         },
-      },      (err, stdout, stderr) => {
-        expect(err!.message).toMatch(
-          `File can not be found at location`,
-        );
-        expect(stderr).toMatch(
-          `File can not be found at location`,
-        );
+      },
+      (err, stdout, stderr) => {
+        expect(err!.message).toMatch(`File can not be found at location`);
+        expect(stderr).toMatch(`File can not be found at location`);
         expect(stdout).toEqual('');
       },
     ).on('exit', (code) => {

@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import * as debugLib from 'debug';
-import { requestsManager } from 'snyk-request-manager';
+import type { requestsManager } from 'snyk-request-manager';
 
 const debug = debugLib('snyk:api-import');
 
@@ -23,7 +23,7 @@ export async function requestWithRateLimitHandling(
         body: JSON.stringify(body),
       });
       break;
-    } catch (e) {
+    } catch (e: any) {
       res = e;
       if (e.data.code === 401) {
         console.error(

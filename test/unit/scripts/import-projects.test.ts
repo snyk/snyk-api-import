@@ -1,4 +1,4 @@
-import { ImportTarget } from '../../../src/lib/types';
+import type { ImportTarget } from '../../../src/lib/types';
 import { filterOutImportedTargets } from '../../../src/scripts/import-projects';
 
 describe('filterOutImportedTargets', () => {

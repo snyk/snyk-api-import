@@ -63,9 +63,8 @@ export async function updateProject(
   requestManager: requestsManager,
   orgId: string,
   projectId: string,
-  config: { branch: string},
+  config: { branch: string },
 ): Promise<SnykProject> {
-
   getApiToken();
   getSnykHost();
   debug('Update project: ' + projectId);
@@ -81,12 +80,12 @@ export async function updateProject(
     branch: config.branch,
   };
 
-  const url = `/org/${orgId.trim()}/project/${projectId.trim()}`
+  const url = `/org/${orgId.trim()}/project/${projectId.trim()}`;
   const res = await requestManager.request({
-  verb: 'put',
-  url: url,
-  body: JSON.stringify(body),
-  useRESTApi: false,
+    verb: 'put',
+    url: url,
+    body: JSON.stringify(body),
+    useRESTApi: false,
   });
 
   const statusCode = res.statusCode || res.status;
@@ -97,7 +96,7 @@ export async function updateProject(
     );
   }
 
-  const updatedProject: SnykProject = res.data
-  
+  const updatedProject: SnykProject = res.data;
+
   return updatedProject;
 }

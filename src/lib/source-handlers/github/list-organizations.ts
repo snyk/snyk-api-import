@@ -86,7 +86,7 @@ export async function githubEnterpriseOrganizations(
   sourceUrl?: string,
 ): Promise<SnykOrgData[]> {
   if (!sourceUrl) {
-   console.warn(
+    console.warn(
       'No `sourceUrl` provided for Github Enterprise source, defaulting to https://api.github.com',
     );
   }

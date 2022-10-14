@@ -3,7 +3,7 @@ import * as bunyan from 'bunyan';
 
 import { getLoggingPath } from '../lib';
 import { CREATED_ORG_LOG_NAME } from '../common';
-import { CreatedOrgResponse } from '../lib';
+import type { CreatedOrgResponse } from '../lib';
 
 const debug = debugLib('snyk:create-orgs-script');
 
