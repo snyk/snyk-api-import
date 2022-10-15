@@ -4,26 +4,27 @@ import { updateProject } from "../api/project";
 
 export async function compareAndUpdateBranches(
   requestManager: requestsManager,
-  snykDefaultBranch: string,
-  githubBranch: string,
-  projectId: string,
+  project: {
+    branch: string,
+    projectPublicId: string,
+  },
+  defaultBranch: string,
   orgId: string,
-): Promise<{ projectUpdated: boolean }> {
-
-  let projectUpdated = false
+): Promise<{ updated: boolean }> {
+  const {branch, projectPublicId} = project;
+  let updated = false
   try {
 
-    if (snykDefaultBranch != githubBranch) {
-      debug(`default branch update needed for project ${projectId}\n`);
-
-      await updateProject(requestManager, orgId, projectId, { branch: githubBranch });
-      projectUpdated = true
+    if (branch != defaultBranch) {
+      debug(`Default branch has changed for Snyk project ${projectPublicId}`);
+      await updateProject(requestManager, orgId, projectPublicId, { branch: defaultBranch });
+      updated = true
     }
 
-    return { projectUpdated }
+    return { updated }
   } catch (e) {
     throw new Error(
-      `Failed to update project ${projectId}. ERROR: ${e.message}`,
+      `Failed to update project ${projectPublicId}. ERROR: ${e.message}`,
     );
   }
 }
