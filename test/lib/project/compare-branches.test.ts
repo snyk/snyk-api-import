@@ -11,10 +11,14 @@ describe('compareAndUpdateBranches', () => {
     process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
   });
   afterAll(() => {
+    jest.clearAllMocks();
+    process.env = { ...OLD_ENV };
+  }, 1000);
+  afterEach(() => {
     jest.resetAllMocks();
     process.env = { ...OLD_ENV };
   }, 1000);
-  it('Update project branch', async () => {
+  it('updates project branch if the default branch changed', async () => {
     jest.spyOn(requestManager, 'request').mockResolvedValue({
       data: {
         name: 'test',
@@ -59,7 +63,27 @@ describe('compareAndUpdateBranches', () => {
     expect(res.updated).toBeTruthy();
   }, 5000);
 
-  it('Return ProjectNeededUpdate false if branches are the same', async () => {
+  it('does not call the Projects API in dryRun mode', async () => {
+    const requestSpy = jest.spyOn(requestManager, 'request').mockResolvedValue({
+      data: {},
+      status: 200,
+    });
+
+    const res = await compareProject.compareAndUpdateBranches(
+      requestManager,
+      {
+        branch: 'main',
+        projectPublicId: 'af137b96-6966-46c1-826b-2e79ac49bbd9',
+      },
+      'newDefaultBranch',
+      'af137b96-6966-46c1-826b-2e79ac49bbxx',
+      true,
+    );
+    expect(requestSpy).not.toHaveBeenCalled();
+    expect(res.updated).toBeTruthy();
+  }, 5000);
+
+  it('does not update the project if the branches are the same', async () => {
     const res = await compareProject.compareAndUpdateBranches(
       requestManager,
       {
@@ -72,7 +96,7 @@ describe('compareAndUpdateBranches', () => {
     expect(res.updated).toBeFalsy();
   }, 5000);
 
-  it('throw if the api requests fails', async () => {
+  it('throws if the api requests fails', async () => {
     jest
       .spyOn(requestManager, 'request')
       .mockResolvedValue({ statusCode: 500, data: {} });

@@ -18,12 +18,17 @@ export async function getFeatureFlag(
       url: url,
       useRESTApi: false,
     });
+
     debug(`Feature flag ${featureFlagName} is enabled for Org ${orgId}`);
-    return res.data['ok'];
+
+    const enabled: boolean = res.data['ok'];
+
+    return enabled;
   } catch (err) {
     if (err instanceof Error) {
       //Currently this is the only way to distinguish between an actual 403 and a 403 that is returned when an org hasn't got that FF enabled
-      if (JSON.stringify(err).search('"ok":false') > 0) {
+      const errorMessage = JSON.stringify(err);
+      if (errorMessage.includes('"ok":false')) {
         debug(
           `Feature flag ${featureFlagName} is not enabled for Org ${orgId}, please advise with your Snyk representative`,
         );

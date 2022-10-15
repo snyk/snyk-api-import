@@ -10,15 +10,20 @@ export async function compareAndUpdateBranches(
   },
   defaultBranch: string,
   orgId: string,
+  dryRun = false,
 ): Promise<{ updated: boolean }> {
-  const {branch, projectPublicId} = project;
+  const { branch, projectPublicId } = project;
   let updated = false
   try {
 
     if (branch != defaultBranch) {
       debug(`Default branch has changed for Snyk project ${projectPublicId}`);
-      await updateProject(requestManager, orgId, projectPublicId, { branch: defaultBranch });
-      updated = true
+      if (!dryRun) {
+        await updateProject(requestManager, orgId, project.projectPublicId, {
+          branch: defaultBranch,
+        });
+      }
+      updated = true;
     }
 
     return { updated }
