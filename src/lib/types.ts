@@ -1,4 +1,3 @@
-
 export interface ImportTarget {
   orgId: string;
   integrationId: string;
@@ -92,6 +91,10 @@ export enum SupportedIntegrationTypesImportOrgData {
   BITBUCKET_CLOUD = 'bitbucket-cloud',
 }
 
+export enum SupportedIntegrationTypesUpdateProject {
+  GITHUB = 'github',
+}
+
 // used to generate imported targets that exist in Snyk
 // when we need to grab the integrationId from Snyk
 export enum SupportedIntegrationTypesToListSnykTargets {
@@ -117,15 +120,27 @@ export interface CommandResult {
   message: string | undefined;
 }
 
-export interface SnykProject {
-  name: string; 
-  id: string; 
-  created: string; 
-  origin: string; 
-  type: string; 
-  branch: string | null;  
+export interface CompareAndUpdateBranchesResponse {
+  projectUpdated: boolean;
 }
 
+export interface SnykProject {
+  name: string;
+  id: string;
+  created: string;
+  origin: string;
+  type: string;
+  branch: string | null;
+}
+
+export interface SnykProject {
+  name: string;
+  id: string;
+  created: string;
+  origin: string;
+  type: string;
+  branch: string | null;
+}
 
 export interface Org {
   name: string;
@@ -138,12 +153,11 @@ export interface Org {
   };
 }
 
-
 export interface RESTProjectData {
   attributes: RESTProjectsAttributes;
   id: string;
   relationships: RESTProjectsRelationships;
-  type: string
+  type: string;
 }
 
 export interface RESTProjectsAttributes {
@@ -170,7 +184,7 @@ export interface RESTProjectsRelashionshipData {
   data: {
     id: string;
     type: string;
-  }
+  };
   links: {
     first?: string;
     last?: string;
@@ -184,10 +198,10 @@ export interface RESTProjectsRelashionshipData {
 
 export interface SnykTargetRelationships {
   org: {
-    data : {
+    data: {
       id: string;
       type: string;
-    }
+    };
     links: {
       first?: string;
       last?: string;
@@ -197,26 +211,26 @@ export interface SnykTargetRelationships {
       self?: string;
     };
     meta: unknown;
-  }
+  };
 }
 
-export interface SnykTargetData {
+export interface SnykTarget {
   attributes: {
-    displayName: string; 
-    isPrivate: boolean;   
+    displayName: string;
+    isPrivate: boolean;
     origin: string;
     remoteUrl: string | null;
   }
-  id: string;    
+  id: string;
   relationships: SnykTargetRelationships;
   type: string;
 }
 
-export interface SnykTarget {
-  data: SnykTargetData[];
+export interface RESTTargetResponse {
+  data: SnykTarget[];
   jsonapi: {
     version: string;
-  }
+  };
   links: {
     first?: string;
     last?: string;
@@ -225,8 +239,4 @@ export interface SnykTarget {
     related?: string;
     self?: string;
   };
-}
-
-export interface TargetsResponse {
-  targets: SnykTarget[]
 }

@@ -1,29 +1,33 @@
-import debug = require("debug");
-import { requestsManager } from "snyk-request-manager";
-import { updateProject } from "../api/project";
+import debug = require('debug');
+import { requestsManager } from 'snyk-request-manager';
+import { updateProject } from '../api/project';
 
 export async function compareAndUpdateBranches(
-    requestManager: requestsManager,
-    snykDefaultBranch: string,
-    githubBranch: string,
-    projectId: string,
-    orgId: string,
-  ): Promise<{projectUpdated:boolean}> {
+  requestManager: requestsManager,
+  project: {
+    branch: string;
+    projectPublicId: string;
+  },
+  defaultBranch: string,
+  orgId: string,
+): Promise<{ updated: boolean }> {
+  let updated = false;
+  try {
+    if (project.branch != defaultBranch) {
+      debug(
+        `default branch update needed for project ${project.projectPublicId}\n`,
+      );
 
-    let projectUpdated = false
-    try {
-      
-      if (snykDefaultBranch != githubBranch) {
-        debug(`default branch update needed for project ${projectId}\n`);
-        
-          await updateProject(requestManager, orgId, projectId, {branch: githubBranch});
-          projectUpdated = true
-      }
+      await updateProject(requestManager, orgId, project.projectPublicId, {
+        branch: defaultBranch,
+      });
+      updated = true;
+    }
 
-    return { projectUpdated: projectUpdated } 
+    return { updated };
   } catch (e) {
     throw new Error(
-      `Failed to update project ${projectId}. ERROR: ${e.message}`,
+      `Failed to update project ${project.projectPublicId}. ERROR: ${e.message}`,
     );
   }
 }

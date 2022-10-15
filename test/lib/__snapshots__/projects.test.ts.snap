@@ -1,3 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`UpdateProject Update project branch 1`] = `"newDefaultBranch"`;
+
+exports[`compareAndUpdateBranches Update project branch 1`] = `
+Object {
+  "ProjectNeededUpdate": true,
+  "projects": Object {
+    "attributes": Object {},
+    "branch": "newDefaultBranch",
+    "browseUrl": "https://app.snyk.io/org/4a18d42f-0706-4ad0-b127-24078731fbed/project/af137b96-6966-46c1-826b-2e79ac49bbd9",
+    "created": "2018-10-29T09:50:54.014Z",
+    "hostname": null,
+    "id": "af137b96-6966-46c1-826b-2e79ac49bbd9",
+    "imageBaseImage": "alpine:3",
+    "imageCluster": "Production",
+    "imageId": "sha256:caf27325b298a6730837023a8a342699c8b7b388b8d",
+    "imagePlatform": "linux/arm64",
+    "imageTag": "latest",
+    "importingUser": Object {},
+    "isMonitored": false,
+    "issueCountsBySeverity": Object {},
+    "lastTestedDate": "2019-02-05T08:54:07.704Z",
+    "name": "test",
+    "origin": "github",
+    "readOnly": false,
+    "remediation": Object {},
+    "remoteRepoUrl": "https://github.com/snyk/test.git",
+    "tags": Array [],
+    "targetReference": null,
+    "testFrequency": "daily",
+    "totalDependencies": 42,
+    "type": "maven",
+  },
+}
+`;
