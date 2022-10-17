@@ -10,7 +10,7 @@ describe('getFeatureFlag', () => {
     userAgentPrefix: 'snyk-api-import:tests',
   });
   afterAll(async () => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   }, 1000);
 
   it('get feature flag for org - mock', async () => {

@@ -94,7 +94,7 @@ describe('listTargets', () => {
     userAgentPrefix: 'snyk-api-import:tests',
   });
   afterAll(async () => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   }, 1000);
 
   it('list the targets in a given Org without pagination - mock', async () => {
