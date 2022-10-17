@@ -3,8 +3,8 @@ import * as needle from 'needle';
 import * as debugLib from 'debug';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
-import { requestsManager } from 'snyk-request-manager';
-import { SnykProject } from '../../types';
+import type { requestsManager } from 'snyk-request-manager';
+import type { SnykProject } from '../../types';
 const debug = debugLib('snyk:api-import');
 
 export async function deleteProjects(
