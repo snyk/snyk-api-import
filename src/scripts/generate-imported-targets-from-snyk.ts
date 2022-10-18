@@ -4,11 +4,13 @@ import * as path from 'path';
 import * as pMap from 'p-map';
 import * as _ from 'lodash';
 
-import {
+import type {
   FilePath,
   SnykProject,
-  SupportedIntegrationTypesToListSnykTargets,
   Target,
+} from '../lib/types';
+import {
+  SupportedIntegrationTypesToListSnykTargets,
 } from '../lib/types';
 import {
   getAllOrgs,
@@ -69,8 +71,8 @@ export function imageProjectToTarget(
     name: project.name,
   };
 }
-
-const targetGenerators = {
+// TODO: move to it's own lib?
+export const targetGenerators = {
   [SupportedIntegrationTypesToListSnykTargets.GITHUB]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.GITLAB]: gitlabProjectToImportLogTarget,
   [SupportedIntegrationTypesToListSnykTargets.GHE]: projectToTarget,
