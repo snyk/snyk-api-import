@@ -9,7 +9,7 @@ describe('`snyk-api-import help <...>`', () => {
   const OLD_ENV = process.env;
   const GROUP_ID = process.env.TEST_GROUP_ID as string;
 
-  afterAll(async () => {
+  afterAll(() => {
     process.env = { ...OLD_ENV };
   });
   it('Shows help text as expected', (done) => {

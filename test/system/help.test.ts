@@ -7,7 +7,7 @@ describe('`snyk-api-import help <...>`', () => {
   process.env.SNYK_API = process.env.SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
 
-  afterAll(async () => {
+  afterAll(() => {
     process.env = { ...OLD_ENV };
   });
   it('Shows help text as expected', (done) => {

@@ -10,9 +10,10 @@ describe('getFeatureFlag', () => {
     userAgentPrefix: 'snyk-api-import:tests',
     maxRetryCount: 1,
   });
-  afterAll(async () => {
-    jest.resetAllMocks();
-  }, 1000);
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
 
   it('get feature flag for org - mock', async () => {
     jest.spyOn(requestManager, 'request').mockResolvedValueOnce({

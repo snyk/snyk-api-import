@@ -6,7 +6,7 @@ const main = './dist/index.js'.replace(/\//g, sep);
 
 describe('`snyk-api-import import:data <...>`', () => {
   const OLD_ENV = process.env;
-  afterAll(async () => {
+  afterAll(() => {
     process.env = { ...OLD_ENV };
   });
   it('Shows help text as expected', (done) => {
