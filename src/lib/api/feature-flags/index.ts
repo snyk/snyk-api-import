@@ -1,4 +1,4 @@
-import { requestsManager } from 'snyk-request-manager';
+import type { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 
 const debug = debugLib('snyk:get-feature-flag');
