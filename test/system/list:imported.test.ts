@@ -11,7 +11,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
   const GROUP_ID = process.env.TEST_GROUP_ID as string;
   const ORG_ID = process.env.TEST_ORG_ID as string;
 
-  afterAll(async () => {
+  afterAll(() => {
     process.env = { ...OLD_ENV };
   });
   it('Shows help text as expected', (done) => {

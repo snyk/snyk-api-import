@@ -9,7 +9,7 @@ describe('generateOrgImportDataFile Github script', () => {
     __dirname + '/group-groupIdExample-github-com-orgs.json',
     __dirname + '/group-groupIdExample-github-enterprise-orgs.json',
   ];
-  afterAll(async () => {
+  afterAll(() => {
     process.env = { ...OLD_ENV };
   });
 
@@ -142,7 +142,7 @@ describe('generateOrgImportDataFile Gitlab script', () => {
   const filesToCleanup: string[] = [
     __dirname + '/group-groupIdExample-gitlab-orgs.json',
   ];
-  afterAll(async () => {
+  afterAll(() => {
     process.env = { ...OLD_ENV };
   });
 
@@ -233,7 +233,7 @@ describe('generateOrgImportDataFile Bitbucket Cloud script', () => {
   const filesToCleanup: string[] = [
     __dirname + '/group-groupIdExample-bitbucket-cloud-orgs.json',
   ];
-  afterAll(async () => {
+  afterAll(() => {
     process.env = { ...OLD_ENV };
   });
 
