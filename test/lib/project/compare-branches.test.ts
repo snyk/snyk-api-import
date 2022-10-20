@@ -11,7 +11,7 @@ describe('compareAndUpdateBranches', () => {
     process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
   });
   afterAll(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
     process.env = { ...OLD_ENV };
   }, 1000);
   afterEach(() => {
