@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`listProjects list the projects in a given Org with filter - mock 1`] = `
+Object {
+  "org": Object {
+    "id": "74e2f385-a54f-491e-9034-76c53e72927a",
+  },
+  "projects": Array [
+    Object {
+      "branch": "master",
+      "created": "2021-05-29T09:50:54.014Z",
+      "id": "331ede0a-de94-456f-b788-166caeca58bf",
+      "name": "snyk/goof",
+      "origin": "github",
+      "type": "maven",
+    },
+  ],
+}
+`;
+
 exports[`listTargets list the targets in a given Org with filter - mock 1`] = `
 Object {
   "targets": Array [

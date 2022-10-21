@@ -237,13 +237,17 @@ async function getProject(
   filters?: ProjectsFilters,
   nextPageLink?: string,
 ): Promise<{ projects: SnykProject[]; next?: string }> {
-  const url = nextPageLink
-    ? nextPageLink
-    : `/orgs/${orgId.trim()}/projects?version=2022-06-08~beta`;
+
+  const query = qs.stringify({
+    version: '2022-09-15~beta',
+    ...filters,
+  });
+
+  const url = nextPageLink ?? `/orgs/${orgId.trim()}/projects?${query}`;
+
   const res = await requestManager.request({
     verb: 'get',
     url: url,
-    body: JSON.stringify(filters),
     useRESTApi: true,
   });
 
