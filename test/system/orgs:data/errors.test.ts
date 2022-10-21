@@ -4,7 +4,7 @@ const main = './dist/index.js'.replace(/\//g, path.sep);
 
 describe('General `snyk-api-import orgs:data <...>`', () => {
   const OLD_ENV = process.env;
-  afterAll(async () => {
+  afterAll(() => {
     process.env = { ...OLD_ENV };
   });
   it('Shows error when missing groupId', (done) => {

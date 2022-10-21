@@ -16,7 +16,7 @@ describe('Orgs API', () => {
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import:tests',
   });
-  afterAll(async () => {
+  afterAll(() => {
     process.env = { ...OLD_ENV };
   });
 
