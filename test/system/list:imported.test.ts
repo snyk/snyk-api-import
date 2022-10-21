@@ -75,6 +75,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
             'imported-targets.log',
           )}`,
         );
+        expect(stdout.trim()).toContain("Extracted 2 unique targets from 2 projects from org 74e2f385-a54f-491e-9034-76c53e72927a");
         deleteFiles([path.resolve(__dirname, IMPORT_LOG_NAME)]);
       },
     ).on('exit', (code) => {

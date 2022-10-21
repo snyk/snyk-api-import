@@ -87,6 +87,98 @@ describe('listProjects', () => {
       branch: expect.any(String),
     });
   }, 5000);
+  it('list the projects in a given Org with filter - mock', async () => {
+    const req = jest.spyOn(requestManager, 'request');
+
+    req.mockResolvedValue({
+      statusCode: 200,
+      data: {
+        jsonapi: { version: '1.0' },
+        data: [
+          {
+            attributes: {
+              businessCriticality: ['medium'],
+              created: '2021-05-29T09:50:54.014Z',
+              environment: ['external', 'hosted'],
+              lifecycle: ['production'],
+              name: 'snyk/goof',
+              origin: 'github',
+              status: 'active',
+              tags: [
+                {
+                  key: 'tag-key',
+                  value: 'tag-value',
+                },
+              ],
+              targetReference: 'master',
+              type: 'maven',
+            },
+            id: '331ede0a-de94-456f-b788-166caeca58bf',
+            relationships: {
+              importingUser: {
+                data: {
+                  id: 'e661d4ef-5ad5-4cef-ad16-5157cefa83f5',
+                  type: 'org',
+                },
+                links: {
+                  self: {
+                    href: '/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefa83f5',
+                  },
+                },
+              },
+              org: {
+                data: {
+                  id: 'e661d4ef-5ad5-4cef-ad16-5157cefa83f5',
+                  type: 'org',
+                },
+                links: {
+                  self: {
+                    href: '/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefa83f5',
+                  },
+                },
+              },
+              owner: {
+                data: {
+                  id: 'e661d4ef-5ad5-4cef-ad16-5157cefa83f5',
+                  type: 'org',
+                },
+                links: {
+                  self: {
+                    href: '/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefa83f5',
+                  },
+                },
+              },
+              target: {
+                data: {
+                  id: 'e661d4ef-5ad5-4cef-ad16-5157cefa83f5',
+                  type: 'org',
+                },
+                links: {
+                  self: {
+                    href: '/v3/orgs/e661d4ef-5ad5-4cef-ad16-5157cefa83f5',
+                  },
+                },
+              },
+              type: 'projects',
+            },
+          },
+        ],
+        links: {},
+      },
+    });
+
+    const res = await listProjects(requestManager, ORG_ID, {
+      targetId: 'e661d4ef-5ad5-4cef-ad16-5157cefaxxx',
+    });
+    expect(req).toBeCalledWith({
+      body: undefined,
+      url:
+        '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/projects?version=2022-09-15~beta&targetId=e661d4ef-5ad5-4cef-ad16-5157cefaxxx',
+      useRESTApi: true,
+      verb: 'get',
+    });
+    expect(res).toMatchSnapshot();
+  }, 5000);
 });
 
 describe('listTargets', () => {

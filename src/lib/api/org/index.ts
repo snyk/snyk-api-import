@@ -166,6 +166,7 @@ interface ProjectsFilters {
   origin?: string; //If supplied, only projects that exactly match this origin will be returned
   type?: string; //If supplied, only projects that exactly match this type will be returned
   isMonitored?: boolean; // If set to true, only include projects which are monitored, if set to false, only include projects which are not monitored
+  targetId?: string;
 }
 
 export async function listProjects(
@@ -237,13 +238,17 @@ async function getProject(
   filters?: ProjectsFilters,
   nextPageLink?: string,
 ): Promise<{ projects: SnykProject[]; next?: string }> {
-  const url = nextPageLink
-    ? nextPageLink
-    : `/orgs/${orgId.trim()}/projects?version=2022-06-08~beta`;
+
+  const query = qs.stringify({
+    version: '2022-09-15~beta',
+    ...filters,
+  });
+
+  const url = nextPageLink ?? `/orgs/${orgId.trim()}/projects?${query}`;
+
   const res = await requestManager.request({
     verb: 'get',
     url: url,
-    body: JSON.stringify(filters),
     useRESTApi: true,
   });
 
