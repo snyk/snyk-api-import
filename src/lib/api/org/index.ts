@@ -139,7 +139,7 @@ export async function deleteOrg(
   return res.data;
 }
 
-interface ProjectsResponse {
+export interface ProjectsResponse {
   org: {
     id: string;
   };
@@ -166,6 +166,7 @@ interface ProjectsFilters {
   origin?: string; //If supplied, only projects that exactly match this origin will be returned
   type?: string; //If supplied, only projects that exactly match this type will be returned
   isMonitored?: boolean; // If set to true, only include projects which are monitored, if set to false, only include projects which are not monitored
+  targetId?: string; // The target ID to be used in sunc functions
 }
 
 export async function listProjects(
@@ -175,8 +176,7 @@ export async function listProjects(
 ): Promise<ProjectsResponse> {
   getApiToken();
   getSnykHost();
-  debug(`Listing all projects for org: ${orgId}`);
-
+  debug(`Listing all projects for org: ${orgId} with filter ${JSON.stringify(filters)}`);
   if (!orgId) {
     throw new Error(
       `Missing required parameters. Please ensure you have set: orgId, settings.
@@ -280,7 +280,7 @@ function convertToSnykProject(projectData: RESTProjectData[]): SnykProject[] {
 
   return projects;
 }
-interface TargetFilters {
+export interface TargetFilters {
   remoteUrl?: string;
   limit?: number;
   isPrivate?: boolean;
@@ -304,12 +304,12 @@ export async function listTargets(
     );
   }
 
-  const targets = await listAllSnykTarget(requestManager, orgId, config);
+  const targets = await listAllSnykTargets(requestManager, orgId, config);
 
   return { targets };
 }
 
-export async function listAllSnykTarget(
+export async function listAllSnykTargets(
   requestManager: requestsManager,
   orgId: string,
   config?: TargetFilters,

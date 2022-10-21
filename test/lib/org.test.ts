@@ -97,7 +97,6 @@ describe('listTargets', () => {
     jest.restoreAllMocks();
   });
 
-
   it('list the targets in a given Org without pagination - mock', async () => {
     jest.spyOn(requestManager, 'request').mockResolvedValue({
       statusCode: 200,

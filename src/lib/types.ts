@@ -91,6 +91,10 @@ export enum SupportedIntegrationTypesImportOrgData {
   BITBUCKET_CLOUD = 'bitbucket-cloud',
 }
 
+export enum SupportedIntegrationTypesUpdateProject {
+  GITHUB = 'github',
+}
+
 // used to generate imported targets that exist in Snyk
 // when we need to grab the integrationId from Snyk
 export enum SupportedIntegrationTypesToListSnykTargets {

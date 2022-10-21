@@ -56,7 +56,8 @@ describe('Import skips previously imported', () => {
   process.env.INTEGRATION_ID = 'INTEGRATION_ID';
   process.env.ORG_ID = 'ORG_ID';
 
-  afterAll(async () => {
+  afterAll(() => {
+    jest.restoreAllMocks();
     process.env = { ...OLD_ENV };
   }, 1000);
   it('succeeds to import targets from file with import log', async () => {
