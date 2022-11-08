@@ -127,7 +127,7 @@ export async function updateTargets(
     targets,
     async (target: SnykTarget) => {
       try {
-        const filters = { targetId: target.id };
+        const filters = { targetId: target.id, limit: 100 };
         debug(`Listing projects for target ${target.attributes.displayName}`);
         const { projects } = await listProjects(requestManager, orgId, filters);
         debug(`Syncing projects for target ${target.attributes.displayName}`);
