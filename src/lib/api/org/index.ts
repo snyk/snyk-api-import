@@ -223,7 +223,7 @@ async function listAllProjects(
         : ((lastPage = true), (nextPageLink = ''));
       pageCount++;
     } catch (e) {
-      debug('Failed to update notification settings for ', orgId, e);
+      debug('Failed to get projects for ', orgId, e);
       throw e;
     }
   }
@@ -323,7 +323,7 @@ export async function listAllSnykTargets(
   let nextPageLink: string | undefined = undefined;
   while (!lastPage) {
     try {
-      debug(`Fetching page ${pageCount} of get target for ${orgId}\n`);
+      debug(`Fetching page ${pageCount} of targets for orgId: ${orgId}\n`);
       const {
         targets,
         next,

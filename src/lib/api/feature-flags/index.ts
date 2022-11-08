@@ -25,7 +25,6 @@ export async function getFeatureFlag(
 
     return enabled;
   } catch (err: any) {
-    console.log(err.message)
     const res = err.message?.response?.data;
     const message = res?.userMessage || res?.message || err.message?.message;
 
@@ -37,10 +36,10 @@ export async function getFeatureFlag(
     }
 
     debug(
-      `Could not fetch the ${featureFlagName} feature flag for ${orgId}\n ${JSON.stringify(
+      `Could not fetch the ${featureFlagName} feature flag for ${orgId}. Error: ${JSON.stringify(
         err,
       )}`,
     );
-    throw new Error(message);
+    throw new Error(`Could not fetch the ${featureFlagName} feature flag for ${orgId}. ${message}`);
   }
 }

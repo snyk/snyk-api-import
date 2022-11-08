@@ -71,7 +71,7 @@ export function imageProjectToTarget(
     name: project.name,
   };
 }
-// TODO: move to it's own lib?
+
 export const targetGenerators = {
   [SupportedIntegrationTypesToListSnykTargets.GITHUB]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.GITLAB]: gitlabProjectToImportLogTarget,
