@@ -42,7 +42,7 @@ export async function listIntegrations(
   if (!statusCode || statusCode !== 200) {
     throw new Error(
       'Expected a 200 response, instead received: ' +
-        JSON.stringify({ data: res.data || res.body, status: statusCode }),
+      JSON.stringify({ data: res.data || res.body, status: statusCode }),
     );
   }
   return res.data || {};
@@ -100,7 +100,7 @@ export async function setNotificationPreferences(
     if (!statusCode || statusCode !== 200) {
       throw new Error(
         'Expected a 200 response, instead received: ' +
-          JSON.stringify({ data: res.data, status: statusCode }),
+        JSON.stringify({ data: res.data, status: statusCode }),
       );
     }
     return res.data || {};
@@ -133,7 +133,7 @@ export async function deleteOrg(
   if (!statusCode || statusCode !== 204) {
     throw new Error(
       'Expected a 204 response, instead received: ' +
-        JSON.stringify({ data: res.data, status: statusCode }),
+      JSON.stringify({ data: res.data, status: statusCode }),
     );
   }
   return res.data;
@@ -166,7 +166,8 @@ interface ProjectsFilters {
   origin?: string; //If supplied, only projects that exactly match this origin will be returned
   type?: string; //If supplied, only projects that exactly match this type will be returned
   isMonitored?: boolean; // If set to true, only include projects which are monitored, if set to false, only include projects which are not monitored
-  targetId?: string; // The target ID to be used in sunc functions
+  targetId?: string; // The target public ID
+  limit?: number; // how many results per page, defaults to 10
 }
 
 export async function listProjects(
@@ -186,14 +187,12 @@ export async function listProjects(
 
   const projects = await listAllProjects(requestManager, orgId, filters);
 
-  const snykProjectData: ProjectsResponse = {
+  return {
     org: {
       id: orgId,
     },
     projects: projects,
   };
-
-  return snykProjectData;
 }
 
 async function listAllProjects(
@@ -216,7 +215,7 @@ async function listAllProjects(
       }: {
         projects: SnykProject[];
         next?: string;
-      } = await getProject(requestManager, orgId, filters, nextPageLink);
+      } = await getProjectsPage(requestManager, orgId, filters, nextPageLink);
 
       projectsList.push(...projects);
       next
@@ -231,7 +230,7 @@ async function listAllProjects(
   return projectsList;
 }
 
-async function getProject(
+async function getProjectsPage(
   requestManager: requestsManager,
   orgId: string,
   filters?: ProjectsFilters,
@@ -255,7 +254,7 @@ async function getProject(
   if (!statusCode || statusCode !== 200) {
     throw new Error(
       'Expected a 200 response, instead received: ' +
-        JSON.stringify({ data: res.data, status: statusCode }),
+      JSON.stringify({ data: res.data, status: statusCode }),
     );
   }
 
@@ -357,9 +356,9 @@ export async function getSnykTarget(
     excludeEmpty?: boolean;
     origin?: string;
   } = {
-    limit: 20,
-    excludeEmpty: true,
-  },
+      limit: 20,
+      excludeEmpty: true,
+    },
 ): Promise<{ targets: SnykTarget[]; next?: string }> {
   const query = qs.stringify({
     version: '2022-09-15~beta',
@@ -378,7 +377,7 @@ export async function getSnykTarget(
   if (!statusCode || statusCode !== 200) {
     throw new Error(
       'Expected a 200 response, instead received: ' +
-        JSON.stringify({ data: res.data, status: statusCode }),
+      JSON.stringify({ data: res.data, status: statusCode }),
     );
   }
 
@@ -388,3 +387,4 @@ export async function getSnykTarget(
 
   return { targets, next };
 }
+

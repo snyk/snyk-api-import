@@ -118,7 +118,7 @@ export async function generateSnykImportedTargets(
     ? await getAllOrgs(requestManager, groupId)
     : [{ id: orgId! }];
   const failedOrgs: SnykOrg[] = [];
-  const projectFilters = integrationTypes.length > 1 ?  undefined: { origin: integrationTypes[0] };
+  const projectFilters = integrationTypes.length > 1 ? { limit: 100 } : { origin: integrationTypes[0], limit: 100 };
   await pMap(
     groupOrgs,
     async (org: SnykOrg) => {
@@ -183,8 +183,7 @@ export async function generateSnykImportedTargets(
       } catch (e) {
         failedOrgs.push(org);
         console.warn(
-          `Failed to process projects for organization ${
-            name && slug ? `${name}(${slug})` : orgId
+          `Failed to process projects for organization ${name && slug ? `${name}(${slug})` : orgId
           }. Continuing.`,
         );
       }
