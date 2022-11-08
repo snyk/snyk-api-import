@@ -67,8 +67,6 @@ export async function updateProject(
 ): Promise<SnykProject> {
   getApiToken();
   getSnykHost();
-  debug('Update project: ' + projectId);
-
   if (!orgId || !projectId) {
     throw new Error(
       `Missing required parameters. Please ensure you have set: orgId and projectId.
@@ -97,6 +95,6 @@ export async function updateProject(
   }
 
   const updatedProject: SnykProject = res.data;
-
+  debug('Updated project: ' + projectId);
   return updatedProject;
 }

@@ -2,7 +2,7 @@ import type { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 
 import { getGithubReposDefaultBranch } from '../../lib/source-handlers/github';
-import { compareAndUpdateBranches } from '../../lib/project/compare-branches';
+import { updateBranch } from '../../lib/project/update-branch';
 import type {
   SnykProject, Target,
 } from '../../lib/types';
@@ -41,7 +41,7 @@ export async function updateProjectForTarget(
     return { updated: false };
   }
 
-  const { updated } = await compareAndUpdateBranches(
+  const { updated } = await updateBranch(
     requestManager,
     {
       branch: project.branch!,

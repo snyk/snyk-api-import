@@ -1,7 +1,7 @@
 import { requestsManager } from 'snyk-request-manager';
-import * as compareProject from '../../../src/lib/project/compare-branches';
+import * as compareProject from '../../../src/lib/project/update-branch';
 
-describe('compareAndUpdateBranches', () => {
+describe('updateBranch', () => {
   const OLD_ENV = process.env;
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import:tests',
@@ -51,7 +51,7 @@ describe('compareAndUpdateBranches', () => {
       status: 200,
     });
 
-    const res = await compareProject.compareAndUpdateBranches(
+    const res = await compareProject.updateBranch(
       requestManager,
       {
         branch: 'main',
@@ -69,7 +69,7 @@ describe('compareAndUpdateBranches', () => {
       status: 200,
     });
 
-    const res = await compareProject.compareAndUpdateBranches(
+    const res = await compareProject.updateBranch(
       requestManager,
       {
         branch: 'main',
@@ -84,7 +84,7 @@ describe('compareAndUpdateBranches', () => {
   }, 5000);
 
   it('does not update the project if the branches are the same', async () => {
-    const res = await compareProject.compareAndUpdateBranches(
+    const res = await compareProject.updateBranch(
       requestManager,
       {
         branch: 'main',
@@ -101,7 +101,7 @@ describe('compareAndUpdateBranches', () => {
       .spyOn(requestManager, 'request')
       .mockResolvedValue({ statusCode: 500, data: {} });
     expect(async () => {
-      await compareProject.compareAndUpdateBranches(
+      await compareProject.updateBranch(
         requestManager,
         {
           branch: 'main',
