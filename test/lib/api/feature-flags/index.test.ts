@@ -54,7 +54,9 @@ describe('getFeatureFlag', () => {
     jest.spyOn(requestManager, 'request').mockRejectedValue(error);
     await expect(
       getFeatureFlag(requestManager, 'nonEnabledFeatureFlag', '0000'),
-    ).rejects.toThrowError();
+    ).rejects.toThrowError(
+      'Could not fetch the nonEnabledFeatureFlag feature flag for 0000. Org test-org was not found or you may not have the correct permissions to access the org',
+    );
   }, 20000);
 
   it('Error if the request fails with a 403 that indicates the FF is not enabled for a real org', async () => {

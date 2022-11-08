@@ -3,7 +3,7 @@ import * as yargs from 'yargs';
 const debug = debugLib('snyk:orgs-create-script');
 
 import { getLoggingPath } from '../lib';
-import { CommandResult } from '../lib/types';
+import type { CommandResult } from '../lib/types';
 import { createOrgs } from '../scripts/create-orgs';
 
 export const command = ['orgs:create'];
