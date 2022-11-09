@@ -17,8 +17,7 @@ export const builder = {
   },
   noDuplicateNames: {
     required: false,
-    desc:
-      'Skip creating an organization if the given name is already taken within the Group.',
+    desc: 'Skip creating an organization if the given name is already taken within the Group.',
   },
   includeExistingOrgsInOutput: {
     required: false,

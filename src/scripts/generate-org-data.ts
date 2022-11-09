@@ -27,16 +27,20 @@ const sourceGenerators = {
   [SupportedIntegrationTypesImportOrgData.GITLAB]: listGitlabGroups,
   [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizations,
   [SupportedIntegrationTypesImportOrgData.GHE]: githubEnterpriseOrganizations,
-  [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]: listBitbucketServerProjects,
-  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD]: listBitbucketCloudWorkspaces,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]:
+    listBitbucketServerProjects,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD]:
+    listBitbucketCloudWorkspaces,
 };
 
 const sourceNotEmpty = {
   [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizationIsEmpty,
   [SupportedIntegrationTypesImportOrgData.GHE]: githubOrganizationIsEmpty,
   [SupportedIntegrationTypesImportOrgData.GITLAB]: gitlabGroupIsEmpty,
-  [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]: bitbucketServerProjectIsEmpty,
-  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD]: bitbucketCloudWorkspaceIsEmpty,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]:
+    bitbucketServerProjectIsEmpty,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD]:
+    bitbucketCloudWorkspaceIsEmpty,
 };
 
 export const entityName: {
@@ -101,8 +105,8 @@ export async function generateOrgImportDataFile(
   );
 
   const fileName = `group-${groupId}-${exportFileName[source]}-orgs.json`;
-  await writeFile(fileName, ({
+  await writeFile(fileName, {
     orgs: orgData,
-  } as unknown) as JSON);
+  } as unknown as JSON);
   return { orgs: orgData, fileName, skippedEmptyOrgs };
 }

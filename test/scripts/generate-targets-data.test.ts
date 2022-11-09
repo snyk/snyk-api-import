@@ -1,11 +1,7 @@
 import * as _ from 'lodash';
 import * as path from 'path';
-import type {
-  CreatedOrg,
-} from '../../src/lib/types';
-import {
-  SupportedIntegrationTypesImportData,
-} from '../../src/lib/types';
+import type { CreatedOrg } from '../../src/lib/types';
+import { SupportedIntegrationTypesImportData } from '../../src/lib/types';
 
 import { generateTargetsImportDataFile } from '../../src/scripts/generate-targets-data';
 import { deleteFiles } from '../delete-files';

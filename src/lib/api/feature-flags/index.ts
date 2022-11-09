@@ -28,10 +28,12 @@ export async function getFeatureFlag(
     const res = err.message?.response?.data;
     const message = res?.userMessage || res?.message || err.message?.message;
 
-    if (res && res.ok === false && res?.userMessage?.includes('feature enabled')) {
-      debug(
-        `Feature flag ${featureFlagName} is not enabled for Org ${orgId}`,
-      );
+    if (
+      res &&
+      res.ok === false &&
+      res?.userMessage?.includes('feature enabled')
+    ) {
+      debug(`Feature flag ${featureFlagName} is not enabled for Org ${orgId}`);
       return false;
     }
 
@@ -40,6 +42,8 @@ export async function getFeatureFlag(
         err,
       )}`,
     );
-    throw new Error(`Could not fetch the ${featureFlagName} feature flag for ${orgId}. ${message}`);
+    throw new Error(
+      `Could not fetch the ${featureFlagName} feature flag for ${orgId}. ${message}`,
+    );
   }
 }

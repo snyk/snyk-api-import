@@ -42,7 +42,7 @@ export async function listIntegrations(
   if (!statusCode || statusCode !== 200) {
     throw new Error(
       'Expected a 200 response, instead received: ' +
-      JSON.stringify({ data: res.data || res.body, status: statusCode }),
+        JSON.stringify({ data: res.data || res.body, status: statusCode }),
     );
   }
   return res.data || {};
@@ -100,7 +100,7 @@ export async function setNotificationPreferences(
     if (!statusCode || statusCode !== 200) {
       throw new Error(
         'Expected a 200 response, instead received: ' +
-        JSON.stringify({ data: res.data, status: statusCode }),
+          JSON.stringify({ data: res.data, status: statusCode }),
       );
     }
     return res.data || {};
@@ -133,7 +133,7 @@ export async function deleteOrg(
   if (!statusCode || statusCode !== 204) {
     throw new Error(
       'Expected a 204 response, instead received: ' +
-      JSON.stringify({ data: res.data, status: statusCode }),
+        JSON.stringify({ data: res.data, status: statusCode }),
     );
   }
   return res.data;
@@ -177,7 +177,11 @@ export async function listProjects(
 ): Promise<ProjectsResponse> {
   getApiToken();
   getSnykHost();
-  debug(`Listing all projects for org: ${orgId} with filter ${JSON.stringify(filters)}`);
+  debug(
+    `Listing all projects for org: ${orgId} with filter ${JSON.stringify(
+      filters,
+    )}`,
+  );
   if (!orgId) {
     throw new Error(
       `Missing required parameters. Please ensure you have set: orgId, settings.
@@ -236,7 +240,6 @@ async function getProjectsPage(
   filters?: ProjectsFilters,
   nextPageLink?: string,
 ): Promise<{ projects: SnykProject[]; next?: string }> {
-
   const query = qs.stringify({
     version: '2022-09-15~beta',
     ...filters,
@@ -254,7 +257,7 @@ async function getProjectsPage(
   if (!statusCode || statusCode !== 200) {
     throw new Error(
       'Expected a 200 response, instead received: ' +
-      JSON.stringify({ data: res.data, status: statusCode }),
+        JSON.stringify({ data: res.data, status: statusCode }),
     );
   }
 
@@ -324,15 +327,8 @@ export async function listAllSnykTargets(
   while (!lastPage) {
     try {
       debug(`Fetching page ${pageCount} of targets for orgId: ${orgId}\n`);
-      const {
-        targets,
-        next,
-      }: { targets: SnykTarget[]; next?: string } = await getSnykTarget(
-        requestManager,
-        orgId,
-        nextPageLink,
-        config,
-      );
+      const { targets, next }: { targets: SnykTarget[]; next?: string } =
+        await getSnykTarget(requestManager, orgId, nextPageLink, config);
 
       targetsList.push(...targets);
       next
@@ -356,9 +352,9 @@ export async function getSnykTarget(
     excludeEmpty?: boolean;
     origin?: string;
   } = {
-      limit: 20,
-      excludeEmpty: true,
-    },
+    limit: 20,
+    excludeEmpty: true,
+  },
 ): Promise<{ targets: SnykTarget[]; next?: string }> {
   const query = qs.stringify({
     version: '2022-09-15~beta',
@@ -377,7 +373,7 @@ export async function getSnykTarget(
   if (!statusCode || statusCode !== 200) {
     throw new Error(
       'Expected a 200 response, instead received: ' +
-      JSON.stringify({ data: res.data, status: statusCode }),
+        JSON.stringify({ data: res.data, status: statusCode }),
     );
   }
 
@@ -387,4 +383,3 @@ export async function getSnykTarget(
 
   return { targets, next };
 }
-

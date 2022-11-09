@@ -34,14 +34,13 @@ describe('Generate imported targets based on Snyk data', () => {
   it('succeeds to generate targets for Group for Github & GHE', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
-    const {
-      targets,
-      failedOrgs,
-      fileName,
-    } = await generateSnykImportedTargets({ groupId: GROUP_ID }, [
-      SupportedIntegrationTypesToListSnykTargets.GITHUB,
-      SupportedIntegrationTypesToListSnykTargets.GHE,
-    ]);
+    const { targets, failedOrgs, fileName } = await generateSnykImportedTargets(
+      { groupId: GROUP_ID },
+      [
+        SupportedIntegrationTypesToListSnykTargets.GITHUB,
+        SupportedIntegrationTypesToListSnykTargets.GHE,
+      ],
+    );
     expect(failedOrgs).toEqual([]);
     expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
     expect(targets[0]).toMatchObject({
@@ -65,13 +64,10 @@ describe('Generate imported targets based on Snyk data', () => {
   it('succeeds to generate targets for Org + Gitlab', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
-    const {
-      targets,
-      failedOrgs,
-      fileName,
-    } = await generateSnykImportedTargets({ orgId: ORG_ID }, [
-      SupportedIntegrationTypesToListSnykTargets.GITHUB,
-    ]);
+    const { targets, failedOrgs, fileName } = await generateSnykImportedTargets(
+      { orgId: ORG_ID },
+      [SupportedIntegrationTypesToListSnykTargets.GITHUB],
+    );
     expect(failedOrgs).toEqual([]);
     expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
     expect(targets[0]).toMatchObject({
@@ -94,13 +90,10 @@ describe('Generate imported targets based on Snyk data', () => {
   it('succeeds to generate targets for Org + Azure', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
-    const {
-      targets,
-      failedOrgs,
-      fileName,
-    } = await generateSnykImportedTargets({ orgId: ORG_ID }, [
-      SupportedIntegrationTypesToListSnykTargets.AZURE_REPOS,
-    ]);
+    const { targets, failedOrgs, fileName } = await generateSnykImportedTargets(
+      { orgId: ORG_ID },
+      [SupportedIntegrationTypesToListSnykTargets.AZURE_REPOS],
+    );
     expect(failedOrgs).toEqual([]);
     expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
     expect(targets[0]).toMatchObject({
@@ -123,13 +116,10 @@ describe('Generate imported targets based on Snyk data', () => {
   it('succeeds to generate targets for Org + Bitbucket server', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
-    const {
-      targets,
-      failedOrgs,
-      fileName,
-    } = await generateSnykImportedTargets({ orgId: ORG_ID }, [
-      SupportedIntegrationTypesToListSnykTargets.BITBUCKET_SERVER,
-    ]);
+    const { targets, failedOrgs, fileName } = await generateSnykImportedTargets(
+      { orgId: ORG_ID },
+      [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_SERVER],
+    );
     expect(failedOrgs).toEqual([]);
     expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
     expect(targets[0]).toMatchObject({
@@ -151,13 +141,10 @@ describe('Generate imported targets based on Snyk data', () => {
   it('succeeds to generate targets for Group for Bitbucket Cloud', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
-    const {
-      targets,
-      failedOrgs,
-      fileName,
-    } = await generateSnykImportedTargets({ groupId: GROUP_ID }, [
-      SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD,
-    ]);
+    const { targets, failedOrgs, fileName } = await generateSnykImportedTargets(
+      { groupId: GROUP_ID },
+      [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD],
+    );
     expect(failedOrgs).toEqual([]);
     expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
     expect(targets[0]).toMatchObject({
@@ -180,13 +167,10 @@ describe('Generate imported targets based on Snyk data', () => {
   it('succeeds to generate targets for Org + Bitbucket Cloud', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
-    const {
-      targets,
-      failedOrgs,
-      fileName,
-    } = await generateSnykImportedTargets({ orgId: ORG_ID }, [
-      SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD,
-    ]);
+    const { targets, failedOrgs, fileName } = await generateSnykImportedTargets(
+      { orgId: ORG_ID },
+      [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD],
+    );
     expect(failedOrgs).toEqual([]);
     expect(fileName).toEqual(path.resolve(__dirname, IMPORT_LOG_NAME));
     expect(targets[0]).toMatchObject({

@@ -7,12 +7,8 @@ import * as _ from 'lodash';
 import * as pMap from 'p-map';
 import type { PollImportResponse, Project } from '../../types';
 import { getApiToken } from '../../get-api-token';
-import type {
-  FailedProject,
-} from '../../../loggers/log-failed-projects';
-import {
-  logFailedProjects,
-} from '../../../loggers/log-failed-projects';
+import type { FailedProject } from '../../../loggers/log-failed-projects';
+import { logFailedProjects } from '../../../loggers/log-failed-projects';
 import { logFailedPollUrls } from '../../../loggers/log-failed-polls';
 import { logImportedProjects } from '../../../loggers/log-imported-projects';
 import { logJobResult } from '../../../loggers/log-job-result';

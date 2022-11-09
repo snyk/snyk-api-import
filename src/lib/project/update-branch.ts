@@ -1,12 +1,12 @@
-import debug = require("debug");
-import type { requestsManager } from "snyk-request-manager";
-import { updateProject } from "../api/project";
+import debug = require('debug');
+import type { requestsManager } from 'snyk-request-manager';
+import { updateProject } from '../api/project';
 
 export async function updateBranch(
   requestManager: requestsManager,
   project: {
-    branch: string,
-    projectPublicId: string,
+    branch: string;
+    projectPublicId: string;
   },
   defaultBranch: string,
   orgId: string,
@@ -28,7 +28,7 @@ export async function updateBranch(
     } else {
       debug(`Default branch has not changed`);
     }
-    return { updated }
+    return { updated };
   } catch (e) {
     throw new Error(
       `Failed to update project ${projectPublicId}. ERROR: ${e.message}`,
