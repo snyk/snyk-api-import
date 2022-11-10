@@ -14,7 +14,7 @@ export async function getGithubReposDefaultBranch(
   const baseUrl = getGithubBaseUrl(host);
   const octokit: Octokit = new Octokit({ baseUrl, auth: githubToken });
 
-  debug(`Fetch default branch for repo: ${target.owner}/${target.name}`);
+  debug(`Fetching default branch for repo: ${target.owner}/${target.name}`);
 
   const response = await octokit.repos.get({
     owner: target.owner!,

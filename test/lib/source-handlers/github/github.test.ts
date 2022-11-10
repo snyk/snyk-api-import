@@ -62,3 +62,21 @@ describe('listGithubRepos script', () => {
     });
   }, 30000);
 });
+
+describe('isGithubConfigured', () => {
+  const OLD_ENV = process.env;
+
+  afterEach(async () => {
+    process.env = { ...OLD_ENV };
+  });
+  it('correctly configured', async () => {
+    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
+
+    const configured = github.isGithubConfigured();
+    expect(configured).toBeTruthy();
+  });
+  it('not configured should throw', async () => {
+    delete process.env.GITHUB_TOKEN;
+    expect(() => github.isGithubConfigured()).toThrow();
+  });
+});

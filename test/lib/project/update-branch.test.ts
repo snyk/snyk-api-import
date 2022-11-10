@@ -1,5 +1,5 @@
 import { requestsManager } from 'snyk-request-manager';
-import * as compareProject from '../../../src/lib/project/update-branch';
+import * as updateBranch from '../../../src/lib/project/update-branch';
 
 describe('updateBranch', () => {
   const OLD_ENV = process.env;
@@ -51,7 +51,7 @@ describe('updateBranch', () => {
       status: 200,
     });
 
-    const res = await compareProject.updateBranch(
+    const res = await updateBranch.updateBranch(
       requestManager,
       {
         branch: 'main',
@@ -69,7 +69,7 @@ describe('updateBranch', () => {
       status: 200,
     });
 
-    const res = await compareProject.updateBranch(
+    const res = await updateBranch.updateBranch(
       requestManager,
       {
         branch: 'main',
@@ -84,7 +84,7 @@ describe('updateBranch', () => {
   }, 5000);
 
   it('does not update the project if the branches are the same', async () => {
-    const res = await compareProject.updateBranch(
+    const res = await updateBranch.updateBranch(
       requestManager,
       {
         branch: 'main',
@@ -101,7 +101,7 @@ describe('updateBranch', () => {
       .spyOn(requestManager, 'request')
       .mockResolvedValue({ statusCode: 500, data: {} });
     expect(async () => {
-      await compareProject.updateBranch(
+      await updateBranch.updateBranch(
         requestManager,
         {
           branch: 'main',

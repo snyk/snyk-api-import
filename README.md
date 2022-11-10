@@ -31,6 +31,8 @@ If you need to adjust concurrency you can stop the script, change the concurrenc
 
 - [Contributing](.github/CONTRIBUTING.md)
 - [Kicking off an import](docs/import.md)
+- [Sync: detecting changes in monitored repos and updating Snyk projects](docs/sync.md)
+
 - Example workflows
   - [AWS automation example](docs/example-workflows/aws-automation-example.md)
 

@@ -2,7 +2,7 @@ import * as bunyan from 'bunyan';
 import * as debugLib from 'debug';
 
 import { FAILED_PROJECTS_LOG_NAME } from './../common';
-import { Project } from './../lib/types';
+import type { Project } from './../lib/types';
 import { getLoggingPath } from './../lib';
 
 const debug = debugLib('snyk:import-projects-script');
