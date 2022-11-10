@@ -53,15 +53,14 @@ const getProjects = async (
 }> => {
   const headers: OutgoingHttpHeaders = { Authorization: `Bearer ${token}` };
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
-  const { body, statusCode } = await limiterWithRateLimitRetries<
-    BitbucketProjectsResponse
-  >(
-    'get',
-    `${url}/rest/api/1.0/projects?start=${startFrom}&limit=${limit}`,
-    headers,
-    limiter,
-    60000,
-  );
+  const { body, statusCode } =
+    await limiterWithRateLimitRetries<BitbucketProjectsResponse>(
+      'get',
+      `${url}/rest/api/1.0/projects?start=${startFrom}&limit=${limit}`,
+      headers,
+      limiter,
+      60000,
+    );
   if (statusCode != 200) {
     throw new Error(`Failed to fetch projects for ${url}/rest/api/1.0/projects?start=${startFrom}&limit=${limit}\n
     Status Code: ${statusCode}\n

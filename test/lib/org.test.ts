@@ -172,8 +172,7 @@ describe('listProjects', () => {
     });
     expect(req).toBeCalledWith({
       body: undefined,
-      url:
-        '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/projects?version=2022-09-15~beta&targetId=e661d4ef-5ad5-4cef-ad16-5157cefaxxx',
+      url: '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/projects?version=2022-09-15~beta&targetId=e661d4ef-5ad5-4cef-ad16-5157cefaxxx',
       useRESTApi: true,
       verb: 'get',
     });
@@ -475,8 +474,7 @@ describe('listTargets', () => {
     });
     expect(req).toBeCalledWith({
       body: undefined,
-      url:
-        '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~beta&origin=github-enterprise',
+      url: '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~beta&origin=github-enterprise',
       useRESTApi: true,
       verb: 'get',
     });
@@ -703,12 +701,9 @@ describe('listTargets', () => {
           links: {
             first:
               '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~beta',
-            last:
-              '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~beta&starting_after=v1.eyg',
-            next:
-              '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~beta&starting_after=v1.eyJ',
-            self:
-              '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~beta',
+            last: '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~beta&starting_after=v1.eyg',
+            next: '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~beta&starting_after=v1.eyJ',
+            self: '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~beta',
           },
         },
       })
@@ -928,10 +923,8 @@ describe('listTargets', () => {
           links: {
             first:
               '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~beta',
-            last:
-              '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~betapage=2',
-            self:
-              '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~betapage=2',
+            last: '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~betapage=2',
+            self: '/orgs/74e2f385-a54f-491e-9034-76c53e72927a/targets?version=2022-09-15~betapage=2',
           },
         },
       });

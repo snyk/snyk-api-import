@@ -77,7 +77,7 @@ describe('filterOutImportedTargets', () => {
         // this is how the target is written during `import:data` command
         target: {
           projectKey: 'AT',
-          repoSlug: 'GoofTest'
+          repoSlug: 'GoofTest',
         },
         files: [{ path: 'package.json' }],
       },
@@ -97,7 +97,7 @@ describe('filterOutImportedTargets', () => {
         integrationId: 'integration-A',
         target: {
           projectKey: 'AT',
-          repoSlug: 'GoofTest'
+          repoSlug: 'GoofTest',
         },
         files: [{ path: 'package.json' }],
       },

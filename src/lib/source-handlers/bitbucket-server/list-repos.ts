@@ -62,15 +62,14 @@ const getRepos = async (
   const repos: BitbucketServerRepoData[] = [];
   const headers: OutgoingHttpHeaders = { Authorization: `Bearer ${token}` };
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
-  const { body, statusCode } = await limiterWithRateLimitRetries<
-    BitbucketServeRepoData
-  >(
-    'get',
-    `${url}/rest/api/1.0/repos?projectname=${projectKey}&state=AVAILABLE&start=${startFrom}&limit=${limit}`,
-    headers,
-    limiter,
-    60000,
-  );
+  const { body, statusCode } =
+    await limiterWithRateLimitRetries<BitbucketServeRepoData>(
+      'get',
+      `${url}/rest/api/1.0/repos?projectname=${projectKey}&state=AVAILABLE&start=${startFrom}&limit=${limit}`,
+      headers,
+      limiter,
+      60000,
+    );
   if (statusCode != 200) {
     throw new Error(`Failed to fetch repos for ${url}/rest/api/1.0/repos?projectname=${projectKey}&state=AVAILABLE&start=${startFrom}&limit=${limit}\n
     Status Code: ${statusCode}\n

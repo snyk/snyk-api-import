@@ -68,16 +68,15 @@ const getRepos = async (
     Authorization: `Basic ${base64.encode(username + ':' + password)}`,
   };
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
-  const { statusCode, body } = await limiterWithRateLimitRetries<
-    BitbucketReposResponse
-  >(
-    'get',
-    nextPageLink ??
-      `https://bitbucket.org/api/2.0/repositories/${workspace}?pagelen=100`,
-    headers,
-    limiter,
-    60000,
-  );
+  const { statusCode, body } =
+    await limiterWithRateLimitRetries<BitbucketReposResponse>(
+      'get',
+      nextPageLink ??
+        `https://bitbucket.org/api/2.0/repositories/${workspace}?pagelen=100`,
+      headers,
+      limiter,
+      60000,
+    );
   if (statusCode != 200) {
     throw new Error(`Failed to fetch projects for ${
       nextPageLink != ''

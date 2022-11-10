@@ -18,28 +18,24 @@ export const builder = {
   orgsData: {
     required: true,
     default: undefined,
-    desc:
-      'Path to organizations data file generated with "orgs:create" command',
+    desc: 'Path to organizations data file generated with "orgs:create" command',
   },
   source: {
     required: true,
     default: SupportedIntegrationTypesImportData.GITHUB,
     choices: [...Object.values(SupportedIntegrationTypesImportData)],
-    desc:
-      'The source of the targets to be imported e.g. Github, Github Enterprise, Gitlab, Azure. This will be used to make an API call to list all available entities per org',
+    desc: 'The source of the targets to be imported e.g. Github, Github Enterprise, Gitlab, Azure. This will be used to make an API call to list all available entities per org',
   },
   sourceUrl: {
     required: false,
     default: undefined,
-    desc:
-      'Custom base url for the source API that can list organizations (e.g. Github Enterprise url)',
+    desc: 'Custom base url for the source API that can list organizations (e.g. Github Enterprise url)',
   },
   integrationType: {
     required: true,
     default: undefined,
     choices: [...Object.values(SupportedIntegrationTypesImportData)],
-    desc:
-      'The configured integration type on the created Snyk Org to use for generating import targets data. Applies to all targets.',
+    desc: 'The configured integration type on the created Snyk Org to use for generating import targets data. Applies to all targets.',
   },
 };
 

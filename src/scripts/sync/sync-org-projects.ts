@@ -3,22 +3,11 @@ import * as debugLib from 'debug';
 import * as path from 'path';
 import { requestsManager } from 'snyk-request-manager';
 import { UPDATED_PROJECTS_LOG_NAME } from '../../common';
-import type {
-  TargetFilters,
-} from '../../lib';
-import {
-  getLoggingPath,
-  listProjects,
-  listTargets,
-} from '../../lib';
+import type { TargetFilters } from '../../lib';
+import { getLoggingPath, listProjects, listTargets } from '../../lib';
 import { getFeatureFlag } from '../../lib/api/feature-flags';
-import type {
-  SnykProject,
-  SnykTarget,
-} from '../../lib/types';
-import {
-  SupportedIntegrationTypesUpdateProject,
-} from '../../lib/types';
+import type { SnykProject, SnykTarget } from '../../lib/types';
+import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { logUpdatedProjects } from '../../loggers/log-updated-project';
 import { updateProjectForTarget as updateProjectForTarget } from './sync-projects-per-target';
 
@@ -97,7 +86,9 @@ export async function updateOrgTargets(
         dryRun,
       );
       res.processedTargets += updated.processedTargets;
-      res.meta.projects.branchUpdated.push(...updated.meta.projects.branchUpdated);
+      res.meta.projects.branchUpdated.push(
+        ...updated.meta.projects.branchUpdated,
+      );
       debug(`Logging updated targets for source ${source}`);
       // TODO: add a test to ensure a log was created & is the expected format
       await logUpdatedProjects(publicOrgId, branchUpdated, logFile);
@@ -131,12 +122,19 @@ export async function updateTargets(
         debug(`Listing projects for target ${target.attributes.displayName}`);
         const { projects } = await listProjects(requestManager, orgId, filters);
         debug(`Syncing projects for target ${target.attributes.displayName}`);
-        const { updatedProjects } = await syncAllProjects(requestManager, orgId, projects, dryRun);
+        const { updatedProjects } = await syncAllProjects(
+          requestManager,
+          orgId,
+          projects,
+          dryRun,
+        );
         updated.push(...updatedProjects);
         processedTargets += 1;
       } catch (e) {
         debug(e);
-        console.warn(`Failed to sync target ${target.attributes.displayName}. ERROR: ${e.message}`)
+        console.warn(
+          `Failed to sync target ${target.attributes.displayName}. ERROR: ${e.message}`,
+        );
       }
     },
     { concurrency: 10 },
@@ -156,7 +154,8 @@ async function syncAllProjects(
   requestManager: requestsManager,
   orgId: string,
   projects: SnykProject[],
-  dryRun = false): Promise<{ updatedProjects: string[] }> {
+  dryRun = false,
+): Promise<{ updatedProjects: string[] }> {
   const updatedProjects: string[] = [];
   await pMap(projects, async (project) => {
     const { updated } = await updateProjectForTarget(

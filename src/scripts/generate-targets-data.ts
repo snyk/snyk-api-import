@@ -40,8 +40,10 @@ const sourceGenerators = {
   [SupportedIntegrationTypesImportData.GHE]: githubEnterpriseRepos,
   [SupportedIntegrationTypesImportData.GITLAB]: listGitlabRepos,
   [SupportedIntegrationTypesImportData.AZURE_REPOS]: listAzureRepos,
-  [SupportedIntegrationTypesImportData.BITBUCKET_SERVER]: listBitbucketServerRepos,
-  [SupportedIntegrationTypesImportData.BITBUCKET_CLOUD]: listBitbucketCloudRepos,
+  [SupportedIntegrationTypesImportData.BITBUCKET_SERVER]:
+    listBitbucketServerRepos,
+  [SupportedIntegrationTypesImportData.BITBUCKET_CLOUD]:
+    listBitbucketCloudRepos,
 };
 
 function validateRequiredOrgData(
@@ -118,8 +120,8 @@ export async function generateTargetsImportDataFile(
     );
   }
   const fileName = `${source}-import-targets.json`;
-  await writeFile(fileName, ({
+  await writeFile(fileName, {
     targets: targetsData,
-  } as unknown) as JSON);
+  } as unknown as JSON);
   return { targets: targetsData, fileName };
 }

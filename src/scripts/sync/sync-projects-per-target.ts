@@ -3,12 +3,8 @@ import * as debugLib from 'debug';
 
 import { getGithubReposDefaultBranch } from '../../lib/source-handlers/github';
 import { updateBranch } from '../../lib/project/update-branch';
-import type {
-  SnykProject, Target,
-} from '../../lib/types';
-import {
-  SupportedIntegrationTypesUpdateProject,
-} from '../../lib/types';
+import type { SnykProject, Target } from '../../lib/types';
+import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { targetGenerators } from '../generate-imported-targets-from-snyk';
 const debug = debugLib('snyk:sync-projects-per-target');
 
@@ -16,7 +12,8 @@ export function getBranchGenerator(
   origin: SupportedIntegrationTypesUpdateProject,
 ): (target: Target, host?: string | undefined) => Promise<string> {
   const getDefaultBranchGenerators = {
-    [SupportedIntegrationTypesUpdateProject.GITHUB]: getGithubReposDefaultBranch,
+    [SupportedIntegrationTypesUpdateProject.GITHUB]:
+      getGithubReposDefaultBranch,
   };
   return getDefaultBranchGenerators[origin];
 }

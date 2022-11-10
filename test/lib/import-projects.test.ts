@@ -33,7 +33,7 @@ describe('Skip target if found in log', () => {
 
   it('Trying to parse without a log name should throw', async () => {
     expect(
-      parseLogIntoTargetIds((undefined as unknown) as string),
+      parseLogIntoTargetIds(undefined as unknown as string),
     ).rejects.toThrow('Received undefined');
   });
 

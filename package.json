@@ -6,8 +6,8 @@
     "snyk-api-import": "dist/index.js"
   },
   "scripts": {
-    "format:check": "prettier --check '{''{lib,test}/!(test/**/fixtures)/**/*,*}.{js,ts,json,yml}'",
-    "format": "prettier --write '{''{src,test}/!(fixtures)/**/*,*}.{js,ts,json,yml}'",
+    "format:check": "prettier --check '{''{src,test}/!(test/**/fixtures)/**/*,*}.{js,ts,json,yml}'",
+    "format": "prettier --write '{''{src,test}/!(test/**/fixtures)/**/*,*}.{js,ts,json,yml}'",
     "lint": "npm run format:check && npm run lint:eslint",
     "lint:eslint": "eslint --cache '{lib,test}/**/*.ts'",
     "test": "npm run lint && npm run build && npm run test:unit",
@@ -74,7 +74,7 @@
     "eslint-plugin-check-file": "1.2.3",
     "jest": "27.0.6",
     "nock": "^13.2.1",
-    "prettier": "^1.19.1",
+    "prettier": "2.7.1",
     "semantic-release": "17.3.0",
     "ts-jest": "27.0.3",
     "tsc-watch": "^4.1.0",

@@ -30,7 +30,7 @@ async function saveCreatedOrgData(
   orgData: Partial<NewOrExistingOrg>[],
 ): Promise<string> {
   const fileName = 'snyk-created-orgs.json';
-  await writeFile(fileName, ({ orgData } as unknown) as JSON);
+  await writeFile(fileName, { orgData } as unknown as JSON);
   return fileName;
 }
 async function createNewOrgs(

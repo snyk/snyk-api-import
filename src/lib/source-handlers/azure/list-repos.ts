@@ -47,15 +47,14 @@ async function getRepos(
     Authorization: `Basic ${base64.encode(':' + token)}`,
   };
   const limiter = await limiterForScm(1, 500);
-  const { body, statusCode } = await limiterWithRateLimitRetries<
-    AzureReposResponse
-  >(
-    'get',
-    `${url}/${orgName}/${projectId}/_apis/git/repositories?api-version=4.1`,
-    headers,
-    limiter,
-    60000,
-  );
+  const { body, statusCode } =
+    await limiterWithRateLimitRetries<AzureReposResponse>(
+      'get',
+      `${url}/${orgName}/${projectId}/_apis/git/repositories?api-version=4.1`,
+      headers,
+      limiter,
+      60000,
+    );
   if (statusCode != 200) {
     throw new Error(`Failed to fetch repos for ${url}/${orgName}/${projectId}/_apis/git/repositories?api-version=4.1\n
     Status Code: ${statusCode}\n

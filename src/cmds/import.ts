@@ -26,13 +26,8 @@ export async function importFunction(file: string): Promise<CommandResult> {
     const logsPath = getLoggingPath();
     const importFile = getImportProjectsFile(file);
 
-    const {
-      projects,
-      filteredTargets,
-      targets,
-      skippedTargets,
-      logFile,
-    } = await importProjects(importFile);
+    const { projects, filteredTargets, targets, skippedTargets, logFile } =
+      await importProjects(importFile);
 
     const projectsMessage =
       projects.length > 0

@@ -4,14 +4,8 @@ import * as path from 'path';
 import * as pMap from 'p-map';
 import * as _ from 'lodash';
 
-import type {
-  FilePath,
-  SnykProject,
-  Target,
-} from '../lib/types';
-import {
-  SupportedIntegrationTypesToListSnykTargets,
-} from '../lib/types';
+import type { FilePath, SnykProject, Target } from '../lib/types';
+import { SupportedIntegrationTypesToListSnykTargets } from '../lib/types';
 import {
   getAllOrgs,
   getLoggingPath,
@@ -74,13 +68,15 @@ export function imageProjectToTarget(
 
 export const targetGenerators = {
   [SupportedIntegrationTypesToListSnykTargets.GITHUB]: projectToTarget,
-  [SupportedIntegrationTypesToListSnykTargets.GITLAB]: gitlabProjectToImportLogTarget,
+  [SupportedIntegrationTypesToListSnykTargets.GITLAB]:
+    gitlabProjectToImportLogTarget,
   [SupportedIntegrationTypesToListSnykTargets.GHE]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.GCR]: imageProjectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.DOCKER_HUB]: imageProjectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.AZURE_REPOS]: projectToTarget,
-  [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_SERVER]: bitbucketServerProjectToTarget,
+  [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_SERVER]:
+    bitbucketServerProjectToTarget,
 };
 
 interface SnykOrg {
@@ -118,7 +114,10 @@ export async function generateSnykImportedTargets(
     ? await getAllOrgs(requestManager, groupId)
     : [{ id: orgId! }];
   const failedOrgs: SnykOrg[] = [];
-  const projectFilters = integrationTypes.length > 1 ? { limit: 100 } : { origin: integrationTypes[0], limit: 100 };
+  const projectFilters =
+    integrationTypes.length > 1
+      ? { limit: 100 }
+      : { origin: integrationTypes[0], limit: 100 };
   await pMap(
     groupOrgs,
     async (org: SnykOrg) => {
@@ -136,9 +135,10 @@ export async function generateSnykImportedTargets(
             ),
           )
           .map((p) => {
-            const target = targetGenerators[
-              p.origin as SupportedIntegrationTypesToListSnykTargets
-            ](p);
+            const target =
+              targetGenerators[
+                p.origin as SupportedIntegrationTypesToListSnykTargets
+              ](p);
             return {
               target,
               integrationId: resIntegrations[p.origin],
@@ -183,7 +183,8 @@ export async function generateSnykImportedTargets(
       } catch (e) {
         failedOrgs.push(org);
         console.warn(
-          `Failed to process projects for organization ${name && slug ? `${name}(${slug})` : orgId
+          `Failed to process projects for organization ${
+            name && slug ? `${name}(${slug})` : orgId
           }. Continuing.`,
         );
       }
