@@ -5,7 +5,7 @@ import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
 import type { requestsManager } from 'snyk-request-manager';
 import type { SnykProject } from '../../types';
-const debug = debugLib('snyk:api-import');
+const debug = debugLib('snyk:api-project');
 
 export async function deleteProjects(
   orgId: string,
@@ -88,6 +88,7 @@ export async function updateProject(
 
   const statusCode = res.statusCode || res.status;
   if (!statusCode || statusCode !== 200) {
+    debug('Failed updating project: ' + projectId);
     throw new Error(
       'Expected a 200 response, instead received: ' +
         JSON.stringify({ data: res.data, status: statusCode }),

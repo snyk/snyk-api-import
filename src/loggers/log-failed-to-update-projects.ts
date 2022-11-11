@@ -1,12 +1,12 @@
 import * as bunyan from 'bunyan';
 
-import { UPDATED_PROJECTS_LOG_NAME } from './../common';
+import { FAILED_UPDATE_PROJECTS_LOG_NAME } from './../common';
 import { getLoggingPath } from './../lib';
-import type { ProjectUpdate } from '../scripts/sync/sync-projects-per-target';
+import type { ProjectUpdateFailure } from '../scripts/sync/sync-projects-per-target';
 
-export async function logUpdatedProjects(
+export async function logFailedToUpdateProjects(
   orgId: string,
-  updated: ProjectUpdate[],
+  updated: ProjectUpdateFailure[],
   loggingPath: string = getLoggingPath(),
 ): Promise<void> {
   try {
@@ -16,7 +16,7 @@ export async function logUpdatedProjects(
       streams: [
         {
           level: 'info',
-          path: `${loggingPath}/${orgId}.${UPDATED_PROJECTS_LOG_NAME}`,
+          path: `${loggingPath}/${orgId}.${FAILED_UPDATE_PROJECTS_LOG_NAME}`,
         },
       ],
     });
@@ -35,8 +35,9 @@ export async function logUpdatedProjects(
             displayName: update.target?.attributes.displayName,
             remoteUrl: update.target?.attributes.remoteUrl ?? undefined,
           },
+          error: update.errorMessage,
         },
-        `Snyk project ${update.type} updated`,
+        `Snyk project ${update.type} update failed`,
       );
     });
   } catch (e) {

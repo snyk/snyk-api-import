@@ -31,7 +31,7 @@ export async function updateBranch(
     return { updated };
   } catch (e) {
     throw new Error(
-      `Failed to update project ${projectPublicId}. ERROR: ${e.message}`,
+      `Failed to update project ${projectPublicId} via Snyk API. ERROR: ${e.message}`,
     );
   }
 }

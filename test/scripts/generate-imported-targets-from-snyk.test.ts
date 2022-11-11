@@ -205,6 +205,19 @@ describe('projectToTarget', () => {
     });
   });
 
+  it('succeed to convert Github / Gitlab project name to target with branch in the name', async () => {
+    const project = {
+      name: 'lili-snyk/huge-monorepo(main):cockroach/build/builder/Dockerfile',
+      branch: 'main',
+    };
+    const target = projectToTarget(project);
+    expect(target).toEqual({
+      branch: 'main',
+      name: 'huge-monorepo',
+      owner: 'lili-snyk',
+    });
+  });
+
   it('succeed to convert GCR project name to target', async () => {
     const project = {
       name: 'snyk-main/bundle-lock-job:prod',

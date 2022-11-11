@@ -33,7 +33,7 @@ export function projectToTarget(
   return {
     owner,
     branch: project.branch || undefined, // TODO: make it not optional
-    name,
+    name: name.split('(')[0],
   };
 }
 export function bitbucketServerProjectToTarget(
@@ -42,7 +42,7 @@ export function bitbucketServerProjectToTarget(
   const [projectKey, repoSlug] = project.name.split(':')[0].split('/');
   return {
     projectKey,
-    repoSlug,
+    repoSlug: repoSlug.split('(')[0],
   };
 }
 
@@ -51,6 +51,7 @@ export function gitlabProjectToImportLogTarget(
 ): Target {
   // Gitlab target is only `id` & branch and the Snyk API does not return the id.
   // However we are already logging `name` which for Gitlab is "owner/repo", branch & id so if we use the same name we can match on it
+  // TODO: add support for customBranch projects
   const name = project.name.split(':')[0];
   return {
     branch: project.branch || undefined, // TODO: make it not optional
@@ -93,8 +94,6 @@ export async function generateSnykImportedTargets(
   fileName: string;
   failedOrgs: SnykOrg[];
 }> {
-  const timeLabel = 'Generated imported Snyk targets';
-  console.time(timeLabel);
   const { groupId, orgId } = id;
   if (!(groupId || orgId)) {
     throw new Error(
@@ -198,7 +197,6 @@ export async function generateSnykImportedTargets(
       : `Could the organization ${orgId} be empty?`;
     console.warn(`No targets could be generated. ${message}`);
   }
-  console.timeEnd(timeLabel);
   return {
     targets: targetsData,
     fileName: path.resolve(getLoggingPath(), IMPORT_LOG_NAME),
