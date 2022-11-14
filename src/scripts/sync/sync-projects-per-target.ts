@@ -16,6 +16,7 @@ export function getBranchGenerator(
   const getDefaultBranchGenerators = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]:
       getGithubReposDefaultBranch,
+    [SupportedIntegrationTypesUpdateProject.GHE]: getGithubReposDefaultBranch,
   };
   return getDefaultBranchGenerators[origin];
 }
@@ -72,7 +73,7 @@ export async function bulkUpdateProjectsBranch(
   orgId: string,
   projects: SnykProject[],
   dryRun = false,
-  host?: string,
+  sourceUrl?: string,
 ): Promise<{ updated: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
   const updatedProjects: ProjectUpdate[] = [];
   const failedProjects: ProjectUpdateFailure[] = [];
@@ -82,7 +83,7 @@ export async function bulkUpdateProjectsBranch(
   try {
     const target = targetGenerators[origin](projects[0]);
     debug(`Getting default branch via ${origin} for ${projects[0].name}`);
-    defaultBranch = await getBranchGenerator(origin)(target, host);
+    defaultBranch = await getBranchGenerator(origin)(target, sourceUrl);
   } catch (e) {
     debug(e);
     const error = `Getting default branch via ${origin} API failed with error: ${e.message}`;

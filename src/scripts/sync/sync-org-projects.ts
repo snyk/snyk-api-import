@@ -26,6 +26,7 @@ export function isSourceConfigured(
 ): () => void {
   const getDefaultBranchGenerators = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]: isGithubConfigured,
+    [SupportedIntegrationTypesUpdateProject.GHE]: isGithubConfigured,
   };
   return getDefaultBranchGenerators[origin];
 }
@@ -34,7 +35,7 @@ export async function updateOrgTargets(
   publicOrgId: string,
   sources: SupportedIntegrationTypesUpdateProject[],
   dryRun = false,
-  host?: string,
+  sourceUrl?: string,
 ): Promise<{
   fileName: string;
   failedFileName: string;
@@ -124,7 +125,7 @@ export async function updateOrgTargets(
         publicOrgId,
         targets,
         dryRun,
-        host,
+        sourceUrl,
       );
       res.processedTargets += response.processedTargets;
       res.meta.projects.updated.push(...response.meta.projects.updated);
@@ -156,7 +157,7 @@ export async function updateTargets(
   orgId: string,
   targets: SnykTarget[],
   dryRun = false,
-  host?: string,
+  sourceUrl?: string,
 ): Promise<{
   processedTargets: number;
   meta: {
@@ -181,7 +182,7 @@ export async function updateTargets(
           orgId,
           target,
           dryRun,
-          host,
+          sourceUrl,
         );
         updatedProjects.push(...updated);
         failedProjects.push(...failed);

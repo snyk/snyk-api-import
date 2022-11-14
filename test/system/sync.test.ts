@@ -25,7 +25,7 @@ describe('`snyk-api-import help <...>`', () => {
     });
   });
 
-  it('Fails when given a bad/non-existent org ID `123456789`', (done) => {
+  it('fails when given a bad/non-existent org ID `123456789`', (done) => {
     const logPath = path.resolve(__dirname + '/fixtures');
 
     exec(
@@ -58,7 +58,7 @@ describe('`snyk-api-import help <...>`', () => {
     });
   }, 40000);
 
-  it('Throws an error for an unsupported SCM like Bitbucket Server', (done) => {
+  it('throws an error for an unsupported SCM like Bitbucket Server', (done) => {
     const logPath = path.resolve(__dirname);
 
     exec(
@@ -72,55 +72,10 @@ describe('`snyk-api-import help <...>`', () => {
         },
       },
       (err, stdout, stderr) => {
-        expect(stderr).toMatchInlineSnapshot(`
-          "index.js sync
-
-          Sync targets (e.g. repos) and their projects between Snyk and SCM for a given
-          organization. Actions include:
-          - updating monitored branch in Snyk to match the default branch from SCM
-
-          Options:
-            --version      Show version number                                   [boolean]
-            --help         Show help                                             [boolean]
-            --orgPublicId  Public id of the organization in Snyk that will be updated
-                                                                                [required]
-            --sourceUrl    Custom base url for the source API that can list organizations
-                           (e.g. Github Enterprise url)
-            --source       List of sources to be synced e.g. Github, Github Enterprise,
-                           Gitlab, Bitbucket Server, Bitbucket Cloud
-                                        [required] [choices: \\"github\\"] [default: \\"github\\"]
-            --dryRun       Dry run option. Will create a log file listing the potential
-                           updates                                        [default: false]
-
-          Invalid values:
-            Argument: source, Given: \\"bitbucket-server\\", Choices: \\"github\\"
-          "
-        `);
-        expect(err!.message).toMatchInlineSnapshot(`
-          "Command failed: node ./dist/index.js sync --orgPublicId=123456789 --source=bitbucket-server --sourceUrl=somewhere.com
-          index.js sync
-
-          Sync targets (e.g. repos) and their projects between Snyk and SCM for a given
-          organization. Actions include:
-          - updating monitored branch in Snyk to match the default branch from SCM
-
-          Options:
-            --version      Show version number                                   [boolean]
-            --help         Show help                                             [boolean]
-            --orgPublicId  Public id of the organization in Snyk that will be updated
-                                                                                [required]
-            --sourceUrl    Custom base url for the source API that can list organizations
-                           (e.g. Github Enterprise url)
-            --source       List of sources to be synced e.g. Github, Github Enterprise,
-                           Gitlab, Bitbucket Server, Bitbucket Cloud
-                                        [required] [choices: \\"github\\"] [default: \\"github\\"]
-            --dryRun       Dry run option. Will create a log file listing the potential
-                           updates                                        [default: false]
-
-          Invalid values:
-            Argument: source, Given: \\"bitbucket-server\\", Choices: \\"github\\"
-          "
-        `);
+        expect(stderr).toMatch(`Argument: source, Given: "bitbucket-server"`);
+        expect(err!.message).toMatch(
+          `Argument: source, Given: "bitbucket-server"`,
+        );
         expect(stdout).toEqual('');
       },
     ).on('exit', (code) => {

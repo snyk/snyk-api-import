@@ -10,6 +10,8 @@
   - [2. Download & run](#2-download--run)
   - [Examples](#examples)
     - [Github.com](#githubcom)
+    - [GitHub Enterprise Server](#github-enterprise-server)
+    - [GitHub Enterprise Cloud](#github-enterprise-cloud)
 - [Known limitations](#known-limitations)
 
 ## Prerequisites
@@ -59,6 +61,26 @@ In dry-run mode:
 
 Live mode:
 `DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github`
+
+
+### GitHub Enterprise Server
+
+In dry-run mode:
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com --dryRun=true`
+
+Live mode:
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com`
+
+
+
+### GitHub Enterprise Cloud
+
+In dry-run mode:
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --dryRun=true`
+
+Live mode:
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise`
+
 
 # Known limitations
 - Any organizations using a custom branch feature are currently not supported, `sync` will not continue.

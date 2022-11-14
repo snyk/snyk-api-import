@@ -22,7 +22,6 @@ export const builder = {
     default: undefined,
     desc: 'Custom base url for the source API that can list organizations (e.g. Github Enterprise url)',
   },
-  // TODO: needs integration Type for GHE<> Github setup
   source: {
     required: true,
     default: SupportedIntegrationTypesUpdateProject.GITHUB,

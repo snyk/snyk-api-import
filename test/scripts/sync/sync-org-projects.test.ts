@@ -28,11 +28,13 @@ describe('updateTargets', () => {
     userAgentPrefix: 'snyk-api-import:tests',
   });
   let githubSpy: jest.SpyInstance;
-  let projectsSpy: jest.SpyInstance;
+  let updateProjectsSpy: jest.SpyInstance;
+  let listProjectsSpy: jest.SpyInstance;
 
   beforeAll(() => {
     githubSpy = jest.spyOn(github, 'getGithubReposDefaultBranch');
-    projectsSpy = jest.spyOn(projectApi, 'updateProject');
+    updateProjectsSpy = jest.spyOn(projectApi, 'updateProject');
+    listProjectsSpy = jest.spyOn(lib, 'listProjects');
   }, 1000);
 
   afterAll(async () => {
@@ -107,7 +109,7 @@ describe('updateTargets', () => {
         .spyOn(lib, 'listProjects')
         .mockImplementation(() => Promise.resolve(projectsAPIResponse));
       githubSpy.mockImplementation(() => Promise.resolve(defaultBranch));
-      projectsSpy.mockImplementation(() =>
+      updateProjectsSpy.mockImplementation(() =>
         Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
       );
       // Act
@@ -170,11 +172,11 @@ describe('updateTargets', () => {
 
       const defaultBranch = projectsAPIResponse.projects[0].branch;
 
-      jest
-        .spyOn(lib, 'listProjects')
-        .mockImplementation(() => Promise.resolve(projectsAPIResponse));
+      listProjectsSpy.mockImplementation(() =>
+        Promise.resolve(projectsAPIResponse),
+      );
       githubSpy.mockImplementation(() => Promise.resolve(defaultBranch));
-      projectsSpy.mockImplementation(() =>
+      updateProjectsSpy.mockImplementation(() =>
         Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
       );
 
@@ -264,11 +266,11 @@ describe('updateTargets', () => {
         },
       ];
 
-      jest
-        .spyOn(lib, 'listProjects')
-        .mockImplementation(() => Promise.resolve(projectsAPIResponse));
+      listProjectsSpy.mockImplementation(() =>
+        Promise.resolve(projectsAPIResponse),
+      );
       githubSpy.mockImplementation(() => Promise.resolve(defaultBranch));
-      projectsSpy
+      updateProjectsSpy
         .mockImplementationOnce(() =>
           Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
         )
@@ -288,6 +290,119 @@ describe('updateTargets', () => {
           },
         },
       });
+    }, 5000);
+  });
+  describe('Github Enterprise', () => {
+    it('updates several projects from the same target 1 failed 1 success', async () => {
+      // Arrange
+      const testTargets = [
+        {
+          attributes: {
+            displayName: 'snyk/monorepo',
+            isPrivate: false,
+            origin: 'github-enterprise',
+            remoteUrl: null,
+          },
+          id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+          relationships: {
+            org: {
+              data: {
+                id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+                type: 'org',
+              },
+              links: {},
+              meta: {},
+            },
+          },
+          type: 'target',
+        },
+      ];
+      const orgId = 'af137b96-6966-46c1-826b-2e79ac49bbxx';
+      const projectsAPIResponse: ProjectsResponse = {
+        org: {
+          id: orgId,
+        },
+        projects: [
+          {
+            name: 'snyk/monorepo:build.gradle',
+            id: '3626066d-21a7-424f-b6fc-dc0d222d8e4a',
+            created: '2018-10-29T09:50:54.014Z',
+            origin: 'github-enterprise',
+            type: 'npm',
+            branch: 'master',
+          },
+          {
+            name: 'snyk/monorepo(main):package.json',
+            id: 'f57afea5-8fed-41d8-a8fd-d374c0944b07',
+            created: '2018-10-29T09:50:54.014Z',
+            origin: 'github-enterprise',
+            type: 'maven',
+            branch: 'master',
+          },
+        ],
+      };
+
+      const defaultBranch = 'develop';
+      const updated: syncProjectsForTarget.ProjectUpdate[] = [
+        {
+          projectPublicId: projectsAPIResponse.projects[0].id,
+          from: projectsAPIResponse.projects[0].branch!,
+          to: defaultBranch,
+          type: 'branch',
+          dryRun: false,
+        },
+      ];
+      const failed: syncProjectsForTarget.ProjectUpdateFailure[] = [
+        {
+          errorMessage:
+            'Failed to update project f57afea5-8fed-41d8-a8fd-d374c0944b07 via Snyk API. ERROR: Error',
+          projectPublicId: projectsAPIResponse.projects[1].id,
+          from: projectsAPIResponse.projects[1].branch!,
+          to: defaultBranch,
+          type: 'branch',
+          dryRun: false,
+        },
+      ];
+
+      listProjectsSpy.mockImplementation(() =>
+        Promise.resolve(projectsAPIResponse),
+      );
+      githubSpy.mockImplementation(() => Promise.resolve(defaultBranch));
+      updateProjectsSpy
+        .mockImplementationOnce(() =>
+          Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
+        )
+        .mockImplementationOnce(() =>
+          Promise.reject({ statusCode: '404', message: 'Error' }),
+        );
+      // Act
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTargets,
+        false,
+        'https://custom-ghe.com',
+      );
+
+      // Assert
+      expect(res).toStrictEqual({
+        processedTargets: 1,
+        meta: {
+          projects: {
+            updated: updated.map((u) => ({ ...u, target: testTargets[0] })),
+            failed: failed.map((f) => ({ ...f, target: testTargets[0] })),
+          },
+        },
+      });
+
+      expect(githubSpy).toBeCalledWith(
+        {
+          branch: 'master',
+          name: 'monorepo',
+          owner: 'snyk',
+        },
+        'https://custom-ghe.com',
+      );
     }, 5000);
   });
 });
@@ -323,7 +438,7 @@ describe('updateOrgTargets', () => {
     jest.clearAllMocks();
   });
 
-  describe('Github', () => {
+  describe('Errors', () => {
     it('throws if only unsupported origins requested', async () => {
       await expect(
         updateOrgTargets('xxx', ['unsupported' as any]),
@@ -379,9 +494,12 @@ describe('updateOrgTargets', () => {
         processedTargets: 0,
       });
     });
-    it.todo('github is not configured');
-    it.todo('skips extra unsupported source, but finishes supported');
-    it('skips target & projects error if getting default branch fails', async () => {
+  });
+
+  describe('Github', () => {
+    it('github is not configured', async () => {
+      // Arrange
+      delete process.env.GITHUB_TOKEN;
       const targets: SnykTarget[] = [
         {
           attributes: {
@@ -410,9 +528,53 @@ describe('updateOrgTargets', () => {
       listProjectsSpy.mockRejectedValue(projects);
       logUpdatedProjectsSpy.mockResolvedValue(null);
 
+      // Act
+      await expect(() =>
+        updateOrgTargets('xxx', [
+          SupportedIntegrationTypesUpdateProject.GITHUB,
+        ]),
+      ).rejects.toThrowError(
+        "Please set the GITHUB_TOKEN e.g. export GITHUB_TOKEN='mypersonalaccesstoken123'",
+      );
+
+      // Assert
+    });
+    it.todo('skips extra unsupported source, but finishes supported');
+    it('skips target & projects error if getting default branch fails', async () => {
+      // Arrange
+      const targets: SnykTarget[] = [
+        {
+          attributes: {
+            displayName: 'foo/bar',
+            isPrivate: true,
+            origin: 'github',
+            remoteUrl: null,
+          },
+          id: 'xxx',
+          relationships: {} as unknown as SnykTargetRelationships,
+          type: 'target',
+        },
+      ];
+      const projects: SnykProject[] = [
+        {
+          name: 'example',
+          id: '123',
+          created: 'date',
+          origin: 'github',
+          type: 'npm',
+          branch: 'main',
+        },
+      ];
+      featureFlagsSpy.mockResolvedValue(false);
+      listTargetsSpy.mockResolvedValue({ targets });
+      listProjectsSpy.mockRejectedValue(projects);
+      logUpdatedProjectsSpy.mockResolvedValue(null);
+
+      // Act
       const res = await updateOrgTargets('xxx', [
         SupportedIntegrationTypesUpdateProject.GITHUB,
       ]);
+
       expect(res).toStrictEqual({
         failedFileName: expect.stringMatching('/failed-to-update-projects.log'),
         fileName: expect.stringMatching('/updated-projects.log'),
@@ -426,7 +588,8 @@ describe('updateOrgTargets', () => {
       });
     });
 
-    it('Successfully updated several targets (dryRun mode)', async () => {
+    it('successfully updated several targets (dryRun mode)', async () => {
+      // Arrange
       const targets: SnykTarget[] = [
         {
           attributes: {
@@ -507,6 +670,150 @@ describe('updateOrgTargets', () => {
         'xxx',
         [SupportedIntegrationTypesUpdateProject.GITHUB],
         true,
+      );
+      // Assert
+      expect(res).toStrictEqual({
+        failedFileName: expect.stringMatching('/failed-to-update-projects.log'),
+        fileName: expect.stringMatching('/updated-projects.log'),
+        meta: {
+          projects: {
+            updated,
+            failed,
+          },
+        },
+        processedTargets: 2,
+      });
+      expect(featureFlagsSpy).toHaveBeenCalledTimes(1);
+      expect(listTargetsSpy).toHaveBeenCalledTimes(1);
+      expect(listProjectsSpy).toHaveBeenCalledTimes(2);
+      expect(githubSpy).toBeCalledTimes(2);
+      expect(updateProjectSpy).not.toHaveBeenCalled();
+      expect(logUpdatedProjectsSpy).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('Github Enterprise', () => {
+    it('github enterprise is not configured', async () => {
+      // Arrange
+      delete process.env.GITHUB_TOKEN;
+      const targets: SnykTarget[] = [
+        {
+          attributes: {
+            displayName: 'foo/bar',
+            isPrivate: true,
+            origin: 'github-enterprise',
+            remoteUrl: null,
+          },
+          id: 'xxx',
+          relationships: {} as unknown as SnykTargetRelationships,
+          type: 'target',
+        },
+      ];
+      const projects: SnykProject[] = [
+        {
+          name: 'example',
+          id: '123',
+          created: 'date',
+          origin: 'github-enterprise',
+          type: 'npm',
+          branch: 'main',
+        },
+      ];
+      featureFlagsSpy.mockResolvedValue(false);
+      listTargetsSpy.mockResolvedValue({ targets });
+      listProjectsSpy.mockRejectedValue(projects);
+      logUpdatedProjectsSpy.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(() =>
+        updateOrgTargets('xxx', [SupportedIntegrationTypesUpdateProject.GHE]),
+      ).rejects.toThrowError(
+        "Please set the GITHUB_TOKEN e.g. export GITHUB_TOKEN='mypersonalaccesstoken123'",
+      );
+    });
+    it('successfully updated several targets (dryRun mode)', async () => {
+      // Arrange
+      const targets: SnykTarget[] = [
+        {
+          attributes: {
+            displayName: 'snyk/bar',
+            isPrivate: true,
+            origin: 'github-enterprise',
+            remoteUrl: null,
+          },
+          id: uuid.v4(),
+          relationships: {} as unknown as SnykTargetRelationships,
+          type: 'target',
+        },
+        {
+          attributes: {
+            displayName: 'snyk/foo',
+            isPrivate: false,
+            origin: 'github-enterprise',
+            remoteUrl: null,
+          },
+          id: uuid.v4(),
+          relationships: {} as unknown as SnykTargetRelationships,
+          type: 'target',
+        },
+      ];
+      const updatedProjectId1 = uuid.v4();
+      const updatedProjectId2 = uuid.v4();
+      const projectsTarget1: SnykProject[] = [
+        {
+          name: 'snyk/bar',
+          id: updatedProjectId1,
+          created: 'date',
+          origin: 'github',
+          type: 'npm',
+          branch: 'main',
+        },
+      ];
+      const projectsTarget2: SnykProject[] = [
+        {
+          name: 'snyk/foo',
+          id: updatedProjectId2,
+          created: 'date',
+          origin: 'github-enterprise',
+          type: 'yarn',
+          branch: 'develop',
+        },
+      ];
+      featureFlagsSpy.mockResolvedValueOnce(false);
+      listTargetsSpy.mockResolvedValueOnce({ targets });
+      listProjectsSpy
+        .mockResolvedValueOnce({ projects: projectsTarget1 })
+        .mockResolvedValueOnce({ projects: projectsTarget2 });
+
+      logUpdatedProjectsSpy.mockResolvedValueOnce(null);
+      const defaultBranch = 'new-branch';
+      githubSpy.mockResolvedValue(defaultBranch);
+      const updated: syncProjectsForTarget.ProjectUpdate[] = [
+        {
+          projectPublicId: updatedProjectId1,
+          from: projectsTarget1[0].branch!,
+          to: defaultBranch,
+          type: 'branch',
+          dryRun: true,
+          target: targets[0],
+        },
+        {
+          projectPublicId: updatedProjectId2,
+          from: projectsTarget2[0].branch!,
+          to: defaultBranch,
+          type: 'branch',
+          dryRun: true,
+          target: targets[1],
+        },
+      ];
+      const failed: syncProjectsForTarget.ProjectUpdateFailure[] = [];
+
+      // Act
+      const res = await updateOrgTargets(
+        'xxx',
+        [SupportedIntegrationTypesUpdateProject.GHE],
+        true,
+        'https://custom.ghe.com',
       );
       // Assert
       expect(res).toStrictEqual({
