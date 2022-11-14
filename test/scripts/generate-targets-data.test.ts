@@ -36,7 +36,6 @@ describe('generateTargetsImportDataFile Github script', () => {
     const res = await generateTargetsImportDataFile(
       SupportedIntegrationTypesImportData.GITHUB,
       orgsData,
-      SupportedIntegrationTypesImportData.GITHUB,
     );
     expect(res.fileName).toEqual('github-import-targets.json');
     expect(res.targets.length > 0).toBeTruthy();
@@ -75,7 +74,6 @@ describe('generateTargetsImportDataFile Github script', () => {
     const res = await generateTargetsImportDataFile(
       SupportedIntegrationTypesImportData.GHE,
       orgsData,
-      SupportedIntegrationTypesImportData.GHE,
       GHE_URL,
     );
     expect(res.fileName).toEqual('github-enterprise-import-targets.json');
@@ -109,7 +107,6 @@ describe('generateTargetsImportDataFile Github script', () => {
       generateTargetsImportDataFile(
         SupportedIntegrationTypesImportData.GITHUB,
         orgsData,
-        SupportedIntegrationTypesImportData.GITHUB,
       ),
     ).rejects.toThrow(
       'No targets could be generated. Check the error output & try again.',
@@ -147,7 +144,6 @@ describe('generateTargetsImportDataFile Github script', () => {
     const res = await generateTargetsImportDataFile(
       SupportedIntegrationTypesImportData.GITHUB,
       orgsData,
-      SupportedIntegrationTypesImportData.GITHUB,
     );
     expect(res.fileName).toEqual('github-import-targets.json');
     expect(res.targets.length > 0).toBeTruthy();
@@ -195,7 +191,6 @@ describe('generateTargetsImportDataFile Gitlab script', () => {
     const res = await generateTargetsImportDataFile(
       SupportedIntegrationTypesImportData.GITLAB,
       orgsData,
-      SupportedIntegrationTypesImportData.GITLAB,
       GITLAB_BASE_URL,
     );
     expect(res.fileName).toEqual('gitlab-import-targets.json');
@@ -232,7 +227,6 @@ describe('generateTargetsImportDataFile Gitlab script', () => {
       generateTargetsImportDataFile(
         SupportedIntegrationTypesImportData.GITLAB,
         orgsData,
-        SupportedIntegrationTypesImportData.GITLAB,
         GITLAB_BASE_URL,
       ),
     ).rejects.toThrow(
@@ -273,7 +267,6 @@ describe('generateTargetsImportDataFile Gitlab script', () => {
     const res = await generateTargetsImportDataFile(
       SupportedIntegrationTypesImportData.GITLAB,
       orgsData,
-      SupportedIntegrationTypesImportData.GITLAB,
       GITLAB_BASE_URL,
     );
     expect(res.fileName).toEqual('gitlab-import-targets.json');

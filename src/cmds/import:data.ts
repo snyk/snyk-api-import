@@ -3,11 +3,8 @@ import * as yargs from 'yargs';
 import { getLoggingPath } from '../lib/get-logging-path';
 const debug = debugLib('snyk:generate-data-script');
 
-import {
-  CreatedOrg,
-  SupportedIntegrationTypesImportData,
-  CommandResult,
-} from '../lib/types';
+import { SupportedIntegrationTypesImportData } from '../lib/types';
+import type { CreatedOrg, CommandResult } from '../lib/types';
 import { loadFile } from '../load-file';
 import { generateTargetsImportDataFile } from '../scripts/generate-targets-data';
 
@@ -31,12 +28,6 @@ export const builder = {
     default: undefined,
     desc: 'Custom base url for the source API that can list organizations (e.g. Github Enterprise url)',
   },
-  integrationType: {
-    required: true,
-    default: undefined,
-    choices: [...Object.values(SupportedIntegrationTypesImportData)],
-    desc: 'The configured integration type on the created Snyk Org to use for generating import targets data. Applies to all targets.',
-  },
 };
 
 const entityName: {
@@ -53,7 +44,6 @@ const entityName: {
 export async function generateOrgData(
   source: SupportedIntegrationTypesImportData,
   orgsData: string,
-  integrationType: SupportedIntegrationTypesImportData,
   sourceUrl: string,
 ): Promise<CommandResult> {
   try {
@@ -76,7 +66,6 @@ export async function generateOrgData(
     const res = await generateTargetsImportDataFile(
       source,
       orgsDataJson,
-      integrationType,
       sourceUrl,
     );
     const targetsMessage =
@@ -103,18 +92,12 @@ export async function generateOrgData(
 export async function handler(argv: {
   source: SupportedIntegrationTypesImportData;
   orgsData: string;
-  integrationType: SupportedIntegrationTypesImportData;
   sourceUrl: string;
 }): Promise<void> {
-  const { source, orgsData, integrationType, sourceUrl } = argv;
+  const { source, orgsData, sourceUrl } = argv;
   debug('ℹ️  Options: ' + JSON.stringify(argv));
 
-  const res = await generateOrgData(
-    source,
-    orgsData,
-    integrationType,
-    sourceUrl,
-  );
+  const res = await generateOrgData(source, orgsData, sourceUrl);
 
   if (res.exitCode === 1) {
     debug('Failed to create organizations.\n' + res.message);

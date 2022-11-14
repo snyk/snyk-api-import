@@ -83,7 +83,6 @@ function validateRequiredOrgData(
 export async function generateTargetsImportDataFile(
   source: SupportedIntegrationTypesImportData,
   orgsData: CreatedOrg[],
-  integrationType: SupportedIntegrationTypesImportData,
   sourceUrl?: string,
 ): Promise<{ targets: ImportTarget[]; fileName: string }> {
   const targetsData: ImportTarget[] = [];
@@ -104,7 +103,7 @@ export async function generateTargetsImportDataFile(
       entities.forEach((entity) => {
         targetsData.push({
           target: entity,
-          integrationId: integrations[integrationType],
+          integrationId: integrations[source],
           orgId,
         });
       });

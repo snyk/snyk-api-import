@@ -1,7 +1,7 @@
 import * as debugLib from 'debug';
 import * as _ from 'lodash';
 import * as yargs from 'yargs';
-import { CommandResult } from '../lib/types';
+import type { CommandResult } from '../lib/types';
 
 const debug = debugLib('snyk:import-projects-script');
 
