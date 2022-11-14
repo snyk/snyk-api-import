@@ -38,9 +38,9 @@ This is a util that can help generate the import json data needed by the import 
   - All organization IDs can be found by listing all organizations a group admin belongs to via [Snyk Organizations API](https://snyk.docs.apiary.io/#reference/groups/list-all-organizations-in-a-group/list-all-organizations-in-a-group)
 
 3. Run the command to generate import data:
- - **Github.com:** `DEBUG=snyk* GITHUB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=github --integrationType=github`
- - **Github Enterprise Server:** `DEBUG=snyk* GITHUB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=github-enterprise --integrationType=github-enterprise --sourceUrl=https://ghe.custom.com`
- - **Github Enterprise Cloud:** `DEBUG=snyk* GITHUB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=github-enterprise --integrationType=github-enterprise`
+ - **Github.com:** `DEBUG=snyk* GITHUB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=github`
+ - **Github Enterprise Server:** `DEBUG=snyk* GITHUB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=github-enterprise --sourceUrl=https://ghe.custom.com`
+ - **Github Enterprise Cloud:** `DEBUG=snyk* GITHUB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=github-enterprise`
 
 4. Use the generated data to feed into [import] command (/import.md) to generate kick off the import.
 
@@ -67,8 +67,8 @@ This is a util that can help generate the import json data needed by the import 
   - All organization IDs can be found by listing all organizations a group admin belongs to via [Snyk Organizations API](https://snyk.docs.apiary.io/#reference/groups/list-all-organizations-in-a-group/list-all-organizations-in-a-group)
 
 3. Run the command to generate import data:
- - **Gitlab.com:** `DEBUG=snyk* GITLAB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=gitlab --integrationType=gitlab`
- - **Hosted Gitlab:** `DEBUG=snyk* GITLAB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=gitlab --integrationType=gitlab --sourceUrl=https://gitlab.custom.com`
+ - **Gitlab.com:** `DEBUG=snyk* GITLAB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=gitlab `
+ - **Hosted Gitlab:** `DEBUG=snyk* GITLAB_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=gitlab --sourceUrl=https://gitlab.custom.com`
 
 4. Use the generated data to feed into [import] command (/import.md) to generate kick off the import.
 
@@ -97,8 +97,8 @@ This is a util that can help generate the import json data needed by the import 
   - All organization IDs can be found by listing all organizations a group admin belongs to via [Snyk Organizations API](https://snyk.docs.apiary.io/#reference/groups/list-all-organizations-in-a-group/list-all-organizations-in-a-group)
 
 3. Run the command to generate import data:
- - **dev.azure.com:** `DEBUG=snyk* AZURE_TOKEN=*** SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=azure-repos --integrationType=azure-repos`
- - **Hosted Azure:** `DEBUG=snyk* AZURE_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=azure-repos --integrationType=azure-repos --sourceUrl=https://azure.custom.com`
+ - **dev.azure.com:** `DEBUG=snyk* AZURE_TOKEN=*** SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=azure-repos`
+ - **Hosted Azure:** `DEBUG=snyk* AZURE_TOKEN=***  SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=azure-repos --sourceUrl=https://azure.custom.com`
 
 4. Use the generated data to feed into [import] command (/import.md) to generate kick off the import.
 
@@ -127,7 +127,7 @@ This is a util that can help generate the import json data needed by the import 
   - All organization IDs can be found by listing all organizations a group admin belongs to via [Snyk Organizations API](https://snyk.docs.apiary.io/#reference/groups/list-all-organizations-in-a-group/list-all-organizations-in-a-group)
 
 3. Run the command to generate import data:
- - **Bitbucket Server:** `DEBUG=snyk* BITBUCKET_SERVER_TOKEN=*** SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=bitbucket-server --integrationType=bitbucket-server --sourceUrl=https://bitbucket-server.dev.example.com`
+ - **Bitbucket Server:** `DEBUG=snyk* BITBUCKET_SERVER_TOKEN=*** SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=bitbucket-server --sourceUrl=https://bitbucket-server.dev.example.com`
 
 4. Use the generated data to feed into [import] command (/import.md) to generate kick off the import.
 
@@ -160,7 +160,7 @@ export BITBUCKET_CLOUD_PASSWORD=your_bitbucket_cloud_password
   - All organization IDs can be found by listing all organizations a group admin belongs to via [Snyk Organizations API](https://snyk.docs.apiary.io/#reference/groups/list-all-organizations-in-a-group/list-all-organizations-in-a-group)
 
 3. Run the command to generate import data:
- - **Bitbucket Cloud:** `DEBUG=snyk* BITBUCKET_CLOUD_USERNAME=*** BITBUCKET_CLOUD_PASSWORD=*** SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=bitbucket-cloud --integrationType=bitbucket-cloud`
+ - **Bitbucket Cloud:** `DEBUG=snyk* BITBUCKET_CLOUD_USERNAME=*** BITBUCKET_CLOUD_PASSWORD=*** SNYK_TOKEN=*** snyk-api-import import:data --orgsData=path/to/snyk-orgs.json --source=bitbucket-cloud`
 
 4. Use the generated data to feed into [import command](/import.md) to generate kick off the import.
 

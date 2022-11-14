@@ -38,7 +38,7 @@ describe('`snyk-api-import list:imported <...>`', () => {
           --integrationType  The configured integration type (source of the projects in
                              Snyk e.g. Github, Github Enterprise.). This will be used to
                              pick the correct integrationID from each org in Snyk E.g.
-                             --integrationType=github
+                             --integrationType=github,
                              --integrationType=github-enterprise
            [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\", \\"gcr\\",
                     \\"docker-hub\\", \\"gitlab\\", \\"azure-repos\\", \\"bitbucket-server\\"] [default:
@@ -222,16 +222,16 @@ describe('`snyk-api-import list:imported <...>`', () => {
       },
       (err, stdout, stderr) => {
         expect(stderr).toMatchInlineSnapshot(`
-"ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.
-ERROR: Too many parameters: orgId or groupId must be provided, not both.
-"
-`);
+          "ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.
+          ERROR: Too many parameters: orgId or groupId must be provided, not both.
+          "
+        `);
         expect(err).toMatchInlineSnapshot(`
-[Error: Command failed: node ./dist/index.js list:imported --integrationType=github --orgId=foo --groupId=bar
-ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.
-ERROR: Too many parameters: orgId or groupId must be provided, not both.
-]
-`);
+          [Error: Command failed: node ./dist/index.js list:imported --integrationType=github --orgId=foo --groupId=bar
+          ERROR! Failed to list imported targets in Snyk. Try running with \`DEBUG=snyk* <command> for more info\`.
+          ERROR: Too many parameters: orgId or groupId must be provided, not both.
+          ]
+        `);
         expect(stdout).toEqual('');
       },
     ).on('exit', (code) => {

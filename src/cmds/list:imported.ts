@@ -28,7 +28,7 @@ export const builder = {
     required: true, // TODO: allow to not set any type to return all
     default: [...Object.values(SupportedIntegrationTypesToListSnykTargets)],
     choices: [...Object.values(SupportedIntegrationTypesToListSnykTargets)],
-    desc: 'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each org in Snyk E.g. --integrationType=github --integrationType=github-enterprise',
+    desc: 'The configured integration type (source of the projects in Snyk e.g. Github, Github Enterprise.). This will be used to pick the correct integrationID from each org in Snyk E.g. --integrationType=github, --integrationType=github-enterprise',
   },
 };
 
