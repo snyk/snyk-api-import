@@ -117,6 +117,7 @@ describe('updateTargets', () => {
 
       // Assert
       expect(res).toStrictEqual({
+        failedTargets: 0,
         processedTargets: 1,
         meta: {
           projects: {
@@ -185,6 +186,7 @@ describe('updateTargets', () => {
 
       // Assert
       expect(res).toStrictEqual({
+        failedTargets: 0,
         processedTargets: 1,
         meta: {
           projects: {
@@ -283,6 +285,7 @@ describe('updateTargets', () => {
       // Assert
       expect(res).toStrictEqual({
         processedTargets: 1,
+        failedTargets: 0,
         meta: {
           projects: {
             updated: updated.map((u) => ({ ...u, target: testTargets[0] })),
@@ -386,6 +389,7 @@ describe('updateTargets', () => {
 
       // Assert
       expect(res).toStrictEqual({
+        failedTargets: 0,
         processedTargets: 1,
         meta: {
           projects: {
@@ -492,6 +496,7 @@ describe('updateOrgTargets', () => {
           },
         },
         processedTargets: 0,
+        failedTargets: 1,
       });
     });
   });
@@ -585,6 +590,7 @@ describe('updateOrgTargets', () => {
           },
         },
         processedTargets: 0,
+        failedTargets: 1,
       });
     });
 
@@ -682,6 +688,7 @@ describe('updateOrgTargets', () => {
           },
         },
         processedTargets: 2,
+        failedTargets: 0,
       });
       expect(featureFlagsSpy).toHaveBeenCalledTimes(1);
       expect(listTargetsSpy).toHaveBeenCalledTimes(1);
@@ -826,6 +833,7 @@ describe('updateOrgTargets', () => {
           },
         },
         processedTargets: 2,
+        failedTargets: 0,
       });
       expect(featureFlagsSpy).toHaveBeenCalledTimes(1);
       expect(listTargetsSpy).toHaveBeenCalledTimes(1);

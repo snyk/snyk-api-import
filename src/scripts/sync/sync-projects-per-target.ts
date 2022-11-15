@@ -140,7 +140,7 @@ export async function bulkUpdateProjectsBranch(
         });
       }
     },
-    { concurrency: 30 },
+    { concurrency: 50 },
   );
 
   return { updated: updatedProjects, failed: failedProjects };
