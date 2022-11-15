@@ -16,7 +16,7 @@ Options:
                  (e.g. Github Enterprise url)
   --source       List of sources to be synced e.g. Github, Github Enterprise,
                  Gitlab, Bitbucket Server, Bitbucket Cloud
-                              [required] [choices: \\"github\\"] [default: \\"github\\"]
+         [required] [choices: \\"github\\", \\"github-enterprise\\"] [default: \\"github\\"]
   --dryRun       Dry run option. Will create a log file listing the potential
                  updates                                        [default: false]"
 `;
