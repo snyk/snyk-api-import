@@ -40,6 +40,7 @@ export async function updateOrgTargets(
   fileName: string;
   failedFileName: string;
   processedTargets: number;
+  failedTargets: number;
   meta: {
     projects: {
       updated: ProjectUpdate[];
@@ -48,6 +49,7 @@ export async function updateOrgTargets(
   };
 }> {
   const res: {
+    failedTargets: number;
     processedTargets: number;
     meta: {
       projects: {
@@ -56,6 +58,7 @@ export async function updateOrgTargets(
       };
     };
   } = {
+    failedTargets: 0,
     processedTargets: 0,
     meta: {
       projects: {
@@ -128,6 +131,7 @@ export async function updateOrgTargets(
         sourceUrl,
       );
       res.processedTargets += response.processedTargets;
+      res.failedTargets += response.failedTargets;
       res.meta.projects.updated.push(...response.meta.projects.updated);
       res.meta.projects.failed.push(...response.meta.projects.failed);
     },
@@ -159,6 +163,7 @@ export async function updateTargets(
   dryRun = false,
   sourceUrl?: string,
 ): Promise<{
+  failedTargets: number;
   processedTargets: number;
   meta: {
     projects: {
@@ -168,15 +173,18 @@ export async function updateTargets(
   };
 }> {
   let processedTargets = 0;
+  let failedTargets = 0;
   const updatedProjects: ProjectUpdate[] = [];
   const failedProjects: ProjectUpdateFailure[] = [];
 
   const loggingPath = getLoggingPath();
+  const concurrentTargets = 50;
 
   await pMap(
     targets,
     async (target: SnykTarget) => {
       try {
+        // TODO: is target reachable via SCM token? If not skip listing projects
         const { updated, failed } = await syncProjectsForTarget(
           requestManager,
           orgId,
@@ -195,6 +203,7 @@ export async function updateTargets(
           await logFailedToUpdateProjects(orgId, failed);
         }
       } catch (e) {
+        failedTargets += 1;
         debug(e);
         const errorMessage: string = e.message;
         console.warn(
@@ -202,12 +211,24 @@ export async function updateTargets(
         );
         await logFailedSync(orgId, target, errorMessage, loggingPath);
       }
+
+      if (
+        updatedProjects.length == 0 &&
+        processedTargets == concurrentTargets
+      ) {
+        console.error(
+          `Every target in this batch failed to update projects, stopping as this is unexpected! Please check if everything is configured ok and review the logs located at ${loggingPath}`,
+        );
+        // die immediately
+        process.exit(1);
+      }
     },
-    { concurrency: 20 },
+    { concurrency: concurrentTargets },
   );
   return {
     processedTargets,
     // TODO: collect failed targets & log them with reason?
+    failedTargets,
     meta: {
       projects: {
         updated: updatedProjects,

@@ -52,7 +52,7 @@ export async function syncOrg(
       res.meta.projects.failed.length == 0;
     const orgMessage = nothingToUpdate
       ? `Did not detect any changes to apply`
-      : `Processed ${res.processedTargets} targets\nUpdated ${res.meta.projects.updated.length} projects\n${res.meta.projects.failed.length} projects failed to update\nFind more information in ${res.fileName} and ${res.failedFileName}`;
+      : `Processed ${res.processedTargets} targets (${res.failedTargets} failed)\nUpdated ${res.meta.projects.updated.length} projects\n${res.meta.projects.failed.length} projects failed to update\nFind more information in ${res.fileName} and ${res.failedFileName}`;
 
     return {
       fileName: res.fileName,
