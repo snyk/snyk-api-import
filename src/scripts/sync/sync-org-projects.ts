@@ -86,27 +86,6 @@ export async function updateOrgTargets(
     maxRetryCount: 3,
   });
 
-  let hasCustomBranchFlag = true;
-
-  try {
-    hasCustomBranchFlag = await getFeatureFlag(
-      requestManager,
-      'customBranch',
-      publicOrgId,
-    );
-  } catch (e) {
-    throw new Error(
-      `Org ${publicOrgId} was not found or you may not have the correct permissions to access the org`,
-    );
-  }
-
-  // TODO: move this into sync project per target and skip only whats needed
-  if (hasCustomBranchFlag) {
-    throw new Error(
-      `Detected custom branches feature. Skipping syncing organization ${publicOrgId} because it is not possible to determine which should be the default branch.`,
-    );
-  }
-
   await pMap(
     allowedSources,
     async (source: SupportedIntegrationTypesUpdateProject) => {

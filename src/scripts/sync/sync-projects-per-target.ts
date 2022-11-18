@@ -8,6 +8,7 @@ import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { targetGenerators } from '../generate-imported-targets-from-snyk';
 import { listProjects } from '../../lib';
 import pMap = require('p-map');
+import { getFeatureFlag } from '../../lib/api/feature-flags';
 const debug = debugLib('snyk:sync-projects-per-target');
 
 export function getBranchGenerator(
@@ -77,6 +78,27 @@ export async function bulkUpdateProjectsBranch(
 ): Promise<{ updated: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
   const updatedProjects: ProjectUpdate[] = [];
   const failedProjects: ProjectUpdateFailure[] = [];
+
+  let hasCustomBranchFlag = true;
+
+  try {
+    hasCustomBranchFlag = await getFeatureFlag(
+      requestManager,
+      'customBranch',
+      orgId,
+    );
+  } catch (e) {
+    throw new Error(
+      `Org ${orgId} was not found or you may not have the correct permissions to access the org`,
+    );
+  }
+
+  // TODO: move this into sync project per target and skip only whats needed
+  if (hasCustomBranchFlag) {
+    throw new Error(
+      `Detected custom branches feature. Skipping syncing organization ${orgId} because it is not possible to determine which should be the default branch.`,
+    );
+  }
 
   let defaultBranch: string;
   const origin = projects[0].origin as SupportedIntegrationTypesUpdateProject;
