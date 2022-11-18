@@ -1,7 +1,7 @@
 import type { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 
-import { getGithubReposDefaultBranch } from '../../lib/source-handlers/github';
+import { getGithubRepoMetaData } from '../../lib/source-handlers/github';
 import { updateBranch } from '../../lib/project/update-branch';
 import type { SnykProject, SnykTarget, Target } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
@@ -10,13 +10,15 @@ import { listProjects } from '../../lib';
 import pMap = require('p-map');
 const debug = debugLib('snyk:sync-projects-per-target');
 
-export function getBranchGenerator(
+export function getMetaDataGenerator(
   origin: SupportedIntegrationTypesUpdateProject,
-): (target: Target, host?: string | undefined) => Promise<string> {
+): (
+  target: Target,
+  host?: string | undefined,
+) => Promise<{ branch: string; cloneUrl: string }> {
   const getDefaultBranchGenerators = {
-    [SupportedIntegrationTypesUpdateProject.GITHUB]:
-      getGithubReposDefaultBranch,
-    [SupportedIntegrationTypesUpdateProject.GHE]: getGithubReposDefaultBranch,
+    [SupportedIntegrationTypesUpdateProject.GITHUB]: getGithubRepoMetaData,
+    [SupportedIntegrationTypesUpdateProject.GHE]: getGithubRepoMetaData,
   };
   return getDefaultBranchGenerators[origin];
 }
@@ -83,7 +85,8 @@ export async function bulkUpdateProjectsBranch(
   try {
     const target = targetGenerators[origin](projects[0]);
     debug(`Getting default branch via ${origin} for ${projects[0].name}`);
-    defaultBranch = await getBranchGenerator(origin)(target, sourceUrl);
+    const res = await getMetaDataGenerator(origin)(target, sourceUrl);
+    defaultBranch = res.branch;
   } catch (e) {
     debug(e);
     const error = `Getting default branch via ${origin} API failed with error: ${e.message}`;
