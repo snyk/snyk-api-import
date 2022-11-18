@@ -32,7 +32,7 @@ describe('updateTargets', () => {
   let listProjectsSpy: jest.SpyInstance;
 
   beforeAll(() => {
-    githubSpy = jest.spyOn(github, 'getGithubReposDefaultBranch');
+    githubSpy = jest.spyOn(github, 'getGithubRepoMetaData');
     updateProjectsSpy = jest.spyOn(projectApi, 'updateProject');
     listProjectsSpy = jest.spyOn(lib, 'listProjects');
   }, 1000);
@@ -108,7 +108,12 @@ describe('updateTargets', () => {
       jest
         .spyOn(lib, 'listProjects')
         .mockImplementation(() => Promise.resolve(projectsAPIResponse));
-      githubSpy.mockImplementation(() => Promise.resolve(defaultBranch));
+      githubSpy.mockImplementation(() =>
+        Promise.resolve({
+          branch: defaultBranch,
+          cloneUrl: 'https://some-url.com',
+        }),
+      );
       updateProjectsSpy.mockImplementation(() =>
         Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
       );
@@ -176,7 +181,12 @@ describe('updateTargets', () => {
       listProjectsSpy.mockImplementation(() =>
         Promise.resolve(projectsAPIResponse),
       );
-      githubSpy.mockImplementation(() => Promise.resolve(defaultBranch));
+      githubSpy.mockImplementation(() =>
+        Promise.resolve({
+          branch: defaultBranch,
+          cloneUrl: 'https://some-url.com',
+        }),
+      );
       updateProjectsSpy.mockImplementation(() =>
         Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
       );
@@ -271,7 +281,12 @@ describe('updateTargets', () => {
       listProjectsSpy.mockImplementation(() =>
         Promise.resolve(projectsAPIResponse),
       );
-      githubSpy.mockImplementation(() => Promise.resolve(defaultBranch));
+      githubSpy.mockImplementation(() =>
+        Promise.resolve({
+          branch: defaultBranch,
+          cloneUrl: 'https://some-url.com',
+        }),
+      );
       updateProjectsSpy
         .mockImplementationOnce(() =>
           Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
@@ -370,7 +385,12 @@ describe('updateTargets', () => {
       listProjectsSpy.mockImplementation(() =>
         Promise.resolve(projectsAPIResponse),
       );
-      githubSpy.mockImplementation(() => Promise.resolve(defaultBranch));
+      githubSpy.mockImplementation(() =>
+        Promise.resolve({
+          branch: defaultBranch,
+          cloneUrl: 'https://some-url.com',
+        }),
+      );
       updateProjectsSpy
         .mockImplementationOnce(() =>
           Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
@@ -427,7 +447,7 @@ describe('updateOrgTargets', () => {
     listTargetsSpy = jest.spyOn(lib, 'listTargets');
     listProjectsSpy = jest.spyOn(lib, 'listProjects');
     logUpdatedProjectsSpy = jest.spyOn(updateProjectsLog, 'logUpdatedProjects');
-    githubSpy = jest.spyOn(github, 'getGithubReposDefaultBranch');
+    githubSpy = jest.spyOn(github, 'getGithubRepoMetaData');
     updateProjectSpy = jest.spyOn(projectApi, 'updateProject');
   });
   afterAll(() => {
@@ -650,7 +670,10 @@ describe('updateOrgTargets', () => {
 
       logUpdatedProjectsSpy.mockResolvedValueOnce(null);
       const defaultBranch = 'new-branch';
-      githubSpy.mockResolvedValue(defaultBranch);
+      githubSpy.mockResolvedValue({
+        branch: defaultBranch,
+        cloneUrl: 'https://some-url.com',
+      });
       const updated: syncProjectsForTarget.ProjectUpdate[] = [
         {
           projectPublicId: updatedProjectId1,
@@ -794,7 +817,10 @@ describe('updateOrgTargets', () => {
 
       logUpdatedProjectsSpy.mockResolvedValueOnce(null);
       const defaultBranch = 'new-branch';
-      githubSpy.mockResolvedValue(defaultBranch);
+      githubSpy.mockResolvedValue({
+        branch: defaultBranch,
+        cloneUrl: 'https://some-url.com',
+      });
       const updated: syncProjectsForTarget.ProjectUpdate[] = [
         {
           projectPublicId: updatedProjectId1,

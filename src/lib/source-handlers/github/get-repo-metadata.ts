@@ -6,10 +6,10 @@ import { getGithubBaseUrl } from './github-base-url';
 
 const debug = debugLib('snyk:get-github-defaultBranch-script');
 
-export async function getGithubReposDefaultBranch(
+export async function getGithubRepoMetaData(
   target: Target,
   host?: string,
-): Promise<string> {
+): Promise<{ branch: string; cloneUrl: string }> {
   const githubToken = getGithubToken();
   const baseUrl = getGithubBaseUrl(host);
   const octokit: Octokit = new Octokit({ baseUrl, auth: githubToken });
@@ -20,5 +20,8 @@ export async function getGithubReposDefaultBranch(
     owner: target.owner!,
     repo: target.name!,
   });
-  return response.data.default_branch as string;
+  return {
+    branch: response.data.default_branch!,
+    cloneUrl: response.data.clone_url!,
+  };
 }
