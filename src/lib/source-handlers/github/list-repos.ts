@@ -2,7 +2,7 @@ import { Octokit } from '@octokit/rest';
 import * as debugLib from 'debug';
 import { getGithubToken } from './get-github-token';
 import { getGithubBaseUrl } from './github-base-url';
-import { GithubRepoData } from './types';
+import type { GithubRepoData } from './types';
 
 const debug = debugLib('snyk:list-repos-script');
 

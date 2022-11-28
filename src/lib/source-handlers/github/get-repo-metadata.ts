@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import * as debugLib from 'debug';
-import type { Target } from '../../types';
+import type { RepoMetaData, Target } from '../../types';
 import { getGithubToken } from './get-github-token';
 import { getGithubBaseUrl } from './github-base-url';
 
@@ -9,7 +9,7 @@ const debug = debugLib('snyk:get-github-defaultBranch-script');
 export async function getGithubRepoMetaData(
   target: Target,
   host?: string,
-): Promise<{ branch: string; cloneUrl: string }> {
+): Promise<RepoMetaData> {
   const githubToken = getGithubToken();
   const baseUrl = getGithubBaseUrl(host);
   const octokit: Octokit = new Octokit({ baseUrl, auth: githubToken });
@@ -23,5 +23,6 @@ export async function getGithubRepoMetaData(
   return {
     branch: response.data.default_branch!,
     cloneUrl: response.data.clone_url!,
+    sshUrl: response.data.ssh_url!,
   };
 }

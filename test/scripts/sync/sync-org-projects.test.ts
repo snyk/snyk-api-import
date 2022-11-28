@@ -112,6 +112,7 @@ describe('updateTargets', () => {
         Promise.resolve({
           branch: defaultBranch,
           cloneUrl: 'https://some-url.com',
+          sshUrl: 'git@some-url.com',
         }),
       );
       updateProjectsSpy.mockImplementation(() =>
@@ -185,6 +186,7 @@ describe('updateTargets', () => {
         Promise.resolve({
           branch: defaultBranch,
           cloneUrl: 'https://some-url.com',
+          sshUrl: 'git@some-url.com',
         }),
       );
       updateProjectsSpy.mockImplementation(() =>
@@ -285,6 +287,7 @@ describe('updateTargets', () => {
         Promise.resolve({
           branch: defaultBranch,
           cloneUrl: 'https://some-url.com',
+          sshUrl: 'git@some-url.com',
         }),
       );
       updateProjectsSpy
@@ -389,6 +392,7 @@ describe('updateTargets', () => {
         Promise.resolve({
           branch: defaultBranch,
           cloneUrl: 'https://some-url.com',
+          sshUrl: 'git@some-url.com',
         }),
       );
       updateProjectsSpy
@@ -673,6 +677,7 @@ describe('updateOrgTargets', () => {
       githubSpy.mockResolvedValue({
         branch: defaultBranch,
         cloneUrl: 'https://some-url.com',
+        sshUrl: 'git@some-url.com',
       });
       const updated: syncProjectsForTarget.ProjectUpdate[] = [
         {
@@ -820,6 +825,7 @@ describe('updateOrgTargets', () => {
       githubSpy.mockResolvedValue({
         branch: defaultBranch,
         cloneUrl: 'https://some-url.com',
+        sshUrl: 'git@some-url.com',
       });
       const updated: syncProjectsForTarget.ProjectUpdate[] = [
         {

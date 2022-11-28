@@ -196,6 +196,12 @@ export interface SnykTargetRelationships {
   };
 }
 
+export interface RepoMetaData {
+  branch: string;
+  cloneUrl: string;
+  sshUrl: string;
+}
+
 export interface SnykTarget {
   attributes: {
     displayName: string;
