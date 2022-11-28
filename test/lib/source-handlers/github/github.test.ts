@@ -80,3 +80,26 @@ describe('isGithubConfigured', () => {
     expect(() => github.isGithubConfigured()).toThrow();
   });
 });
+
+describe('buildGitCloneUrl', () => {
+  const OLD_ENV = process.env;
+
+  beforeEach(async () => {
+    delete process.env.GITHUB_TOKEN;
+  });
+
+  afterEach(async () => {
+    process.env = { ...OLD_ENV };
+  });
+  it('builds correct clone url for github.com / ghe (the urls come back from API already correct)', async () => {
+    process.env.GITHUB_TOKEN = 'secret_token';
+    const url = github.buildGitCloneUrl({
+      branch: 'main',
+      sshUrl: 'https://git@github.com:snyk-tech-services/snyk-api-import.git',
+      cloneUrl: 'https://github.com/snyk-tech-services/snyk-api-import.git',
+    });
+    expect(url).toEqual(
+      `https://secret_token@github.com/snyk-tech-services/snyk-api-import.git`,
+    );
+  });
+});
