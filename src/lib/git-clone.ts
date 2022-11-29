@@ -13,6 +13,7 @@ const debug = debugLib('snyk:git-clone');
 
 const urlGenerators = {
   [SupportedIntegrationTypesUpdateProject.GITHUB]: github.buildGitCloneUrl,
+  [SupportedIntegrationTypesUpdateProject.GHE]: github.buildGitCloneUrl,
 };
 
 interface GitCloneResponse {
@@ -21,7 +22,7 @@ interface GitCloneResponse {
   gitResponse: string;
 }
 export async function gitClone(
-  integrationType: SupportedIntegrationTypesUpdateProject.GITHUB,
+  integrationType: SupportedIntegrationTypesUpdateProject,
   meta: RepoMetaData,
 ): Promise<GitCloneResponse> {
   const repoClonePath = await fs.mkdtempSync(
