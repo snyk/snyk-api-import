@@ -84,4 +84,4 @@ Live mode:
 
 # Known limitations
 - Any organizations using a custom branch feature are currently not supported, `sync` will not continue.
-- ANy organizations that previously used the custom feature flag should ideally delete all existing projects & re-import to restore the project names to standard format (do not include a branch in the project name). `sync` will work regardless but may cause confusion as the project name will reference a branch that is not likely to be the actual branch being tested.
+- Any organizations that previously used the custom feature flag should ideally delete all existing projects & re-import to restore the project names to standard format (do not include a branch in the project name). `sync` will work regardless but may cause confusion as the project name will reference a branch that is not likely to be the actual branch being tested.
