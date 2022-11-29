@@ -99,7 +99,7 @@ describe('buildGitCloneUrl', () => {
       cloneUrl: 'https://github.com/snyk-tech-services/snyk-api-import.git',
     });
     expect(url).toEqual(
-      `https://secret_token@github.com/snyk-tech-services/snyk-api-import.git`,
+      `https://secret_token:x-oauth-basic@github.com/snyk-tech-services/snyk-api-import.git`,
     );
   });
 });
