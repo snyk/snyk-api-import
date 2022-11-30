@@ -1,6 +1,7 @@
 import pMap = require('p-map');
 import * as debugLib from 'debug';
 import * as path from 'path';
+import * as fs from 'fs';
 import { requestsManager } from 'snyk-request-manager';
 import {
   FAILED_UPDATE_PROJECTS_LOG_NAME,
@@ -18,6 +19,7 @@ import { syncProjectsForTarget } from './sync-projects-per-target';
 import type { ProjectUpdate } from './sync-projects-per-target';
 import { logFailedSync } from '../../loggers/log-failed-sync';
 import { logFailedToUpdateProjects } from '../../loggers/log-failed-to-update-projects';
+import type { SnykProductEntitlement } from '../../lib/supported-project-types/supported-manifests';
 
 const debug = debugLib('snyk:sync-org-projects');
 
@@ -36,9 +38,11 @@ export async function updateOrgTargets(
   sources: SupportedIntegrationTypesUpdateProject[],
   dryRun = false,
   sourceUrl?: string,
+  entitlements: SnykProductEntitlement[] = ['openSource'],
+  manifestTypes?: string[],
 ): Promise<{
   fileName: string;
-  failedFileName: string;
+  failedFileName?: string;
   processedTargets: number;
   failedTargets: number;
   meta: {
@@ -116,44 +120,46 @@ export async function updateOrgTargets(
         origin: source,
         excludeEmpty: true,
       };
-      debug(`Listing all targets for source ${source}`);
+      console.log(`Listing all targets for source ${source}`);
       const { targets } = await listTargets(
         requestManager,
         publicOrgId,
         filters,
       );
-      debug(`Syncing targets for source ${source}`);
+      console.log(`Syncing targets for source ${source}`);
       const response = await updateTargets(
         requestManager,
         publicOrgId,
         targets,
         dryRun,
         sourceUrl,
+        entitlements,
+        manifestTypes,
       );
+      console.log(`Done syncing targets for source ${source}`);
       res.processedTargets += response.processedTargets;
       res.failedTargets += response.failedTargets;
       res.meta.projects.updated.push(...response.meta.projects.updated);
       res.meta.projects.failed.push(...response.meta.projects.failed);
     },
-    { concurrency: 3 },
+    { concurrency: 30 },
   );
 
-  let logFile = UPDATED_PROJECTS_LOG_NAME;
-  try {
-    logFile = path.resolve(getLoggingPath(), UPDATED_PROJECTS_LOG_NAME);
-  } catch (e) {
-    console.warn(e.message);
-  }
-  let failedLogFile = FAILED_UPDATE_PROJECTS_LOG_NAME;
-  try {
-    failedLogFile = path.resolve(
-      getLoggingPath(),
-      FAILED_UPDATE_PROJECTS_LOG_NAME,
-    );
-  } catch (e) {
-    console.warn(e.message);
-  }
-  return { ...res, fileName: logFile, failedFileName: failedLogFile };
+  const failedLogExists = fs.existsSync(
+    `${getLoggingPath()}/${publicOrgId}.${FAILED_UPDATE_PROJECTS_LOG_NAME}`,
+  );
+
+  return {
+    ...res,
+    fileName: path.resolve(
+      `${getLoggingPath()}/${publicOrgId}.${UPDATED_PROJECTS_LOG_NAME}`,
+    ),
+    failedFileName: failedLogExists
+      ? path.resolve(
+          `${getLoggingPath()}/${publicOrgId}.${FAILED_UPDATE_PROJECTS_LOG_NAME}`,
+        )
+      : undefined,
+  };
 }
 
 export async function updateTargets(
@@ -162,6 +168,8 @@ export async function updateTargets(
   targets: SnykTarget[],
   dryRun = false,
   sourceUrl?: string,
+  entitlements: SnykProductEntitlement[] = ['openSource'],
+  manifestTypes?: string[],
 ): Promise<{
   failedTargets: number;
   processedTargets: number;
@@ -178,12 +186,13 @@ export async function updateTargets(
   const failedProjects: ProjectUpdateFailure[] = [];
 
   const loggingPath = getLoggingPath();
-  const concurrentTargets = 50;
+  const concurrentTargets = 100;
 
   await pMap(
     targets,
     async (target: SnykTarget) => {
       try {
+        console.log(`Processing target ${target.attributes.displayName}`);
         // TODO: is target reachable via SCM token? If not skip listing projects
         const { updated, failed } = await syncProjectsForTarget(
           requestManager,
@@ -191,6 +200,8 @@ export async function updateTargets(
           target,
           dryRun,
           sourceUrl,
+          entitlements,
+          manifestTypes,
         );
         updatedProjects.push(...updated);
         failedProjects.push(...failed);
@@ -210,18 +221,12 @@ export async function updateTargets(
           `Failed to sync target ${target.attributes.displayName}. ERROR: ${errorMessage}`,
         );
         await logFailedSync(orgId, target, errorMessage, loggingPath);
-      }
-
-      if (
-        updatedProjects.length == 0 &&
-        processedTargets == concurrentTargets
-      ) {
-        console.error(
-          `Every target in this batch failed to update projects, stopping as this is unexpected! Please check if everything is configured ok and review the logs located at ${loggingPath}`,
+      } finally {
+        console.log(
+          `Finished processing target ${target.attributes.displayName}`,
         );
-        // die immediately
-        process.exit(1);
       }
+      // TODO: exit early if 100% of batch targets failed.
     },
     { concurrency: concurrentTargets },
   );

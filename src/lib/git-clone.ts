@@ -21,6 +21,7 @@ interface GitCloneResponse {
   repoPath?: string;
   gitResponse: string;
 }
+
 export async function gitClone(
   integrationType: SupportedIntegrationTypesUpdateProject,
   meta: RepoMetaData,

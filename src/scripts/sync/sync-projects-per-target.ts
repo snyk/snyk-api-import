@@ -11,10 +11,16 @@ import type {
 } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { targetGenerators } from '../generate-imported-targets-from-snyk';
-import { listProjects } from '../../lib';
+import { deactivateProject, listProjects } from '../../lib';
 import pMap = require('p-map');
+import { cloneAndAnalyze } from './clone-and-analyze';
+import type { SnykProductEntitlement } from '../../lib/supported-project-types/supported-manifests';
 const debug = debugLib('snyk:sync-projects-per-target');
 
+export enum ProjectUpdateType {
+  BRANCH = 'branch',
+  DEACTIVATE = 'deactivate',
+}
 export function getMetaDataGenerator(
   origin: SupportedIntegrationTypesUpdateProject,
 ): (target: Target, host?: string | undefined) => Promise<RepoMetaData> {
@@ -31,6 +37,8 @@ export async function syncProjectsForTarget(
   target: SnykTarget,
   dryRun = false,
   host?: string,
+  entitlements: SnykProductEntitlement[] = ['openSource'],
+  manifestTypes?: string[],
 ): Promise<{ updated: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
   const failed: ProjectUpdateFailure[] = [];
   const updated: ProjectUpdate[] = [];
@@ -39,27 +47,29 @@ export async function syncProjectsForTarget(
     targetId: target.id,
     limit: 100,
   });
+
+  // TODO: if target is empty, try to import it and stop here
   if (projects.length < 1) {
-    throw new Error(
-      `No projects returned to process for target: ${target.attributes.displayName} orgId: ${orgId}`,
-    );
+    return {
+      updated,
+      failed,
+    };
   }
   debug(`Syncing projects for target ${target.attributes.displayName}`);
   let targetMeta: RepoMetaData;
+  const origin = projects[0].origin as SupportedIntegrationTypesUpdateProject;
+
   try {
-    const origin = projects[0].origin as SupportedIntegrationTypesUpdateProject;
     const targetData = targetGenerators[origin](projects[0]);
-    debug(`Getting default branch via ${origin} for ${projects[0].name}`);
     targetMeta = await getMetaDataGenerator(origin)(targetData, host);
   } catch (e) {
     debug(e);
     const error = `Getting default branch via ${origin} API failed with error: ${e.message}`;
-    console.error(error);
     projects.map((project) => {
       failed.push({
         errorMessage: error,
         projectPublicId: project.id,
-        type: 'branch',
+        type: ProjectUpdateType.BRANCH,
         from: project.branch!,
         to: targetMeta.branch,
         dryRun,
@@ -68,17 +78,63 @@ export async function syncProjectsForTarget(
     });
   }
 
-  // update branches
-  const res = await bulkUpdateProjectsBranch(
-    requestManager,
-    orgId,
-    projects,
-    targetMeta!.branch,
-    dryRun,
-  );
-  updated.push(...res.updated.map((t) => ({ ...t, target })));
-  failed.push(...res.failed.map((t) => ({ ...t, target })));
-  // add target info for logs
+  const deactivate = [];
+  try {
+    const res = await cloneAndAnalyze(
+      origin,
+      targetMeta!,
+      projects,
+      undefined, // TODO send exclusions when import is supported
+      entitlements,
+      manifestTypes,
+    );
+    debug(
+      'Analysis finished',
+      JSON.stringify({ deactivate: res.deactivate.length }),
+    );
+    deactivate.push(...res.deactivate);
+  } catch (e) {
+    debug(e);
+    const error = `Cloning and analysing the repo to deactivate projects failed with error: ${e.message}`;
+    projects.map((project) => {
+      failed.push({
+        errorMessage: error,
+        projectPublicId: project.id,
+        from: 'active',
+        to: 'deactivated',
+        type: ProjectUpdateType.DEACTIVATE,
+        dryRun,
+        target,
+      });
+    });
+  }
+
+  // remove any projects that are to be deactivated from other actions
+  const branchUpdateProjects = [];
+  const deactivateIds = deactivate.map((p) => p.id);
+  for (const p of projects.filter((p) => p.status !== 'inactive')) {
+    if (!deactivateIds.includes(p.id)) {
+      branchUpdateProjects.push(p);
+    }
+  }
+
+  const actions = [
+    bulkUpdateProjectsBranch(
+      requestManager,
+      orgId,
+      branchUpdateProjects,
+      targetMeta!.branch,
+      dryRun,
+    ),
+    bulkDeactivateProjects(requestManager, orgId, deactivate, dryRun),
+  ];
+
+  const [branchUpdate, deactivatedProjects] = await Promise.all(actions);
+  updated.push(...branchUpdate.updated.map((t) => ({ ...t, target })));
+  failed.push(...branchUpdate.failed.map((t) => ({ ...t, target })));
+  updated.push(...deactivatedProjects.updated.map((t) => ({ ...t, target })));
+  failed.push(...deactivatedProjects.failed.map((t) => ({ ...t, target })));
+  // TODO: add target info for logs
   return {
     updated,
     failed,
@@ -87,7 +143,7 @@ export async function syncProjectsForTarget(
 
 export interface ProjectUpdate {
   projectPublicId: string;
-  type: 'branch';
+  type: ProjectUpdateType;
   from: string;
   to: string;
   dryRun: boolean;
@@ -124,7 +180,7 @@ export async function bulkUpdateProjectsBranch(
         if (updated) {
           updatedProjects.push({
             projectPublicId: project.id,
-            type: 'branch',
+            type: ProjectUpdateType.BRANCH,
             from: project.branch!,
             to: branch,
             dryRun,
@@ -139,7 +195,7 @@ export async function bulkUpdateProjectsBranch(
         failedProjects.push({
           errorMessage: e.message,
           projectPublicId: project.id,
-          type: 'branch',
+          type: ProjectUpdateType.BRANCH,
           from: project.branch!,
           to: branch,
           dryRun,
@@ -150,4 +206,60 @@ export async function bulkUpdateProjectsBranch(
   );
 
   return { updated: updatedProjects, failed: failedProjects };
+}
+
+export async function bulkDeactivateProjects(
+  requestManager: requestsManager,
+  orgId: string,
+  projects: SnykProject[] = [],
+  dryRun = false,
+): Promise<{ updated: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
+  const updated: ProjectUpdate[] = [];
+  const failed: ProjectUpdateFailure[] = [];
+  if (!projects.length) {
+    return { updated, failed };
+  }
+  debug(`De-activating projects: ${projects.map((p) => p.id).join(',')}`);
+  await pMap(
+    projects,
+    async (project: SnykProject) => {
+      if (!dryRun) {
+        try {
+          await deactivateProject(requestManager, orgId, project.id);
+
+          updated.push({
+            projectPublicId: project.id,
+            type: ProjectUpdateType.DEACTIVATE,
+            from: 'active',
+            to: 'deactivated',
+            dryRun,
+          });
+        } catch (e) {
+          failed.push({
+            projectPublicId: project.id,
+            type: ProjectUpdateType.DEACTIVATE,
+            from: 'active',
+            to: 'deactivated',
+            dryRun,
+            errorMessage: `Could not deactivate project: ${e.message}`,
+          });
+        }
+      } else {
+        debug('Skipping de-activating project in dryRun mode');
+
+        updated.push(
+          ...projects.map((p) => ({
+            projectPublicId: p.id,
+            type: ProjectUpdateType.DEACTIVATE,
+            from: 'active',
+            to: 'deactivated',
+            dryRun,
+          })),
+        );
+      }
+    },
+    { concurrency: 100 },
+  );
+
+  return { updated, failed };
 }

@@ -110,7 +110,7 @@ function findFile(
 ): string | null {
   if (filter.length > 0) {
     const filename = pathLib.basename(path);
-    if (matches(filename, filter)) {
+    if (matches(filename, filter) || matches(path, filter)) {
       return path;
     }
   } else {
@@ -154,5 +154,5 @@ async function findInDirectory(
 }
 
 function matches(filePath: string, globs: string[]): boolean {
-  return globs.some((glob) => micromatch.isMatch(filePath, glob));
+  return globs.some((glob) => micromatch.isMatch(filePath, '**/' + glob));
 }

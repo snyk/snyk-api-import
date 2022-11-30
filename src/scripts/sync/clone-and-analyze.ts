@@ -4,6 +4,7 @@ import * as path from 'path';
 
 import { find, getSCMSupportedManifests, gitClone } from '../../lib';
 import type { SnykProductEntitlement } from '../../lib/supported-project-types/supported-manifests';
+import { getSCMSupportedProjectTypes } from '../../lib/supported-project-types/supported-manifests';
 import type {
   RepoMetaData,
   SnykProject,
@@ -35,6 +36,10 @@ export async function cloneAndAnalyze(
   import: string[];
   deactivate: SnykProject[];
 }> {
+  const manifestFileTypes =
+    manifestTypes && manifestTypes.length > 0
+      ? manifestTypes
+      : getSCMSupportedProjectTypes(entitlements);
   const { success, repoPath, gitResponse } = await gitClone(
     integrationType,
     repoMetadata,
@@ -54,7 +59,7 @@ export async function cloneAndAnalyze(
     // TODO: when possible switch to check entitlements via API automatically for an org
     // right now the product entitlements are not exposed via API so user has to provide which products
     // they are using
-    getSCMSupportedManifests(manifestTypes, entitlements),
+    getSCMSupportedManifests(manifestFileTypes, entitlements),
     6,
   );
   const relativeFileNames = files.map((f) => path.relative(repoPath, f));
@@ -69,6 +74,6 @@ export async function cloneAndAnalyze(
   return generateProjectDiffActions(
     relativeFileNames,
     snykMonitoredProjects,
-    manifestTypes,
+    manifestFileTypes,
   );
 }

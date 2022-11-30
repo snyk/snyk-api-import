@@ -1,3 +1,5 @@
+import { SnykProductEntitlement } from './supported-project-types/supported-manifests';
+
 export interface ImportTarget {
   orgId: string;
   integrationId: string;
@@ -96,6 +98,19 @@ export enum SupportedIntegrationTypesUpdateProject {
   GHE = 'github-enterprise',
 }
 
+export enum SupportedProductsUpdateProject {
+  CONTAINER = 'container',
+  OPEN_SOURCE = 'open-source',
+  IAC = 'iac',
+}
+
+export const productEntitlements: {
+  [key in SupportedProductsUpdateProject]: SnykProductEntitlement;
+} = {
+  [SupportedProductsUpdateProject.IAC]: 'infrastructureAsCode',
+  [SupportedProductsUpdateProject.OPEN_SOURCE]: 'openSource',
+  [SupportedProductsUpdateProject.CONTAINER]: 'dockerfileFromScm',
+};
 // used to generate imported targets that exist in Snyk
 // when we need to grab the integrationId from Snyk
 export enum SupportedIntegrationTypesToListSnykTargets {
