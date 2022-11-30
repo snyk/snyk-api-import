@@ -3,7 +3,12 @@ import * as debugLib from 'debug';
 
 import { getGithubRepoMetaData } from '../../lib/source-handlers/github';
 import { updateBranch } from '../../lib/project/update-branch';
-import type { SnykProject, SnykTarget, Target } from '../../lib/types';
+import type {
+  SnykProject,
+  SnykTarget,
+  Target,
+  RepoMetaData,
+} from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { targetGenerators } from '../generate-imported-targets-from-snyk';
 import { listProjects } from '../../lib';
@@ -12,10 +17,7 @@ const debug = debugLib('snyk:sync-projects-per-target');
 
 export function getMetaDataGenerator(
   origin: SupportedIntegrationTypesUpdateProject,
-): (
-  target: Target,
-  host?: string | undefined,
-) => Promise<{ branch: string; cloneUrl: string }> {
+): (target: Target, host?: string | undefined) => Promise<RepoMetaData> {
   const getDefaultBranchGenerators = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]: getGithubRepoMetaData,
     [SupportedIntegrationTypesUpdateProject.GHE]: getGithubRepoMetaData,
@@ -30,6 +32,8 @@ export async function syncProjectsForTarget(
   dryRun = false,
   host?: string,
 ): Promise<{ updated: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
+  const failed: ProjectUpdateFailure[] = [];
+  const updated: ProjectUpdate[] = [];
   debug(`Listing projects for target ${target.attributes.displayName}`);
   const { projects } = await listProjects(requestManager, orgId, {
     targetId: target.id,
@@ -41,19 +45,43 @@ export async function syncProjectsForTarget(
     );
   }
   debug(`Syncing projects for target ${target.attributes.displayName}`);
+  let targetMeta: RepoMetaData;
+  try {
+    const origin = projects[0].origin as SupportedIntegrationTypesUpdateProject;
+    const targetData = targetGenerators[origin](projects[0]);
+    debug(`Getting default branch via ${origin} for ${projects[0].name}`);
+    targetMeta = await getMetaDataGenerator(origin)(targetData, host);
+  } catch (e) {
+    debug(e);
+    const error = `Getting default branch via ${origin} API failed with error: ${e.message}`;
+    console.error(error);
+    projects.map((project) => {
+      failed.push({
+        errorMessage: error,
+        projectPublicId: project.id,
+        type: 'branch',
+        from: project.branch!,
+        to: targetMeta.branch,
+        dryRun,
+        target,
+      });
+    });
+  }
 
   // update branches
-  const { updated, failed } = await bulkUpdateProjectsBranch(
+  const res = await bulkUpdateProjectsBranch(
     requestManager,
     orgId,
     projects,
+    targetMeta!.branch,
     dryRun,
-    host,
   );
+  updated.push(...res.updated.map((t) => ({ ...t, target })));
+  failed.push(...res.failed.map((t) => ({ ...t, target })));
   // add target info for logs
   return {
-    updated: updated.map((t) => ({ ...t, target })),
-    failed: failed.map((t) => ({ ...t, target })),
+    updated,
+    failed,
   };
 }
 
@@ -74,36 +102,11 @@ export async function bulkUpdateProjectsBranch(
   requestManager: requestsManager,
   orgId: string,
   projects: SnykProject[],
+  branch: string,
   dryRun = false,
-  sourceUrl?: string,
 ): Promise<{ updated: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
   const updatedProjects: ProjectUpdate[] = [];
   const failedProjects: ProjectUpdateFailure[] = [];
-
-  let defaultBranch: string;
-  const origin = projects[0].origin as SupportedIntegrationTypesUpdateProject;
-  try {
-    const target = targetGenerators[origin](projects[0]);
-    debug(`Getting default branch via ${origin} for ${projects[0].name}`);
-    const res = await getMetaDataGenerator(origin)(target, sourceUrl);
-    defaultBranch = res.branch;
-  } catch (e) {
-    debug(e);
-    const error = `Getting default branch via ${origin} API failed with error: ${e.message}`;
-    console.error(error);
-    projects.map((project) => {
-      failedProjects.push({
-        errorMessage: error,
-        projectPublicId: project.id,
-        type: 'branch',
-        from: project.branch!,
-        to: defaultBranch,
-        dryRun,
-      });
-    });
-    return { updated: updatedProjects, failed: failedProjects };
-  }
-
   await pMap(
     projects,
     async (project: SnykProject) => {
@@ -114,7 +117,7 @@ export async function bulkUpdateProjectsBranch(
             branch: project.branch!,
             projectPublicId: project.id,
           },
-          defaultBranch,
+          branch,
           orgId,
           dryRun,
         );
@@ -123,11 +126,11 @@ export async function bulkUpdateProjectsBranch(
             projectPublicId: project.id,
             type: 'branch',
             from: project.branch!,
-            to: defaultBranch,
+            to: branch,
             dryRun,
           });
           debug(
-            `Default branch updated from ${project.branch!} to ${defaultBranch} for ${
+            `Default branch updated from ${project.branch!} to ${branch} for ${
               project.id
             }`,
           );
@@ -138,7 +141,7 @@ export async function bulkUpdateProjectsBranch(
           projectPublicId: project.id,
           type: 'branch',
           from: project.branch!,
-          to: defaultBranch,
+          to: branch,
           dryRun,
         });
       }
