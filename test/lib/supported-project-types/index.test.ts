@@ -85,8 +85,34 @@ test('SCM supported manifest files for specific project types', async () => {
   expect(getSCMSupportedManifests(['dockerfile'])).toEqual([]);
 });
 
-test('SCM supported project types', async () => {
+test('SCM supported project types default', async () => {
   expect(getSCMSupportedProjectTypes().sort()).toEqual(
+    [
+      'npm',
+      'rubygems',
+      'yarn',
+      'yarn-workspace',
+      'maven',
+      'gradle',
+      'sbt',
+      'pip',
+      'golangdep',
+      'govendor',
+      'gomodules',
+      'nuget',
+      'composer',
+      'cocoapods',
+    ].sort(),
+  );
+});
+
+test('SCM supported project types (OS & IAC & Docker)', async () => {
+  expect(
+    getSCMSupportedProjectTypes([
+      'dockerfileFromScm',
+      'infrastructureAsCode',
+    ]).sort(),
+  ).toEqual(
     [
       'npm',
       'rubygems',

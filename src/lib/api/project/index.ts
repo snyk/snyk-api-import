@@ -7,10 +7,14 @@ import type { requestsManager } from 'snyk-request-manager';
 import type { SnykProject } from '../../types';
 const debug = debugLib('snyk:api-project');
 
+interface BulkProjectUpdateResponse {
+  publicId: string;
+  name: string;
+}
 export async function deleteProjects(
   orgId: string,
   projects: string[],
-): Promise<boolean> {
+): Promise<BulkProjectUpdateResponse> {
   const apiToken = getApiToken();
   if (!(orgId && projects)) {
     throw new Error(
