@@ -160,14 +160,20 @@ export function getSCMSupportedManifests(
   return Array.from(manifestFiles);
 }
 
-export function getSCMSupportedProjectTypes(): string[] {
+export function getSCMSupportedProjectTypes(
+  orgEntitlements: SnykProductEntitlement[] = [],
+): string[] {
   const supported = [];
-
-  for (const [name, entry] of Object.entries({
+  const typesWithSCMSupport = Object.entries({
     ...OPEN_SOURCE_PACKAGE_MANAGERS,
     ...CLOUD_CONFIGS,
     ...DOCKER,
-  })) {
+  }).filter(([, config]) => config.isSupported);
+
+  for (const [name, entry] of typesWithSCMSupport) {
+    if (entry.entitlement && !orgEntitlements.includes(entry.entitlement)) {
+      continue;
+    }
     if (entry.isSupported) {
       supported.push(name);
     }
