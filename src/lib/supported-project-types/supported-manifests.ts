@@ -2,7 +2,7 @@ export type SnykProductEntitlement =
   | 'dockerfileFromScm'
   | 'infrastructureAsCode';
 
-export const PACKAGE_MANAGERS: {
+export const OPEN_SOURCE_PACKAGE_MANAGERS: {
   [projectType: string]: {
     manifestFiles: string[];
     isSupported: boolean;
@@ -84,6 +84,19 @@ export const PACKAGE_MANAGERS: {
     manifestFiles: ['Podfile'],
     isSupported: true,
   },
+  hex: {
+    manifestFiles: ['mix.exs'],
+    isSupported: false,
+  },
+};
+
+export const DOCKER: {
+  [projectType: string]: {
+    manifestFiles: string[];
+    isSupported: boolean;
+    entitlement?: SnykProductEntitlement;
+  };
+} = {
   dockerfile: {
     isSupported: true,
     manifestFiles: [
@@ -92,12 +105,7 @@ export const PACKAGE_MANAGERS: {
     ],
     entitlement: 'dockerfileFromScm',
   },
-  hex: {
-    manifestFiles: ['mix.exs'],
-    isSupported: false,
-  },
 };
-
 export const CLOUD_CONFIGS: {
   [projectType: string]: {
     manifestFiles: string[];
@@ -127,8 +135,9 @@ export function getSCMSupportedManifests(
   orgEntitlements: SnykProductEntitlement[] = [],
 ): string[] {
   const typesWithSCMSupport = Object.entries({
-    ...PACKAGE_MANAGERS,
+    ...OPEN_SOURCE_PACKAGE_MANAGERS,
     ...CLOUD_CONFIGS,
+    ...DOCKER,
   }).filter(([, config]) => config.isSupported);
 
   const manifestFiles = typesWithSCMSupport.reduce(
@@ -155,8 +164,9 @@ export function getSCMSupportedProjectTypes(): string[] {
   const supported = [];
 
   for (const [name, entry] of Object.entries({
-    ...PACKAGE_MANAGERS,
+    ...OPEN_SOURCE_PACKAGE_MANAGERS,
     ...CLOUD_CONFIGS,
+    ...DOCKER,
   })) {
     if (entry.isSupported) {
       supported.push(name);

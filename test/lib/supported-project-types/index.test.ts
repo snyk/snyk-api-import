@@ -41,8 +41,8 @@ test('SCM supported manifest files for importing & auto discovery', async () => 
     getSCMSupportedManifests(undefined, [
       'infrastructureAsCode',
       'dockerfileFromScm',
-    ]),
-  ).toEqual(supported);
+    ]).sort(),
+  ).toEqual(supported.sort());
 });
 
 test('SCM supported manifest files for specific project types', async () => {
@@ -86,24 +86,26 @@ test('SCM supported manifest files for specific project types', async () => {
 });
 
 test('SCM supported project types', async () => {
-  expect(getSCMSupportedProjectTypes()).toEqual([
-    'npm',
-    'rubygems',
-    'yarn',
-    'yarn-workspace',
-    'maven',
-    'gradle',
-    'sbt',
-    'pip',
-    'golangdep',
-    'govendor',
-    'gomodules',
-    'nuget',
-    'composer',
-    'cocoapods',
-    'dockerfile',
-    'helmconfig',
-    'k8sconfig',
-    'terraformconfig',
-  ]);
+  expect(getSCMSupportedProjectTypes().sort()).toEqual(
+    [
+      'npm',
+      'rubygems',
+      'yarn',
+      'yarn-workspace',
+      'maven',
+      'gradle',
+      'sbt',
+      'pip',
+      'golangdep',
+      'govendor',
+      'gomodules',
+      'nuget',
+      'composer',
+      'cocoapods',
+      'dockerfile',
+      'helmconfig',
+      'k8sconfig',
+      'terraformconfig',
+    ].sort(),
+  );
 });
