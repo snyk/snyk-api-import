@@ -36,7 +36,7 @@ export async function logUpdatedProjects(
             remoteUrl: update.target?.attributes.remoteUrl ?? undefined,
           },
         },
-        `Snyk project ${update.type} updated`,
+        `Snyk project "${update.type}" update completed`,
       );
     });
   } catch (e) {

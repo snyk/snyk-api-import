@@ -72,6 +72,6 @@ export async function cloneAndAnalyze(
   return generateProjectDiffActions(
     relativeFileNames,
     snykMonitoredProjects,
-    manifestTypes && manifestTypes.length > 0,
+    manifestTypes,
   );
 }

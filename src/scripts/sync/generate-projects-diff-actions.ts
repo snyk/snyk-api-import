@@ -1,9 +1,10 @@
+import { OPEN_SOURCE_PACKAGE_MANAGERS } from '../../lib/supported-project-types/supported-manifests';
 import type { SnykProject } from '../../lib/types';
 
 export function generateProjectDiffActions(
   repoManifests: string[],
   snykMonitoredProjects: SnykProject[],
-  skipDeactivating = false,
+  manifestTypes: string[] = Object.keys(OPEN_SOURCE_PACKAGE_MANAGERS),
 ): {
   import: string[];
   deactivate: SnykProject[];
@@ -26,12 +27,14 @@ export function generateProjectDiffActions(
   // related project de-activated
   for (const project of snykMonitoredProjects) {
     if (!repoManifests.includes(project.name.split(':')[1])) {
-      deactivate.push(project);
+      if (manifestTypes.includes(project.type)) {
+        deactivate.push(project);
+      }
     }
   }
 
   return {
     import: filesToImport,
-    deactivate: skipDeactivating ? [] : deactivate,
+    deactivate,
   };
 }

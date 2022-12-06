@@ -145,7 +145,7 @@ describe('cloneAndAnalyze', () => {
         deactivate: [],
       });
     });
-    it('detects new files only for a particular ecosystem when asked (npm)', async () => {
+    it('detects changes needed for a particular ecosystem (npm)', async () => {
       // Arrange
       const projects: SnykProject[] = [
         {
@@ -181,8 +181,7 @@ describe('cloneAndAnalyze', () => {
           type: 'npm',
           branch: 'master',
         },
-        // TODO: eventually add support to identify this project needs to be de-activated
-        // as the file is not in repo
+        // should be detected as no longer present, and needs de-activating
         {
           name: 'snyk-fixtures/monorepo-simple:not-in-repo/package.json',
           id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
@@ -212,7 +211,16 @@ describe('cloneAndAnalyze', () => {
       // only detects which npm project need to be brought in
       expect(res).toStrictEqual({
         import: ['npm-project/package.json'],
-        deactivate: [],
+        deactivate: [
+          {
+            name: 'snyk-fixtures/monorepo-simple:not-in-repo/package.json',
+            id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+            created: '2018-10-29T09:50:54.014Z',
+            origin: 'github',
+            type: 'npm',
+            branch: 'master',
+          },
+        ],
       });
     });
     it('no changes needed', async () => {
