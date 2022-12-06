@@ -1,8 +1,12 @@
+export type SnykProductEntitlement =
+  | 'dockerfileFromScm'
+  | 'infrastructureAsCode';
+
 export const PACKAGE_MANAGERS: {
   [projectType: string]: {
     manifestFiles: string[];
     isSupported: boolean;
-    entitlement?: string;
+    entitlement?: SnykProductEntitlement;
   };
 } = {
   npm: {
@@ -86,7 +90,7 @@ export const PACKAGE_MANAGERS: {
       '*[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]*',
       '*Dockerfile*',
     ],
-    entitlement: 'dockerfileFromScm', // TODO: use API to check https://snyk.docs.apiary.io/#reference/entitlements/a-specific-entitlement-by-organization/get-an-organization's-entitlement-value
+    entitlement: 'dockerfileFromScm',
   },
   hex: {
     manifestFiles: ['mix.exs'],
@@ -98,7 +102,7 @@ export const CLOUD_CONFIGS: {
   [projectType: string]: {
     manifestFiles: string[];
     isSupported: boolean;
-    entitlement?: string;
+    entitlement?: SnykProductEntitlement;
   };
 } = {
   helmconfig: {
@@ -120,7 +124,7 @@ export const CLOUD_CONFIGS: {
 
 export function getSCMSupportedManifests(
   manifestTypes?: string[],
-  orgEntitlements: string[] = [],
+  orgEntitlements: SnykProductEntitlement[] = [],
 ): string[] {
   const typesWithSCMSupport = Object.entries({
     ...PACKAGE_MANAGERS,

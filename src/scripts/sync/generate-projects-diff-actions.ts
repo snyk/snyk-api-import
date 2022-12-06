@@ -3,6 +3,7 @@ import type { SnykProject } from '../../lib/types';
 export function generateProjectDiffActions(
   repoManifests: string[],
   snykMonitoredProjects: SnykProject[],
+  skipDeactivating = false,
 ): {
   import: string[];
   deactivate: SnykProject[];
@@ -29,5 +30,8 @@ export function generateProjectDiffActions(
     }
   }
 
-  return { import: filesToImport, deactivate };
+  return {
+    import: filesToImport,
+    deactivate: skipDeactivating ? [] : deactivate,
+  };
 }
