@@ -37,7 +37,7 @@ export async function logFailedToUpdateProjects(
           },
           error: update.errorMessage,
         },
-        `Snyk project ${update.type} update failed`,
+        `Snyk project "${update.type}" update failed`,
       );
     });
   } catch (e) {
