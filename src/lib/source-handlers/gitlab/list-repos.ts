@@ -22,6 +22,8 @@ export async function fetchGitlabReposForPage(
     // eslint-disable-next-line @typescript-eslint/camelcase
     perPage,
     page: pageNumber,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    includeSubgroups: true,
   };
   const projects = (await client.Groups.projects(
     groupName,
