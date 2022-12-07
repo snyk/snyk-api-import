@@ -90,7 +90,7 @@ export const OPEN_SOURCE_PACKAGE_MANAGERS: {
   },
 };
 
-export const DOCKER: {
+export const CONTAINER: {
   [projectType: string]: {
     manifestFiles: string[];
     isSupported: boolean;
@@ -131,18 +131,18 @@ export const CLOUD_CONFIGS: {
 };
 
 export function getSCMSupportedManifests(
-  manifestTypes?: string[],
+  manifestTypes: string[] = [],
   orgEntitlements: SnykProductEntitlement[] = [],
 ): string[] {
   const typesWithSCMSupport = Object.entries({
     ...OPEN_SOURCE_PACKAGE_MANAGERS,
     ...CLOUD_CONFIGS,
-    ...DOCKER,
+    ...CONTAINER,
   }).filter(([, config]) => config.isSupported);
 
   const manifestFiles = typesWithSCMSupport.reduce(
     (manifests, [name, config]) => {
-      if (manifestTypes && !manifestTypes.includes(name)) {
+      if (manifestTypes.length > 0 && !manifestTypes.includes(name)) {
         return manifests;
       }
 
@@ -167,7 +167,7 @@ export function getSCMSupportedProjectTypes(
   const typesWithSCMSupport = Object.entries({
     ...OPEN_SOURCE_PACKAGE_MANAGERS,
     ...CLOUD_CONFIGS,
-    ...DOCKER,
+    ...CONTAINER,
   }).filter(([, config]) => config.isSupported);
 
   for (const [name, entry] of typesWithSCMSupport) {

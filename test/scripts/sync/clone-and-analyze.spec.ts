@@ -35,6 +35,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'npm',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:no-vulns-bundler-app/Gemfile.lock',
@@ -43,6 +44,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:npm-project/package.json',
@@ -51,6 +53,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:npm-project-with-policy/package.json',
@@ -59,6 +62,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
       ];
 
@@ -93,6 +97,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'npm',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:no-vulns-bundler-app/Gemfile.lock',
@@ -101,6 +106,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:npm-project/package.json',
@@ -109,6 +115,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:npm-project-with-policy/package.json',
@@ -117,6 +124,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
       ];
 
@@ -155,6 +163,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'npm',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:no-vulns-bundler-app/Gemfile.lock',
@@ -163,6 +172,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
         // Should find this file needs bringing in
         // {
@@ -172,6 +182,7 @@ describe('cloneAndAnalyze', () => {
         //   origin: 'github',
         //   type: 'rubygems',
         //   branch: 'master',
+        //   status: 'active'
         // },
         {
           name: 'snyk-fixtures/monorepo-simple:npm-project-with-policy/package.json',
@@ -180,6 +191,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'npm',
           branch: 'master',
+          status: 'active',
         },
         // should be detected as no longer present, and needs de-activating
         {
@@ -189,6 +201,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'npm',
           branch: 'master',
+          status: 'active',
         },
       ];
 
@@ -219,6 +232,7 @@ describe('cloneAndAnalyze', () => {
             origin: 'github',
             type: 'npm',
             branch: 'master',
+            status: 'active',
           },
         ],
       });
@@ -233,6 +247,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'npm',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:Gemfile.lock',
@@ -241,6 +256,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:bundler-app/Gemfile.lock',
@@ -249,6 +265,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:no-vulns-bundler-app/Gemfile.lock',
@@ -257,6 +274,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:npm-project/package.json',
@@ -265,6 +283,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
         {
           name: 'snyk-fixtures/monorepo-simple:npm-project-with-policy/package.json',
@@ -273,6 +292,7 @@ describe('cloneAndAnalyze', () => {
           origin: 'github',
           type: 'rubygems',
           branch: 'master',
+          status: 'active',
         },
       ];
 

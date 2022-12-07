@@ -12,6 +12,7 @@ Object {
       "id": "331ede0a-de94-456f-b788-166caeca58bf",
       "name": "snyk/goof",
       "origin": "github",
+      "status": "active",
       "type": "maven",
     },
   ],

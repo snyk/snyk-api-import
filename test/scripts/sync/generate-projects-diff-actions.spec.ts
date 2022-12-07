@@ -1,7 +1,7 @@
 import { generateProjectDiffActions } from '../../../src/scripts/sync/generate-projects-diff-actions';
 import type { SnykProject } from '../../../src/lib/types';
 import {
-  DOCKER,
+  CONTAINER,
   OPEN_SOURCE_PACKAGE_MANAGERS,
 } from '../../../src/lib/supported-project-types/supported-manifests';
 
@@ -16,6 +16,7 @@ describe('generateProjectDiffActions', () => {
         origin: 'github',
         type: 'npm',
         branch: 'master',
+        status: 'active',
       },
       {
         name: 'snyk/goof:src/Dockerfile',
@@ -24,13 +25,14 @@ describe('generateProjectDiffActions', () => {
         origin: 'github',
         type: 'dockerfile',
         branch: 'master',
+        status: 'active',
       },
     ];
     // Act
     const res = await generateProjectDiffActions(
       ['package.json', 'path/to/build.gradle', 'src/Dockerfile'],
       projects,
-      [...Object.keys(OPEN_SOURCE_PACKAGE_MANAGERS), ...Object.keys(DOCKER)],
+      [...Object.keys(OPEN_SOURCE_PACKAGE_MANAGERS), ...Object.keys(CONTAINER)],
     );
 
     // Assert
@@ -44,6 +46,7 @@ describe('generateProjectDiffActions', () => {
           origin: 'github',
           type: 'npm',
           branch: 'master',
+          status: 'active',
         },
       ],
     });
@@ -58,6 +61,7 @@ describe('generateProjectDiffActions', () => {
         origin: 'github',
         type: 'npm',
         branch: 'master',
+        status: 'active',
       },
     ];
     // Act
@@ -80,6 +84,7 @@ describe('generateProjectDiffActions', () => {
         origin: 'github',
         type: 'npm',
         branch: 'master',
+        status: 'active',
       },
       {
         name: 'snyk/goof:Dockerfile',
@@ -88,6 +93,7 @@ describe('generateProjectDiffActions', () => {
         origin: 'github',
         type: 'dockerfile',
         branch: 'master',
+        status: 'active',
       },
     ];
     // Act
@@ -109,6 +115,7 @@ describe('generateProjectDiffActions', () => {
         origin: 'github',
         type: 'npm',
         branch: 'master',
+        status: 'active',
       },
       {
         name: 'snyk/goof:Dockerfile',
@@ -117,12 +124,13 @@ describe('generateProjectDiffActions', () => {
         origin: 'github',
         type: 'dockerfile',
         branch: 'master',
+        status: 'active',
       },
     ];
     // Act
     const res = await generateProjectDiffActions(['package.json'], projects, [
       ...Object.keys(OPEN_SOURCE_PACKAGE_MANAGERS),
-      ...Object.keys(DOCKER),
+      ...Object.keys(CONTAINER),
     ]);
 
     // Assert
@@ -136,6 +144,7 @@ describe('generateProjectDiffActions', () => {
           origin: 'github',
           type: 'dockerfile',
           branch: 'master',
+          status: 'active',
         },
       ],
     });
