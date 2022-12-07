@@ -122,6 +122,7 @@ export interface SnykProject {
   origin: string;
   type: string;
   branch: string | null;
+  status: 'inactive' | 'active';
 }
 
 export interface Org {
@@ -149,7 +150,7 @@ export interface RESTProjectsAttributes {
   lifecycle: string;
   name: string;
   origin: string;
-  status: string;
+  status: 'inactive' | 'active';
   tags: unknown;
   targetReference: string | null;
   type: string;

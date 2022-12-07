@@ -280,6 +280,7 @@ function convertToSnykProject(projectData: RESTProjectData[]): SnykProject[] {
       origin: project.attributes.origin,
       name: project.attributes.name,
       type: project.attributes.type,
+      status: project.attributes.status,
     };
     projects.push(projectTmp);
   }

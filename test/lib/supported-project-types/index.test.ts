@@ -44,7 +44,49 @@ test('SCM supported manifest files for importing & auto discovery', async () => 
     ]).sort(),
   ).toEqual(supported.sort());
 });
+test('SCM supported manifest files for importing & auto discovery', async () => {
+  const supported = [
+    'package.json',
+    'Gemfile.lock',
+    'yarn.lock',
+    'pom.xml',
+    'build.gradle',
+    'build.sbt',
+    '*req*.txt',
+    'requirements/*.txt',
+    'Gopkg.lock',
+    'vendor.json',
+    'go.mod',
+    'packages.config',
+    '*.csproj',
+    '*.fsproj',
+    '*.vbproj',
+    'project.json',
+    'project.assets.json',
+    '*.targets',
+    '*.props',
+    'packages*.lock.json',
+    'global.json',
+    'composer.lock',
+    'Podfile',
+    '*[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]*',
+    '*Dockerfile*',
+    'templates/*.yaml',
+    'templates/*.yml',
+    'Chart.yaml',
+    '*.yaml',
+    '*.yml',
+    '*.json',
+    '*.tf',
+  ];
 
+  expect(
+    getSCMSupportedManifests(
+      [],
+      ['infrastructureAsCode', 'dockerfileFromScm'],
+    ).sort(),
+  ).toEqual(supported.sort());
+});
 test('SCM supported manifest files for specific project types', async () => {
   expect(getSCMSupportedManifests(['rubygems'])).toEqual(['Gemfile.lock']);
   expect(getSCMSupportedManifests(['npm', 'yarn'])).toEqual([

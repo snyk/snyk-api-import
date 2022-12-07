@@ -87,6 +87,7 @@ describe('updateTargets', () => {
             origin: 'github',
             type: 'npm',
             branch: 'master',
+            status: 'active',
           },
         ],
       };
@@ -171,6 +172,7 @@ describe('updateTargets', () => {
             origin: 'github',
             type: 'npm',
             branch: 'master',
+            status: 'active',
           },
         ],
       };
@@ -246,6 +248,7 @@ describe('updateTargets', () => {
             origin: 'github',
             type: 'npm',
             branch: 'master',
+            status: 'active',
           },
           {
             name: 'snyk/monorepo(main):package.json',
@@ -254,6 +257,7 @@ describe('updateTargets', () => {
             origin: 'github',
             type: 'maven',
             branch: 'master',
+            status: 'active',
           },
         ],
       };
@@ -351,6 +355,7 @@ describe('updateTargets', () => {
             origin: 'github-enterprise',
             type: 'npm',
             branch: 'master',
+            status: 'active',
           },
           {
             name: 'snyk/monorepo(main):package.json',
@@ -359,6 +364,7 @@ describe('updateTargets', () => {
             origin: 'github-enterprise',
             type: 'maven',
             branch: 'master',
+            status: 'active',
           },
         ],
       };
@@ -550,6 +556,7 @@ describe('updateOrgTargets', () => {
           origin: 'github',
           type: 'npm',
           branch: 'main',
+          status: 'active',
         },
       ];
       featureFlagsSpy.mockResolvedValue(false);
@@ -592,6 +599,7 @@ describe('updateOrgTargets', () => {
           origin: 'github',
           type: 'npm',
           branch: 'main',
+          status: 'active',
         },
       ];
       featureFlagsSpy.mockResolvedValue(false);
@@ -654,6 +662,7 @@ describe('updateOrgTargets', () => {
           origin: 'github',
           type: 'npm',
           branch: 'main',
+          status: 'active',
         },
       ];
       const projectsTarget2: SnykProject[] = [
@@ -664,6 +673,7 @@ describe('updateOrgTargets', () => {
           origin: 'github',
           type: 'yarn',
           branch: 'develop',
+          status: 'active',
         },
       ];
       featureFlagsSpy.mockResolvedValueOnce(false);
@@ -752,6 +762,7 @@ describe('updateOrgTargets', () => {
           origin: 'github-enterprise',
           type: 'npm',
           branch: 'main',
+          status: 'active',
         },
       ];
       featureFlagsSpy.mockResolvedValue(false);
@@ -802,6 +813,7 @@ describe('updateOrgTargets', () => {
           origin: 'github',
           type: 'npm',
           branch: 'main',
+          status: 'active',
         },
       ];
       const projectsTarget2: SnykProject[] = [
@@ -812,6 +824,7 @@ describe('updateOrgTargets', () => {
           origin: 'github-enterprise',
           type: 'yarn',
           branch: 'develop',
+          status: 'active',
         },
       ];
       featureFlagsSpy.mockResolvedValueOnce(false);
