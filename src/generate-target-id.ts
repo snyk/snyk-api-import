@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 
 import { targetProps } from './common';
-import { Target } from './lib/types';
+import type { Target } from './lib/types';
 
 export function generateTargetId(
   orgId: string,

@@ -12,7 +12,11 @@ import { getLoggingPath } from '../../get-logging-path';
 import { logFailedImports } from '../../../loggers/log-failed-imports';
 import { logImportJobsPerOrg } from '../../../loggers/log-import-jobs';
 import { getConcurrentImportsNumber } from '../../get-concurrent-imports-number';
-import { FAILED_LOG_NAME, targetPropsWithId } from '../../../common';
+import {
+  FAILED_LOG_NAME,
+  targetProps,
+  targetPropsWithId,
+} from '../../../common';
 import { requestWithRateLimitHandling } from './request-with-rate-limit';
 
 const debug = debugLib('snyk:api-import');
@@ -43,7 +47,9 @@ export async function importTarget(
   }
   try {
     const body = {
-      target: _.pick(target, ...targetPropsWithId),
+      target: isGitlabTarget(target)
+        ? _.pick(target, ...targetPropsWithId)
+        : _.pick(target, ...targetProps),
       files,
       exclusionGlobs,
     };
@@ -151,4 +157,17 @@ export async function importTargets(
     { concurrency: getConcurrentImportsNumber() },
   );
   return _.uniq(pollingUrls);
+}
+
+function isGitlabTarget(target: Target): boolean {
+  const keys = Object.keys(target);
+
+  if (keys.length !== 2) {
+    return false;
+  }
+  if (keys.find((k) => k === 'id') && keys.find((k) => k === 'branch')) {
+    return true;
+  }
+
+  return false;
 }
