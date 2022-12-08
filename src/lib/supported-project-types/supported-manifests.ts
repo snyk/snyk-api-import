@@ -1,61 +1,74 @@
 export type SnykProductEntitlement =
   | 'dockerfileFromScm'
-  | 'infrastructureAsCode';
+  | 'infrastructureAsCode'
+  | 'openSource';
 
 export const OPEN_SOURCE_PACKAGE_MANAGERS: {
   [projectType: string]: {
     manifestFiles: string[];
     isSupported: boolean;
-    entitlement?: SnykProductEntitlement;
+    entitlement: SnykProductEntitlement;
   };
 } = {
   npm: {
     manifestFiles: ['package.json'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   rubygems: {
     manifestFiles: ['Gemfile.lock'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   yarn: {
     manifestFiles: ['yarn.lock'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   'yarn-workspace': {
     manifestFiles: ['yarn.lock'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   maven: {
     manifestFiles: ['pom.xml'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   gradle: {
     manifestFiles: ['build.gradle'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   sbt: {
     manifestFiles: ['build.sbt'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   pip: {
     manifestFiles: ['*req*.txt', 'requirements/*.txt'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   poetry: {
     manifestFiles: ['pyproject.toml'],
     isSupported: false,
+    entitlement: 'openSource',
   },
   golangdep: {
     manifestFiles: ['Gopkg.lock'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   govendor: {
     manifestFiles: ['vendor.json'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   gomodules: {
     manifestFiles: ['go.mod'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   nuget: {
     manifestFiles: [
@@ -71,22 +84,27 @@ export const OPEN_SOURCE_PACKAGE_MANAGERS: {
       'global.json',
     ],
     isSupported: true,
+    entitlement: 'openSource',
   },
   paket: {
     manifestFiles: ['paket.dependencies'],
     isSupported: false,
+    entitlement: 'openSource',
   },
   composer: {
     manifestFiles: ['composer.lock'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   cocoapods: {
     manifestFiles: ['Podfile'],
     isSupported: true,
+    entitlement: 'openSource',
   },
   hex: {
     manifestFiles: ['mix.exs'],
     isSupported: false,
+    entitlement: 'openSource',
   },
 };
 
@@ -132,7 +150,7 @@ export const CLOUD_CONFIGS: {
 
 export function getSCMSupportedManifests(
   manifestTypes: string[] = [],
-  orgEntitlements: SnykProductEntitlement[] = [],
+  orgEntitlements: SnykProductEntitlement[] = ['openSource'],
 ): string[] {
   const typesWithSCMSupport = Object.entries({
     ...OPEN_SOURCE_PACKAGE_MANAGERS,
@@ -161,7 +179,7 @@ export function getSCMSupportedManifests(
 }
 
 export function getSCMSupportedProjectTypes(
-  orgEntitlements: SnykProductEntitlement[] = [],
+  orgEntitlements: SnykProductEntitlement[] = ['openSource'],
 ): string[] {
   const supported = [];
   const typesWithSCMSupport = Object.entries({

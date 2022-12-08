@@ -39,6 +39,7 @@ test('SCM supported manifest files for importing & auto discovery', async () => 
 
   expect(
     getSCMSupportedManifests(undefined, [
+      'openSource',
       'infrastructureAsCode',
       'dockerfileFromScm',
     ]).sort(),
@@ -83,7 +84,7 @@ test('SCM supported manifest files for importing & auto discovery', async () => 
   expect(
     getSCMSupportedManifests(
       [],
-      ['infrastructureAsCode', 'dockerfileFromScm'],
+      ['openSource', 'infrastructureAsCode', 'dockerfileFromScm'],
     ).sort(),
   ).toEqual(supported.sort());
 });
@@ -151,6 +152,7 @@ test('SCM supported project types default', async () => {
 test('SCM supported project types (OS & IAC & Docker)', async () => {
   expect(
     getSCMSupportedProjectTypes([
+      'openSource',
       'dockerfileFromScm',
       'infrastructureAsCode',
     ]).sort(),

@@ -25,7 +25,7 @@ describe('cloneAndAnalyze', () => {
     process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     process.env.SNYK_LOG_PATH = __dirname;
 
-    it('identifies correctly the diff between files in the repo vs monitored in Snyk', async () => {
+    it('identifies correctly the diff between files in the repo vs monitored in Snyk (defaults to OS)', async () => {
       // Arrange
       const projects: SnykProject[] = [
         {
@@ -77,7 +77,7 @@ describe('cloneAndAnalyze', () => {
         repoMeta,
         projects,
         undefined,
-        [],
+        undefined,
         undefined,
       );
 
@@ -139,7 +139,7 @@ describe('cloneAndAnalyze', () => {
         repoMeta,
         projects,
         undefined,
-        ['infrastructureAsCode'],
+        ['openSource', 'infrastructureAsCode'],
         undefined,
       );
 
@@ -216,7 +216,7 @@ describe('cloneAndAnalyze', () => {
         repoMeta,
         projects,
         undefined,
-        [],
+        ['openSource'],
         ['npm'],
       );
 
@@ -307,7 +307,7 @@ describe('cloneAndAnalyze', () => {
         repoMeta,
         projects,
         undefined,
-        [],
+        ['openSource'],
         undefined,
       );
 
@@ -333,7 +333,7 @@ describe('cloneAndAnalyze', () => {
         repoMeta,
         projects,
         undefined,
-        [],
+        ['openSource'],
         undefined,
       );
 
@@ -359,7 +359,7 @@ describe('cloneAndAnalyze', () => {
           repoMeta,
           projects,
           undefined,
-          [],
+          ['openSource'],
           undefined,
         ),
       ).rejects.toThrowError(
@@ -391,7 +391,7 @@ describe('cloneAndAnalyze', () => {
         repoMeta,
         projects,
         undefined,
-        [],
+        ['openSource'],
         undefined,
       );
 
@@ -427,7 +427,7 @@ describe('cloneAndAnalyze', () => {
         repoMeta,
         projects,
         undefined,
-        ['infrastructureAsCode', 'dockerfileFromScm'],
+        ['openSource', 'infrastructureAsCode', 'dockerfileFromScm'],
         undefined,
       );
 
@@ -452,7 +452,7 @@ describe('cloneAndAnalyze', () => {
         repoMeta,
         projects,
         undefined,
-        [],
+        ['openSource'],
         undefined,
       );
 
