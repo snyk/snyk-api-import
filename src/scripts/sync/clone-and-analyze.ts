@@ -29,10 +29,7 @@ export async function cloneAndAnalyze(
   repoMetadata: RepoMetaData,
   snykMonitoredProjects: SnykProject[],
   exclusionGlobs: string[] = [],
-  entitlements: SnykProductEntitlement[] = [
-    'dockerfileFromScm',
-    'infrastructureAsCode',
-  ],
+  entitlements: SnykProductEntitlement[] = ['openSource'],
   manifestTypes?: string[],
 ): Promise<{
   import: string[];
