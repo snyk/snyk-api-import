@@ -366,6 +366,34 @@ describe('cloneAndAnalyze', () => {
         'fatal: Remote branch master not found in upstream origin',
       );
     }, 70000);
+
+    it('correctly matches python files using globs', async () => {
+      // Arrange
+      const projects: SnykProject[] = [];
+
+      const repoMeta: RepoMetaData = {
+        branch: 'master',
+        cloneUrl:
+          'https://github.com/snyk-fixtures/python-requirements-custom-name-inside-folder.git',
+        sshUrl:
+          'git@github.com:snyk-fixtures/python-requirements-custom-name-inside-folder.git',
+      };
+
+      // Act & Assert
+      const res = await cloneAndAnalyze(
+        SupportedIntegrationTypesUpdateProject.GITHUB,
+        repoMeta,
+        projects,
+        undefined,
+        ['openSource'],
+        undefined,
+      );
+
+      expect(res).toStrictEqual({
+        import: ['requirements/dev.txt', 'requirements/prod.txt'],
+        deactivate: [],
+      });
+    });
   });
   describe('Github Enterprise', () => {
     const GHE_URL = new URL(process.env.TEST_GHE_URL!);

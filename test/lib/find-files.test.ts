@@ -1,6 +1,7 @@
 import * as path from 'path';
 
-import { find } from '../../src/lib';
+import { find, getSCMSupportedManifests } from '../../src/lib';
+import { getSCMSupportedProjectTypes } from '../../src/lib/supported-project-types/supported-manifests';
 
 export function getFixturePath(fixtureName: string): string {
   return path.join(__dirname, './fixtures', fixtureName);
@@ -25,6 +26,7 @@ test('find all files in test fixture ignoring node_modules', async () => {
     path.join(testFixture, 'maven', 'test.txt'),
     path.join(testFixture, 'mvn', 'pom.xml'),
     path.join(testFixture, 'mvn', 'test.txt'),
+    path.join(testFixture, 'python', 'requirements/dev.txt'),
   ];
   expect(result.sort()).toStrictEqual(expected.sort());
 }, 5000);
@@ -37,6 +39,7 @@ test('find all files in test fixture ignoring node_modules by default', async ()
     path.join(testFixture, 'maven', 'test.txt'),
     path.join(testFixture, 'mvn', 'pom.xml'),
     path.join(testFixture, 'mvn', 'test.txt'),
+    path.join(testFixture, 'python', 'requirements/dev.txt'),
   ];
   expect(result.sort()).toStrictEqual(expected.sort());
 }, 5000);
@@ -51,6 +54,19 @@ test('find all files in test fixture ignoring *.txt', async () => {
   expect(result.sort()).toStrictEqual(expected.sort());
 }, 5000);
 
+test('find all files in test fixture (python)', async () => {
+  const testFixture = getFixturePath('find-files/python');
+  // six levels deep to ensure node_modules is tested
+  const { files: result } = await find(
+    testFixture,
+    [],
+    getSCMSupportedManifests(getSCMSupportedProjectTypes()),
+    6,
+  );
+  const expected = [path.join(testFixture, 'requirements/dev.txt')];
+  expect(result.sort()).toStrictEqual(expected.sort());
+}, 5000);
+
 test('find all files in test fixture by filtering for *.xml', async () => {
   // six levels deep to ensure node_modules is tested
   const { files: result } = await find(testFixture, [], ['*.xml'], 6);
@@ -62,7 +78,12 @@ test('find all files in test fixture by filtering for *.xml', async () => {
 }, 5000);
 
 test('find all files in test fixture but filter out specific path for mvn', async () => {
-  const { files: result } = await find(testFixture, ['**/mvn/**.xml'], [], 6);
+  const { files: result } = await find(
+    testFixture,
+    ['**/mvn/**.xml', '**requirements/*.txt'],
+    [],
+    6,
+  );
   const expected = [
     path.join(testFixture, 'maven', 'pom.xml'),
     path.join(testFixture, 'maven', 'test.txt'),
@@ -71,7 +92,9 @@ test('find all files in test fixture but filter out specific path for mvn', asyn
   expect(result.sort()).toStrictEqual(expected.sort());
 }, 5000);
 
-test.todo('Test **/folder/*.txt');
+test.todo(
+  'Test getting 100% of all supported files (big fixture that contains all)',
+);
 
 test('find pom.xml files in test fixture', async () => {
   const { files: result } = await find(testFixture, [], ['pom.xml']);

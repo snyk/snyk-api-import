@@ -24,8 +24,10 @@ export function generateProjectDiffActions(
   }
 
   // any files in Snyk, not found in the repo should have the
-  // related project de-activated
-  for (const project of snykMonitoredProjects) {
+  // related project deactivated
+  for (const project of snykMonitoredProjects.filter(
+    (p) => p.status !== 'inactive',
+  )) {
     if (!repoManifests.includes(project.name.split(':')[1])) {
       if (manifestTypes.includes(project.type)) {
         deactivate.push(project);

@@ -3,7 +3,10 @@ import * as yargs from 'yargs';
 const debug = debugLib('snyk:orgs-data-script');
 
 import { getLoggingPath } from '../lib/get-logging-path';
-import type { CommandResult } from '../lib/types';
+import type { SnykProductEntitlement } from '../lib/supported-project-types/supported-manifests';
+import { CommandResult, productEntitlements } from '../lib/types';
+import { SupportedProductsUpdateProject } from '../lib/types';
+
 import { SupportedIntegrationTypesUpdateProject } from '../lib/types';
 
 import { updateOrgTargets } from '../scripts/sync/sync-org-projects';
@@ -33,6 +36,12 @@ export const builder = {
     default: false,
     desc: 'Dry run option. Will create a log file listing the potential updates',
   },
+  snykProduct: {
+    required: false,
+    default: SupportedProductsUpdateProject.OPEN_SOURCE,
+    choices: [...Object.values(SupportedProductsUpdateProject)],
+    desc: 'List of Snyk Products to consider when syncing an SCM repo. Monitored Snyk Code repos are automatically synced already, if Snyk Code is enabled any new repo imports will include Snyk Code projects',
+  },
 };
 
 export async function syncOrg(
@@ -40,11 +49,20 @@ export async function syncOrg(
   orgPublicId: string,
   sourceUrl?: string,
   dryRun?: boolean,
+  entitlements: SnykProductEntitlement[] = [],
+  manifestTypes?: string[],
 ): Promise<CommandResult> {
   try {
     getLoggingPath();
 
-    const res = await updateOrgTargets(orgPublicId, source, dryRun, sourceUrl);
+    const res = await updateOrgTargets(
+      orgPublicId,
+      source,
+      dryRun,
+      sourceUrl,
+      entitlements,
+      manifestTypes,
+    );
 
     const nothingToUpdate =
       res.processedTargets == 0 &&
@@ -52,7 +70,13 @@ export async function syncOrg(
       res.meta.projects.failed.length == 0;
     const orgMessage = nothingToUpdate
       ? `Did not detect any changes to apply`
-      : `Processed ${res.processedTargets} targets (${res.failedTargets} failed)\nUpdated ${res.meta.projects.updated.length} projects\n${res.meta.projects.failed.length} projects failed to update\nFind more information in ${res.fileName} and ${res.failedFileName}`;
+      : `Processed ${res.processedTargets} targets (${
+          res.failedTargets
+        } failed)\nUpdated ${
+          res.meta.projects.updated.length
+        } projects\nFind more information in ${res.fileName}${
+          res.failedFileName ? ` and ${res.failedFileName}` : ''
+        }`;
 
     return {
       fileName: res.fileName,
@@ -76,16 +100,43 @@ export async function handler(argv: {
   orgPublicId: string;
   sourceUrl?: string;
   dryRun?: boolean;
+  snykProduct?: SupportedProductsUpdateProject[];
 }): Promise<void> {
-  const { source, orgPublicId, sourceUrl, dryRun } = argv;
+  const {
+    source,
+    orgPublicId,
+    sourceUrl,
+    dryRun,
+    snykProduct = [SupportedProductsUpdateProject.OPEN_SOURCE],
+  } = argv;
   debug('ℹ️  Options: ' + JSON.stringify(argv));
 
   const sourceList: SupportedIntegrationTypesUpdateProject[] = [];
   sourceList.push(source);
 
+  const manifestTypes: string[] = [];
+  const entitlements: SnykProductEntitlement[] = [];
+
+  const products = Array.isArray(snykProduct) ? snykProduct : [snykProduct];
+  for (const p of products) {
+    entitlements.push(productEntitlements[p]);
+  }
+  console.log(
+    `ℹ️  Running sync for ${source} projects in org: ${orgPublicId} (products to be synced: ${products.join(
+      ',',
+    )})`,
+  );
+
   // when the input will be a file we will need to
   // add a function to read and parse the file
-  const res = await syncOrg(sourceList, orgPublicId, sourceUrl, dryRun);
+  const res = await syncOrg(
+    sourceList,
+    orgPublicId,
+    sourceUrl,
+    dryRun,
+    entitlements,
+    manifestTypes,
+  );
 
   if (res.exitCode === 1) {
     debug('Failed to sync organizations.\n' + res.message);

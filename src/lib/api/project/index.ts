@@ -5,6 +5,7 @@ import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
 import type { requestsManager } from 'snyk-request-manager';
 import type { SnykProject } from '../../types';
+import { straightThroughBufferTask } from 'simple-git/dist/src/lib/tasks/task';
 const debug = debugLib('snyk:api-project');
 
 interface BulkProjectUpdateResponse {
@@ -14,7 +15,10 @@ interface BulkProjectUpdateResponse {
 export async function deleteProjects(
   orgId: string,
   projects: string[],
-): Promise<BulkProjectUpdateResponse> {
+): Promise<{
+  success: BulkProjectUpdateResponse[];
+  failure: BulkProjectUpdateResponse[];
+}> {
   const apiToken = getApiToken();
   if (!(orgId && projects)) {
     throw new Error(
@@ -61,6 +65,41 @@ export async function deleteProjects(
     err.innerError = error;
     throw err;
   }
+}
+
+export async function deactivateProject(
+  requestManager: requestsManager,
+  orgId: string,
+  projectPublicId: string,
+): Promise<boolean> {
+  getApiToken();
+  getSnykHost();
+  if (!(orgId && projectPublicId)) {
+    throw new Error(
+      `Missing required parameters. Please ensure you have provided: orgId & projectId.`,
+    );
+  }
+  debug(`De-activating project: ${projectPublicId}`);
+  const url = `/org/${orgId.trim()}/project/${projectPublicId}/deactivate`;
+
+  const res = await requestManager.request({
+    verb: 'post',
+    url: url,
+    body: JSON.stringify({}),
+    useRESTApi: false,
+  });
+
+  const statusCode = res.statusCode || res.status;
+  if (!statusCode || statusCode !== 200) {
+    debug(`Failed de-activating project projectId`);
+    throw new Error(
+      'Expected a 200 response, instead received: ' +
+        JSON.stringify({ data: res.data, status: statusCode }),
+    );
+  }
+
+  debug('Updated projects batch');
+  return true;
 }
 
 export async function updateProject(

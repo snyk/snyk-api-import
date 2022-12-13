@@ -9,7 +9,7 @@ import {
   pollImportUrls,
   getConcurrentImportsNumber,
 } from '../lib';
-import { Project, ImportTarget } from '../lib/types';
+import type { Project, ImportTarget } from '../lib/types';
 import { getLoggingPath } from '../lib';
 import { logImportedBatch } from '../loggers/log-imported-batch';
 import { IMPORT_LOG_NAME } from '../common';
