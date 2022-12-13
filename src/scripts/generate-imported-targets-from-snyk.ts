@@ -106,7 +106,7 @@ export async function generateSnykImportedTargets(
     );
   }
   const requestManager = new requestsManager({
-    userAgentPrefix: 'snyk-api-import',
+    userAgentPrefix: 'snyk-api-import:list',
   });
   const targetsData: ImportTarget[] = [];
   const groupOrgs = groupId
