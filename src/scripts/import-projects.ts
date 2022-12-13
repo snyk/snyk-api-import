@@ -157,7 +157,7 @@ export async function importProjects(
     };
   }
   const requestManager = new requestsManager({
-    userAgentPrefix: 'snyk-api-import',
+    userAgentPrefix: 'snyk-api-import:import',
     period: 1000,
     maxRetryCount: 3,
   });

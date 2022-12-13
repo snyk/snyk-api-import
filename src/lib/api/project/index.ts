@@ -5,7 +5,6 @@ import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
 import type { requestsManager } from 'snyk-request-manager';
 import type { SnykProject } from '../../types';
-import { straightThroughBufferTask } from 'simple-git/dist/src/lib/tasks/task';
 const debug = debugLib('snyk:api-project');
 
 interface BulkProjectUpdateResponse {

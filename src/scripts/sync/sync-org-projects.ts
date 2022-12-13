@@ -85,7 +85,7 @@ export async function updateOrgTargets(
   }
 
   const requestManager = new requestsManager({
-    userAgentPrefix: 'snyk-api-import',
+    userAgentPrefix: 'snyk-api-import:sync',
     period: 1000,
     maxRetryCount: 3,
   });

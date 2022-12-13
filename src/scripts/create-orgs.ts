@@ -156,7 +156,7 @@ export async function createOrgs(
   const createdOrgs: NewOrExistingOrg[] = [];
   const allExistingOrgs: Org[] = [];
   const requestManager = new requestsManager({
-    userAgentPrefix: 'snyk-api-import',
+    userAgentPrefix: 'snyk-api-import:create-orgs',
   });
 
   for (const groupId in orgsPerGroup) {

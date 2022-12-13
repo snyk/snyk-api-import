@@ -1,6 +1,6 @@
 import * as debugLib from 'debug';
 import * as yargs from 'yargs';
-const debug = debugLib('snyk:orgs-data-script');
+const debug = debugLib('snyk:sync-cmd');
 
 import { getLoggingPath } from '../lib/get-logging-path';
 import type { SnykProductEntitlement } from '../lib/supported-project-types/supported-manifests';
