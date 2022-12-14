@@ -142,7 +142,7 @@ export async function updateOrgTargets(
       res.meta.projects.updated.push(...response.meta.projects.updated);
       res.meta.projects.failed.push(...response.meta.projects.failed);
     },
-    { concurrency: 30 },
+    { concurrency: 10 },
   );
 
   const failedLogExists = fs.existsSync(
@@ -186,7 +186,7 @@ export async function updateTargets(
   const failedProjects: ProjectUpdateFailure[] = [];
 
   const loggingPath = getLoggingPath();
-  const concurrentTargets = 100;
+  const concurrentTargets = 300;
 
   await pMap(
     targets,

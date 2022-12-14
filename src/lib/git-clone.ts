@@ -22,9 +22,11 @@ interface GitCloneResponse {
   gitResponse: string;
 }
 
+const MAX_RETRIES = 2;
 export async function gitClone(
   integrationType: SupportedIntegrationTypesUpdateProject,
   meta: RepoMetaData,
+  retryAttempt = 0,
 ): Promise<GitCloneResponse> {
   const repoClonePath = await fs.mkdtempSync(
     path.join(os.tmpdir(), `snyk-clone-${Date.now()}-${Math.random()}`),
@@ -37,7 +39,9 @@ export async function gitClone(
       maxConcurrentProcesses: 6,
       trimmed: false,
     };
-    debug(`Trying to shallow clone repo: ${meta.cloneUrl}`);
+    debug(
+      `Trying to shallow clone repo: ${meta.cloneUrl} (attempt ${retryAttempt}/${MAX_RETRIES})`,
+    );
     const git = simpleGit(options);
     const output = await git.clone(cloneUrl, repoClonePath, {
       '--depth': '1',
@@ -51,9 +55,14 @@ export async function gitClone(
       repoPath: repoClonePath,
     };
   } catch (err: any) {
-    debug(`Could not shallow clone the repo:\n ${err}`);
+    debug(
+      `Attempt ${retryAttempt} failed, could not shallow clone the repo:\n ${err}`,
+    );
     if (fs.existsSync(repoClonePath)) {
       fs.rmdirSync(repoClonePath);
+    }
+    if (retryAttempt < MAX_RETRIES) {
+      return gitClone(integrationType, meta, retryAttempt + 1);
     }
     return {
       success: false,
