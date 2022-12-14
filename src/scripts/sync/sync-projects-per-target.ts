@@ -40,8 +40,9 @@ export async function syncProjectsForTarget(
   entitlements: SnykProductEntitlement[] = ['openSource'],
   manifestTypes?: string[],
 ): Promise<{ updated: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
-  const failed: ProjectUpdateFailure[] = [];
-  const updated: ProjectUpdate[] = [];
+  const updated = new Set<ProjectUpdate>();
+  const failed = new Set<ProjectUpdateFailure>();
+
   debug(`Listing projects for target ${target.attributes.displayName}`);
   const { projects } = await listProjects(requestManager, orgId, {
     targetId: target.id,
@@ -51,8 +52,8 @@ export async function syncProjectsForTarget(
   // TODO: if target is empty, try to import it and stop here
   if (projects.length < 1) {
     return {
-      updated,
-      failed,
+      updated: Array.from(updated),
+      failed: Array.from(failed),
     };
   }
   debug(`Syncing projects for target ${target.attributes.displayName}`);
@@ -66,7 +67,7 @@ export async function syncProjectsForTarget(
     debug(e);
     const error = `Getting default branch via ${origin} API failed with error: ${e.message}`;
     projects.map((project) => {
-      failed.push({
+      failed.add({
         errorMessage: error,
         projectPublicId: project.id,
         type: ProjectUpdateType.BRANCH,
@@ -97,7 +98,7 @@ export async function syncProjectsForTarget(
     debug(e);
     const error = `Cloning and analysing the repo to deactivate projects failed with error: ${e.message}`;
     projects.map((project) => {
-      failed.push({
+      failed.add({
         errorMessage: error,
         projectPublicId: project.id,
         from: 'active',
@@ -130,14 +131,24 @@ export async function syncProjectsForTarget(
   ];
 
   const [branchUpdate, deactivatedProjects] = await Promise.all(actions);
-  updated.push(...branchUpdate.updated.map((t) => ({ ...t, target })));
-  failed.push(...branchUpdate.failed.map((t) => ({ ...t, target })));
-  updated.push(...deactivatedProjects.updated.map((t) => ({ ...t, target })));
-  failed.push(...deactivatedProjects.failed.map((t) => ({ ...t, target })));
+
+  branchUpdate.updated
+    .map((t) => ({ ...t, target }))
+    .forEach((i) => updated.add(i));
+  branchUpdate.failed
+    .map((t) => ({ ...t, target }))
+    .forEach((i) => failed.add(i));
+
+  deactivatedProjects.updated
+    .map((t) => ({ ...t, target }))
+    .forEach((i) => updated.add(i));
+  deactivatedProjects.failed
+    .map((t) => ({ ...t, target }))
+    .forEach((i) => failed.add(i));
   // TODO: add target info for logs
   return {
-    updated,
-    failed,
+    updated: Array.from(updated),
+    failed: Array.from(failed),
   };
 }
 
