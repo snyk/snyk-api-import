@@ -60,7 +60,7 @@ export async function cloneAndAnalyze(
     // right now the product entitlements are not exposed via API so user has to provide which products
     // they are using
     getSCMSupportedManifests(manifestFileTypes, entitlements),
-    6,
+    10,
   );
   const relativeFileNames = files.map((f) => path.relative(repoPath, f));
   debug(
