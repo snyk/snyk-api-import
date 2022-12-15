@@ -1,6 +1,7 @@
 import * as debugLib from 'debug';
 import * as fs from 'fs';
 import * as path from 'path';
+import { defaultExclusionGlobs } from '../../common';
 
 import { find, getSCMSupportedManifests, gitClone } from '../../lib';
 import type { SnykProductEntitlement } from '../../lib/supported-project-types/supported-manifests';
@@ -14,17 +15,6 @@ import { generateProjectDiffActions } from './generate-projects-diff-actions';
 
 const debug = debugLib('snyk:clone-and-analyze');
 
-const defaultExclusionGlobs = [
-  'fixtures',
-  'tests',
-  '__tests__',
-  'test',
-  '__test__',
-  'ci',
-  'node_modules',
-  'bower_components',
-  '.git',
-];
 export async function cloneAndAnalyze(
   integrationType: SupportedIntegrationTypesUpdateProject,
   repoMetadata: RepoMetaData,

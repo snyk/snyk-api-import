@@ -1,4 +1,4 @@
-import type { requestsManager } from 'snyk-request-manager';
+import { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 
 import { getGithubRepoMetaData } from '../../lib/source-handlers/github';
@@ -8,13 +8,21 @@ import type {
   SnykTarget,
   Target,
   RepoMetaData,
+  Project,
 } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { targetGenerators } from '../generate-imported-targets-from-snyk';
-import { deactivateProject, listProjects } from '../../lib';
+import {
+  deactivateProject,
+  importTarget,
+  listIntegrations,
+  listProjects,
+  pollImportUrls,
+} from '../../lib';
 import pMap = require('p-map');
 import { cloneAndAnalyze } from './clone-and-analyze';
 import type { SnykProductEntitlement } from '../../lib/supported-project-types/supported-manifests';
+import { defaultExclusionGlobs } from '../../common';
 const debug = debugLib('snyk:sync-projects-per-target');
 
 export enum ProjectUpdateType {
@@ -49,8 +57,16 @@ export async function syncProjectsForTarget(
     limit: 100,
   });
 
-  // TODO: if target is empty, try to import it and stop here
   if (projects.length < 1) {
+    //TODO: finsh
+    const { projects } = importProjectsForTarget(
+      requestsManager,
+      orgId,
+      projects[0].origin,
+      projects[0].target,
+      [],
+
+    );
     return {
       updated: Array.from(updated),
       failed: Array.from(failed),
@@ -269,8 +285,37 @@ export async function bulkDeactivateProjects(
         );
       }
     },
-    { concurrency: 100 },
+    { concurrency: 50 },
   );
 
   return { updated, failed };
+}
+
+async function importProjectsForTarget(
+  requestManager: requestsManager,
+  orgId: string,
+  integrationType: SupportedIntegrationTypesUpdateProject,
+  target: Target,
+  filesToImport: string[],
+  exclusionGlobs: string,
+  loggingPath: string,
+): Promise<{ projects: Project[] }> {
+  const integrationsData = await listIntegrations(requestManager, orgId);
+  const integrationId = integrationsData[integrationType];
+  importTarget(requestManager, orgId, integrationId, target);
+  const files = filesToImport.map((f) => ({ path: f }));
+  const { pollingUrl } = await importTarget(
+    requestManager,
+    orgId,
+    integrationId,
+    target,
+    files,
+    `${exclusionGlobs}, ${defaultExclusionGlobs.join(',')}`,
+    loggingPath,
+  );
+
+  debug(`Polling for updates`);
+  const res = await pollImportUrls(requestManager, [pollingUrl]);
+  debug(`Finished polling, discovered ${res.projects?.length} projects`);
+  return res;
 }
