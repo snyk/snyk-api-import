@@ -186,7 +186,7 @@ export async function updateTargets(
   const failedProjects: ProjectUpdateFailure[] = [];
 
   const loggingPath = getLoggingPath();
-  const concurrentTargets = 100;
+  const concurrentTargets = 30;
 
   await pMap(
     targets,

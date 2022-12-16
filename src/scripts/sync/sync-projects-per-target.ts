@@ -269,7 +269,7 @@ export async function bulkDeactivateProjects(
         );
       }
     },
-    { concurrency: 100 },
+    { concurrency: 50 },
   );
 
   return { updated, failed };
