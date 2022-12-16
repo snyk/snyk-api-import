@@ -23,3 +23,15 @@ export const targetProps = [
   'branch',
 ];
 export const targetPropsWithId = [...targetProps, 'id'];
+
+export const defaultExclusionGlobs = [
+  'fixtures',
+  'tests',
+  '__tests__',
+  'test',
+  '__test__',
+  'ci',
+  'node_modules',
+  'bower_components',
+  '.git',
+];
