@@ -76,11 +76,14 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
+        {
+          exclusionGlobs: ['bundler-app'],
+        },
       );
 
       // Assert
       expect(res).toStrictEqual({
-        import: ['Gemfile.lock', 'bundler-app/Gemfile.lock'],
+        import: ['Gemfile.lock'],
         deactivate: [],
       });
     });
@@ -135,16 +138,15 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        { entitlements: ['openSource', 'infrastructureAsCode'] },
+        {
+          entitlements: ['openSource', 'infrastructureAsCode'],
+          exclusionGlobs: ['*.file.json'],
+        },
       );
 
       // Assert
       expect(res).toStrictEqual({
-        import: [
-          'Gemfile.lock',
-          'bundler-app/Gemfile.lock',
-          'package-2.file.json',
-        ],
+        import: ['Gemfile.lock', 'bundler-app/Gemfile.lock'],
         deactivate: [],
       });
     });

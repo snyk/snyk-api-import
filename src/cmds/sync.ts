@@ -43,6 +43,11 @@ export const builder = {
     choices: [...Object.values(SupportedProductsUpdateProject)],
     desc: 'List of Snyk Products to consider when syncing an SCM repo for deleting projects & importing new ones (default branch will be updated for all projects in a target). Monitored Snyk Code repos are automatically synced already, if Snyk Code is enabled any new repo imports will bring in Snyk Code projects',
   },
+  exclusionGlobs: {
+    required: false,
+    default: undefined,
+    desc: 'Comma separated list of glob patterns to prevent matching files from being in Snyk. This will refuse to import new files matching the patterns and de-activate existing projects that match these files.',
+  },
 };
 
 export async function syncOrg(
@@ -97,6 +102,7 @@ export async function handler(argv: {
   sourceUrl?: string;
   dryRun?: boolean;
   snykProduct?: SupportedProductsUpdateProject[];
+  exclusionGlobs?: string | string[];
 }): Promise<void> {
   const {
     source,
@@ -104,6 +110,7 @@ export async function handler(argv: {
     sourceUrl,
     dryRun = false,
     snykProduct = [SupportedProductsUpdateProject.OPEN_SOURCE],
+    exclusionGlobs,
   } = argv;
   debug('ℹ️  Options: ' + JSON.stringify(argv));
 
@@ -115,8 +122,17 @@ export async function handler(argv: {
   const sourceList: SupportedIntegrationTypesUpdateProject[] = [];
   sourceList.push(source);
 
-  const manifestTypes: string[] = [];
+  const manifestTypes: string[] = []; // TODO: let users provide this
   const entitlements: SnykProductEntitlement[] = [];
+  const exclusions: string[] = [];
+
+  if (exclusionGlobs) {
+    exclusions.push(
+      ...(Array.isArray(exclusionGlobs)
+        ? exclusionGlobs.join(',').split(',')
+        : exclusionGlobs.split(',')),
+    );
+  }
 
   const products = Array.isArray(snykProduct) ? snykProduct : [snykProduct];
   for (const p of products) {
@@ -128,12 +144,11 @@ export async function handler(argv: {
     )})`,
   );
 
-  // when the input will be a file we will need to
-  // add a function to read and parse the file
   const res = await syncOrg(sourceList, orgPublicId, sourceUrl, {
     dryRun,
     entitlements,
     manifestTypes,
+    exclusionGlobs: exclusions,
   });
 
   if (res.exitCode === 1) {

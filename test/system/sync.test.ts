@@ -193,7 +193,7 @@ describe('`snyk-api-import sync <...>`', () => {
           GITHUB_TOKEN: process.env.TEST_GHE_TOKEN,
         },
       },
-      (err, stdout, stderr) => {
+      async (err, stdout, stderr) => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout).toMatch(
@@ -201,18 +201,20 @@ describe('`snyk-api-import sync <...>`', () => {
         );
         expect(stdout).toMatch('Processed 3 targets (0 failed)');
         expect(stdout).toMatch('Updated 2 projects');
+
+        // give file a little time to be finished to be written
+        await new Promise((r) => setTimeout(r, 20000));
+        const file = fs.readFileSync(updatedLog, 'utf8');
+        // 1 project deactivated
+        expect(file).toMatch('"Snyk project \\"deactivate\\" update completed');
+        // another project has branch updated
+        expect(file).toMatch('"from":"main","to":"master"');
+
+        deleteFiles([updatedLog]);
       },
     ).on('exit', (code) => {
       expect(code).toEqual(0);
-      const file = fs.readFileSync(updatedLog, 'utf8');
-
-      // 1 project deactivated
-      expect(file).toMatch('"Snyk project \\"deactivate\\" update completed');
-      // another project has branch updated
-      expect(file).toMatch('"from":"main","to":"master"');
-
-      deleteFiles([updatedLog]);
       done();
     });
-  }, 100000);
+  }, 500000);
 });

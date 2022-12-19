@@ -83,7 +83,7 @@ export async function syncProjectsForTarget(
   const deactivate = [];
   try {
     const res = await cloneAndAnalyze(origin, targetMeta!, projects, {
-      // TODO send exclusions when import is supported
+      exclusionGlobs: config.exclusionGlobs,
       entitlements: config.entitlements,
       manifestTypes: config.manifestTypes,
     });
