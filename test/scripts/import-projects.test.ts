@@ -49,7 +49,7 @@ describe('Import projects script', () => {
     discoveredProjects.push(...projects);
   }, 2400000);
 
-  it.skip('succeeds to import Gitlab project from file', async () => {
+  it('succeeds to import Gitlab project from file', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
 
