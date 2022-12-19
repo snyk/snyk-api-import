@@ -147,7 +147,7 @@ describe('`snyk-api-import sync <...>`', () => {
       done();
     });
   }, 40000);
-  it('Successfully generates synced logs in --dryRun mode', (done) => {
+  it('Successfully generates synced logs in --dryRun mode', async (done) => {
     const logPath = path.resolve(__dirname);
     const updatedLog = path.resolve(
       `${logPath}/${ORG_ID}.${UPDATED_PROJECTS_LOG_NAME}`,
@@ -164,7 +164,7 @@ describe('`snyk-api-import sync <...>`', () => {
           GITHUB_TOKEN: process.env.TEST_GHE_TOKEN,
         },
       },
-      (err, stdout, stderr) => {
+      async (err, stdout, stderr) => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout).toMatch(
@@ -172,6 +172,9 @@ describe('`snyk-api-import sync <...>`', () => {
         );
         expect(stdout).toMatch('Processed 3 targets (0 failed)');
         expect(stdout).toMatch('Updated 2 projects');
+
+        // give file a little time to be finished to be written
+        await new Promise((r) => setTimeout(r, 20000));
         const file = fs.readFileSync(updatedLog, 'utf8');
 
         // 1 project deactivated
