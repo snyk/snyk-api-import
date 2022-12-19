@@ -42,8 +42,31 @@ describe('Import projects script', () => {
       targetFile: expect.any(String),
     });
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
+    // Github project
     expect(logFile).toMatch(
       `"target":{"name":"ruby-with-versions","owner":"api-import-circle-test","branch":"master"}`,
+    );
+    discoveredProjects.push(...projects);
+  }, 2400000);
+
+  it.skip('succeeds to import Gitlab project from file', async () => {
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
+    logs = Object.values(logFiles);
+
+    const { projects } = await importProjects(
+      path.resolve(__dirname + `/fixtures/import-projects-gitlab.json`),
+      __dirname,
+    );
+    expect(projects).not.toBe([]);
+    expect(projects[0]).toMatchObject({
+      projectUrl: expect.any(String),
+      success: true,
+      targetFile: expect.any(String),
+    });
+    const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
+    // Gitlab project
+    expect(logFile).toMatch(
+      `"target":{"name":"test-maven","branch":"develop"}`,
     );
     discoveredProjects.push(...projects);
   }, 2400000);

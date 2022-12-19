@@ -48,7 +48,7 @@ export async function importTarget(
   try {
     const body = {
       target: isGitlabTarget(target)
-        ? _.pick(target, ...targetPropsWithId)
+        ? _.pick(target, 'id', 'branch')
         : _.pick(target, ...targetProps),
       files,
       exclusionGlobs,
@@ -161,10 +161,6 @@ export async function importTargets(
 
 function isGitlabTarget(target: Target): boolean {
   const keys = Object.keys(target);
-
-  if (keys.length !== 2) {
-    return false;
-  }
   if (keys.find((k) => k === 'id') && keys.find((k) => k === 'branch')) {
     return true;
   }

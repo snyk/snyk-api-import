@@ -1,0 +1,14 @@
+{
+  "targets": [
+    {
+      "orgId": "74e2f385-a54f-491e-9034-76c53e72927a",
+      "integrationId": "5b9a5e7f-56ac-45a3-85f1-a60e887643da",
+      "target": {
+        "name": "test-maven",
+        "branch": "develop",
+        "id": 226,
+        "fork": false
+      }
+    }
+  ]
+}
