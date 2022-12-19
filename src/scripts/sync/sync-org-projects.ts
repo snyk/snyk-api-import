@@ -11,7 +11,7 @@ import type { TargetFilters } from '../../lib';
 import { isGithubConfigured } from '../../lib';
 import { getLoggingPath, listTargets } from '../../lib';
 import { getFeatureFlag } from '../../lib/api/feature-flags';
-import type { SnykTarget } from '../../lib/types';
+import type { SnykTarget, SyncTargetsConfig } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { logUpdatedProjects } from '../../loggers/log-updated-project';
 import type { ProjectUpdateFailure } from './sync-projects-per-target';
@@ -19,7 +19,6 @@ import { syncProjectsForTarget } from './sync-projects-per-target';
 import type { ProjectUpdate } from './sync-projects-per-target';
 import { logFailedSync } from '../../loggers/log-failed-sync';
 import { logFailedToUpdateProjects } from '../../loggers/log-failed-to-update-projects';
-import type { SnykProductEntitlement } from '../../lib/supported-project-types/supported-manifests';
 
 const debug = debugLib('snyk:sync-org-projects');
 
@@ -36,10 +35,11 @@ export function isSourceConfigured(
 export async function updateOrgTargets(
   publicOrgId: string,
   sources: SupportedIntegrationTypesUpdateProject[],
-  dryRun = false,
-  sourceUrl?: string,
-  entitlements: SnykProductEntitlement[] = ['openSource'],
-  manifestTypes?: string[],
+  sourceUrl: string | undefined,
+  config: SyncTargetsConfig = {
+    dryRun: false,
+    entitlements: ['openSource'],
+  },
 ): Promise<{
   fileName: string;
   failedFileName?: string;
@@ -131,10 +131,8 @@ export async function updateOrgTargets(
         requestManager,
         publicOrgId,
         targets,
-        dryRun,
         sourceUrl,
-        entitlements,
-        manifestTypes,
+        config,
       );
       console.log(`Done syncing targets for source ${source}`);
       res.processedTargets += response.processedTargets;
@@ -166,10 +164,11 @@ export async function updateTargets(
   requestManager: requestsManager,
   orgId: string,
   targets: SnykTarget[],
-  dryRun = false,
-  sourceUrl?: string,
-  entitlements: SnykProductEntitlement[] = ['openSource'],
-  manifestTypes?: string[],
+  sourceUrl: string | undefined,
+  config: SyncTargetsConfig = {
+    dryRun: false,
+    entitlements: ['openSource'],
+  },
 ): Promise<{
   failedTargets: number;
   processedTargets: number;
@@ -198,10 +197,8 @@ export async function updateTargets(
           requestManager,
           orgId,
           target,
-          dryRun,
           sourceUrl,
-          entitlements,
-          manifestTypes,
+          config,
         );
         updatedProjects.push(...updated);
         failedProjects.push(...failed);

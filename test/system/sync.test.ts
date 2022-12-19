@@ -91,6 +91,30 @@ describe('`snyk-api-import sync <...>`', () => {
     });
   }, 40000);
 
+  it('fails when several sources are provided', (done) => {
+    const logPath = path.resolve(__dirname + '/fixtures');
+
+    exec(
+      `node ${main} sync --orgPublicId=123456789 --source=github --source=github-enterprise`,
+      {
+        env: {
+          PATH: process.env.PATH,
+          SNYK_TOKEN: process.env.SNYK_TOKEN_TEST,
+          SNYK_API: process.env.SNYK_API_TEST,
+          SNYK_LOG_PATH: logPath,
+        },
+      },
+      (err, stdout, stderr) => {
+        expect(stderr).toMatch('Please provide a single value for --source. Multiple sources processing is not supported.');
+        expect(err!.message).toMatch(`Please provide a single value for --source. Multiple sources processing is not supported.`);
+        expect(stdout).toMatch('');
+      },
+    ).on('exit', (code) => {
+      expect(code).toEqual(1);
+      done();
+    });
+  }, 40000);
+
   it('throws an error for an unsupported SCM like Bitbucket Server', (done) => {
     const logPath = path.resolve(__dirname);
 

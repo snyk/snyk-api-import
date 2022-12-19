@@ -175,7 +175,12 @@ describe('updateTargets', () => {
         }),
       );
       // Act
-      const res = await updateTargets(requestManager, orgId, testTargets);
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTargets,
+        undefined,
+      );
 
       // Assert
       expect(res).toStrictEqual({
@@ -276,7 +281,12 @@ describe('updateTargets', () => {
         }),
       );
       // Act
-      const res = await updateTargets(requestManager, orgId, testTarget);
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTarget,
+        undefined,
+      );
 
       // Assert
       expect(res).toStrictEqual({
@@ -359,7 +369,12 @@ describe('updateTargets', () => {
       );
 
       // Act
-      const res = await updateTargets(requestManager, orgId, testTarget);
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTarget,
+        undefined,
+      );
 
       // Assert
       expect(res).toStrictEqual({
@@ -472,7 +487,12 @@ describe('updateTargets', () => {
         }),
       );
       // Act
-      const res = await updateTargets(requestManager, orgId, testTargets);
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTargets,
+        undefined,
+      );
 
       // Assert
       expect(res).toStrictEqual({
@@ -590,8 +610,10 @@ describe('updateTargets', () => {
         requestManager,
         orgId,
         testTargets,
-        false,
         'https://custom-ghe.com',
+        {
+          dryRun: false,
+        },
       );
 
       // Assert
@@ -659,7 +681,7 @@ describe('updateOrgTargets', () => {
   describe('Errors', () => {
     it('throws if only unsupported origins requested', async () => {
       await expect(
-        updateOrgTargets('xxx', ['unsupported' as any]),
+        updateOrgTargets('xxx', ['unsupported' as any], undefined),
       ).rejects.toThrowError(
         'Nothing to sync, stopping. Sync command currently only supports the following sources: github',
       );
@@ -667,9 +689,11 @@ describe('updateOrgTargets', () => {
     it('throws if the organization uses the customBranch FF', async () => {
       featureFlagsSpy.mockResolvedValue(true);
       await expect(
-        updateOrgTargets('xxx', [
-          SupportedIntegrationTypesUpdateProject.GITHUB,
-        ]),
+        updateOrgTargets(
+          'xxx',
+          [SupportedIntegrationTypesUpdateProject.GITHUB],
+          undefined,
+        ),
       ).rejects.toThrowError(
         'Detected custom branches feature. Skipping syncing organization xxx because it is not possible to determine which should be the default branch.',
       );
@@ -720,9 +744,11 @@ describe('updateOrgTargets', () => {
         );
       logUpdatedProjectsSpy.mockResolvedValue(null);
 
-      const res = await updateOrgTargets('xxx', [
-        SupportedIntegrationTypesUpdateProject.GITHUB,
-      ]);
+      const res = await updateOrgTargets(
+        'xxx',
+        [SupportedIntegrationTypesUpdateProject.GITHUB],
+        undefined,
+      );
       expect(res).toStrictEqual({
         failedFileName: undefined,
         fileName: expect.stringMatching('.updated-projects.log'),
@@ -773,9 +799,11 @@ describe('updateOrgTargets', () => {
 
       // Act
       await expect(() =>
-        updateOrgTargets('xxx', [
-          SupportedIntegrationTypesUpdateProject.GITHUB,
-        ]),
+        updateOrgTargets(
+          'xxx',
+          [SupportedIntegrationTypesUpdateProject.GITHUB],
+          undefined,
+        ),
       ).rejects.toThrowError(
         "Please set the GITHUB_TOKEN e.g. export GITHUB_TOKEN='mypersonalaccesstoken123'",
       );
@@ -815,9 +843,11 @@ describe('updateOrgTargets', () => {
       logUpdatedProjectsSpy.mockResolvedValue(null);
 
       // Act
-      const res = await updateOrgTargets('xxx', [
-        SupportedIntegrationTypesUpdateProject.GITHUB,
-      ]);
+      const res = await updateOrgTargets(
+        'xxx',
+        [SupportedIntegrationTypesUpdateProject.GITHUB],
+        undefined,
+      );
 
       expect(res).toStrictEqual({
         failedFileName: undefined,
@@ -955,7 +985,10 @@ describe('updateOrgTargets', () => {
       const res = await updateOrgTargets(
         'xxx',
         [SupportedIntegrationTypesUpdateProject.GITHUB],
-        true,
+        undefined,
+        {
+          dryRun: true,
+        }
       );
       // Assert
       expect(res).toStrictEqual({
@@ -1021,7 +1054,7 @@ describe('updateOrgTargets', () => {
 
       // Act & Assert
       await expect(() =>
-        updateOrgTargets('xxx', [SupportedIntegrationTypesUpdateProject.GHE]),
+        updateOrgTargets('xxx', [SupportedIntegrationTypesUpdateProject.GHE], undefined),
       ).rejects.toThrowError(
         "Please set the GITHUB_TOKEN e.g. export GITHUB_TOKEN='mypersonalaccesstoken123'",
       );
@@ -1129,8 +1162,10 @@ describe('updateOrgTargets', () => {
       const res = await updateOrgTargets(
         'xxx',
         [SupportedIntegrationTypesUpdateProject.GHE],
-        true,
         'https://custom.ghe.com',
+        {
+          dryRun: true,
+        }
       );
       // Assert
       expect(res).toStrictEqual({
