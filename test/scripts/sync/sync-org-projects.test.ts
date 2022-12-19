@@ -988,7 +988,7 @@ describe('updateOrgTargets', () => {
         undefined,
         {
           dryRun: true,
-        }
+        },
       );
       // Assert
       expect(res).toStrictEqual({
@@ -1054,7 +1054,11 @@ describe('updateOrgTargets', () => {
 
       // Act & Assert
       await expect(() =>
-        updateOrgTargets('xxx', [SupportedIntegrationTypesUpdateProject.GHE], undefined),
+        updateOrgTargets(
+          'xxx',
+          [SupportedIntegrationTypesUpdateProject.GHE],
+          undefined,
+        ),
       ).rejects.toThrowError(
         "Please set the GITHUB_TOKEN e.g. export GITHUB_TOKEN='mypersonalaccesstoken123'",
       );
@@ -1165,7 +1169,7 @@ describe('updateOrgTargets', () => {
         'https://custom.ghe.com',
         {
           dryRun: true,
-        }
+        },
       );
       // Assert
       expect(res).toStrictEqual({

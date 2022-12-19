@@ -15,7 +15,6 @@ import { targetGenerators } from '../generate-imported-targets-from-snyk';
 import { deactivateProject, listProjects } from '../../lib';
 import pMap = require('p-map');
 import { cloneAndAnalyze } from './clone-and-analyze';
-import type { SnykProductEntitlement } from '../../lib/supported-project-types/supported-manifests';
 const debug = debugLib('snyk:sync-projects-per-target');
 
 export enum ProjectUpdateType {
@@ -83,14 +82,11 @@ export async function syncProjectsForTarget(
 
   const deactivate = [];
   try {
-    const res = await cloneAndAnalyze(
-      origin,
-      targetMeta!,
-      projects,
-      undefined, // TODO send exclusions when import is supported
-      config.entitlements,
-      config.manifestTypes,
-    );
+    const res = await cloneAndAnalyze(origin, targetMeta!, projects, {
+      // TODO send exclusions when import is supported
+      entitlements: config.entitlements,
+      manifestTypes: config.manifestTypes,
+    });
     debug(
       'Analysis finished',
       JSON.stringify({ deactivate: res.deactivate.length }),

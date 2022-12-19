@@ -39,6 +39,7 @@ export async function updateOrgTargets(
   config: SyncTargetsConfig = {
     dryRun: false,
     entitlements: ['openSource'],
+    exclusionGlobs: [],
   },
 ): Promise<{
   fileName: string;

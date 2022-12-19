@@ -105,8 +105,12 @@ describe('`snyk-api-import sync <...>`', () => {
         },
       },
       (err, stdout, stderr) => {
-        expect(stderr).toMatch('Please provide a single value for --source. Multiple sources processing is not supported.');
-        expect(err!.message).toMatch(`Please provide a single value for --source. Multiple sources processing is not supported.`);
+        expect(stderr).toMatch(
+          'Please provide a single value for --source. Multiple sources processing is not supported.',
+        );
+        expect(err!.message).toMatch(
+          `Please provide a single value for --source. Multiple sources processing is not supported.`,
+        );
         expect(stdout).toMatch('');
       },
     ).on('exit', (code) => {

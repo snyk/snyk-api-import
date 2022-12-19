@@ -76,9 +76,6 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        undefined,
-        undefined,
       );
 
       // Assert
@@ -138,9 +135,7 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource', 'infrastructureAsCode'],
-        undefined,
+        { entitlements: ['openSource', 'infrastructureAsCode'] },
       );
 
       // Assert
@@ -215,9 +210,10 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        ['npm'],
+        {
+          entitlements: ['openSource'],
+          manifestTypes: ['npm'],
+        },
       );
 
       // Assert
@@ -306,9 +302,9 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        undefined,
+        {
+          entitlements: ['openSource'],
+        },
       );
 
       // Assert
@@ -332,9 +328,9 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        undefined,
+        {
+          entitlements: ['openSource'],
+        },
       );
 
       expect(res).toStrictEqual({
@@ -358,9 +354,9 @@ describe('cloneAndAnalyze', () => {
           SupportedIntegrationTypesUpdateProject.GITHUB,
           repoMeta,
           projects,
-          undefined,
-          ['openSource'],
-          undefined,
+          {
+            entitlements: ['openSource'],
+          },
         ),
       ).rejects.toThrowError(
         'fatal: Remote branch master not found in upstream origin',
@@ -384,9 +380,9 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        undefined,
+        {
+          entitlements: ['openSource'],
+        },
       );
 
       expect(res).toStrictEqual({
@@ -418,9 +414,9 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        undefined,
+        {
+          entitlements: ['openSource'],
+        },
       );
 
       // Assert
@@ -454,9 +450,13 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource', 'infrastructureAsCode', 'dockerfileFromScm'],
-        undefined,
+        {
+          entitlements: [
+            'openSource',
+            'infrastructureAsCode',
+            'dockerfileFromScm',
+          ],
+        },
       );
 
       // Assert
@@ -479,9 +479,7 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        undefined,
+        { entitlements: ['openSource'] },
       );
 
       // Assert

@@ -249,4 +249,5 @@ export type SyncTargetsConfig = {
   dryRun: boolean;
   entitlements?: SnykProductEntitlement[];
   manifestTypes?: string[];
+  exclusionGlobs?: string[];
 };
