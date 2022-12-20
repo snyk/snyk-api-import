@@ -251,3 +251,9 @@ export type SyncTargetsConfig = {
   manifestTypes?: string[];
   exclusionGlobs?: string[];
 };
+
+export enum ProjectUpdateType {
+  BRANCH = 'branch',
+  DEACTIVATE = 'deactivate',
+  IMPORT = 'import',
+}

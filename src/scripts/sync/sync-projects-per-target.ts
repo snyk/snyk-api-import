@@ -10,17 +10,15 @@ import type {
   RepoMetaData,
   SyncTargetsConfig,
 } from '../../lib/types';
+import { ProjectUpdateType } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { targetGenerators } from '../generate-imported-targets-from-snyk';
 import { deactivateProject, listProjects } from '../../lib';
 import pMap = require('p-map');
 import { cloneAndAnalyze } from './clone-and-analyze';
+import { importSingleTarget } from './import-target';
 const debug = debugLib('snyk:sync-projects-per-target');
 
-export enum ProjectUpdateType {
-  BRANCH = 'branch',
-  DEACTIVATE = 'deactivate',
-}
 export function getMetaDataGenerator(
   origin: SupportedIntegrationTypesUpdateProject,
 ): (target: Target, host?: string | undefined) => Promise<RepoMetaData> {
@@ -271,4 +269,74 @@ export async function bulkDeactivateProjects(
   );
 
   return { updated, failed };
+}
+
+export async function bulkImportTargetFiles(
+  requestManager: requestsManager,
+  orgId: string,
+  files: string[] = [],
+  integrationType: SupportedIntegrationTypesUpdateProject,
+  target: Target,
+  dryRun = false,
+  concurrentFilesImport = 30,
+): Promise<{ created: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
+  const created: ProjectUpdate[] = [];
+  const failed: ProjectUpdateFailure[] = [];
+
+  if (!files.length) {
+    return { created, failed };
+  }
+  debug(`Importing ${files.length} files`);
+
+  if (dryRun) {
+    files.map((f) =>
+      created.push({
+        projectPublicId: '',
+        type: ProjectUpdateType.IMPORT,
+        from: f,
+        to: `https://app.snyk.io/org/example-org-name/project/example-project-id-uuid`,
+        dryRun,
+      }),
+    );
+
+    return { created, failed: [] };
+  }
+
+  for (
+    let index = 0;
+    index < files.length;
+    index = index + concurrentFilesImport
+  ) {
+    const batch = files.slice(index, index + concurrentFilesImport);
+
+    const { projects, failed: failedProjects } = await importSingleTarget(
+      requestManager,
+      orgId,
+      integrationType,
+      target,
+      batch,
+    );
+    projects.map((p) => {
+      const projectId = p.projectUrl?.split('/').slice(-1)[0];
+      created.push({
+        projectPublicId: projectId,
+        type: ProjectUpdateType.IMPORT,
+        from: p.targetFile ?? '', // TODO: is there something more intuitive here?
+        to: p.projectUrl,
+        dryRun,
+      });
+    });
+    failedProjects.map((f) => {
+      failed.push({
+        projectPublicId: '',
+        type: ProjectUpdateType.IMPORT,
+        from: f.targetFile ?? '', // TODO: is there something more intuitive here?
+        to: f.projectUrl,
+        dryRun,
+        errorMessage:
+          f.userMessage ?? 'Failed to import project via Snyk Import API',
+      });
+    });
+  }
+  return { created, failed };
 }
