@@ -22,8 +22,20 @@ describe('listGitlabRepos', () => {
       branch: expect.any(String),
       fork: expect.any(Boolean),
     });
-    for (let i = 0; i < repos.length; i++) {
-      expect(repos[i].name).not.toContain('shared-with-group');
-    }
+    expect(
+      repos.filter((r) => r.name === 'snyk-fixtures/shared-with-group'),
+    ).toHaveLength(1);
+  });
+  it('list repos (Gitlab Custom URL) excludes a shared project', async () => {
+    const GITLAB_BASE_URL = process.env.TEST_GITLAB_BASE_URL;
+    process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
+    // shared-with-group project is shared with group snyk-test
+    const gitlabGroupName = 'snyk-test';
+
+    const repos = await listGitlabRepos(gitlabGroupName, GITLAB_BASE_URL);
+    expect(
+      repos.filter((r) => r.name === 'snyk-fixtures/shared-with-group'),
+    ).toEqual([]);
+    expect(repos.length === 0).toBeTruthy();
   });
 });

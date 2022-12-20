@@ -18,31 +18,39 @@ export async function fetchGitlabReposForPage(
   hasNextPage: boolean;
 }> {
   const repoData: GitlabRepoData[] = [];
-  const params = {
+  const params: gitBeakerTypes.Types.BaseRequestOptions = {
     // eslint-disable-next-line @typescript-eslint/camelcase
     perPage,
     page: pageNumber,
+    with_shared: false,
   };
+
   const projects = (await client.Groups.projects(
     groupName,
     params,
   )) as gitBeakerTypes.Types.ProjectExtendedSchema[];
-  const hasNextPage = projects.length ? true : false;
+  const hasNextPage = projects.length < perPage ? false : true;
+  debug(`Found ${projects.length} projects in ${groupName}`);
 
   for (const project of projects) {
     const {
       archived,
-      shared_with_groups,
+      namespace,
       default_branch,
       forked_from_project,
       path_with_namespace,
       id,
     } = project;
-    if (
-      archived ||
-      !default_branch ||
-      (shared_with_groups && shared_with_groups.length > 0)
-    ) {
+    if (groupName !== namespace.name) {
+      debug(
+        `Skipping project ${project.name_with_namespace} as it belong to another group`,
+      );
+      continue;
+    }
+    if (archived || !default_branch) {
+      debug(
+        `Skipping project ${project.name_with_namespace} as it is either archived or has no default branch`,
+      );
       continue;
     }
 
