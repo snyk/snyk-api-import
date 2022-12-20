@@ -8,6 +8,9 @@ import type { FailedProject } from '../../loggers/log-failed-projects';
 
 const debug = debugLib('snyk:import-single-target');
 
+// TODO: when branch is missing make sure to capture & log as failed
+// TODO: when Snyk Github credentials are invalid, stop early
+
 export async function importSingleTarget(
   requestManager: requestsManager,
   orgId: string,

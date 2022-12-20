@@ -31,7 +31,7 @@ export async function requestWithRateLimitHandling(
         );
         break;
       }
-      if ([404, 504].includes(e.data.code)) {
+      if ([404, 504, 400].includes(e.data.code)) {
         break;
       }
       attempt += 1;
