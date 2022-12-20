@@ -173,17 +173,17 @@ describe('`snyk-api-import sync <...>`', () => {
         );
         expect(stdout).toMatch('Processed 3 targets (0 failed)');
         expect(stdout).toMatch('Updated 2 projects');
-        const file = fs.readFileSync(updatedLog, 'utf8');
-
-        // 1 project deactivated
-        expect(file).toMatch('"Snyk project \\"deactivate\\" update completed');
-        // another project has branch updated
-        expect(file).toMatch('"from":"main","to":"master"');
-
-        deleteFiles([updatedLog]);
       },
     ).on('exit', (code) => {
       expect(code).toEqual(0);
+      const file = fs.readFileSync(updatedLog, 'utf8');
+
+      // 1 project deactivated
+      expect(file).toMatch('"Snyk project \\"deactivate\\" update completed');
+      // another project has branch updated
+      expect(file).toMatch('"from":"main","to":"master"');
+
+      deleteFiles([updatedLog]);
       done();
     });
   }, 100000);

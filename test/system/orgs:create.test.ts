@@ -105,15 +105,15 @@ Options:
           'All requested organizations failed to be created. Review the errors in',
         );
         expect(stdout).toEqual('');
-        const file = fs.readFileSync(
-          path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`),
-          'utf8',
-        );
-        expect(file).toContain('Failed to create org');
-        deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
       },
     ).on('exit', (code) => {
       expect(code).toEqual(1);
+      const file = fs.readFileSync(
+        path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`),
+        'utf8',
+      );
+      expect(file).toContain('Failed to create org');
+      deleteFiles([path.resolve(logPath, `abc.${FAILED_ORG_LOG_NAME}`)]);
       done();
     });
   }, 40000);
@@ -144,17 +144,17 @@ Options:
           'All requested organizations failed to be created. Review the errors in',
         );
         expect(stdout).toEqual('');
-        const file = fs.readFileSync(
-          path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`),
-          'utf8',
-        );
-        expect(file).toContain('Refusing to create a duplicate organization');
-        deleteFiles([
-          path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`),
-        ]);
       },
     ).on('exit', (code) => {
       expect(code).toEqual(1);
+      const file = fs.readFileSync(
+        path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`),
+        'utf8',
+      );
+      expect(file).toContain('Refusing to create a duplicate organization');
+      deleteFiles([
+        path.resolve(logPath, `${GROUP_ID}.${FAILED_ORG_LOG_NAME}`),
+      ]);
       done();
     });
   }, 40000);
