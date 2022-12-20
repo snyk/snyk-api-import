@@ -40,7 +40,7 @@ export const builder = {
     required: false,
     default: SupportedProductsUpdateProject.OPEN_SOURCE,
     choices: [...Object.values(SupportedProductsUpdateProject)],
-    desc: 'List of Snyk Products to consider when syncing an SCM repo. Monitored Snyk Code repos are automatically synced already, if Snyk Code is enabled any new repo imports will include Snyk Code projects',
+    desc: 'List of Snyk Products to consider when syncing an SCM repo for deleting projects & importing new ones (default branch will be updated for all projects in a target). Monitored Snyk Code repos are automatically synced already, if Snyk Code is enabled any new repo imports will bring in Snyk Code projects',
   },
 };
 

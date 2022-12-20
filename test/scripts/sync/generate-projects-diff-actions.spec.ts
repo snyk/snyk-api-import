@@ -63,6 +63,15 @@ describe('generateProjectDiffActions', () => {
         branch: 'master',
         status: 'active',
       },
+      {
+        name: 'snyk/goof:Code Analysis',
+        id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+        created: '2018-10-29T09:50:54.014Z',
+        origin: 'github',
+        type: 'sast',
+        branch: 'master',
+        status: 'active',
+      },
     ];
     // Act
     const res = await generateProjectDiffActions(['package.json'], projects);
@@ -123,6 +132,15 @@ describe('generateProjectDiffActions', () => {
         created: '2018-10-29T09:50:54.014Z',
         origin: 'github',
         type: 'dockerfile',
+        branch: 'master',
+        status: 'active',
+      },
+      {
+        name: 'snyk/goof:Code Analysis',
+        id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+        created: '2018-10-29T09:50:54.014Z',
+        origin: 'github',
+        type: 'sast',
         branch: 'master',
         status: 'active',
       },
