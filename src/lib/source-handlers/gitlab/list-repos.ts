@@ -29,6 +29,8 @@ export async function fetchGitlabReposForPage(
   )) as gitBeakerTypes.Types.ProjectExtendedSchema[];
   const hasNextPage = projects.length ? true : false;
 
+  debug(`Found ${projects.length} projects in ${groupName}`);
+
   for (const project of projects) {
     const {
       archived,
@@ -38,11 +40,15 @@ export async function fetchGitlabReposForPage(
       path_with_namespace,
       id,
     } = project;
+
     if (
       archived ||
       !default_branch ||
       (shared_with_groups && shared_with_groups.length > 0)
     ) {
+      debug(
+        `Skipping project as it is either archived, has no default branch, shared with groups`,
+      );
       continue;
     }
 
