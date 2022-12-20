@@ -44,10 +44,11 @@ describe('`snyk-api-import sync <...>`', () => {
                [required] [choices: \\"github\\", \\"github-enterprise\\"] [default: \\"github\\"]
         --dryRun       Dry run option. Will create a log file listing the potential
                        updates                                        [default: false]
-        --snykProduct  List of Snyk Products to consider when syncing an SCM repo.
-                       Monitored Snyk Code repos are automatically synced already, if
-                       Snyk Code is enabled any new repo imports will include Snyk
-                       Code projects
+        --snykProduct  List of Snyk Products to consider when syncing an SCM repo for
+                       deleting projects & importing new ones (default branch will be
+                       updated for all projects in a target). Monitored Snyk Code
+                       repos are automatically synced already, if Snyk Code is enabled
+                       any new repo imports will bring in Snyk Code projects
                  [choices: \\"container\\", \\"open-source\\", \\"iac\\"] [default: \\"open-source\\"]
       "
       `);
@@ -170,7 +171,7 @@ describe('`snyk-api-import sync <...>`', () => {
         expect(stdout).toMatch(
           'Done syncing targets for source github-enterprise',
         );
-        expect(stdout).toMatch('Processed 3 targets (0 failed)');
+        expect(stdout).toMatch('Processed 4 targets (0 failed)');
         expect(stdout).toMatch('Updated 2 projects');
         const file = fs.readFileSync(updatedLog, 'utf8');
 

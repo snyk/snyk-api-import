@@ -25,10 +25,14 @@ export function generateProjectDiffActions(
 
   // any files in Snyk, not found in the repo should have the
   // related project deactivated
-  for (const project of snykMonitoredProjects.filter(
-    (p) => p.status !== 'inactive',
+  for (const project of getSupportedProjectsToDeactivate(
+    snykMonitoredProjects,
   )) {
-    if (!repoManifests.includes(project.name.split(':')[1])) {
+    const targetFile = project.name.split(':')[1];
+    if (!targetFile) {
+      continue;
+    }
+    if (!repoManifests.includes(targetFile)) {
       if (manifestTypes.includes(project.type)) {
         deactivate.push(project);
       }
@@ -39,4 +43,13 @@ export function generateProjectDiffActions(
     import: filesToImport,
     deactivate,
   };
+}
+
+// should return only projects that reference a manifest file in their name
+function getSupportedProjectsToDeactivate(
+  projects: SnykProject[],
+): SnykProject[] {
+  return projects
+    .filter((p) => p.status !== 'inactive')
+    .filter((p) => p.type !== 'sast');
 }
