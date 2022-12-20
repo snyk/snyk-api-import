@@ -12,12 +12,8 @@ jest.requireActual('snyk-request-manager');
 describe('`snyk-api-import sync <...>`', () => {
   const OLD_ENV = process.env;
   const ORG_ID = process.env.TEST_ORG_ID as string;
-  const filesToDelete: string[] = [];
   afterAll(() => {
     process.env = { ...OLD_ENV };
-  });
-  afterEach(() => {
-    deleteFiles(filesToDelete);
   });
   it('Shows help text as expected', (done) => {
     exec(`node ${main} sync help`, (err, stdout) => {
@@ -25,33 +21,9 @@ describe('`snyk-api-import sync <...>`', () => {
         throw err;
       }
       expect(err).toBeNull();
-      expect(stdout).toMatchInlineSnapshot(`
-      "index.js sync
-
-      Sync targets (e.g. repos) and their projects between Snyk and SCM for a given
-      organization. Actions include:
-      - updating monitored branch in Snyk to match the default branch from SCM
-
-      Options:
-        --version      Show version number                                   [boolean]
-        --help         Show help                                             [boolean]
-        --orgPublicId  Public id of the organization in Snyk that will be updated
-                                                                            [required]
-        --sourceUrl    Custom base url for the source API that can list organizations
-                       (e.g. Github Enterprise url)
-        --source       List of sources to be synced e.g. Github, Github Enterprise,
-                       Gitlab, Bitbucket Server, Bitbucket Cloud
-               [required] [choices: \\"github\\", \\"github-enterprise\\"] [default: \\"github\\"]
-        --dryRun       Dry run option. Will create a log file listing the potential
-                       updates                                        [default: false]
-        --snykProduct  List of Snyk Products to consider when syncing an SCM repo for
-                       deleting projects & importing new ones (default branch will be
-                       updated for all projects in a target). Monitored Snyk Code
-                       repos are automatically synced already, if Snyk Code is enabled
-                       any new repo imports will bring in Snyk Code projects
-                 [choices: \\"container\\", \\"open-source\\", \\"iac\\"] [default: \\"open-source\\"]
-      "
-      `);
+      expect(stdout).toMatch(
+        'Sync targets (e.g. repos) and their projects between Snyk and SCM for a given',
+      );
     }).on('exit', (code) => {
       expect(code).toEqual(0);
       done();
@@ -89,7 +61,7 @@ describe('`snyk-api-import sync <...>`', () => {
       expect(code).toEqual(1);
       done();
     });
-  }, 40000);
+  }, 500000);
 
   it('fails when several sources are provided', (done) => {
     const logPath = path.resolve(__dirname + '/fixtures');
@@ -117,7 +89,7 @@ describe('`snyk-api-import sync <...>`', () => {
       expect(code).toEqual(1);
       done();
     });
-  }, 40000);
+  }, 500000);
 
   it('throws an error for an unsupported SCM like Bitbucket Server', (done) => {
     const logPath = path.resolve(__dirname);
@@ -142,7 +114,7 @@ describe('`snyk-api-import sync <...>`', () => {
       expect(code).toEqual(1);
       done();
     });
-  }, 40000);
+  }, 500000);
 
   it('Throws an error for if source auth details are not provided', (done) => {
     const logPath = path.resolve(__dirname);
@@ -175,13 +147,12 @@ describe('`snyk-api-import sync <...>`', () => {
       expect(code).toEqual(1);
       done();
     });
-  }, 40000);
+  }, 500000);
   it('Successfully generates synced logs in --dryRun mode', (done) => {
     const logPath = path.resolve(__dirname);
     const updatedLog = path.resolve(
       `${logPath}/${ORG_ID}.${UPDATED_PROJECTS_LOG_NAME}`,
     );
-    filesToDelete.push(updatedLog);
     exec(
       `node ${main} sync --orgPublicId=${ORG_ID} --source=github-enterprise --sourceUrl=${process.env.TEST_GHE_URL} --dryRun=true`,
       {
@@ -209,7 +180,6 @@ describe('`snyk-api-import sync <...>`', () => {
         expect(file).toMatch('"Snyk project \\"deactivate\\" update completed');
         // another project has branch updated
         expect(file).toMatch('"from":"main","to":"master"');
-
         deleteFiles([updatedLog]);
       },
     ).on('exit', (code) => {
