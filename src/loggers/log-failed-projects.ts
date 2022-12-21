@@ -9,6 +9,7 @@ const debug = debugLib('snyk:import-projects-script');
 
 export interface FailedProject extends Project {
   locationUrl: string;
+  userMessage?: string;
 }
 
 export async function logFailedProjects(

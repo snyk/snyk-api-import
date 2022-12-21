@@ -7,12 +7,14 @@ import {
   updateTargets,
 } from '../../../src/scripts/sync/sync-org-projects';
 import type { ProjectsResponse } from '../../../src/lib/api/org';
-import * as syncProjectsForTarget from '../../../src/scripts/sync/sync-projects-per-target';
+import type * as syncProjectsForTarget from '../../../src/scripts/sync/sync-projects-per-target';
 import type {
+  Project,
   SnykProject,
   SnykTarget,
   SnykTargetRelationships,
 } from '../../../src/lib/types';
+import { ProjectUpdateType } from '../../../src/lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../../src/lib/types';
 import * as lib from '../../../src/lib';
 import * as clone from '../../../src/scripts/sync/clone-and-analyze';
@@ -20,6 +22,11 @@ import * as projectApi from '../../../src/lib/api/project';
 import * as github from '../../../src/lib/source-handlers/github';
 import * as featureFlags from '../../../src/lib/api/feature-flags';
 import * as updateProjectsLog from '../../../src/loggers/log-updated-project';
+import * as importTarget from '../../../src/scripts/sync/import-target';
+import { deleteFiles } from '../../delete-files';
+import { generateLogsPaths } from '../../generate-log-file-names';
+import { bulkImportTargetFiles } from '../../../src/scripts/sync/sync-projects-per-target';
+import type { FailedProject } from '../../../src/loggers/log-failed-projects';
 const fixturesFolderPath = path.resolve(__dirname, '../') + '/fixtures/repos';
 
 describe('updateTargets', () => {
@@ -125,7 +132,7 @@ describe('updateTargets', () => {
           projectPublicId: projectsAPIResponse.projects[0].id,
           from: projectsAPIResponse.projects[0].branch!,
           to: defaultBranch,
-          type: syncProjectsForTarget.ProjectUpdateType.BRANCH,
+          type: ProjectUpdateType.BRANCH,
           dryRun: false,
           target: testTargets[0],
         },
@@ -133,7 +140,7 @@ describe('updateTargets', () => {
           projectPublicId: projectsAPIResponse.projects[2].id,
           from: 'active',
           to: 'deactivated',
-          type: syncProjectsForTarget.ProjectUpdateType.DEACTIVATE,
+          type: ProjectUpdateType.DEACTIVATE,
           dryRun: false,
           target: testTargets[0],
         },
@@ -145,7 +152,7 @@ describe('updateTargets', () => {
           projectPublicId: projectsAPIResponse.projects[1].id,
           from: projectsAPIResponse.projects[1].branch!,
           to: defaultBranch,
-          type: syncProjectsForTarget.ProjectUpdateType.BRANCH,
+          type: ProjectUpdateType.BRANCH,
           dryRun: false,
           target: testTargets[0],
         },
@@ -255,7 +262,7 @@ describe('updateTargets', () => {
           projectPublicId: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
           from: projectsAPIResponse.projects[0].branch!,
           to: defaultBranch,
-          type: syncProjectsForTarget.ProjectUpdateType.BRANCH,
+          type: ProjectUpdateType.BRANCH,
           dryRun: false,
         },
       ];
@@ -360,7 +367,7 @@ describe('updateTargets', () => {
           projectPublicId: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
           from: 'active',
           to: 'deactivated',
-          type: syncProjectsForTarget.ProjectUpdateType.DEACTIVATE,
+          type: ProjectUpdateType.DEACTIVATE,
           dryRun: false,
         },
       ];
@@ -556,7 +563,7 @@ describe('updateTargets', () => {
           projectPublicId: projectsAPIResponse.projects[0].id,
           from: projectsAPIResponse.projects[0].branch!,
           to: defaultBranch,
-          type: syncProjectsForTarget.ProjectUpdateType.BRANCH,
+          type: ProjectUpdateType.BRANCH,
           dryRun: false,
         },
       ];
@@ -567,7 +574,7 @@ describe('updateTargets', () => {
           projectPublicId: projectsAPIResponse.projects[1].id,
           from: projectsAPIResponse.projects[1].branch!,
           to: defaultBranch,
-          type: syncProjectsForTarget.ProjectUpdateType.BRANCH,
+          type: ProjectUpdateType.BRANCH,
           dryRun: false,
         },
       ];
@@ -675,7 +682,7 @@ describe('updateTargets', () => {
           projectPublicId: projectsAPIResponse.projects[0].id,
           from: projectsAPIResponse.projects[0].branch!,
           to: defaultBranch,
-          type: syncProjectsForTarget.ProjectUpdateType.BRANCH,
+          type: ProjectUpdateType.BRANCH,
           dryRun: false,
         },
       ];
@@ -686,7 +693,7 @@ describe('updateTargets', () => {
           projectPublicId: projectsAPIResponse.projects[1].id,
           from: projectsAPIResponse.projects[1].branch!,
           to: defaultBranch,
-          type: syncProjectsForTarget.ProjectUpdateType.BRANCH,
+          type: ProjectUpdateType.BRANCH,
           dryRun: false,
         },
       ];
@@ -1072,7 +1079,7 @@ describe('updateOrgTargets', () => {
           projectPublicId: updatedProjectId1,
           from: projectsAPIResponse1.projects[0].branch!,
           to: defaultBranch,
-          type: syncProjectsForTarget.ProjectUpdateType.BRANCH,
+          type: ProjectUpdateType.BRANCH,
           dryRun: true,
           target: targets[0],
         },
@@ -1080,7 +1087,7 @@ describe('updateOrgTargets', () => {
           projectPublicId: deletedProjectId,
           from: 'active',
           to: 'deactivated',
-          type: syncProjectsForTarget.ProjectUpdateType.DEACTIVATE,
+          type: ProjectUpdateType.DEACTIVATE,
           dryRun: true,
           target: targets[0],
         },
@@ -1088,7 +1095,7 @@ describe('updateOrgTargets', () => {
           projectPublicId: updatedProjectId2,
           from: projectsAPIResponse2.projects[0].branch!,
           to: defaultBranch,
-          type: syncProjectsForTarget.ProjectUpdateType.BRANCH,
+          type: ProjectUpdateType.BRANCH,
           dryRun: true,
           target: targets[1],
         },
@@ -1263,7 +1270,7 @@ describe('updateOrgTargets', () => {
           projectPublicId: updatedProjectId1,
           from: projectsAPIResponse1.projects[0].branch!,
           to: defaultBranch,
-          type: syncProjectsForTarget.ProjectUpdateType.BRANCH,
+          type: ProjectUpdateType.BRANCH,
           dryRun: true,
           target: targets[0],
         },
@@ -1271,7 +1278,7 @@ describe('updateOrgTargets', () => {
           projectPublicId: updatedProjectId2,
           from: projectsAPIResponse2.projects[0].branch!,
           to: defaultBranch,
-          type: syncProjectsForTarget.ProjectUpdateType.BRANCH,
+          type: ProjectUpdateType.BRANCH,
           dryRun: true,
           target: targets[1],
         },
@@ -1315,5 +1322,224 @@ describe('updateOrgTargets', () => {
     it.todo(
       'Does not disable Dockerfile projects if the entitlement is not enabled',
     );
+  });
+});
+
+describe('bulkImportTargetFiles', () => {
+  let logs: string[];
+  const OLD_ENV = process.env;
+  process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+  const ORG_ID = 'af137b96-6966-46c1-826b-2e79ac49bbxx';
+  let importSingleTargetSpy: jest.SpyInstance;
+
+  afterAll(async () => {
+    await deleteFiles(logs);
+    process.env = { ...OLD_ENV };
+  }, 10000);
+
+  const requestManager = new requestsManager({
+    userAgentPrefix: 'snyk-api-import:tests',
+  });
+
+  beforeEach(() => {
+    importSingleTargetSpy = jest.spyOn(importTarget, 'importSingleTarget');
+  });
+
+  afterEach(() => {
+    importSingleTargetSpy.mockReset();
+  });
+  it('succeeds to import a single file', async () => {
+    // Arrange
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
+    logs = Object.values(logFiles);
+    const target = {
+      name: 'ruby-with-versions',
+      owner: 'api-import-circle-test',
+      branch: 'master',
+    };
+    const projectId = uuid.v4();
+    const projects: Project[] = [
+      {
+        projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+        success: true,
+        targetFile: 'Gemfile.lock',
+      },
+    ];
+    importSingleTargetSpy.mockResolvedValue({
+      projects,
+      failed: [],
+    });
+
+    const { created } = await bulkImportTargetFiles(
+      requestManager,
+      ORG_ID,
+      ['ruby-2.5.3-exactly/Gemfile'],
+      SupportedIntegrationTypesUpdateProject.GHE,
+      target,
+    );
+    expect(importSingleTargetSpy).toHaveBeenCalledTimes(1);
+    expect(created).not.toBe([]);
+    expect(created.length).toEqual(1);
+    expect(created[0]).toMatchObject({
+      dryRun: false,
+      from: 'Gemfile.lock',
+      projectPublicId: projectId,
+      to: `https://app.snyk.io/org/hello/project/${projectId}`,
+      type: 'import',
+    });
+  });
+  it('batch imports many files to keep import jobs smaller', async () => {
+    // Arrange
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
+    logs = Object.values(logFiles);
+    const target = {
+      name: 'ruby-with-versions',
+      owner: 'api-import-circle-test',
+      branch: 'master',
+    };
+    const projectId = uuid.v4();
+    const projects: Project[] = [
+      {
+        projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+        success: true,
+        targetFile: 'Gemfile.lock',
+      },
+      {
+        projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+        success: true,
+        targetFile: 'package.json',
+      },
+      {
+        projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+        success: true,
+        targetFile: 'folder/package.json',
+      },
+      {
+        projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+        success: true,
+        targetFile: 'Dockerfile',
+      },
+      {
+        projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+        success: true,
+        targetFile: 'another/Dockerfile',
+      },
+    ];
+    const failedProjects: FailedProject[] = [
+      {
+        projectUrl: '',
+        success: false,
+        locationUrl: 'https://polling/url',
+        targetFile: 'failure/Dockerfile',
+        userMessage: 'Invalid syntax',
+      },
+    ];
+
+    importSingleTargetSpy.mockResolvedValueOnce({
+      projects: [projects[0], projects[1]],
+      failed: [],
+    });
+    importSingleTargetSpy.mockResolvedValueOnce({
+      projects: [projects[2], projects[3]],
+      failed: [],
+    });
+    importSingleTargetSpy.mockResolvedValueOnce({
+      projects: [projects[4]],
+      failed: [failedProjects[0]],
+    });
+
+    const { created, failed } = await bulkImportTargetFiles(
+      requestManager,
+      ORG_ID,
+      projects.map((p) => p.targetFile!),
+      SupportedIntegrationTypesUpdateProject.GHE,
+      target,
+      false,
+      2,
+    );
+    expect(importSingleTargetSpy).toHaveBeenCalledTimes(3);
+    expect(created).not.toBe([]);
+    expect(created.length).toEqual(5);
+    expect(failed.length).toEqual(1);
+
+    expect(created.find((c) => c.from === 'folder/package.json')).toMatchObject(
+      {
+        dryRun: false,
+        from: 'folder/package.json',
+        projectPublicId: projectId,
+        to: `https://app.snyk.io/org/hello/project/${projectId}`,
+        type: 'import',
+      },
+    );
+    expect(failed.find((c) => c.from === 'failure/Dockerfile')).toMatchObject({
+      dryRun: false,
+      from: 'failure/Dockerfile',
+      projectPublicId: '',
+      to: '',
+      type: 'import',
+    });
+  });
+  it('batch imports many files in dryRun mode', async () => {
+    // Arrange
+    const logFiles = generateLogsPaths(__dirname, ORG_ID);
+    logs = Object.values(logFiles);
+    const target = {
+      name: 'ruby-with-versions',
+      owner: 'api-import-circle-test',
+      branch: 'master',
+    };
+    const projectId = uuid.v4();
+    const projects: Project[] = [
+      {
+        projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+        success: true,
+        targetFile: 'Gemfile.lock',
+      },
+      {
+        projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+        success: true,
+        targetFile: 'package.json',
+      },
+      {
+        projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+        success: true,
+        targetFile: 'folder/package.json',
+      },
+      {
+        projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+        success: true,
+        targetFile: 'Dockerfile',
+      },
+      {
+        projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+        success: true,
+        targetFile: 'another/Dockerfile',
+      },
+    ];
+    importSingleTargetSpy.mockResolvedValueOnce({
+      projects: [projects[0], projects[1]],
+      failed: [],
+    });
+    importSingleTargetSpy.mockResolvedValueOnce({
+      projects: [projects[2], projects[3]],
+      failed: [],
+    });
+    importSingleTargetSpy.mockResolvedValueOnce({
+      projects: [projects[4]],
+      failed: [],
+    });
+
+    const { created } = await bulkImportTargetFiles(
+      requestManager,
+      ORG_ID,
+      projects.map((p) => p.targetFile!),
+      SupportedIntegrationTypesUpdateProject.GHE,
+      target,
+      true,
+      2,
+    );
+    expect(importSingleTargetSpy).toHaveBeenCalledTimes(0);
+    expect(created).not.toBe([]);
+    expect(created.length).toEqual(5);
   });
 });

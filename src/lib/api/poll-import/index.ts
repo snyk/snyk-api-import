@@ -78,7 +78,7 @@ export async function pollImportUrl(
 export async function pollImportUrls(
   requestManager: requestsManager,
   locationUrls: string[],
-): Promise<{ projects: Project[] }> {
+): Promise<{ projects: Project[]; failed: FailedProject[] }> {
   if (!locationUrls) {
     throw new Error(
       'Missing required parameters. Please ensure you have provided: locationUrls.',
@@ -130,5 +130,5 @@ export async function pollImportUrls(
 
   await logFailedProjects(allFailedProjects);
 
-  return { projects: projectsArray };
+  return { projects: projectsArray, failed: allFailedProjects };
 }
