@@ -15,6 +15,7 @@ import type {
 } from '../../../src/lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../../src/lib/types';
 import * as lib from '../../../src/lib';
+import * as clone from '../../../src/scripts/sync/clone-and-analyze';
 import * as projectApi from '../../../src/lib/api/project';
 import * as github from '../../../src/lib/source-handlers/github';
 import * as featureFlags from '../../../src/lib/api/feature-flags';
@@ -175,7 +176,12 @@ describe('updateTargets', () => {
         }),
       );
       // Act
-      const res = await updateTargets(requestManager, orgId, testTargets);
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTargets,
+        undefined,
+      );
 
       // Assert
       expect(res).toStrictEqual({
@@ -276,7 +282,121 @@ describe('updateTargets', () => {
         }),
       );
       // Act
-      const res = await updateTargets(requestManager, orgId, testTarget);
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTarget,
+        undefined,
+      );
+
+      // Assert
+      expect(res).toStrictEqual({
+        failedTargets: 0,
+        processedTargets: 1,
+        meta: {
+          projects: {
+            failed: failed.map((f) => ({ ...f, target: testTarget[0] })),
+            updated: updated.map((u) => ({ ...u, target: testTarget[0] })),
+          },
+        },
+      });
+    }, 10000);
+    it('deactivates a project if it matches exclusion globs', async () => {
+      // Arrange
+      const testTarget = [
+        {
+          attributes: {
+            displayName: 'test',
+            isPrivate: false,
+            origin: 'github',
+            remoteUrl: null,
+          },
+          id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+          relationships: {
+            org: {
+              data: {
+                id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+                type: 'org',
+              },
+              links: {},
+              meta: {},
+            },
+          },
+          type: 'target',
+        },
+      ];
+
+      const projectsAPIResponse: ProjectsResponse = {
+        org: {
+          id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+        },
+        projects: [
+          {
+            name: 'snyk/goof:package.json',
+            id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+            created: '2018-10-29T09:50:54.014Z',
+            origin: 'github',
+            type: 'npm',
+            branch: 'master',
+            status: 'active',
+          },
+          {
+            name: 'snyk/goof:deactivated/package.json',
+            id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+            created: '2018-10-29T09:50:54.014Z',
+            origin: 'github',
+            type: 'npm',
+            branch: 'master',
+            status: 'inactive',
+          },
+        ],
+      };
+
+      const orgId = 'af137b96-6966-46c1-826b-2e79ac49bbxx';
+      const defaultBranch = 'develop';
+
+      const updated: syncProjectsForTarget.ProjectUpdate[] = [
+        {
+          projectPublicId: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+          from: 'active',
+          to: 'deactivated',
+          type: syncProjectsForTarget.ProjectUpdateType.DEACTIVATE,
+          dryRun: false,
+        },
+      ];
+      const failed: syncProjectsForTarget.ProjectUpdateFailure[] = [];
+
+      jest
+        .spyOn(lib, 'listProjects')
+        .mockImplementation(() => Promise.resolve(projectsAPIResponse));
+      githubSpy.mockImplementation(() =>
+        Promise.resolve({
+          branch: defaultBranch,
+          cloneUrl: 'https://some-url.com',
+          sshUrl: 'git@some-url.com',
+        }),
+      );
+      updateProjectsSpy.mockImplementation(() =>
+        Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
+      );
+      cloneSpy.mockImplementation(() =>
+        Promise.resolve({
+          success: true,
+          repoPath: path.resolve(fixturesFolderPath, 'goof'),
+          gitResponse: '',
+        }),
+      );
+      // Act
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTarget,
+        undefined,
+        {
+          dryRun: false,
+          exclusionGlobs: ['**/package.json'],
+        },
+      );
 
       // Assert
       expect(res).toStrictEqual({
@@ -359,7 +479,12 @@ describe('updateTargets', () => {
       );
 
       // Act
-      const res = await updateTargets(requestManager, orgId, testTarget);
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTarget,
+        undefined,
+      );
 
       // Assert
       expect(res).toStrictEqual({
@@ -472,7 +597,12 @@ describe('updateTargets', () => {
         }),
       );
       // Act
-      const res = await updateTargets(requestManager, orgId, testTargets);
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTargets,
+        undefined,
+      );
 
       // Assert
       expect(res).toStrictEqual({
@@ -590,8 +720,10 @@ describe('updateTargets', () => {
         requestManager,
         orgId,
         testTargets,
-        false,
         'https://custom-ghe.com',
+        {
+          dryRun: false,
+        },
       );
 
       // Assert
@@ -630,6 +762,7 @@ describe('updateOrgTargets', () => {
   let githubSpy: jest.SpyInstance;
   let updateProjectSpy: jest.SpyInstance;
   let deactivateProjectSpy: jest.SpyInstance;
+  let cloneAndAnalyzeSpy: jest.SpyInstance;
 
   let cloneSpy: jest.SpyInstance;
 
@@ -642,6 +775,7 @@ describe('updateOrgTargets', () => {
     updateProjectSpy = jest.spyOn(projectApi, 'updateProject');
     deactivateProjectSpy = jest.spyOn(projectApi, 'deactivateProject');
     cloneSpy = jest.spyOn(lib, 'gitClone');
+    cloneAndAnalyzeSpy = jest.spyOn(clone, 'cloneAndAnalyze');
     jest.spyOn(fs, 'rmdirSync').mockImplementation(() => true);
   });
   afterAll(() => {
@@ -659,7 +793,7 @@ describe('updateOrgTargets', () => {
   describe('Errors', () => {
     it('throws if only unsupported origins requested', async () => {
       await expect(
-        updateOrgTargets('xxx', ['unsupported' as any]),
+        updateOrgTargets('xxx', ['unsupported' as any], undefined),
       ).rejects.toThrowError(
         'Nothing to sync, stopping. Sync command currently only supports the following sources: github',
       );
@@ -667,9 +801,11 @@ describe('updateOrgTargets', () => {
     it('throws if the organization uses the customBranch FF', async () => {
       featureFlagsSpy.mockResolvedValue(true);
       await expect(
-        updateOrgTargets('xxx', [
-          SupportedIntegrationTypesUpdateProject.GITHUB,
-        ]),
+        updateOrgTargets(
+          'xxx',
+          [SupportedIntegrationTypesUpdateProject.GITHUB],
+          undefined,
+        ),
       ).rejects.toThrowError(
         'Detected custom branches feature. Skipping syncing organization xxx because it is not possible to determine which should be the default branch.',
       );
@@ -720,9 +856,11 @@ describe('updateOrgTargets', () => {
         );
       logUpdatedProjectsSpy.mockResolvedValue(null);
 
-      const res = await updateOrgTargets('xxx', [
-        SupportedIntegrationTypesUpdateProject.GITHUB,
-      ]);
+      const res = await updateOrgTargets(
+        'xxx',
+        [SupportedIntegrationTypesUpdateProject.GITHUB],
+        undefined,
+      );
       expect(res).toStrictEqual({
         failedFileName: undefined,
         fileName: expect.stringMatching('.updated-projects.log'),
@@ -773,9 +911,11 @@ describe('updateOrgTargets', () => {
 
       // Act
       await expect(() =>
-        updateOrgTargets('xxx', [
-          SupportedIntegrationTypesUpdateProject.GITHUB,
-        ]),
+        updateOrgTargets(
+          'xxx',
+          [SupportedIntegrationTypesUpdateProject.GITHUB],
+          undefined,
+        ),
       ).rejects.toThrowError(
         "Please set the GITHUB_TOKEN e.g. export GITHUB_TOKEN='mypersonalaccesstoken123'",
       );
@@ -815,9 +955,11 @@ describe('updateOrgTargets', () => {
       logUpdatedProjectsSpy.mockResolvedValue(null);
 
       // Act
-      const res = await updateOrgTargets('xxx', [
-        SupportedIntegrationTypesUpdateProject.GITHUB,
-      ]);
+      const res = await updateOrgTargets(
+        'xxx',
+        [SupportedIntegrationTypesUpdateProject.GITHUB],
+        undefined,
+      );
 
       expect(res).toStrictEqual({
         failedFileName: undefined,
@@ -955,7 +1097,11 @@ describe('updateOrgTargets', () => {
       const res = await updateOrgTargets(
         'xxx',
         [SupportedIntegrationTypesUpdateProject.GITHUB],
-        true,
+        undefined,
+        {
+          dryRun: true,
+          // exclusionGlobs: ['to-ignore']
+        },
       );
       // Assert
       expect(res).toStrictEqual({
@@ -975,6 +1121,7 @@ describe('updateOrgTargets', () => {
         updated.map((p) => p.type).sort(),
       );
 
+      expect(cloneAndAnalyzeSpy).toHaveBeenCalledTimes(2);
       expect(res.meta.projects.failed).toEqual([]);
       expect(featureFlagsSpy).toHaveBeenCalledTimes(1);
       expect(listTargetsSpy).toHaveBeenCalledTimes(1);
@@ -1021,7 +1168,11 @@ describe('updateOrgTargets', () => {
 
       // Act & Assert
       await expect(() =>
-        updateOrgTargets('xxx', [SupportedIntegrationTypesUpdateProject.GHE]),
+        updateOrgTargets(
+          'xxx',
+          [SupportedIntegrationTypesUpdateProject.GHE],
+          undefined,
+        ),
       ).rejects.toThrowError(
         "Please set the GITHUB_TOKEN e.g. export GITHUB_TOKEN='mypersonalaccesstoken123'",
       );
@@ -1129,8 +1280,10 @@ describe('updateOrgTargets', () => {
       const res = await updateOrgTargets(
         'xxx',
         [SupportedIntegrationTypesUpdateProject.GHE],
-        true,
         'https://custom.ghe.com',
+        {
+          dryRun: true,
+        },
       );
       // Assert
       expect(res).toStrictEqual({

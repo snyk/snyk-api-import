@@ -76,14 +76,14 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        undefined,
-        undefined,
+        {
+          exclusionGlobs: ['bundler-app'],
+        },
       );
 
       // Assert
       expect(res).toStrictEqual({
-        import: ['Gemfile.lock', 'bundler-app/Gemfile.lock'],
+        import: ['Gemfile.lock'],
         deactivate: [],
       });
     });
@@ -138,18 +138,15 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource', 'infrastructureAsCode'],
-        undefined,
+        {
+          entitlements: ['openSource', 'infrastructureAsCode'],
+          exclusionGlobs: ['*.file.json'],
+        },
       );
 
       // Assert
       expect(res).toStrictEqual({
-        import: [
-          'Gemfile.lock',
-          'bundler-app/Gemfile.lock',
-          'package-2.file.json',
-        ],
+        import: ['Gemfile.lock', 'bundler-app/Gemfile.lock'],
         deactivate: [],
       });
     });
@@ -215,9 +212,10 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        ['npm'],
+        {
+          entitlements: ['openSource'],
+          manifestTypes: ['npm'],
+        },
       );
 
       // Assert
@@ -306,9 +304,9 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        undefined,
+        {
+          entitlements: ['openSource'],
+        },
       );
 
       // Assert
@@ -332,9 +330,9 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        undefined,
+        {
+          entitlements: ['openSource'],
+        },
       );
 
       expect(res).toStrictEqual({
@@ -358,9 +356,9 @@ describe('cloneAndAnalyze', () => {
           SupportedIntegrationTypesUpdateProject.GITHUB,
           repoMeta,
           projects,
-          undefined,
-          ['openSource'],
-          undefined,
+          {
+            entitlements: ['openSource'],
+          },
         ),
       ).rejects.toThrowError(
         'fatal: Remote branch master not found in upstream origin',
@@ -384,9 +382,9 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        undefined,
+        {
+          entitlements: ['openSource'],
+        },
       );
 
       expect(res).toStrictEqual({
@@ -418,9 +416,9 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        undefined,
+        {
+          entitlements: ['openSource'],
+        },
       );
 
       // Assert
@@ -454,9 +452,13 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource', 'infrastructureAsCode', 'dockerfileFromScm'],
-        undefined,
+        {
+          entitlements: [
+            'openSource',
+            'infrastructureAsCode',
+            'dockerfileFromScm',
+          ],
+        },
       );
 
       // Assert
@@ -479,9 +481,7 @@ describe('cloneAndAnalyze', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         repoMeta,
         projects,
-        undefined,
-        ['openSource'],
-        undefined,
+        { entitlements: ['openSource'] },
       );
 
       // Assert

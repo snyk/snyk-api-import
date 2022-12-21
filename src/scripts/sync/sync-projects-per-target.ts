@@ -8,13 +8,13 @@ import type {
   SnykTarget,
   Target,
   RepoMetaData,
+  SyncTargetsConfig,
 } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { targetGenerators } from '../generate-imported-targets-from-snyk';
 import { deactivateProject, listProjects } from '../../lib';
 import pMap = require('p-map');
 import { cloneAndAnalyze } from './clone-and-analyze';
-import type { SnykProductEntitlement } from '../../lib/supported-project-types/supported-manifests';
 const debug = debugLib('snyk:sync-projects-per-target');
 
 export enum ProjectUpdateType {
@@ -35,10 +35,11 @@ export async function syncProjectsForTarget(
   requestManager: requestsManager,
   orgId: string,
   target: SnykTarget,
-  dryRun = false,
-  host?: string,
-  entitlements: SnykProductEntitlement[] = ['openSource'],
-  manifestTypes?: string[],
+  host: string | undefined,
+  config: SyncTargetsConfig = {
+    dryRun: false,
+    entitlements: ['openSource'],
+  },
 ): Promise<{ updated: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
   const updated = new Set<ProjectUpdate>();
   const failed = new Set<ProjectUpdateFailure>();
@@ -73,7 +74,7 @@ export async function syncProjectsForTarget(
         type: ProjectUpdateType.BRANCH,
         from: project.branch!,
         to: targetMeta.branch,
-        dryRun,
+        dryRun: config.dryRun,
         target,
       });
     });
@@ -81,14 +82,11 @@ export async function syncProjectsForTarget(
 
   const deactivate = [];
   try {
-    const res = await cloneAndAnalyze(
-      origin,
-      targetMeta!,
-      projects,
-      undefined, // TODO send exclusions when import is supported
-      entitlements,
-      manifestTypes,
-    );
+    const res = await cloneAndAnalyze(origin, targetMeta!, projects, {
+      exclusionGlobs: config.exclusionGlobs,
+      entitlements: config.entitlements,
+      manifestTypes: config.manifestTypes,
+    });
     debug(
       'Analysis finished',
       JSON.stringify({ deactivate: res.deactivate.length }),
@@ -104,7 +102,7 @@ export async function syncProjectsForTarget(
         from: 'active',
         to: 'deactivated',
         type: ProjectUpdateType.DEACTIVATE,
-        dryRun,
+        dryRun: config.dryRun,
         target,
       });
     });
@@ -125,9 +123,9 @@ export async function syncProjectsForTarget(
       orgId,
       branchUpdateProjects,
       targetMeta!.branch,
-      dryRun,
+      config.dryRun,
     ),
-    bulkDeactivateProjects(requestManager, orgId, deactivate, dryRun),
+    bulkDeactivateProjects(requestManager, orgId, deactivate, config.dryRun),
   ];
 
   const [branchUpdate, deactivatedProjects] = await Promise.all(actions);

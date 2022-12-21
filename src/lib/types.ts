@@ -1,4 +1,4 @@
-import { SnykProductEntitlement } from './supported-project-types/supported-manifests';
+import type { SnykProductEntitlement } from './supported-project-types/supported-manifests';
 
 export interface ImportTarget {
   orgId: string;
@@ -244,3 +244,10 @@ export interface RESTTargetResponse {
     self?: string;
   };
 }
+
+export type SyncTargetsConfig = {
+  dryRun: boolean;
+  entitlements?: SnykProductEntitlement[];
+  manifestTypes?: string[];
+  exclusionGlobs?: string[];
+};

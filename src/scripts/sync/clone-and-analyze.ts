@@ -4,12 +4,12 @@ import * as path from 'path';
 import { defaultExclusionGlobs } from '../../common';
 
 import { find, getSCMSupportedManifests, gitClone } from '../../lib';
-import type { SnykProductEntitlement } from '../../lib/supported-project-types/supported-manifests';
 import { getSCMSupportedProjectTypes } from '../../lib/supported-project-types/supported-manifests';
 import type {
   RepoMetaData,
   SnykProject,
   SupportedIntegrationTypesUpdateProject,
+  SyncTargetsConfig,
 } from '../../lib/types';
 import { generateProjectDiffActions } from './generate-projects-diff-actions';
 
@@ -19,13 +19,16 @@ export async function cloneAndAnalyze(
   integrationType: SupportedIntegrationTypesUpdateProject,
   repoMetadata: RepoMetaData,
   snykMonitoredProjects: SnykProject[],
-  exclusionGlobs: string[] = [],
-  entitlements: SnykProductEntitlement[] = ['openSource'],
-  manifestTypes?: string[],
+  config: Omit<SyncTargetsConfig, 'dryRun'>,
 ): Promise<{
   import: string[];
   deactivate: SnykProject[];
 }> {
+  const {
+    manifestTypes,
+    entitlements = ['openSource'],
+    exclusionGlobs = [],
+  } = config;
   const manifestFileTypes =
     manifestTypes && manifestTypes.length > 0
       ? manifestTypes
