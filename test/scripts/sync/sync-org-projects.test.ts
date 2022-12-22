@@ -747,7 +747,6 @@ describe('updateTargets', () => {
 
       expect(githubSpy).toBeCalledWith(
         {
-          branch: 'master',
           name: 'monorepo',
           owner: 'snyk',
         },

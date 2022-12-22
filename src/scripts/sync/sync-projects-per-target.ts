@@ -12,7 +12,6 @@ import type {
 } from '../../lib/types';
 import { ProjectUpdateType } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
-import { targetGenerators } from '../generate-imported-targets-from-snyk';
 import { deactivateProject, listProjects } from '../../lib';
 import pMap = require('p-map');
 import { cloneAndAnalyze } from './clone-and-analyze';
@@ -27,6 +26,16 @@ export function getMetaDataGenerator(
     [SupportedIntegrationTypesUpdateProject.GHE]: getGithubRepoMetaData,
   };
   return getDefaultBranchGenerators[origin];
+}
+
+export function getTargetConverter(
+  origin: SupportedIntegrationTypesUpdateProject,
+): (target: SnykTarget) => Target {
+  const getTargetConverter = {
+    [SupportedIntegrationTypesUpdateProject.GITHUB]: snykTargetConverter,
+    [SupportedIntegrationTypesUpdateProject.GHE]: snykTargetConverter,
+  };
+  return getTargetConverter[origin];
 }
 
 export async function syncProjectsForTarget(
@@ -57,10 +66,11 @@ export async function syncProjectsForTarget(
   }
   debug(`Syncing projects for target ${target.attributes.displayName}`);
   let targetMeta: RepoMetaData;
-  const origin = projects[0].origin as SupportedIntegrationTypesUpdateProject;
+  const origin = target.attributes
+    .origin as SupportedIntegrationTypesUpdateProject;
+  const targetData = getTargetConverter(origin)(target);
 
   try {
-    const targetData = targetGenerators[origin](projects[0]);
     targetMeta = await getMetaDataGenerator(origin)(targetData, host);
   } catch (e) {
     debug(e);
@@ -339,4 +349,12 @@ export async function bulkImportTargetFiles(
     });
   }
   return { created, failed };
+}
+
+export function snykTargetConverter(target: SnykTarget): Target {
+  const [owner, name] = target.attributes.displayName.split('/');
+  return {
+    owner,
+    name: name,
+  };
 }
