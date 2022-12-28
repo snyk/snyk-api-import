@@ -32,7 +32,7 @@ This is an opinionated util and will assume every organization in Github.com / G
   --sourceOrgPublicId  Public id of the organization in Snyk that
                        can be used as a template to copy all
                        supported organization settings.
-  --skipEmptyOrgs      Skip organizations that have no targets. 
+  --skipEmptyOrgs      Skip organizations that have no targets.
                        (e.g. Github Organizations that have no repos)
 ```
 ## Github.com / Github Enterprise
@@ -50,7 +50,7 @@ This will create the organization data in a file `group-<snyk_group_id>-github-<
  - **Gitlab:** `snyk-api-import orgs:data --source=gitlab --groupId=<snyk_group_id>`
  - **Hosted Gitlab:** `snyk-api-import orgs:data --source=gitlab --groupId=<snyk_group_id> -- sourceUrl=https://gitlab.custom.com`
 
-This will create the organization data in a file `group-<snyk_group_id>-gitlab-orgs.json`
+This will create the organization data in a file `group-<snyk_group_id>-gitlab-orgs.json`. Both groups & sub-groups will be [listed](https://docs.gitlab.com/ee/api/groups.html) and then these will become Organizations in Snyk.
 
 
 ## Bitbucket Server

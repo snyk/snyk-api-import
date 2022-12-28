@@ -41,7 +41,7 @@ export async function fetchGitlabReposForPage(
       path_with_namespace,
       id,
     } = project;
-    if (groupName !== namespace.name) {
+    if (groupName !== namespace.full_path) {
       debug(
         `Skipping project ${project.name_with_namespace} as it belong to another group`,
       );

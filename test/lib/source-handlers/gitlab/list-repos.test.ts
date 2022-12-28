@@ -23,19 +23,27 @@ describe('listGitlabRepos', () => {
       fork: expect.any(Boolean),
     });
     expect(
-      repos.filter((r) => r.name === 'snyk-fixtures/shared-with-group'),
+      repos.filter((r) => r.name === `${GITLAB_ORG_NAME}/shared-with-group`),
     ).toHaveLength(1);
   });
   it('list repos (Gitlab Custom URL) excludes a shared project', async () => {
     const GITLAB_BASE_URL = process.env.TEST_GITLAB_BASE_URL;
+    const GITLAB_ORG_NAME = process.env.TEST_GITLAB_ORG_NAME;
     process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
     // shared-with-group project is shared with group snyk-test
     const gitlabGroupName = 'snyk-test';
-
     const repos = await listGitlabRepos(gitlabGroupName, GITLAB_BASE_URL);
     expect(
-      repos.filter((r) => r.name === 'snyk-fixtures/shared-with-group'),
+      repos.filter((r) => r.name === `${GITLAB_ORG_NAME}/shared-with-group`),
     ).toEqual([]);
-    expect(repos.length === 0).toBeTruthy();
+    expect(repos.length > 0).toBeTruthy();
+  });
+
+  it('list repos for a sub-group', async () => {
+    const GITLAB_BASE_URL = process.env.TEST_GITLAB_BASE_URL;
+    process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
+    const gitlabGroupName = 'snyk-fixtures/example-sub-group';
+    const repos = await listGitlabRepos(gitlabGroupName, GITLAB_BASE_URL);
+    expect(repos.length > 0).toBeTruthy();
   });
 });
