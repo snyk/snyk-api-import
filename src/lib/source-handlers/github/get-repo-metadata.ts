@@ -1,9 +1,11 @@
 import { Octokit } from '@octokit/rest';
+import { retry } from '@octokit/plugin-retry';
 import * as debugLib from 'debug';
 import type { RepoMetaData, Target } from '../../types';
 import { getGithubToken } from './get-github-token';
 import { getGithubBaseUrl } from './github-base-url';
 
+const githubClient = Octokit.plugin(retry);
 const debug = debugLib('snyk:get-github-defaultBranch-script');
 
 export async function getGithubRepoMetaData(
@@ -12,7 +14,10 @@ export async function getGithubRepoMetaData(
 ): Promise<RepoMetaData> {
   const githubToken = getGithubToken();
   const baseUrl = getGithubBaseUrl(host);
-  const octokit: Octokit = new Octokit({ baseUrl, auth: githubToken });
+  const octokit: Octokit = new githubClient({
+    baseUrl,
+    auth: githubToken,
+  });
 
   debug(`Fetching default branch for repo: ${target.owner}/${target.name}`);
 

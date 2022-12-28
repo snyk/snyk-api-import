@@ -1,10 +1,12 @@
 import { Octokit } from '@octokit/rest';
+import { retry } from '@octokit/plugin-retry';
 import * as debugLib from 'debug';
 import { getGithubToken } from './get-github-token';
 import { getGithubBaseUrl } from './github-base-url';
 import type { GithubRepoData } from './types';
 
 const debug = debugLib('snyk:list-repos-script');
+const githubClient = Octokit.plugin(retry);
 
 export async function fetchReposForPage(
   octokit: Octokit,
@@ -82,7 +84,7 @@ export async function listGithubRepos(
 ): Promise<GithubRepoData[]> {
   const githubToken = getGithubToken();
   const baseUrl = getGithubBaseUrl(host);
-  const octokit: Octokit = new Octokit({ baseUrl, auth: githubToken });
+  const octokit: Octokit = new githubClient({ baseUrl, auth: githubToken });
   debug(`Fetching all repos data for org: ${orgName}`);
   const repos = await fetchAllRepos(octokit, orgName);
 
