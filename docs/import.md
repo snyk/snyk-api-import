@@ -11,18 +11,19 @@
     - [Example: Google Container Registry](#example-google-container-registry)
     - [Example: Azure Container Registry, Elastic Container Registry, Artifactory Container Registry](#example-azure-container-registry-elastic-container-registry-artifactory-container-registry)
   - [2. Set the env vars](#2-set-the-env-vars)
-  - [3. Download & run](#3-download--run)
+  - [3. Download \& run](#3-download--run)
+  - [4. Review logs](#4-review-logs)
 - [Tips](#tips)
   - [Skip all previously imported targets](#skip-all-previously-imported-targets)
   - [Check how many projects successfully imported](#check-how-many-projects-successfully-imported)
-  - [Check how many projects failed to import& why](#check-how-many-projects-failed-to-import-why)
+  - [Check how many projects failed to import\& why](#check-how-many-projects-failed-to-import-why)
 
 
 ## Prerequisites
 You will need to have setup in advance:
 - your [Snyk organizations](docs/orgs.md) should be setup before running an import
-- your Snyk organizations configured with some connection to SCM (Github/Gitlab/Bitbucket etc) as you will need the `integrationId` to generate the import files. 
-- you will need your Snyk API token, with correct scope & [admin access for all Organizations](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets) you are importing to. **Github Integration Note**: As Github is both an auth & integration, how the integration is done has an effect on usage: 
+- your Snyk organizations configured with some connection to SCM (Github/Gitlab/Bitbucket etc) as you will need the `integrationId` to generate the import files.
+- you will need your Snyk API token, with correct scope & [admin access for all Organizations](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets) you are importing to. **Github Integration Note**: As Github is both an auth & integration, how the integration is done has an effect on usage:
   - For users importing via [Github Snyk integration](https://docs.snyk.io/integrations/git-repository-scm-integrations/github-integration#setting-up-a-github-integration) use your **personal Snyk API token** (Service Accounts are not supported for Github integration imports via API as this is a personal auth token only accessible to the user)
   - For Github Enterprise Snyk integration with a url & token (for Github.com, Github Enterprise Cloud & Github Enterprise hosted) use a **Snyk API service account token**
 - Recommended: have [notifications disabled](https://snyk.docs.apiary.io/#reference/organizations/notification-settings/set-notification-settings) for emails etc to avoid receiving import notifications
@@ -194,6 +195,16 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 ## 3. Download & run
 
 Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/imported-targets.json`
+
+## 4. Review logs
+When import is started via Snyk API, many files & targets will be added to an import job. This job when complete will provide logs of what projects could be detected, which failed and any errors that were encountered. For more details see [Import API documentation](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets)
+
+`import` command will generate several logs:
+- `<public_org_id>.failed-polls.log` - contains errors received when polling an import job for status (complete / pending)
+- `<public_org_id>.failed-projects.log` - contains entry per project that was identified but failed to be created
+- `<public_org_id>.imported_projects.log` - contains entry per projects of all projects that were successfully created in Snyk
+- `import-job-results.log` - contains the [Import API](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets) logs received for this job once it completed.
+- `imported-targets.log` - contains information on which targets have been requested for processing.
 
 # Tips
 ## Skip all previously imported targets

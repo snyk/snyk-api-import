@@ -15,6 +15,8 @@
 - [Kick off sync](#kick-off-sync)
   - [1. Set the env vars](#1-set-the-env-vars)
   - [2. Download \& run](#2-download--run)
+  - [3. Review logs](#3-review-logs)
+    - [--dryRun](#--dryrun)
   - [Examples](#examples)
     - [Github.com](#githubcom)
     - [GitHub Enterprise Server](#github-enterprise-server)
@@ -70,6 +72,7 @@ Any projects that were imported but match the default exclusions list (deemed to
 - `.git`
 
 ## Detecting & importing new files not already monitored in Snyk
+
 While analyzing each target known to Snyk any new Snyk supported files found in the repo that do not have a corresponding project in Snyk will be imported in batches. Any files matching the default or user provided `exclusionGlobs` will be ignored.
 If a file has a corresponding de-activated project in Snyk, it will not be brought in again. Activate manually or via API if it should be active.
 
@@ -91,6 +94,22 @@ The command will produce detailed logs for projects that were `updated` and thos
 ## 2. Download & run
 
 Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/imported-targets.json`
+
+## 3. Review logs
+
+The `sync` command will generate several logs:
+
+- `<snyk_public_org_id>.failed-to-sync-target.log` will contain error information when an entire target (Github repo) could not be processed, this can be because the provided token does not have access to this repo, it is archived or deleted etc.
+- `<snyk_public_org_id>.updated-projects.log` will contain project specific information on what kind of update was performed on the project:
+  - `branch` Snyk project default branch was updated
+  - `deactivate` Snyk project was deactivated
+  - `import` Snyk project was created from detected supported file
+
+When `import` is triggered additional import logs will be generated. See [Kicking off an import](../docs/import.md#4-review-logs) documentation for more detailed information on generated logs.
+
+### --dryRun
+
+When running `sync` in `--dryRun` mode the logs will have `dryRun` as `true` so these can be separated from live updates.
 
 ## Examples
 
@@ -129,7 +148,7 @@ Live mode:
 
 ### Exclude from syncing certain files & directories
 
-`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=open-source --snykProduct=iac  --exclusionGlobs=**/*.yaml,logs,system-test`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=open-source --snykProduct=iac --exclusionGlobs=**/*.yaml,logs,system-test`
 
 # Known limitations
 
