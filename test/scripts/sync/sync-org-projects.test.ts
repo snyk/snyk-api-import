@@ -1328,6 +1328,7 @@ describe('bulkImportTargetFiles', () => {
   let logs: string[];
   const OLD_ENV = process.env;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
+  const GHE_INTEGRATION_ID = process.env.GHE_INTEGRATION_ID as string;
   const ORG_ID = 'af137b96-6966-46c1-826b-2e79ac49bbxx';
   let importSingleTargetSpy: jest.SpyInstance;
 
@@ -1373,7 +1374,7 @@ describe('bulkImportTargetFiles', () => {
       requestManager,
       ORG_ID,
       ['ruby-2.5.3-exactly/Gemfile'],
-      SupportedIntegrationTypesUpdateProject.GHE,
+      GHE_INTEGRATION_ID,
       target,
     );
     expect(importSingleTargetSpy).toHaveBeenCalledTimes(1);
@@ -1451,7 +1452,7 @@ describe('bulkImportTargetFiles', () => {
       requestManager,
       ORG_ID,
       projects.map((p) => p.targetFile!),
-      SupportedIntegrationTypesUpdateProject.GHE,
+      GHE_INTEGRATION_ID,
       target,
       false,
       2,
@@ -1532,7 +1533,7 @@ describe('bulkImportTargetFiles', () => {
       requestManager,
       ORG_ID,
       projects.map((p) => p.targetFile!),
-      SupportedIntegrationTypesUpdateProject.GHE,
+      GHE_INTEGRATION_ID,
       target,
       true,
       2,

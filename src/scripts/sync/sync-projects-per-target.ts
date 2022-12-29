@@ -285,7 +285,7 @@ export async function bulkImportTargetFiles(
   requestManager: requestsManager,
   orgId: string,
   files: string[] = [],
-  integrationType: SupportedIntegrationTypesUpdateProject,
+  integrationId: string,
   target: Target,
   dryRun = false,
   concurrentFilesImport = 30,
@@ -322,7 +322,7 @@ export async function bulkImportTargetFiles(
     const { projects, failed: failedProjects } = await importSingleTarget(
       requestManager,
       orgId,
-      integrationType,
+      integrationId,
       target,
       batch,
     );
