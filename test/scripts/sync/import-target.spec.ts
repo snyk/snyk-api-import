@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { requestsManager } from 'snyk-request-manager';
 import { importSingleTarget } from '../../../src/scripts/sync/import-target';
-import { SupportedIntegrationTypesUpdateProject } from '../../../src/lib/types';
 import type { Project } from '../../../src/lib/types';
 import { deleteFiles } from '../../delete-files';
 import { deleteTestProjects } from '../../delete-test-projects';
@@ -9,6 +8,7 @@ import { generateLogsPaths } from '../../generate-log-file-names';
 
 const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
+const GHE_INTEGRATION_ID = process.env.GHE_INTEGRATION_ID as string;
 
 jest.unmock('snyk-request-manager');
 jest.requireActual('snyk-request-manager');
@@ -43,7 +43,7 @@ describe('Import projects script', () => {
     const { projects } = await importSingleTarget(
       requestManager,
       ORG_ID,
-      SupportedIntegrationTypesUpdateProject.GHE,
+      GHE_INTEGRATION_ID,
       target,
     );
     expect(projects).not.toBe([]);
@@ -72,7 +72,7 @@ describe('Import projects script', () => {
     const { projects } = await importSingleTarget(
       requestManager,
       ORG_ID,
-      SupportedIntegrationTypesUpdateProject.GHE,
+      GHE_INTEGRATION_ID,
       target,
       undefined,
       'ruby-2.5.3-exactly',
