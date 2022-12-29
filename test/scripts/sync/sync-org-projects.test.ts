@@ -43,6 +43,8 @@ describe('updateTargets', () => {
   let listProjectsSpy: jest.SpyInstance;
   let cloneSpy: jest.SpyInstance;
   let deactivateProjectsSpy: jest.SpyInstance;
+  let importSingleTargetSpy: jest.SpyInstance;
+  let listIntegrationsSpy: jest.SpyInstance;
 
   beforeAll(() => {
     githubSpy = jest.spyOn(github, 'getGithubRepoMetaData');
@@ -52,6 +54,13 @@ describe('updateTargets', () => {
       .mockImplementation(() => Promise.resolve(true));
     listProjectsSpy = jest.spyOn(lib, 'listProjects');
     cloneSpy = jest.spyOn(lib, 'gitClone');
+    listIntegrationsSpy = jest
+      .spyOn(lib, 'listIntegrations')
+      .mockResolvedValue({
+        github: 'abcw-12456-dafgsdf-ajrgrbz',
+        'github-enterprise': 'asffgg-2456-6addf-agg',
+      });
+
     jest.spyOn(fs, 'rmdirSync').mockImplementation(() => true);
   }, 1000);
 
@@ -61,12 +70,15 @@ describe('updateTargets', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    importSingleTargetSpy = jest.spyOn(importTarget, 'importSingleTarget');
   }, 1000);
 
   afterEach(() => {
     process.env = { ...OLD_ENV };
+    importSingleTargetSpy.mockReset();
   });
   describe('Github', () => {
+    const integrationId = process.env.INTEGRATION_ID as string;
     it('Removed projects that were accidentally added from `node_modules`', async () => {
       const testTargets = [
         {
@@ -126,6 +138,34 @@ describe('updateTargets', () => {
         ],
       };
 
+      const projectId = uuid.v4();
+      const importedProjects: Project[] = [
+        {
+          projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+          success: true,
+          targetFile: 'build.gradle',
+        },
+        {
+          projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+          success: true,
+          targetFile: 'package.json',
+        },
+      ];
+      const failedProjects: FailedProject[] = [
+        {
+          projectUrl: '',
+          success: false,
+          locationUrl: 'https://polling/url',
+          targetFile: 'failure/Dockerfile',
+          userMessage: 'Invalid syntax',
+        },
+      ];
+
+      importSingleTargetSpy.mockResolvedValueOnce({
+        projects: [importedProjects[0], importedProjects[1], failedProjects[0]],
+        failed: [],
+      });
+
       const defaultBranch = 'develop';
       const updated: syncProjectsForTarget.ProjectUpdate[] = [
         {
@@ -141,6 +181,30 @@ describe('updateTargets', () => {
           from: 'active',
           to: 'deactivated',
           type: ProjectUpdateType.DEACTIVATE,
+          dryRun: false,
+          target: testTargets[0],
+        },
+        {
+          projectPublicId: projectId,
+          from: importedProjects[0].targetFile!,
+          to: importedProjects[0].projectUrl,
+          type: ProjectUpdateType.IMPORT,
+          dryRun: false,
+          target: testTargets[0],
+        },
+        {
+          projectPublicId: projectId,
+          from: importedProjects[1].targetFile!,
+          to: importedProjects[1].projectUrl,
+          type: ProjectUpdateType.IMPORT,
+          dryRun: false,
+          target: testTargets[0],
+        },
+        {
+          projectPublicId: '',
+          from: failedProjects[0].targetFile!,
+          to: '',
+          type: ProjectUpdateType.IMPORT,
           dryRun: false,
           target: testTargets[0],
         },
@@ -161,6 +225,7 @@ describe('updateTargets', () => {
       listProjectsSpy.mockImplementation(() =>
         Promise.resolve(projectsAPIResponse),
       );
+      listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
       githubSpy.mockImplementation(() =>
         Promise.resolve({
           branch: defaultBranch,
@@ -178,7 +243,7 @@ describe('updateTargets', () => {
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
-          repoPath: path.resolve(fixturesFolderPath, 'monorepo'),
+          repoPath: path.resolve(fixturesFolderPath, 'monorepo-new'),
           gitResponse: '',
         }),
       );
@@ -187,6 +252,7 @@ describe('updateTargets', () => {
         requestManager,
         orgId,
         testTargets,
+        integrationId,
         undefined,
       );
 
@@ -278,6 +344,7 @@ describe('updateTargets', () => {
           sshUrl: 'git@some-url.com',
         }),
       );
+      listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
       updateProjectsSpy.mockImplementation(() =>
         Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
       );
@@ -293,7 +360,10 @@ describe('updateTargets', () => {
         requestManager,
         orgId,
         testTarget,
+        integrationId,
         undefined,
+
+        { dryRun: false, exclusionGlobs: ['to-ignore'] },
       );
 
       // Assert
@@ -383,6 +453,7 @@ describe('updateTargets', () => {
           sshUrl: 'git@some-url.com',
         }),
       );
+      listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
       updateProjectsSpy.mockImplementation(() =>
         Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
       );
@@ -398,6 +469,7 @@ describe('updateTargets', () => {
         requestManager,
         orgId,
         testTarget,
+        integrationId,
         undefined,
         {
           dryRun: false,
@@ -417,7 +489,7 @@ describe('updateTargets', () => {
         },
       });
     }, 10000);
-
+    it.todo('Listing integrations fails');
     it('did not need to update a projects branch', async () => {
       // Arrange
       const testTarget = [
@@ -474,6 +546,7 @@ describe('updateTargets', () => {
           sshUrl: 'git@some-url.com',
         }),
       );
+      listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
@@ -490,7 +563,9 @@ describe('updateTargets', () => {
         requestManager,
         orgId,
         testTarget,
+        integrationId,
         undefined,
+        { dryRun: false, exclusionGlobs: ['to-ignore'] },
       );
 
       // Assert
@@ -582,6 +657,7 @@ describe('updateTargets', () => {
       listProjectsSpy.mockImplementation(() =>
         Promise.resolve(projectsAPIResponse),
       );
+      listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
       githubSpy.mockImplementation(() =>
         Promise.resolve({
           branch: defaultBranch,
@@ -608,6 +684,7 @@ describe('updateTargets', () => {
         requestManager,
         orgId,
         testTargets,
+        integrationId,
         undefined,
       );
 
@@ -623,8 +700,136 @@ describe('updateTargets', () => {
         },
       });
     }, 5000);
+    it('imports all projects for an empty target', async () => {
+      // Arrange
+      const testTargets = [
+        {
+          attributes: {
+            displayName: 'snyk/monorepo',
+            isPrivate: false,
+            origin: 'github',
+            remoteUrl: null,
+          },
+          id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+          relationships: {
+            org: {
+              data: {
+                id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+                type: 'org',
+              },
+              links: {},
+              meta: {},
+            },
+          },
+          type: 'target',
+        },
+      ];
+      const orgId = 'af137b96-6966-46c1-826b-2e79ac49bbxx';
+      const projectsAPIResponse: ProjectsResponse = {
+        org: {
+          id: orgId,
+        },
+        projects: [],
+      };
+
+      const defaultBranch = 'develop';
+
+      const projectId = uuid.v4();
+
+      const projects: Project[] = [
+        {
+          projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+          success: true,
+          targetFile: 'build.gradle',
+        },
+        {
+          projectUrl: `https://app.snyk.io/org/hello/project/${projectId}`,
+          success: true,
+          targetFile: 'package.json',
+        },
+      ];
+      const failedProjects: FailedProject[] = [
+        {
+          projectUrl: '',
+          success: false,
+          locationUrl: 'https://polling/url',
+          targetFile: 'failure/Dockerfile',
+          userMessage: 'Invalid syntax',
+        },
+      ];
+
+      importSingleTargetSpy.mockResolvedValueOnce({
+        projects: [projects[0], projects[1], failedProjects[0]],
+        failed: [],
+      });
+
+      listProjectsSpy.mockImplementation(() =>
+        Promise.resolve(projectsAPIResponse),
+      );
+      listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
+      githubSpy.mockImplementation(() =>
+        Promise.resolve({
+          branch: defaultBranch,
+          cloneUrl: 'https://some-url.com',
+          sshUrl: 'git@some-url.com',
+        }),
+      );
+      cloneSpy.mockImplementation(() =>
+        Promise.resolve({
+          success: true,
+          repoPath: path.resolve(fixturesFolderPath, 'monorepo'),
+          gitResponse: '',
+        }),
+      );
+      // Act
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTargets,
+        integrationId,
+        undefined,
+      );
+
+      // Assert
+      expect(res).toStrictEqual({
+        processedTargets: 1,
+        failedTargets: 0,
+        meta: {
+          projects: {
+            updated: [
+              {
+                dryRun: false,
+                from: projects[0].targetFile,
+                projectPublicId: projectId,
+                target: testTargets[0],
+                to: projects[0].projectUrl,
+                type: 'import',
+              },
+              {
+                dryRun: false,
+                from: projects[1].targetFile,
+                projectPublicId: projectId,
+                target: testTargets[0],
+                to: projects[1].projectUrl,
+                type: 'import',
+              },
+              {
+                dryRun: false,
+                from: failedProjects[0].targetFile,
+                projectPublicId: '',
+                target: testTargets[0],
+                to: failedProjects[0].projectUrl,
+                type: 'import',
+              },
+            ],
+            failed: [],
+          },
+        },
+      });
+    }, 5000);
   });
   describe('Github Enterprise', () => {
+    const integrationId = process.env.GHE_INTEGRATION_ID as string;
     it('updates several projects from the same target 1 failed 1 success', async () => {
       // Arrange
       const testTargets = [
@@ -708,6 +913,9 @@ describe('updateTargets', () => {
           sshUrl: 'git@some-url.com',
         }),
       );
+
+      listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
+
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
@@ -727,6 +935,7 @@ describe('updateTargets', () => {
         requestManager,
         orgId,
         testTargets,
+        integrationId,
         'https://custom-ghe.com',
         {
           dryRun: false,
@@ -769,6 +978,7 @@ describe('updateOrgTargets', () => {
   let updateProjectSpy: jest.SpyInstance;
   let deactivateProjectSpy: jest.SpyInstance;
   let cloneAndAnalyzeSpy: jest.SpyInstance;
+  let listIntegrationsSpy: jest.SpyInstance;
 
   let cloneSpy: jest.SpyInstance;
 
@@ -782,6 +992,12 @@ describe('updateOrgTargets', () => {
     deactivateProjectSpy = jest.spyOn(projectApi, 'deactivateProject');
     cloneSpy = jest.spyOn(lib, 'gitClone');
     cloneAndAnalyzeSpy = jest.spyOn(clone, 'cloneAndAnalyze');
+    listIntegrationsSpy = jest
+      .spyOn(lib, 'listIntegrations')
+      .mockResolvedValue({
+        github: 'abcw-12456-dafgsdf-ajrgrbz',
+        'github-enterprise': 'asffgg-2456-6addf-agg',
+      });
     jest.spyOn(fs, 'rmdirSync').mockImplementation(() => true);
   });
   afterAll(() => {
@@ -844,6 +1060,7 @@ describe('updateOrgTargets', () => {
       ];
       featureFlagsSpy.mockResolvedValue(false);
       listTargetsSpy.mockResolvedValue({ targets });
+
       listProjectsSpy
         .mockRejectedValueOnce(
           'Expected a 200 response, instead received:' +
@@ -1106,7 +1323,7 @@ describe('updateOrgTargets', () => {
         undefined,
         {
           dryRun: true,
-          // exclusionGlobs: ['to-ignore']
+          exclusionGlobs: ['to-ignore'],
         },
       );
       // Assert
@@ -1130,6 +1347,7 @@ describe('updateOrgTargets', () => {
       expect(cloneAndAnalyzeSpy).toHaveBeenCalledTimes(2);
       expect(res.meta.projects.failed).toEqual([]);
       expect(featureFlagsSpy).toHaveBeenCalledTimes(1);
+      expect(listIntegrationsSpy).toHaveBeenCalledTimes(1);
       expect(listTargetsSpy).toHaveBeenCalledTimes(1);
       expect(listProjectsSpy).toHaveBeenCalledTimes(2);
       expect(githubSpy).toBeCalledTimes(2);
@@ -1289,6 +1507,7 @@ describe('updateOrgTargets', () => {
         'https://custom.ghe.com',
         {
           dryRun: true,
+          exclusionGlobs: ['to-ignore'],
         },
       );
       // Assert
@@ -1370,7 +1589,7 @@ describe('bulkImportTargetFiles', () => {
       failed: [],
     });
 
-    const { created } = await bulkImportTargetFiles(
+    const { updated } = await bulkImportTargetFiles(
       requestManager,
       ORG_ID,
       ['ruby-2.5.3-exactly/Gemfile'],
@@ -1378,9 +1597,9 @@ describe('bulkImportTargetFiles', () => {
       target,
     );
     expect(importSingleTargetSpy).toHaveBeenCalledTimes(1);
-    expect(created).not.toBe([]);
-    expect(created.length).toEqual(1);
-    expect(created[0]).toMatchObject({
+    expect(updated).not.toBe([]);
+    expect(updated.length).toEqual(1);
+    expect(updated[0]).toMatchObject({
       dryRun: false,
       from: 'Gemfile.lock',
       projectPublicId: projectId,
@@ -1448,7 +1667,7 @@ describe('bulkImportTargetFiles', () => {
       failed: [failedProjects[0]],
     });
 
-    const { created, failed } = await bulkImportTargetFiles(
+    const { updated, failed } = await bulkImportTargetFiles(
       requestManager,
       ORG_ID,
       projects.map((p) => p.targetFile!),
@@ -1458,11 +1677,11 @@ describe('bulkImportTargetFiles', () => {
       2,
     );
     expect(importSingleTargetSpy).toHaveBeenCalledTimes(3);
-    expect(created).not.toBe([]);
-    expect(created.length).toEqual(5);
+    expect(updated).not.toBe([]);
+    expect(updated.length).toEqual(5);
     expect(failed.length).toEqual(1);
 
-    expect(created.find((c) => c.from === 'folder/package.json')).toMatchObject(
+    expect(updated.find((c) => c.from === 'folder/package.json')).toMatchObject(
       {
         dryRun: false,
         from: 'folder/package.json',
@@ -1529,7 +1748,7 @@ describe('bulkImportTargetFiles', () => {
       failed: [],
     });
 
-    const { created } = await bulkImportTargetFiles(
+    const { updated } = await bulkImportTargetFiles(
       requestManager,
       ORG_ID,
       projects.map((p) => p.targetFile!),
@@ -1539,7 +1758,7 @@ describe('bulkImportTargetFiles', () => {
       2,
     );
     expect(importSingleTargetSpy).toHaveBeenCalledTimes(0);
-    expect(created).not.toBe([]);
-    expect(created.length).toEqual(5);
+    expect(updated).not.toBe([]);
+    expect(updated.length).toEqual(5);
   });
 });

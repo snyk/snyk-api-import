@@ -11,6 +11,7 @@
     - [Scenarios](#scenarios)
       - [File renamed/moves/deleted](#file-renamedmovesdeleted)
       - [node\_modules, tests \& fixtures](#node_modules-tests--fixtures)
+  - [Detecting \& importing new files not already monitored in Snyk](#detecting--importing-new-files-not-already-monitored-in-snyk)
 - [Kick off sync](#kick-off-sync)
   - [1. Set the env vars](#1-set-the-env-vars)
   - [2. Download \& run](#2-download--run)
@@ -20,6 +21,7 @@
     - [GitHub Enterprise Cloud](#github-enterprise-cloud)
     - [Only syncing Container projects (Dockerfiles)](#only-syncing-container-projects-dockerfiles)
     - [Only syncing Open Source + Iac projects (Dockerfiles)](#only-syncing-open-source--iac-projects-dockerfiles)
+    - [Exclude from syncing certain files \& directories](#exclude-from-syncing-certain-files--directories)
 - [Known limitations](#known-limitations)
 
 ## Prerequisites
@@ -67,6 +69,10 @@ Any projects that were imported but match the default exclusions list (deemed to
 - `bower_components`
 - `.git`
 
+## Detecting & importing new files not already monitored in Snyk
+While analyzing each target known to Snyk any new Snyk supported files found in the repo that do not have a corresponding project in Snyk will be imported in batches. Any files matching the default or user provided `exclusionGlobs` will be ignored.
+If a file has a corresponding de-activated project in Snyk, it will not be brought in again. Activate manually or via API if it should be active.
+
 # Kick off sync
 
 `sync` command will analyze existing projects & targets (repos) in Snyk organization and determine if any changes are needed.
@@ -91,7 +97,7 @@ Grab a binary from the [releases page](https://github.com/snyk-tech-services/sny
 ### Github.com
 
 In dry-run mode:
-`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github --dryRun=true`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github --exclusionGlobs=**/package.json,logs --dryRun=true`
 
 Live mode:
 `DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github`
@@ -102,7 +108,7 @@ In dry-run mode:
 `DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com --dryRun=true`
 
 Live mode:
-`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com --exclusionGlobs=**/*.yaml,logs`
 
 ### GitHub Enterprise Cloud
 
@@ -120,6 +126,10 @@ Live mode:
 ### Only syncing Open Source + Iac projects (Dockerfiles)
 
 `DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=open-source --snykProduct=iac`
+
+### Exclude from syncing certain files & directories
+
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=open-source --snykProduct=iac  --exclusionGlobs=**/*.yaml,logs,system-test`
 
 # Known limitations
 

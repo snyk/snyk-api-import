@@ -12,11 +12,7 @@ import { getLoggingPath } from '../../get-logging-path';
 import { logFailedImports } from '../../../loggers/log-failed-imports';
 import { logImportJobsPerOrg } from '../../../loggers/log-import-jobs';
 import { getConcurrentImportsNumber } from '../../get-concurrent-imports-number';
-import {
-  FAILED_LOG_NAME,
-  targetProps,
-  targetPropsWithId,
-} from '../../../common';
+import { FAILED_LOG_NAME, targetProps } from '../../../common';
 import { requestWithRateLimitHandling } from './request-with-rate-limit';
 
 const debug = debugLib('snyk:api-import');

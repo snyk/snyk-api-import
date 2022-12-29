@@ -12,7 +12,7 @@ import type {
 } from '../../lib/types';
 import { ProjectUpdateType } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
-import { deactivateProject, listProjects } from '../../lib';
+import { deactivateProject, listIntegrations, listProjects } from '../../lib';
 import pMap = require('p-map');
 import { cloneAndAnalyze } from './clone-and-analyze';
 import { importSingleTarget } from './import-target';
@@ -42,6 +42,7 @@ export async function syncProjectsForTarget(
   requestManager: requestsManager,
   orgId: string,
   target: SnykTarget,
+  integrationId: string,
   host: string | undefined,
   config: SyncTargetsConfig = {
     dryRun: false,
@@ -57,13 +58,6 @@ export async function syncProjectsForTarget(
     limit: 100,
   });
 
-  // TODO: if target is empty, try to import it and stop here
-  if (projects.length < 1) {
-    return {
-      updated: Array.from(updated),
-      failed: Array.from(failed),
-    };
-  }
   debug(`Syncing projects for target ${target.attributes.displayName}`);
   let targetMeta: RepoMetaData;
   const origin = target.attributes
@@ -89,6 +83,8 @@ export async function syncProjectsForTarget(
   }
 
   const deactivate = [];
+  const createProjects = [];
+
   try {
     const res = await cloneAndAnalyze(origin, targetMeta!, projects, {
       exclusionGlobs: config.exclusionGlobs,
@@ -97,9 +93,13 @@ export async function syncProjectsForTarget(
     });
     debug(
       'Analysis finished',
-      JSON.stringify({ deactivate: res.deactivate.length }),
+      JSON.stringify({
+        deactivate: res.deactivate.length,
+        import: res.import.length,
+      }),
     );
     deactivate.push(...res.deactivate);
+    createProjects.push(...res.import);
   } catch (e) {
     debug(e);
     const error = `Cloning and analysing the repo to deactivate projects failed with error: ${e.message}`;
@@ -134,24 +134,32 @@ export async function syncProjectsForTarget(
       config.dryRun,
     ),
     bulkDeactivateProjects(requestManager, orgId, deactivate, config.dryRun),
+    bulkImportTargetFiles(
+      requestManager,
+      orgId,
+      createProjects,
+      integrationId,
+      { ...targetData, branch: targetMeta!.branch },
+      config.dryRun,
+    ),
   ];
 
-  const [branchUpdate, deactivatedProjects] = await Promise.all(actions);
+  const [branchUpdate, deactivatedProjects, newProjects] = await Promise.all(
+    actions,
+  );
 
-  branchUpdate.updated
+  [
+    ...branchUpdate.updated,
+    ...deactivatedProjects.updated,
+    ...newProjects.updated,
+  ]
     .map((t) => ({ ...t, target }))
     .forEach((i) => updated.add(i));
-  branchUpdate.failed
+  [...branchUpdate.failed, ...deactivatedProjects.failed, ...newProjects.failed]
     .map((t) => ({ ...t, target }))
     .forEach((i) => failed.add(i));
 
-  deactivatedProjects.updated
-    .map((t) => ({ ...t, target }))
-    .forEach((i) => updated.add(i));
-  deactivatedProjects.failed
-    .map((t) => ({ ...t, target }))
-    .forEach((i) => failed.add(i));
-  // TODO: add target info for logs
+  // TODO: add failed target info for logs
   return {
     updated: Array.from(updated),
     failed: Array.from(failed),
@@ -289,18 +297,56 @@ export async function bulkImportTargetFiles(
   target: Target,
   dryRun = false,
   concurrentFilesImport = 30,
-): Promise<{ created: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
-  const created: ProjectUpdate[] = [];
+): Promise<{ updated: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
+  const updated: ProjectUpdate[] = [];
   const failed: ProjectUpdateFailure[] = [];
 
   if (!files.length) {
-    return { created, failed };
+    return { updated, failed };
   }
   debug(`Importing ${files.length} files`);
 
-  if (dryRun) {
+  if (!dryRun) {
+    for (
+      let index = 0;
+      index < files.length;
+      index = index + concurrentFilesImport
+    ) {
+      const batch = files.slice(index, index + concurrentFilesImport);
+
+      const { projects, failed: failedProjects } = await importSingleTarget(
+        requestManager,
+        orgId,
+        integrationId,
+        target,
+        batch,
+      );
+      projects.map((p) => {
+        const projectId = p.projectUrl?.split('/').slice(-1)[0];
+        updated.push({
+          projectPublicId: projectId,
+          type: ProjectUpdateType.IMPORT,
+          from: p.targetFile ?? '', // TODO: is there something more intuitive here?
+          to: p.projectUrl,
+          dryRun,
+        });
+      });
+      failedProjects.map((f) => {
+        failed.push({
+          projectPublicId: '',
+          type: ProjectUpdateType.IMPORT,
+          from: f.targetFile ?? '', // TODO: is there something more intuitive here?
+          to: f.projectUrl,
+          dryRun,
+          errorMessage:
+            f.userMessage ?? 'Failed to import project via Snyk Import API',
+        });
+      });
+    }
+    return { updated, failed };
+  } else {
     files.map((f) =>
-      created.push({
+      updated.push({
         projectPublicId: '',
         type: ProjectUpdateType.IMPORT,
         from: f,
@@ -309,46 +355,8 @@ export async function bulkImportTargetFiles(
       }),
     );
 
-    return { created, failed: [] };
+    return { updated, failed: [] };
   }
-
-  for (
-    let index = 0;
-    index < files.length;
-    index = index + concurrentFilesImport
-  ) {
-    const batch = files.slice(index, index + concurrentFilesImport);
-
-    const { projects, failed: failedProjects } = await importSingleTarget(
-      requestManager,
-      orgId,
-      integrationId,
-      target,
-      batch,
-    );
-    projects.map((p) => {
-      const projectId = p.projectUrl?.split('/').slice(-1)[0];
-      created.push({
-        projectPublicId: projectId,
-        type: ProjectUpdateType.IMPORT,
-        from: p.targetFile ?? '', // TODO: is there something more intuitive here?
-        to: p.projectUrl,
-        dryRun,
-      });
-    });
-    failedProjects.map((f) => {
-      failed.push({
-        projectPublicId: '',
-        type: ProjectUpdateType.IMPORT,
-        from: f.targetFile ?? '', // TODO: is there something more intuitive here?
-        to: f.projectUrl,
-        dryRun,
-        errorMessage:
-          f.userMessage ?? 'Failed to import project via Snyk Import API',
-      });
-    });
-  }
-  return { created, failed };
 }
 
 export function snykTargetConverter(target: SnykTarget): Target {

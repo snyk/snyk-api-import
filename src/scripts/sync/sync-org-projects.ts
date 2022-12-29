@@ -7,6 +7,7 @@ import {
   FAILED_UPDATE_PROJECTS_LOG_NAME,
   UPDATED_PROJECTS_LOG_NAME,
 } from '../../common';
+import { listIntegrations } from '../../lib';
 import type { TargetFilters } from '../../lib';
 import { isGithubConfigured } from '../../lib';
 import { getLoggingPath, listTargets } from '../../lib';
@@ -127,11 +128,18 @@ export async function updateOrgTargets(
         publicOrgId,
         filters,
       );
+      console.log(`Resolving integration ID for source ${source}`);
+      const integrationsData = await listIntegrations(
+        requestManager,
+        publicOrgId,
+      );
+      const integrationId = integrationsData[source];
       console.log(`Syncing targets for source ${source}`);
       const response = await updateTargets(
         requestManager,
         publicOrgId,
         targets,
+        integrationId,
         sourceUrl,
         config,
       );
@@ -165,6 +173,7 @@ export async function updateTargets(
   requestManager: requestsManager,
   orgId: string,
   targets: SnykTarget[],
+  integrationId: string,
   sourceUrl: string | undefined,
   config: SyncTargetsConfig = {
     dryRun: false,
@@ -198,6 +207,7 @@ export async function updateTargets(
           requestManager,
           orgId,
           target,
+          integrationId,
           sourceUrl,
           config,
         );
