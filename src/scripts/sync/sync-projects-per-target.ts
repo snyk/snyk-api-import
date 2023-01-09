@@ -60,6 +60,7 @@ export async function syncProjectsForTarget(
 
   debug(`Syncing projects for target ${target.attributes.displayName}`);
   let targetMeta: RepoMetaData;
+  let isDeleted = false;
   const origin = target.attributes
     .origin as SupportedIntegrationTypesUpdateProject;
   const targetData = getTargetConverter(origin)(target);
@@ -69,18 +70,44 @@ export async function syncProjectsForTarget(
   } catch (e) {
     //TODO: if repo is deleted, deactivate all projects
     debug(e);
-    const error = `Getting default branch via ${origin} API failed with error: ${e.message}`;
-    projects.map((project) => {
-      failed.add({
-        errorMessage: error,
-        projectPublicId: project.id,
-        type: ProjectUpdateType.BRANCH,
-        from: project.branch!,
-        to: targetMeta.branch,
-        dryRun: config.dryRun,
-        target,
+    if (e.status === 404) {
+      // TODO: when else could you get a 404? Manually check
+      isDeleted = true;
+    } else {
+      const error = `Getting metadata from ${origin} API failed with error: ${e.message}`;
+      projects.map((project) => {
+        failed.add({
+          errorMessage: error,
+          projectPublicId: project.id,
+          type: ProjectUpdateType.BRANCH,
+          from: project.branch!,
+          to: 'unknown',
+          dryRun: config.dryRun,
+          target,
+        });
       });
-    });
+      return {
+        updated: Array.from(updated).map((t) => ({ ...t, target })),
+        failed: Array.from(failed).map((t) => ({ ...t, target })),
+      };
+    }
+  }
+
+  if (isDeleted || targetMeta!.archived) {
+    const res = await bulkDeactivateProjects(
+      requestManager,
+      orgId,
+      projects,
+      config.dryRun,
+    );
+
+    res.updated.map((t) => ({ ...t, target })).forEach((i) => updated.add(i));
+    res.failed.map((t) => ({ ...t, target })).forEach((i) => failed.add(i));
+
+    return {
+      updated: Array.from(updated).map((t) => ({ ...t, target })),
+      failed: Array.from(failed).map((t) => ({ ...t, target })),
+    };
   }
 
   const deactivate = [];

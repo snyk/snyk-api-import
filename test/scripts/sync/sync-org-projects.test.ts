@@ -236,7 +236,13 @@ describe('updateTargets', () => {
       );
       updateProjectsSpy
         .mockImplementationOnce(() =>
-          Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
+          Promise.resolve({
+            ...projectsAPIResponse,
+            projects: projectsAPIResponse.projects.map((p) => ({
+              ...p,
+              branch: defaultBranch,
+            })),
+          }),
         )
         .mockImplementationOnce(() =>
           Promise.reject({ statusCode: '404', message: 'Error' }),
@@ -348,7 +354,13 @@ describe('updateTargets', () => {
       );
       listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
       updateProjectsSpy.mockImplementation(() =>
-        Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
+        Promise.resolve({
+          ...projectsAPIResponse,
+          projects: projectsAPIResponse.projects.map((p) => ({
+            ...p,
+            branch: defaultBranch,
+          })),
+        }),
       );
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
@@ -458,7 +470,13 @@ describe('updateTargets', () => {
       );
       listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
       updateProjectsSpy.mockImplementation(() =>
-        Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
+        Promise.resolve({
+          ...projectsAPIResponse,
+          projects: projectsAPIResponse.projects.map((p) => ({
+            ...p,
+            branch: defaultBranch,
+          })),
+        }),
       );
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
@@ -559,7 +577,13 @@ describe('updateTargets', () => {
         }),
       );
       updateProjectsSpy.mockImplementation(() =>
-        Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
+        Promise.resolve({
+          ...projectsAPIResponse,
+          projects: projectsAPIResponse.projects.map((p) => ({
+            ...p,
+            branch: defaultBranch,
+          })),
+        }),
       );
 
       // Act
@@ -672,7 +696,13 @@ describe('updateTargets', () => {
       );
       updateProjectsSpy
         .mockImplementationOnce(() =>
-          Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
+          Promise.resolve({
+            ...projectsAPIResponse,
+            projects: projectsAPIResponse.projects.map((p) => ({
+              ...p,
+              branch: defaultBranch,
+            })),
+          }),
         )
         .mockImplementationOnce(() =>
           Promise.reject({ statusCode: '404', message: 'Error' }),
@@ -788,7 +818,13 @@ describe('updateTargets', () => {
         }),
       );
       updateProjectsSpy.mockImplementation(() =>
-        Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
+        Promise.resolve({
+          ...projectsAPIResponse,
+          projects: projectsAPIResponse.projects.map((p) => ({
+            ...p,
+            branch: defaultBranch,
+          })),
+        }),
       );
       // Act
       const res = await updateTargets(
@@ -940,6 +976,126 @@ describe('updateTargets', () => {
         },
       });
     }, 5000);
+    it('Github API errors during getGithubRepoMetaData call', async () => {
+      // Arrange
+      const testTargets = [
+        {
+          attributes: {
+            displayName: 'snyk/monorepo',
+            isPrivate: false,
+            origin: 'github',
+            remoteUrl: null,
+          },
+          id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+          relationships: {
+            org: {
+              data: {
+                id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+                type: 'org',
+              },
+              links: {},
+              meta: {},
+            },
+          },
+          type: 'target',
+        },
+      ];
+      const orgId = 'af137b96-6966-46c1-826b-2e79ac49bbxx';
+      const projectId = uuid.v4();
+
+      const projectsAPIResponse: ProjectsResponse = {
+        org: {
+          id: orgId,
+        },
+        projects: [
+          {
+            name: 'snyk/monorepo:build.gradle',
+            id: projectId,
+            created: '2018-10-29T09:50:54.014Z',
+            origin: 'github',
+            type: 'npm',
+            branch: 'master',
+            status: 'active',
+          },
+          {
+            name: 'snyk/monorepo(main):package.json',
+            id: projectId,
+            created: '2018-10-29T09:50:54.014Z',
+            origin: 'github',
+            type: 'maven',
+            branch: 'master',
+            status: 'active',
+          },
+        ],
+      };
+
+      listProjectsSpy.mockImplementation(() =>
+        Promise.resolve(projectsAPIResponse),
+      );
+      githubSpy.mockImplementation(() =>
+        // TODO: confirm this is correct
+        Promise.reject({
+          status: 404,
+          message: 'Not found',
+        }),
+      );
+      updateProjectsSpy.mockImplementation(() =>
+        Promise.resolve({
+          ...projectsAPIResponse,
+          projects: projectsAPIResponse.projects.map((p) => ({
+            ...p,
+            status: 'deactivated',
+          })),
+        }),
+      );
+      cloneSpy.mockImplementation(() =>
+        Promise.resolve({
+          success: true,
+          repoPath: path.resolve(fixturesFolderPath, 'monorepo'),
+          gitResponse: '',
+        }),
+      );
+      // Act
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTargets,
+        integrationId,
+        undefined,
+      );
+
+      // Assert
+      expect(res).toStrictEqual({
+        processedTargets: 1,
+        failedTargets: 0,
+        meta: {
+          projects: {
+            updated: [
+              {
+                dryRun: false,
+                from: 'active',
+                projectPublicId: projectId,
+                target: testTargets[0],
+                to: 'deactivated',
+                type: ProjectUpdateType.DEACTIVATE,
+              },
+              {
+                dryRun: false,
+                from: 'active',
+                projectPublicId: projectId,
+                target: testTargets[0],
+                to: 'deactivated',
+                type: ProjectUpdateType.DEACTIVATE,
+              },
+            ],
+            failed: [],
+          },
+        },
+      });
+    });
+    // expect(importSingleTargetSpy).not.toHaveBeenCalled();
+    // expect(listIntegrationsSpy).not.toHaveBeenCalled();
+    // expect(cloneSpy).not.toHaveBeenCalled();
   });
   describe('Github Enterprise', () => {
     const integrationId = process.env.GHE_INTEGRATION_ID as string;
@@ -1039,7 +1195,15 @@ describe('updateTargets', () => {
       );
       updateProjectsSpy
         .mockImplementationOnce(() =>
-          Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
+          updateProjectsSpy.mockImplementation(() =>
+            Promise.resolve({
+              ...projectsAPIResponse,
+              projects: projectsAPIResponse.projects.map((p) => ({
+                ...p,
+                branch: defaultBranch,
+              })),
+            }),
+          ),
         )
         .mockImplementationOnce(() =>
           Promise.reject({ statusCode: '404', message: 'Error' }),
