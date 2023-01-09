@@ -216,6 +216,7 @@ export interface RepoMetaData {
   branch: string;
   cloneUrl: string;
   sshUrl: string;
+  archived: boolean;
 }
 
 export interface SnykTarget {

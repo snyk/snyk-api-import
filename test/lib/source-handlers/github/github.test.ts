@@ -95,6 +95,7 @@ describe('buildGitCloneUrl', () => {
     process.env.GITHUB_TOKEN = 'secret_token';
     const url = github.buildGitCloneUrl({
       branch: 'main',
+      archived: false,
       sshUrl: 'https://git@github.com:snyk-tech-services/snyk-api-import.git',
       cloneUrl: 'https://github.com/snyk-tech-services/snyk-api-import.git',
     });

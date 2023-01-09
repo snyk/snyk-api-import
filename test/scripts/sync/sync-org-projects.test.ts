@@ -231,6 +231,7 @@ describe('updateTargets', () => {
           branch: defaultBranch,
           cloneUrl: 'https://some-url.com',
           sshUrl: 'git@some-url.com',
+          archived: false,
         }),
       );
       updateProjectsSpy
@@ -342,6 +343,7 @@ describe('updateTargets', () => {
           branch: defaultBranch,
           cloneUrl: 'https://some-url.com',
           sshUrl: 'git@some-url.com',
+          archived: false,
         }),
       );
       listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
@@ -451,6 +453,7 @@ describe('updateTargets', () => {
           branch: defaultBranch,
           cloneUrl: 'https://some-url.com',
           sshUrl: 'git@some-url.com',
+          archived: false,
         }),
       );
       listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
@@ -544,6 +547,7 @@ describe('updateTargets', () => {
           branch: defaultBranch,
           cloneUrl: 'https://some-url.com',
           sshUrl: 'git@some-url.com',
+          archived: false,
         }),
       );
       listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
@@ -663,6 +667,7 @@ describe('updateTargets', () => {
           branch: defaultBranch,
           cloneUrl: 'https://some-url.com',
           sshUrl: 'git@some-url.com',
+          archived: false,
         }),
       );
       updateProjectsSpy
@@ -699,6 +704,113 @@ describe('updateTargets', () => {
           },
         },
       });
+    }, 5000);
+    it('deletes all projects from archived target', async () => {
+      // Arrange
+      const testTargets = [
+        {
+          attributes: {
+            displayName: 'snyk/monorepo',
+            isPrivate: false,
+            origin: 'github',
+            remoteUrl: null,
+          },
+          id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+          relationships: {
+            org: {
+              data: {
+                id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
+                type: 'org',
+              },
+              links: {},
+              meta: {},
+            },
+          },
+          type: 'target',
+        },
+      ];
+      const orgId = 'af137b96-6966-46c1-826b-2e79ac49bbxx';
+      const projectsAPIResponse: ProjectsResponse = {
+        org: {
+          id: orgId,
+        },
+        projects: [
+          {
+            name: 'snyk/monorepo:build.gradle',
+            id: '3626066d-21a7-424f-b6fc-dc0d222d8e4a',
+            created: '2018-10-29T09:50:54.014Z',
+            origin: 'github',
+            type: 'npm',
+            branch: 'master',
+            status: 'active',
+          },
+          {
+            name: 'snyk/monorepo(main):package.json',
+            id: 'f57afea5-8fed-41d8-a8fd-d374c0944b07',
+            created: '2018-10-29T09:50:54.014Z',
+            origin: 'github',
+            type: 'maven',
+            branch: 'master',
+            status: 'active',
+          },
+        ],
+      };
+
+      const defaultBranch = 'develop';
+      const updated: syncProjectsForTarget.ProjectUpdate[] = [
+        {
+          projectPublicId: projectsAPIResponse.projects[0].id,
+          from: 'active',
+          to: 'deactivated',
+          type: ProjectUpdateType.DEACTIVATE,
+          dryRun: false,
+        },
+        {
+          projectPublicId: projectsAPIResponse.projects[1].id,
+          from: 'active',
+          to: 'deactivated',
+          type: ProjectUpdateType.DEACTIVATE,
+          dryRun: false,
+        },
+      ];
+      const failed: syncProjectsForTarget.ProjectUpdateFailure[] = [];
+
+      listProjectsSpy.mockImplementation(() =>
+        Promise.resolve(projectsAPIResponse),
+      );
+      listIntegrationsSpy.mockResolvedValue('abc-defg-0123');
+      githubSpy.mockImplementation(() =>
+        Promise.resolve({
+          branch: defaultBranch,
+          cloneUrl: 'https://some-url.com',
+          sshUrl: 'git@some-url.com',
+          archived: true,
+        }),
+      );
+      updateProjectsSpy.mockImplementation(() =>
+        Promise.resolve({ ...projectsAPIResponse, branch: defaultBranch }),
+      );
+      // Act
+      const res = await updateTargets(
+        requestManager,
+        orgId,
+        testTargets,
+        integrationId,
+        undefined,
+      );
+
+      // Assert
+      expect(res).toStrictEqual({
+        processedTargets: 1,
+        failedTargets: 0,
+        meta: {
+          projects: {
+            updated: updated.map((u) => ({ ...u, target: testTargets[0] })),
+            failed: failed.map((f) => ({ ...f, target: testTargets[0] })),
+          },
+        },
+      });
+      expect(cloneSpy).not.toHaveBeenCalled();
     }, 5000);
     it('imports all projects for an empty target', async () => {
       // Arrange
@@ -772,6 +884,7 @@ describe('updateTargets', () => {
           branch: defaultBranch,
           cloneUrl: 'https://some-url.com',
           sshUrl: 'git@some-url.com',
+          archived: false,
         }),
       );
       cloneSpy.mockImplementation(() =>
@@ -911,6 +1024,7 @@ describe('updateTargets', () => {
           branch: defaultBranch,
           cloneUrl: 'https://some-url.com',
           sshUrl: 'git@some-url.com',
+          archived: false,
         }),
       );
 
