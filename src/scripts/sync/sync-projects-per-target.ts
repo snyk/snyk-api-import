@@ -12,7 +12,7 @@ import type {
 } from '../../lib/types';
 import { ProjectUpdateType } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
-import { deactivateProject, listIntegrations, listProjects } from '../../lib';
+import { deactivateProject, listProjects } from '../../lib';
 import pMap = require('p-map');
 import { cloneAndAnalyze } from './clone-and-analyze';
 import { importSingleTarget } from './import-target';
@@ -67,6 +67,7 @@ export async function syncProjectsForTarget(
   try {
     targetMeta = await getMetaDataGenerator(origin)(targetData, host);
   } catch (e) {
+    //TODO: if repo is deleted, deactivate all projects
     debug(e);
     const error = `Getting default branch via ${origin} API failed with error: ${e.message}`;
     projects.map((project) => {
@@ -85,35 +86,39 @@ export async function syncProjectsForTarget(
   const deactivate = [];
   const createProjects = [];
 
-  try {
-    const res = await cloneAndAnalyze(origin, targetMeta!, projects, {
-      exclusionGlobs: config.exclusionGlobs,
-      entitlements: config.entitlements,
-      manifestTypes: config.manifestTypes,
-    });
-    debug(
-      'Analysis finished',
-      JSON.stringify({
-        deactivate: res.deactivate.length,
-        import: res.import.length,
-      }),
-    );
-    deactivate.push(...res.deactivate);
-    createProjects.push(...res.import);
-  } catch (e) {
-    debug(e);
-    const error = `Cloning and analysing the repo to deactivate projects failed with error: ${e.message}`;
-    projects.map((project) => {
-      failed.add({
-        errorMessage: error,
-        projectPublicId: project.id,
-        from: 'active',
-        to: 'deactivated',
-        type: ProjectUpdateType.DEACTIVATE,
-        dryRun: config.dryRun,
-        target,
+  if (targetMeta!.archived) {
+    deactivate.push(...projects);
+  } else {
+    try {
+      const res = await cloneAndAnalyze(origin, targetMeta!, projects, {
+        exclusionGlobs: config.exclusionGlobs,
+        entitlements: config.entitlements,
+        manifestTypes: config.manifestTypes,
       });
-    });
+      debug(
+        'Analysis finished',
+        JSON.stringify({
+          deactivate: res.deactivate.length,
+          import: res.import.length,
+        }),
+      );
+      deactivate.push(...res.deactivate);
+      createProjects.push(...res.import);
+    } catch (e) {
+      debug(e);
+      const error = `Cloning and analysing the repo to deactivate projects failed with error: ${e.message}`;
+      projects.map((project) => {
+        failed.add({
+          errorMessage: error,
+          projectPublicId: project.id,
+          from: 'active',
+          to: 'deactivated',
+          type: ProjectUpdateType.DEACTIVATE,
+          dryRun: config.dryRun,
+          target,
+        });
+      });
+    }
   }
 
   // remove any projects that are to be deactivated from other actions

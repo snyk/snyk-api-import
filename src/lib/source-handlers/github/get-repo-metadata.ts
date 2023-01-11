@@ -29,5 +29,6 @@ export async function getGithubRepoMetaData(
     branch: response.data.default_branch!,
     cloneUrl: response.data.clone_url!,
     sshUrl: response.data.ssh_url!,
+    archived: response.data.archived!,
   };
 }

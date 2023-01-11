@@ -12,6 +12,7 @@
       - [File renamed/moves/deleted](#file-renamedmovesdeleted)
       - [node\_modules, tests \& fixtures](#node_modules-tests--fixtures)
   - [Detecting \& importing new files not already monitored in Snyk](#detecting--importing-new-files-not-already-monitored-in-snyk)
+  - [Repository is archived](#repository-is-archived)
 - [Kick off sync](#kick-off-sync)
   - [1. Set the env vars](#1-set-the-env-vars)
   - [2. Download \& run](#2-download--run)
@@ -76,6 +77,9 @@ Any projects that were imported but match the default exclusions list (deemed to
 While analyzing each target known to Snyk any new Snyk supported files found in the repo that do not have a corresponding project in Snyk will be imported in batches. Any files matching the default or user provided `exclusionGlobs` will be ignored.
 If a file has a corresponding de-activated project in Snyk, it will not be brought in again. Activate manually or via API if it should be active.
 
+## Repository is archived
+
+If the repository is now marked as archived, all relevant Snyk projects will be de-activated.
 # Kick off sync
 
 `sync` command will analyze existing projects & targets (repos) in Snyk organization and determine if any changes are needed.
@@ -155,3 +159,4 @@ Live mode:
 - Any organizations using a custom branch feature are currently not supported, `sync` will not continue.
 - Any organizations that previously used the custom feature flag should ideally delete all existing projects & re-import to restore the project names to standard format (do not include a branch in the project name). `sync` will work regardless but may cause confusion as the project name will reference a branch that is not likely to be the actual branch being tested.
 - It is not possible to know if a file was moved or renamed in the current implementation as it requires looking through commits history or using webhooks. It is also not currently possible to re-name projects in Snyk. In all cases projects will be deactivated and their replacement re-imported, creating a new projects with new history.
+- Deleted repos are not yet supported.

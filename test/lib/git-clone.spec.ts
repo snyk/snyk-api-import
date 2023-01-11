@@ -27,6 +27,7 @@ describe('gitClone', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         {
           branch: 'master',
+          archived: false,
           cloneUrl: 'https://github.com/snyk-fixtures/monorepo-simple.git',
           sshUrl: 'git@github.com:snyk-fixtures/monorepo-simple.git',
         },
@@ -48,6 +49,7 @@ describe('gitClone', () => {
         SupportedIntegrationTypesUpdateProject.GITHUB,
         {
           branch: 'non-existent',
+          archived: false,
           cloneUrl: 'https://github.com/snyk-fixtures/monorepo-simple.git',
           sshUrl: 'git@github.com:snyk-fixtures/monorepo-simple.git',
         },
@@ -87,6 +89,7 @@ describe('gitClone', () => {
       process.env.SNYK_LOG_PATH = __dirname;
       const res = await gitClone(SupportedIntegrationTypesUpdateProject.GHE, {
         branch: 'master',
+        archived: false,
         cloneUrl: `https://${GHE_URL.host}/snyk-fixtures/mono-repo.git`,
         sshUrl: `git@${GHE_URL.host}/snyk-fixtures/mono-repo.git`,
       });
@@ -104,6 +107,7 @@ describe('gitClone', () => {
 
       const res = await gitClone(SupportedIntegrationTypesUpdateProject.GHE, {
         branch: 'non-existent',
+        archived: false,
         cloneUrl: `https://${GHE_URL.host}/snyk-fixtures/mono-repo.git`,
         sshUrl: `git@${GHE_URL.host}/snyk-fixtures/mono-repo.git`,
       });
@@ -122,6 +126,7 @@ describe('gitClone', () => {
 
       const res = await gitClone(SupportedIntegrationTypesUpdateProject.GHE, {
         branch: 'non-existent',
+        archived: false,
         cloneUrl: `https://${GHE_URL.host}/snyk-fixtures/mono-repo.git`,
         sshUrl: `git@${GHE_URL.host}/snyk-fixtures/mono-repo.git`,
       });
