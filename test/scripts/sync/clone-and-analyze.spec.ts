@@ -67,8 +67,8 @@ describe('cloneAndAnalyze', () => {
       ];
 
       const repoMeta: RepoMetaData = {
-        branch: 'master',
         archived: false,
+        branch: 'master',
         cloneUrl: 'https://github.com/snyk-fixtures/monorepo-simple.git',
         sshUrl: 'git@github.com:snyk-fixtures/monorepo-simple.git',
       };
@@ -130,8 +130,8 @@ describe('cloneAndAnalyze', () => {
       ];
 
       const repoMeta: RepoMetaData = {
-        branch: 'master',
         archived: false,
+        branch: 'master',
         cloneUrl: 'https://github.com/snyk-fixtures/monorepo-simple.git',
         sshUrl: 'git@github.com:snyk-fixtures/monorepo-simple.git',
       };
@@ -205,8 +205,8 @@ describe('cloneAndAnalyze', () => {
       ];
 
       const repoMeta: RepoMetaData = {
-        branch: 'master',
         archived: false,
+        branch: 'master',
         cloneUrl: 'https://github.com/snyk-fixtures/monorepo-simple.git',
         sshUrl: 'git@github.com:snyk-fixtures/monorepo-simple.git',
       };
@@ -298,8 +298,8 @@ describe('cloneAndAnalyze', () => {
       ];
 
       const repoMeta: RepoMetaData = {
-        branch: 'master',
         archived: false,
+        branch: 'master',
         cloneUrl: 'https://github.com/snyk-fixtures/monorepo-simple.git',
         sshUrl: 'git@github.com:snyk-fixtures/monorepo-simple.git',
       };
@@ -324,8 +324,8 @@ describe('cloneAndAnalyze', () => {
       const projects: SnykProject[] = [];
 
       const repoMeta: RepoMetaData = {
-        branch: 'main',
         archived: false,
+        branch: 'main',
         cloneUrl: 'https://github.com/snyk-fixtures/no-supported-manifests.git',
         sshUrl: 'git@github.com:snyk-fixtures/no-supported-manifests.git',
       };
@@ -350,8 +350,8 @@ describe('cloneAndAnalyze', () => {
       const projects: SnykProject[] = [];
 
       const repoMeta: RepoMetaData = {
-        branch: 'master',
         archived: false,
+        branch: 'master',
         cloneUrl: 'https://github.com/snyk-fixtures/empty-repo.git',
         sshUrl: 'git@github.com:snyk-fixtures/empty-repo.git',
       };
@@ -376,8 +376,8 @@ describe('cloneAndAnalyze', () => {
       const projects: SnykProject[] = [];
 
       const repoMeta: RepoMetaData = {
-        branch: 'master',
         archived: false,
+        branch: 'master',
         cloneUrl:
           'https://github.com/snyk-fixtures/python-requirements-custom-name-inside-folder.git',
         sshUrl:
@@ -414,8 +414,8 @@ describe('cloneAndAnalyze', () => {
       const projects: SnykProject[] = [];
 
       const repoMeta: RepoMetaData = {
-        branch: 'master',
         archived: false,
+        branch: 'master',
         cloneUrl: `https://${GHE_URL.host}/snyk-fixtures/mono-repo.git`,
         sshUrl: `git@${GHE_URL.host}/snyk-fixtures/mono-repo.git`,
       };
@@ -451,8 +451,8 @@ describe('cloneAndAnalyze', () => {
       const projects: SnykProject[] = [];
 
       const repoMeta: RepoMetaData = {
-        branch: 'master',
         archived: false,
+        branch: 'master',
         cloneUrl: `https://${GHE_URL.host}/snyk-fixtures/docker-goof.git`,
         sshUrl: `git@${GHE_URL.host}/snyk-fixtures/docker-goof.git`,
       };
@@ -481,8 +481,8 @@ describe('cloneAndAnalyze', () => {
       const projects: SnykProject[] = [];
 
       const repoMeta: RepoMetaData = {
-        branch: 'master',
         archived: false,
+        branch: 'master',
         cloneUrl: `https://${GHE_URL.host}/snyk-fixtures/docker-goof.git`,
         sshUrl: `git@${GHE_URL.host}/snyk-fixtures/docker-goof.git`,
       };

@@ -69,7 +69,7 @@ export async function syncProjectsForTarget(
     targetMeta = await getMetaDataGenerator(origin)(targetData, host);
   } catch (e) {
     //TODO: if repo is deleted, deactivate all projects
-    debug(e);
+    debug(`Failed to get metadata ${JSON.stringify(targetData)}: ` + e);
     if (e.status === 404) {
       // TODO: when else could you get a 404? Manually check
       isDeleted = true;
