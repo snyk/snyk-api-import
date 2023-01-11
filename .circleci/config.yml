@@ -10,7 +10,7 @@ jobs:
             - slack/notify:
                 channel: C0137E8F72A
                 color: '#42e2f4'
-                message: Starting snyk-api-import build-test-monitor job
+                message: snyk-api-import build-test-monitor nightly job
             - checkout
             - run: npm install
             - run: npm test
@@ -22,10 +22,6 @@ jobs:
         docker:
             - image: circleci/node:14
         steps:
-            - slack/notify:
-                channel: C0137E8F72A
-                color: '#42e2f4'
-                message: Starting snyk-api-import build-test job
             - checkout
             - run: npm install
             - run: npm test
