@@ -1093,9 +1093,6 @@ describe('updateTargets', () => {
         },
       });
     });
-    // expect(importSingleTargetSpy).not.toHaveBeenCalled();
-    // expect(listIntegrationsSpy).not.toHaveBeenCalled();
-    // expect(cloneSpy).not.toHaveBeenCalled();
   });
   describe('Github Enterprise', () => {
     const integrationId = process.env.GHE_INTEGRATION_ID as string;
