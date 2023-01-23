@@ -1,7 +1,10 @@
 import type { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 
-import { getGithubRepoMetaData } from '../../lib/source-handlers/github';
+import {
+  getGithubRepoMetaData,
+  validateToken,
+} from '../../lib/source-handlers/github';
 import { updateBranch } from '../../lib/project/update-branch';
 import type {
   SnykProject,
@@ -26,6 +29,16 @@ export function getMetaDataGenerator(
     [SupportedIntegrationTypesUpdateProject.GHE]: getGithubRepoMetaData,
   };
   return getDefaultBranchGenerators[origin];
+}
+
+export function getTokenValidator(
+  origin: SupportedIntegrationTypesUpdateProject,
+): (target: Target, host?: string | undefined) => Promise<{ valid: true }> {
+  const generator = {
+    [SupportedIntegrationTypesUpdateProject.GITHUB]: validateToken,
+    [SupportedIntegrationTypesUpdateProject.GHE]: validateToken,
+  };
+  return generator[origin];
 }
 
 export function getTargetConverter(
@@ -64,14 +77,16 @@ export async function syncProjectsForTarget(
   const origin = target.attributes
     .origin as SupportedIntegrationTypesUpdateProject;
   const targetData = getTargetConverter(origin)(target);
+  const isTokenValid = await getTokenValidator(origin);
 
   try {
     targetMeta = await getMetaDataGenerator(origin)(targetData, host);
   } catch (e) {
-    //TODO: if repo is deleted, deactivate all projects
     debug(`Failed to get metadata ${JSON.stringify(targetData)}: ` + e);
-    if (e.status === 404) {
-      // TODO: when else could you get a 404? Manually check
+    if (
+      e.status === 404 &&
+      (await isTokenValid(targetData, host)).valid === true
+    ) {
       isDeleted = true;
     } else {
       const error = `Getting metadata from ${origin} API failed with error: ${e.message}`;
