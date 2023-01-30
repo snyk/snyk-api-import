@@ -27,7 +27,7 @@ export async function importSingleTarget(
     integrationId,
     target,
     files,
-    `${excludeFolders}, ${defaultExclusionGlobs.join(',')}`,
+    `${excludeFolders},${defaultExclusionGlobs.join(',')}`,
     loggingPath,
   );
 
