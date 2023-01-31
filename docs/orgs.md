@@ -34,6 +34,9 @@ This is an opinionated util and will assume every organization in Github.com / G
                        supported organization settings.
   --skipEmptyOrgs      Skip organizations that have no targets. 
                        (e.g. Github Organizations that have no repos)
+  --topLevelGroupsOnly Exclude GitLab Subgroups from org data
+                        (This is only for GitLab)
+
 ```
 ## Github.com / Github Enterprise
 1. set the [Github.com personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) as an environment variable: `export GITHUB_TOKEN=your_personal_access_token`

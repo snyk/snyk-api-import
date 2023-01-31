@@ -45,20 +45,22 @@ async function createNewOrgs(
   for (const orgData of orgsToCreate) {
     const { name, sourceOrgId } = orgData;
     try {
-      debug(`Creating new "${name}" organization`);
-      const org = await createOrg(requestManager, groupId, name, sourceOrgId);
-      debug(`Creating new "${name}" organization`);
-      debug(`Listing integrations for new "${name}" organization`);
+      // const newName = `svb-${name}`;
+      const newName = `${name}`;
+      debug(`Creating new "${newName}" organization`);
+      const org = await createOrg(requestManager, groupId, newName, sourceOrgId);
+      debug(`Creating new "${newName}" organization`);
+      debug(`Listing integrations for new "${newName}" organization`);
       const integrations =
         (await listIntegrations(requestManager, org.id)) || {};
-      debug(`Setting notification settings for new "${name}" organization`);
+      debug(`Setting notification settings for new "${newName}" organization`);
       await setNotificationPreferences(requestManager, org.id, org.name);
       created.push({
         ...org,
         orgId: org.id,
         integrations,
         groupId,
-        origName: name,
+        origName: newName,
         sourceOrgId,
       });
       await logCreatedOrg(groupId, name, org, integrations, loggingPath);

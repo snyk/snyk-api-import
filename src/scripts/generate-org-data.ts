@@ -65,6 +65,7 @@ export async function generateOrgImportDataFile(
   sourceOrgId?: string,
   sourceUrl?: string,
   skipEmptyOrgs = false,
+  topLevelGroupsOnly?: boolean
 ): Promise<{
   orgs: CreateOrgData[];
   fileName: string;

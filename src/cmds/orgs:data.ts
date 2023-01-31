@@ -45,6 +45,11 @@ export const builder = {
     desc:
       'The source of the targets to be imported e.g. Github, Github Enterprise, Gitlab, Bitbucket Server, Bitbucket Cloud',
   },
+  topLevelGroupsOnly: {
+    required: false,
+    desc:
+      'Exclude sub groups from org data file',
+  },
 };
 
 export async function generateOrgImportData(
@@ -53,6 +58,7 @@ export async function generateOrgImportData(
   sourceOrgPublicId?: string,
   sourceUrl?: string,
   skipEmptyOrgs?: boolean,
+  // topLevelGroupsOnly?: boolean,
 ): Promise<CommandResult> {
   try {
     getLoggingPath();
@@ -63,6 +69,7 @@ export async function generateOrgImportData(
       sourceOrgPublicId,
       sourceUrl,
       skipEmptyOrgs,
+      // topLevelGroupsOnly,
     );
     const orgsMessage =
       res.orgs.length > 0
@@ -90,6 +97,7 @@ export async function handler(argv: {
   sourceOrgPublicId?: string;
   sourceUrl?: string;
   skipEmptyOrgs?: boolean;
+  topLevelGroupsOnly?: boolean;
 }): Promise<void> {
   const {
     source,
@@ -97,6 +105,8 @@ export async function handler(argv: {
     groupId,
     sourceUrl,
     skipEmptyOrgs = false,
+    // topLevelGroupsOnly,
+    
   } = argv;
   debug('ℹ️  Options: ' + JSON.stringify(argv));
 
@@ -106,6 +116,7 @@ export async function handler(argv: {
     sourceOrgPublicId,
     sourceUrl,
     skipEmptyOrgs,
+    // topLevelGroupsOnly,
   );
 
   if (res.exitCode === 1) {
