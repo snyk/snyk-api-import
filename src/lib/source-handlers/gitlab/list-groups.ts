@@ -45,7 +45,6 @@ async function fetchOrgsForPage(
     const params = {
       perPage: 100,
       page: pageNumber,
-      top_level_only: true,
     };
     const orgs = await client.Groups.all(params);
     const hasNextPage = orgs.length ? true : false;
@@ -62,7 +61,7 @@ async function fetchOrgsForPage(
       hasNextPage,
     };
   }
-// }
+}
 
 async function fetchAllOrgs(
   client: types.Gitlab,
