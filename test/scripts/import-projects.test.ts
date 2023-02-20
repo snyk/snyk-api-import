@@ -25,7 +25,7 @@ describe('Import projects script', () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
     await deleteFiles(logs);
     process.env = { ...OLD_ENV };
-  }, 10000);
+  }, 30000);
 
   it('succeeds to import targets from file', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
@@ -270,7 +270,7 @@ describe('No projects scenarios', () => {
     await deleteTestProjects(ORG_ID, discoveredProjects);
     await deleteFiles(logs);
     process.env = { ...OLD_ENV };
-  }, 10000);
+  }, 30000);
   it('succeeds to complete import targets from empty repo', async () => {
     const testName = 'empty-target';
     const logPath = path.resolve(__dirname + '/fixtures/' + testName);

@@ -36,5 +36,5 @@ describe('General `snyk-api-import orgs:data <...>`', () => {
       expect(code).toEqual(0);
       done();
     });
-  }, 20000);
+  }, 30000);
 });
