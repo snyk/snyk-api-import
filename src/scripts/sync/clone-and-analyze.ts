@@ -62,7 +62,11 @@ export async function cloneAndAnalyze(
     )}`,
   );
 
-  fs.rmdirSync(repoPath, { recursive: true });
+  try {
+    fs.rmdirSync(repoPath, { recursive: true });
+  } catch (error) {
+    debug(`Failed to delete ${repoPath}. Error was ${error}.`);
+  }
 
   return generateProjectDiffActions(
     relativeFileNames,
