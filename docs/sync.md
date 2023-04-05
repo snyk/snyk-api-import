@@ -45,7 +45,7 @@ Any logs will be generated at `SNYK_LOG_PATH` directory.
 
 Updating the project branch in Snyk to match the default branch of the repo in the SCM. The drift can happen for several reasons:
 
-- branch was renamed in Github/Gitlab etc on a repo from e.g. from `master` > `main`
+- branch was renamed in SCM on a repo from e.g. from `master` > `main`
 - a new default branch was chosen from existing branches e.g. both `main` and `develop` exist as branches and default branch switched from `main` to `develop`
 
 ## De-activating Snyk projects that represent files that have been renamed/moved/deleted
