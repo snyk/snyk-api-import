@@ -1,5 +1,5 @@
 import * as debugLib from 'debug';
-import * as fs from 'fs';
+import { rimraf } from 'rimraf';
 import * as path from 'path';
 import { defaultExclusionGlobs } from '../../common';
 
@@ -63,7 +63,7 @@ export async function cloneAndAnalyze(
   );
 
   try {
-    fs.rmdirSync(repoPath, { recursive: true, maxRetries: 3 });
+    await rimraf(repoPath);
   } catch (error) {
     debug(`Failed to delete ${repoPath}. Error was ${error}.`);
   }

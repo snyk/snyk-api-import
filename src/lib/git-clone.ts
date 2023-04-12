@@ -2,6 +2,7 @@ import * as debugLib from 'debug';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { rimraf } from 'rimraf';
 
 import type { SimpleGitOptions } from 'simple-git';
 import { simpleGit } from 'simple-git';
@@ -53,7 +54,7 @@ export async function gitClone(
   } catch (err: any) {
     debug(`Could not shallow clone the repo:\n ${err}`);
     if (fs.existsSync(repoClonePath)) {
-      fs.rmdirSync(repoClonePath, { recursive: true, maxRetries: 3 });
+      await rimraf(repoClonePath);
     }
     return {
       success: false,
