@@ -30,7 +30,9 @@ export async function fetchReposForPage(
 
   for (const repo of repos) {
     if (repo.archived) {
-      debug(`Skipping archived repo name: ${repo.name} owner: ${repo.owner?.login}`);
+      debug(
+        `Skipping archived repo name: ${repo.name} owner: ${repo.owner?.login}`,
+      );
       continue;
     }
 
