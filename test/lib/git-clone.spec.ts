@@ -20,7 +20,6 @@ describe('gitClone', () => {
       }
     });
     it('successfully clones a repo', async () => {
-      process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
       process.env.SNYK_LOG_PATH = __dirname;
 
       const res = await gitClone(
@@ -42,7 +41,6 @@ describe('gitClone', () => {
     }, 70000);
 
     it('fails to clone a repo for non-existent branch', async () => {
-      process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
       process.env.SNYK_LOG_PATH = __dirname;
 
       const res = await gitClone(

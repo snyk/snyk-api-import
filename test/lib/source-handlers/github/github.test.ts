@@ -7,7 +7,6 @@ describe('listGithubOrgs script', () => {
     process.env = { ...OLD_ENV };
   });
   it('list orgs', async () => {
-    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     const orgs = await github.listGithubOrgs();
     expect(orgs[0]).toEqual({
       name: expect.any(String),
@@ -35,8 +34,6 @@ describe('listGithubRepos script', () => {
   });
   it('list repos', async () => {
     const GITHUB_ORG_NAME = process.env.TEST_GH_ORG_NAME;
-    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
-
     const orgs = await github.listGithubRepos(GITHUB_ORG_NAME as string);
     expect(orgs[0]).toEqual({
       name: expect.any(String),
@@ -70,8 +67,6 @@ describe('isGithubConfigured', () => {
     process.env = { ...OLD_ENV };
   });
   it('correctly configured', async () => {
-    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
-
     const configured = github.isGithubConfigured();
     expect(configured).toBeTruthy();
   });

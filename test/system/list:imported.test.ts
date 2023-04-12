@@ -7,7 +7,6 @@ const main = './dist/index.js'.replace(/\//g, sep);
 
 describe('`snyk-api-import list:imported <...>`', () => {
   const OLD_ENV = process.env;
-  process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
   const GROUP_ID = process.env.TEST_GROUP_ID as string;
   const ORG_ID = process.env.TEST_ORG_ID as string;
 

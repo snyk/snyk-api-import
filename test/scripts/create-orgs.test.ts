@@ -15,7 +15,7 @@ jest.requireActual('snyk-request-manager');
 
 describe('createOrgs script', () => {
   const OLD_ENV = process.env;
-  process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
+
   const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
   process.env.SNYK_API = SNYK_API_TEST;
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;

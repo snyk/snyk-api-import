@@ -22,7 +22,6 @@ describe('cloneAndAnalyze', () => {
     }
   });
   describe('Github', () => {
-    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     process.env.SNYK_LOG_PATH = __dirname;
 
     it('identifies correctly the diff between files in the repo vs monitored in Snyk (defaults to OS)', async () => {
