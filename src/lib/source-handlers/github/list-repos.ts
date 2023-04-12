@@ -26,16 +26,21 @@ export async function fetchReposForPage(
   const res = await octokit.repos.listForOrg(params);
   const repos = res && res.data;
   const hasNextPage = repos.length ? true : false;
-  repoData.push(
-    ...repos
-      .filter((repo) => !repo.archived)
-      .map((repo) => ({
-        fork: repo.fork,
-        name: repo.name,
-        owner: repo.owner?.login,
-        branch: repo.default_branch,
-      })),
-  );
+  debug(`Received # repos from API for page ${pageNumber}: ${repos.length}`);
+
+  for (const repo of repos) {
+    if (repo.archived) {
+      debug(`Skipping archived repo name: ${repo.name} owner: ${repo.owner?.login}`);
+      continue;
+    }
+
+    repoData.push({
+      fork: repo.fork,
+      name: repo.name,
+      owner: repo.owner?.login,
+      branch: repo.default_branch,
+    });
+  }
 
   return { repos: repoData, hasNextPage };
 }
