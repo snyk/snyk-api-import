@@ -13,7 +13,7 @@ describe('General `snyk-api-import orgs:data <...>`', () => {
       {
         env: {
           PATH: process.env.PATH,
-          GITHUB_TOKEN: process.env.GH_TOKEN,
+          GITHUB_TOKEN: process.env.GITHUB_TOKEN,
           SNYK_LOG_PATH: __dirname,
         },
       },
