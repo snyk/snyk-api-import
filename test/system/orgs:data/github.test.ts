@@ -15,7 +15,7 @@ describe('General `snyk-api-import orgs:data <...>`', () => {
       {
         env: {
           PATH: process.env.PATH,
-          GITHUB_TOKEN: process.env.GH_TOKEN,
+          GITHUB_TOKEN: process.env.GITHUB_TOKEN,
           SNYK_LOG_PATH: __dirname,
         },
       },
@@ -26,7 +26,7 @@ describe('General `snyk-api-import orgs:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout).toMatch(
-          'Found 4 organization(s). Written the data to file: group-hello-github-com-orgs.json',
+          'Found 2 organization(s). Written the data to file: group-hello-github-com-orgs.json',
         );
         deleteFiles([
           path.resolve(__dirname, `group-${groupId}-github-com-orgs.json`),
