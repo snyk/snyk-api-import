@@ -17,7 +17,6 @@ describe('generateOrgImportDataFile Github script', () => {
     await deleteFiles(filesToCleanup);
   });
   it('generate Github Orgs data', async () => {
-    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     const groupId = 'groupIdExample';
     const sourceOrgId = 'sourceOrgIdExample';
 
@@ -38,7 +37,6 @@ describe('generateOrgImportDataFile Github script', () => {
   }, 20000);
 
   it('generate Github Orgs data and skips empty orgs', async () => {
-    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     const groupId = 'groupIdExample';
     const sourceOrgId = 'sourceOrgIdExample';
 
@@ -59,7 +57,6 @@ describe('generateOrgImportDataFile Github script', () => {
     });
   });
   it('generate Github Orgs data without sourceOrgId', async () => {
-    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     const groupId = 'groupIdExample';
 
     const res = await generateOrgImportDataFile(

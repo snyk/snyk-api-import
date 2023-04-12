@@ -15,7 +15,6 @@ describe('generateTargetsImportDataFile Github script', () => {
     await deleteFiles(filesToDelete);
   });
   it('generate Github repo data', async () => {
-    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     filesToDelete.push(
       path.resolve(__dirname + '/github-enterprise-import-targets.json'),
     );
@@ -91,7 +90,6 @@ describe('generateTargetsImportDataFile Github script', () => {
   }, 20000);
 
   it('generate Github repo data when no integrations are available', async () => {
-    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     const orgsData: CreatedOrg[] = [
       {
         orgId: process.env.TEST_GH_ORG_NAME as string,
@@ -113,7 +111,6 @@ describe('generateTargetsImportDataFile Github script', () => {
     );
   }, 30000);
   it('Duplicate orgs are ignored', async () => {
-    process.env.GITHUB_TOKEN = process.env.GH_TOKEN;
     filesToDelete.push(path.resolve(__dirname + '/github-import-targets.json'));
     const orgsData: CreatedOrg[] = [
       {
