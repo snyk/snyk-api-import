@@ -147,7 +147,9 @@ describe('generateTargetsImportDataFile Github script', () => {
     );
     expect(res.fileName).toEqual('github-import-targets.json');
     expect(res.targets.length > 0).toBeTruthy();
-    expect(_.uniqBy(res.targets, 'target.name')).toBeTruthy();
+    expect(
+      new Set(res.targets.map((t) => t.target.name)).size == res.targets.length,
+    ).toBeTruthy();
     expect(res.targets[0]).toEqual({
       target: {
         name: expect.any(String),
