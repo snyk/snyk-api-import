@@ -112,6 +112,7 @@ describe('Skips & logs issues', () => {
   let logs: string[];
 
   afterEach(async () => {
+    process.env.CONCURRENT_IMPORTS = '3';
     await deleteFiles(logs);
     process.env = { ...OLD_ENV };
   }, 10000);
@@ -143,11 +144,12 @@ describe('Skips & logs issues', () => {
   }, 50000);
 
   it('Logs failed when API errors', async () => {
+    process.env.CONCURRENT_IMPORTS = '1';
     // this folder does not exist and will be created on run
     const logRoot = __dirname + '/fixtures/failed-batch-log/';
     const logFiles = generateLogsPaths(logRoot, ORG_ID);
     logs = Object.values(logFiles);
-    const exit = jest.spyOn(process, 'exit').mockImplementationOnce(() => {
+    const exit = jest.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('process.exit() was called.');
     });
     try {
