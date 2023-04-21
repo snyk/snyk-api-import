@@ -141,9 +141,9 @@ export async function importTargets(
           { errorMessage: error.message },
           loggingPath,
         );
-        if (failed % concurrentImports === 0) {
+        if (failed % (concurrentImports * 2) === 0) {
           console.error(
-            `Every import in this batch failed, stopping as this is unexpected! Please check if everything is configured ok and review the logs located at ${loggingPath}/*. If everything looks OK re-start the import, previously imported targets will be skipped.`,
+            `Every import in the last few batches failed, stopping as this is unexpected! Please check if everything is configured ok and review the logs located at ${loggingPath}/*. If everything looks OK re-start the import, previously imported targets will be skipped.`,
           );
           // die immediately
           process.exit(1);
