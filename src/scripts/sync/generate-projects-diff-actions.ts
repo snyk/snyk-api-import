@@ -7,10 +7,10 @@ export function generateProjectDiffActions(
   manifestTypes: string[] = Object.keys(OPEN_SOURCE_PACKAGE_MANAGERS),
 ): {
   import: string[];
-  deactivate: SnykProject[];
+  remove: SnykProject[];
 } {
   const filesToImport: string[] = [];
-  const deactivate: SnykProject[] = [];
+  const remove: SnykProject[] = [];
 
   // any files in the repo, not in Snyk already should be
   // imported
@@ -34,14 +34,14 @@ export function generateProjectDiffActions(
     }
     if (!repoManifests.includes(targetFile)) {
       if (manifestTypes.includes(project.type)) {
-        deactivate.push(project);
+        remove.push(project);
       }
     }
   }
 
   return {
     import: filesToImport,
-    deactivate,
+    remove,
   };
 }
 

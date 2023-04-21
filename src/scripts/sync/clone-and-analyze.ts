@@ -22,7 +22,7 @@ export async function cloneAndAnalyze(
   config: Omit<SyncTargetsConfig, 'dryRun'>,
 ): Promise<{
   import: string[];
-  deactivate: SnykProject[];
+  remove: SnykProject[];
 }> {
   const {
     manifestTypes,

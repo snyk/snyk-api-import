@@ -38,7 +38,7 @@ describe('generateProjectDiffActions', () => {
     // Assert
     expect(res).toStrictEqual({
       import: ['package.json', 'path/to/build.gradle'],
-      deactivate: [
+      remove: [
         {
           name: 'snyk/goof:todo/package.json',
           id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
@@ -79,7 +79,7 @@ describe('generateProjectDiffActions', () => {
     // Assert
     expect(res).toStrictEqual({
       import: [],
-      deactivate: [],
+      remove: [],
     });
   });
 
@@ -111,7 +111,7 @@ describe('generateProjectDiffActions', () => {
     // Assert
     expect(res).toStrictEqual({
       import: [],
-      deactivate: [],
+      remove: [],
     });
   });
   it('compares Open Source + Docker projects', async () => {
@@ -154,7 +154,7 @@ describe('generateProjectDiffActions', () => {
     // Assert
     expect(res).toStrictEqual({
       import: [],
-      deactivate: [
+      remove: [
         {
           name: 'snyk/goof:Dockerfile',
           id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',

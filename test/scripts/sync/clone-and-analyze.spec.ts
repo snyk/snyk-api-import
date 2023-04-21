@@ -84,7 +84,7 @@ describe('cloneAndAnalyze', () => {
       // Assert
       expect(res).toStrictEqual({
         import: ['Gemfile.lock'],
-        deactivate: [],
+        remove: [],
       });
     });
     it('identifies correctly the diff between files in the repo vs monitored in Snyk (with IAC enabled)', async () => {
@@ -148,7 +148,7 @@ describe('cloneAndAnalyze', () => {
       // Assert
       expect(res).toStrictEqual({
         import: ['Gemfile.lock', 'bundler-app/Gemfile.lock'],
-        deactivate: [],
+        remove: [],
       });
     });
     it('detects changes needed for a particular ecosystem (npm)', async () => {
@@ -224,7 +224,7 @@ describe('cloneAndAnalyze', () => {
       // only detects which npm project need to be brought in
       expect(res).toStrictEqual({
         import: ['npm-project/package.json'],
-        deactivate: [
+        remove: [
           {
             name: 'snyk-fixtures/monorepo-simple:not-in-repo/package.json',
             id: 'af137b96-6966-46c1-826b-2e79ac49bbxx',
@@ -315,7 +315,7 @@ describe('cloneAndAnalyze', () => {
       // Assert
       expect(res).toStrictEqual({
         import: [],
-        deactivate: [],
+        remove: [],
       });
     }, 70000);
     it('processing repository with no supported manifests > nothing to do', async () => {
@@ -341,7 +341,7 @@ describe('cloneAndAnalyze', () => {
 
       expect(res).toStrictEqual({
         import: [],
-        deactivate: [],
+        remove: [],
       });
     }, 70000);
     it('processing empty repository with no branch throws', async () => {
@@ -395,7 +395,7 @@ describe('cloneAndAnalyze', () => {
 
       expect(res).toStrictEqual({
         import: ['requirements/dev.txt', 'requirements/prod.txt'],
-        deactivate: [],
+        remove: [],
       });
     });
   });
@@ -442,7 +442,7 @@ describe('cloneAndAnalyze', () => {
           'requirements.txt',
           'single-module/pom.xml',
         ],
-        deactivate: [],
+        remove: [],
       });
     });
     it('identifies correctly the diff between files in the repo vs monitored in Snyk (with IAC & Docker enabled)', async () => {
@@ -472,7 +472,7 @@ describe('cloneAndAnalyze', () => {
       // Assert
       expect(res).toStrictEqual({
         import: ['Dockerfile'],
-        deactivate: [],
+        remove: [],
       });
     });
     it('repo appears empty when entitlements not enabled', async () => {
@@ -496,7 +496,7 @@ describe('cloneAndAnalyze', () => {
       // Assert
       expect(res).toStrictEqual({
         import: [],
-        deactivate: [],
+        remove: [],
       });
     });
   });
