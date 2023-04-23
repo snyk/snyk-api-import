@@ -41,6 +41,8 @@ describe('Import projects script', () => {
       success: true,
       targetFile: expect.any(String),
     });
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 5000));
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
     // Github project
     expect(logFile).toMatch(
@@ -63,6 +65,8 @@ describe('Import projects script', () => {
       success: true,
       targetFile: expect.any(String),
     });
+    // give file a little time to be finished to be written
+    await new Promise((r) => setTimeout(r, 5000));
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
     // Gitlab project
     expect(logFile).toMatch(
