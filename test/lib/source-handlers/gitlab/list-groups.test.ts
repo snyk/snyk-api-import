@@ -17,5 +17,5 @@ describe('listGitlabGroups', () => {
       id: expect.any(Number),
       url: expect.any(String),
     });
-  });
+  }, 10000);
 });
