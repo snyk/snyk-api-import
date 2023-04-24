@@ -98,11 +98,11 @@ export async function syncProjectsForTarget(
       debug(
         'Analysis finished',
         JSON.stringify({
-          deactivate: res.deactivate.length,
+          remove: res.remove.length,
           import: res.import.length,
         }),
       );
-      deactivate.push(...res.deactivate);
+      deactivate.push(...res.remove);
       createProjects.push(...res.import);
     } catch (e) {
       debug(e);
