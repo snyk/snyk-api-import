@@ -5,8 +5,10 @@ import { getToken } from './get-token';
 import { getBaseUrl } from './get-base-url';
 import * as gitBeakerTypes from '@gitbeaker/core';
 import { GitlabRepoData } from './types';
+import { getSubGroupFlag } from './get-subgroups-flag';
 
 const debug = debugLib('snyk:list-repos-script');
+const gitlabSubGroupFile = getSubGroupFlag()
 
 export async function fetchGitlabReposForPage(
     client: gitBeakerTypes.Gitlab,
@@ -33,6 +35,7 @@ export async function fetchGitlabReposForPage(
     debug(`Found ${projects.length} projects in ${groupName}`);
 
     for (const project of projects) {
+        debug(`Here is the project inside of the fetchGitlabReposForPage method: ${JSON.stringify(project)}`);
         const {
             archived,
             namespace,
@@ -93,7 +96,21 @@ export async function listGitlabRepos(
     const token = getToken();
     const baseUrl = getBaseUrl(host);
     const client = new Gitlab({ host: baseUrl, token });
+    let repos: GitlabRepoData[] = [];
+
     debug(`Fetching all repos data for org \`${groupName}\` from ${baseUrl}`);
-    const repos = await fetchAllRepos(client, groupName);
+    const repoList = await fetchAllRepos(client, groupName);
+    repos.push(...repoList);
+
+    if (gitlabSubGroupFile) {
+        const subgroups: any = await client.Groups.subgroups(groupName);
+        debug(`Found ${subgroups.length} sub-projects in ${groupName}`);
+
+        for (const subgroup of subgroups) {
+            debug(`This should be a list of full_path of subgroups: ${subgroup.full_path}`)
+            const repoLists = await fetchAllRepos(client, subgroup.full_path);
+            repos.push(...repoLists);
+        }
+    }
     return repos;
 }

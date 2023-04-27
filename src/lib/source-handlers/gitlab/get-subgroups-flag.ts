@@ -1,6 +1,12 @@
 export function getSubGroupFlag(): boolean {
-    const token = process.env.EXCLUDE_GITLAB_SUBGROUPS;
-    if (token) {
+    let token = process.env.EXCLUDE_GITLAB_SUBGROUPS;
+    if (token === undefined) {
+        return false;
+    }
+    else {
+        token = token.toUpperCase()
+    } 
+    if (token === "TRUE") {
         return true;
     }
     return false;
