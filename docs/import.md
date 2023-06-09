@@ -194,7 +194,7 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 
 ## 3. Download & run
 
-Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/imported-targets.json`
+Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/import-projects.json`
 
 ## 4. Review logs
 When import is started via Snyk API, many files & targets will be added to an import job. This job when complete will provide logs of what projects could be detected, which failed and any errors that were encountered. For more details see [Import API documentation](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets)
