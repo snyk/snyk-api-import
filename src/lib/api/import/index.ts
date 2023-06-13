@@ -139,7 +139,7 @@ export async function importTargets(
           orgId,
           integrationId,
           target,
-          { errorMessage: error.message },
+          { errorMessage: error.message, innerError: error.innerError },
           loggingPath,
         );
 
