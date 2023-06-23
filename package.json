@@ -30,7 +30,7 @@
   "author": "Snyk Tech Services",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=14"
+    "node": ">=14.14"
   },
   "files": [
     "bin",
