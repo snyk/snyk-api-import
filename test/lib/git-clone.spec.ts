@@ -13,7 +13,7 @@ describe('gitClone', () => {
     afterEach(() => {
       for (const f of removeFolders) {
         try {
-          fs.rmdirSync(f, { recursive: true, maxRetries: 3 });
+          fs.rmSync(f, { recursive: true, force: true, maxRetries: 3 });
         } catch (e) {
           console.log('Failed to clean up test', e);
         }
@@ -76,7 +76,7 @@ describe('gitClone', () => {
     afterEach(() => {
       for (const f of removeFolders) {
         try {
-          fs.rmdirSync(f, { recursive: true, maxRetries: 3 });
+          fs.rmSync(f, { recursive: true, maxRetries: 3, force: true });
         } catch (e) {
           console.log('Failed to clean up test', e);
         }
