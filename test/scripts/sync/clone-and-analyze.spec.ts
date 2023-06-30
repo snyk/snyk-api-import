@@ -15,7 +15,7 @@ describe('cloneAndAnalyze', () => {
   afterEach(() => {
     for (const f of removeFolders) {
       try {
-        fs.rmSync(f, { recursive: true, maxRetries: 3, force: true });
+        fs.rmdirSync(f, { recursive: true, maxRetries: 3 });
       } catch (e) {
         console.log('Failed to clean up test', e);
       }

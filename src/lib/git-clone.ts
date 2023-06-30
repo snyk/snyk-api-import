@@ -53,7 +53,7 @@ export async function gitClone(
   } catch (err: any) {
     debug(`Could not shallow clone the repo:\n ${err}`);
     if (fs.existsSync(repoClonePath)) {
-      fs.rmSync(repoClonePath, { recursive: true, maxRetries: 3, force: true });
+      fs.rmdirSync(repoClonePath, { recursive: true, maxRetries: 3 });
     }
     return {
       success: false,

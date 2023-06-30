@@ -63,7 +63,7 @@ export async function cloneAndAnalyze(
   );
 
   try {
-    fs.rmSync(repoPath, { recursive: true, maxRetries: 3, force: true });
+    fs.rmdirSync(repoPath, { recursive: true, maxRetries: 3 });
   } catch (error) {
     debug(`Failed to delete ${repoPath}. Error was ${error}.`);
   }
