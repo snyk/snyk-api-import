@@ -1,5 +1,4 @@
 import * as debugLib from 'debug';
-import * as fs from 'fs';
 import * as path from 'path';
 import { defaultExclusionGlobs } from '../../common';
 
@@ -12,6 +11,7 @@ import type {
   SyncTargetsConfig,
 } from '../../lib/types';
 import { generateProjectDiffActions } from './generate-projects-diff-actions';
+import { deleteDirectory } from '../../lib/delete-directory';
 
 const debug = debugLib('snyk:clone-and-analyze');
 
@@ -63,7 +63,7 @@ export async function cloneAndAnalyze(
   );
 
   try {
-    fs.rmdirSync(repoPath, { recursive: true, maxRetries: 3 });
+    await deleteDirectory(repoPath);
   } catch (error) {
     debug(`Failed to delete ${repoPath}. Error was ${error}.`);
   }

@@ -8,6 +8,7 @@ import { simpleGit } from 'simple-git';
 import * as github from '../lib/source-handlers/github';
 import type { RepoMetaData } from './types';
 import { SupportedIntegrationTypesUpdateProject } from './types';
+import { deleteDirectory } from './delete-directory';
 
 const debug = debugLib('snyk:git-clone');
 
@@ -53,7 +54,7 @@ export async function gitClone(
   } catch (err: any) {
     debug(`Could not shallow clone the repo:\n ${err}`);
     if (fs.existsSync(repoClonePath)) {
-      fs.rmdirSync(repoClonePath, { recursive: true, maxRetries: 3 });
+      await deleteDirectory(repoClonePath);
     }
     return {
       success: false,
