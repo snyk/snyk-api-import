@@ -2,7 +2,6 @@ import { requestsManager } from 'snyk-request-manager';
 import * as uuid from 'uuid';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as fse from 'fs-extra';
 import {
   updateOrgTargets,
   updateTargets,
@@ -245,7 +244,7 @@ describe('updateTargets', () => {
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
-          repoPath: fixture('monorepo-new'),
+          repoPath: path.resolve(fixturesFolderPath, 'monorepo-new'),
           gitResponse: '',
         }),
       );
@@ -354,7 +353,7 @@ describe('updateTargets', () => {
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
-          repoPath: fixture('goof'),
+          repoPath: path.resolve(fixturesFolderPath, 'goof'),
           gitResponse: '',
         }),
       );
@@ -464,7 +463,7 @@ describe('updateTargets', () => {
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
-          repoPath: fixture('goof'),
+          repoPath: path.resolve(fixturesFolderPath, 'goof'),
           gitResponse: '',
         }),
       );
@@ -555,7 +554,7 @@ describe('updateTargets', () => {
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
-          repoPath: fixture('goof'),
+          repoPath: path.resolve(fixturesFolderPath, 'goof'),
           gitResponse: '',
         }),
       );
@@ -681,7 +680,7 @@ describe('updateTargets', () => {
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
-          repoPath: fixture('monorepo'),
+          repoPath: path.resolve(fixturesFolderPath, 'monorepo'),
           gitResponse: '',
         }),
       );
@@ -891,7 +890,7 @@ describe('updateTargets', () => {
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
-          repoPath: fixture('monorepo'),
+          repoPath: path.resolve(fixturesFolderPath, 'monorepo'),
           gitResponse: '',
         }),
       );
@@ -1034,7 +1033,7 @@ describe('updateTargets', () => {
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
-          repoPath: fixture('monorepo'),
+          repoPath: path.resolve(fixturesFolderPath, 'monorepo'),
           gitResponse: '',
         }),
       );
@@ -1401,7 +1400,7 @@ describe('updateOrgTargets', () => {
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
-          repoPath: fixture('goof'),
+          repoPath: path.resolve(fixturesFolderPath, 'goof'),
           gitResponse: '',
         }),
       );
@@ -1586,7 +1585,7 @@ describe('updateOrgTargets', () => {
       cloneSpy.mockImplementation(() =>
         Promise.resolve({
           success: true,
-          repoPath: fixture('goof'),
+          repoPath: path.resolve(fixturesFolderPath, 'goof'),
           gitResponse: '',
         }),
       );
@@ -1877,11 +1876,3 @@ describe('bulkImportTargetFiles', () => {
     expect(updated.length).toEqual(5);
   });
 });
-
-function fixture(name: string) {
-  const tempDir = fs.mkdtempSync('snyk-api-import-test-');
-  fse.copySync(path.resolve(fixturesFolderPath, name), tempDir, {
-    overwrite: true,
-  });
-  return tempDir;
-}
