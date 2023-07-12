@@ -78,7 +78,9 @@ const getRepos = async (
   const { values, isLastPage, nextPageStart } = body;
   start = nextPageStart || -1;
   for (const repo of values) {
-    repos.push({ projectKey: repo.project.key, repoSlug: repo.name });
+    if (repo.project.key === projectKey) {
+      repos.push({ projectKey: repo.project.key, repoSlug: repo.name });
+    }
   }
   return { repos, isLastPage, start };
 };
