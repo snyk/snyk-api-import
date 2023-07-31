@@ -11,6 +11,7 @@ interface BitbucketServeRepoData {
     name: string;
     project: {
       key: string;
+      name?: string;
     };
   }[];
   isLastPage: boolean;
@@ -18,7 +19,7 @@ interface BitbucketServeRepoData {
 }
 export const fetchAllRepos = async (
   url: string,
-  projectKey: string,
+  projectName: string,
   token: string,
 ): Promise<BitbucketServerRepoData[]> => {
   let lastPage = false;
@@ -27,11 +28,11 @@ export const fetchAllRepos = async (
   let startFrom = 0;
   const limit = 100;
   while (!lastPage) {
-    debug(`Fetching page ${pageCount} for ${projectKey}\n`);
+    debug(`Fetching page ${pageCount} for ${projectName}\n`);
     try {
       const { repos, isLastPage, start } = await getRepos(
         url,
-        projectKey,
+        projectName,
         token,
         startFrom,
         limit,
@@ -49,7 +50,7 @@ export const fetchAllRepos = async (
 
 const getRepos = async (
   url: string,
-  projectKey: string,
+  projectName: string,
   token: string,
   startFrom: number,
   limit: number,
@@ -65,20 +66,20 @@ const getRepos = async (
   const { body, statusCode } =
     await limiterWithRateLimitRetries<BitbucketServeRepoData>(
       'get',
-      `${url}/rest/api/1.0/repos?projectname=${projectKey}&state=AVAILABLE&start=${startFrom}&limit=${limit}`,
+      `${url}/rest/api/1.0/repos?projectname=${projectName}&state=AVAILABLE&start=${startFrom}&limit=${limit}`,
       headers,
       limiter,
       60000,
     );
   if (statusCode != 200) {
-    throw new Error(`Failed to fetch repos for ${url}/rest/api/1.0/repos?projectname=${projectKey}&state=AVAILABLE&start=${startFrom}&limit=${limit}\n
+    throw new Error(`Failed to fetch repos for ${url}/rest/api/1.0/repos?projectname=${projectName}&state=AVAILABLE&start=${startFrom}&limit=${limit}\n
     Status Code: ${statusCode}\n
     Response body: ${JSON.stringify(body)}`);
   }
   const { values, isLastPage, nextPageStart } = body;
   start = nextPageStart || -1;
   for (const repo of values) {
-    if (repo.project.key === projectKey) {
+    if (repo.project.name === projectName) {
       repos.push({ projectKey: repo.project.key, repoSlug: repo.name });
     }
   }
