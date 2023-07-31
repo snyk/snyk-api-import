@@ -2,7 +2,7 @@ import { getBitbucketServerToken } from './get-bitbucket-server-token';
 import { fetchAllRepos } from './list-repos';
 
 export async function bitbucketServerProjectIsEmpty(
-  projectKey: string,
+  projectName: string,
   sourceUrl?: string,
 ): Promise<boolean> {
   const bitbucketServerToken = getBitbucketServerToken();
@@ -13,7 +13,7 @@ export async function bitbucketServerProjectIsEmpty(
   }
   const repos = await fetchAllRepos(
     sourceUrl,
-    projectKey,
+    projectName,
     bitbucketServerToken,
   );
   if (!repos || repos.length === 0) {

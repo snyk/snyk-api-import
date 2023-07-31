@@ -1,7 +1,7 @@
 {
   "orgData": [
     {
-      "name": "AN",
+      "name": "antoine-snyk-demo",
       "orgId": "<snyk_org_id>",
       "integrations": {
         "bitbucket-server": "<snyk_org_integration_id>"
