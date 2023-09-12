@@ -25,6 +25,8 @@ export async function fetchGitlabReposForPage(
     perPage,
     page: pageNumber,
     with_shared: false,
+    include_subgroups: true,
+    archived: false,
   };
 
   const projects = (await client.Groups.projects(
@@ -44,15 +46,15 @@ export async function fetchGitlabReposForPage(
       path_with_namespace,
       id,
     } = project;
-    if (groupName !== namespace.full_path) {
+    // if (groupName !== namespace.full_path) {
+    //   debug(
+    //     `Skipping project ${project.name_with_namespace} as it belong to another group`,
+    //   );
+    //   continue;
+    // }
+    if (!default_branch) {
       debug(
-        `Skipping project ${project.name_with_namespace} as it belong to another group`,
-      );
-      continue;
-    }
-    if (archived || !default_branch) {
-      debug(
-        `Skipping project ${project.name_with_namespace} as it is either archived or has no default branch`,
+        `Skipping project ${project.name_with_namespace} because it doesn't have a default branch`,
       );
       continue;
     }
@@ -97,36 +99,36 @@ export async function listGitlabRepos(
   const baseUrl = getBaseUrl(host);
   const client = new Gitlab({ host: baseUrl, token });
   let repos: GitlabRepoData[] = [];
-  let subGroupData: any[] = [];
-  let subGroupsCheck = true;
+  // let subGroupData: any[] = [];
+  // let subGroupsCheck = true;
 
   debug(`Fetching all repos data for org \`${groupName}\` from ${baseUrl}`);
   const repoList = await fetchAllRepos(client, groupName);
   repos.push(...repoList);
 
-  const subgroups: any = await client.Groups.subgroups(groupName);
+  // const subgroups: any = await client.Groups.subgroups(groupName);
 
-  if (gitlabSubGroupFile && subgroups.length >= 1) {
-    subGroupData = subgroups
-    while (subGroupsCheck) {
-      subGroupsCheck = false;
-      let extraData: any[] = [];
-      // let findSubGroup = true;
+  // if (gitlabSubGroupFile && subgroups.length >= 1) {
+  //   subGroupData = subgroups
+  //   while (subGroupsCheck) {
+  //     subGroupsCheck = false;
+  //     let extraData: any[] = [];
+  //     // let findSubGroup = true;
 
-      for (const subgroup of subGroupData) {
-        debug(`Looking for subgroups`)
-        const deeperSubGroups: any = await client.Groups.subgroups(subgroup.full_path)
-        if (deeperSubGroups.length >= 1) {
-          debug(`Found subgroup in ${subgroup.full_path}!`)
-          extraData.push(...deeperSubGroups)
-          subGroupsCheck = true;
-        }
-        // debug(`subgroup data ` + JSON.stringify(subgroup))
-        const repoLists = await fetchAllRepos(client, subgroup.full_path);
-        repos.push(...repoLists);
-      }
-      subGroupData = extraData;
-    }
-  }
+  //     for (const subgroup of subGroupData) {
+  //       debug(`Looking for subgroups`)
+  //       const deeperSubGroups: any = await client.Groups.subgroups(subgroup.full_path)
+  //       if (deeperSubGroups.length >= 1) {
+  //         debug(`Found subgroup in ${subgroup.full_path}!`)
+  //         extraData.push(...deeperSubGroups)
+  //         subGroupsCheck = true;
+  //       }
+  //       // debug(`subgroup data ` + JSON.stringify(subgroup))
+  //       const repoLists = await fetchAllRepos(client, subgroup.full_path);
+  //       repos.push(...repoLists);
+  //     }
+  //     subGroupData = extraData;
+  //   }
+  // }
   return repos;
 }
