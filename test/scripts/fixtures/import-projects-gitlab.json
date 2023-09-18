@@ -4,9 +4,9 @@
       "orgId": "74e2f385-a54f-491e-9034-76c53e72927a",
       "integrationId": "c1285fdd-fad5-472e-b515-127b60900965",
       "target": {
-        "name": "test-maven",
-        "branch": "develop",
-        "id": 226,
+        "name": "snyk-api-import-contract-tests/project-from-template",
+        "branch": "master",
+        "id": 28,
         "fork": false
       }
     }

@@ -59,6 +59,7 @@ describe('Import projects script', () => {
       path.resolve(__dirname + `/fixtures/import-projects-gitlab.json`),
       __dirname,
     );
+
     expect(projects).not.toBe([]);
     expect(projects[0]).toMatchObject({
       projectUrl: expect.any(String),
@@ -70,7 +71,7 @@ describe('Import projects script', () => {
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
     // Gitlab project
     expect(logFile).toMatch(
-      `"target":{"name":"test-maven","branch":"develop"}`,
+      `"target":{"name":"snyk-api-import-contract-tests/project-from-template","branch":"master"}`,
     );
     discoveredProjects.push(...projects);
   }, 2400000);

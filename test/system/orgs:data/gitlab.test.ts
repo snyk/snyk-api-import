@@ -26,7 +26,7 @@ describe('General `snyk-api-import orgs:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout).toMatch(
-          'Found 15 group(s). Written the data to file: group-hello-gitlab-orgs.json',
+          'Found 3 group(s). Written the data to file: group-hello-gitlab-orgs.json',
         );
         deleteFiles([
           path.resolve(__dirname, `group-${groupId}-gitlab-orgs.json`),

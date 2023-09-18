@@ -1,7 +1,7 @@
 {
   "orgData": [
     {
-      "name": "snyk-fixtures",
+      "name": "snyk-api-import-contract-tests",
       "orgId": "<snyk_org_id>",
       "integrations": {
         "gitlab": "<snyk_org_integration_id>"
