@@ -1,23 +1,15 @@
 version: 2.1
 orbs:
     snyk: snyk/snyk@1.1.2
-    slack: circleci/slack@3.4.2
 jobs:
     build-test-monitor:
         docker:
             - image: circleci/node:12
         steps:
-            - slack/notify:
-                channel: C0137E8F72A
-                color: '#42e2f4'
-                message: snyk-api-import build-test-monitor nightly job
             - checkout
             - run: npm install
             - run: npm test
             - run: npx semantic-release
-            - slack/status:
-                fail_only: true
-                only_for_branches: master
     build-test:
         docker:
             - image: circleci/node:12
@@ -28,9 +20,6 @@ jobs:
             - run: npx tsc
             - run: npm run pkg-binaries-linux
             - run: ./snyk-api-import-linux help
-            - slack/status:
-                fail_only: true
-                only_for_branches: master
     build-test-from-fork:
         docker:
             - image: circleci/node:12
