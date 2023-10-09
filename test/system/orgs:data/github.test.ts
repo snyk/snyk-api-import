@@ -26,7 +26,7 @@ describe('General `snyk-api-import orgs:data <...>`', () => {
         expect(stderr).toEqual('');
         expect(err).toBeNull();
         expect(stdout).toMatch(
-          'Found 2 organization(s). Written the data to file: group-hello-github-com-orgs.json',
+          'Found 3 organization(s). Written the data to file: group-hello-github-com-orgs.json',
         );
         deleteFiles([
           path.resolve(__dirname, `group-${groupId}-github-com-orgs.json`),
