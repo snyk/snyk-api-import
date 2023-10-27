@@ -31,18 +31,17 @@ describe('listGitlabRepos', () => {
     const GITLAB_ORG_NAME = process.env.TEST_GITLAB_ORG_NAME;
     process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
     // shared-with-group project is shared with group snyk-test
-    const gitlabGroupName = 'another-group-for-contract-tests';
+    const gitlabGroupName = 'snyk-api-import-tool-test-another-org';
     const repos = await listGitlabRepos(gitlabGroupName, GITLAB_BASE_URL);
     expect(
       repos.filter((r) => r.name === `${GITLAB_ORG_NAME}/shared-with-group`),
     ).toEqual([]);
     expect(repos.length > 0).toBeTruthy();
   }, 10000);
-
   it('list repos for a sub-group', async () => {
     const GITLAB_BASE_URL = process.env.TEST_GITLAB_BASE_URL;
     process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
-    const gitlabGroupName = 'snyk-api-import-contract-tests/example-sub-group';
+    const gitlabGroupName = 'snyk-api-import-tool-test-org/example-sub-group';
     const repos = await listGitlabRepos(gitlabGroupName, GITLAB_BASE_URL);
     expect(repos.length > 0).toBeTruthy();
   }, 10000);
