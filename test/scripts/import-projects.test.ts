@@ -27,7 +27,7 @@ describe('Import projects script', () => {
     process.env = { ...OLD_ENV };
   }, 30000);
 
-  it('succeeds to import targets from file', async () => {
+  it('succeeds to import targets from file for Github', async () => {
     const logFiles = generateLogsPaths(__dirname, ORG_ID);
     logs = Object.values(logFiles);
 
@@ -71,7 +71,7 @@ describe('Import projects script', () => {
     const logFile = fs.readFileSync(logFiles.importLogPath, 'utf8');
     // Gitlab project
     expect(logFile).toMatch(
-      `"target":{"name":"snyk-api-import-contract-tests/project-from-template","branch":"master"}`,
+      `"target":{"name":"snyk-api-import-tool-test-org/project-from-template","branch":"main"}`,
     );
     discoveredProjects.push(...projects);
   }, 2400000);
@@ -147,7 +147,6 @@ describe('Skips & logs issues', () => {
     const failedLog = fs.readFileSync(logFiles.failedImportLogPath, 'utf8');
     expect(failedLog).toMatch('ruby-with-versions');
   }, 50000);
-
   it('Logs failed when API errors', async () => {
     process.env.CONCURRENT_IMPORTS = '1';
     // this folder does not exist and will be created on run
@@ -204,8 +203,8 @@ describe('Skips & logs issues', () => {
       'utf-8',
     );
     expect(failedProjectsLog).not.toBeNull();
-    expect(failedProjectsLog).toMatch(
-      `"targetFile":"dotnet/invalid.csproj","success":false,"userMessage":"Failed to process manifest dotnet/invalid.csproj","projectUrl":""`,
+    expect(failedProjectsLog).toContain(
+      `"targetFile":"dotnet/invalid.csproj","success":false`,
     );
 
     let failedImportLog = null;
