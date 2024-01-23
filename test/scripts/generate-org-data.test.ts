@@ -211,8 +211,8 @@ describe('generateOrgImportDataFile Gitlab script', () => {
     });
   });
 
-  it('throws an error when Gitlab Orgs requested without sourceUrl', async () => {
-    process.env.GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN;
+  it('throws an error when Gitlab Orgs requested without valid token', async () => {
+    process.env.GITLAB_TOKEN = 'invalid-token';
     const groupId = 'groupIdExample';
 
     expect(
