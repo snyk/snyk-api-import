@@ -38,7 +38,7 @@
   ],
   "homepage": "https://github.com/snyk-tech-services/snyk-api-import#readme",
   "dependencies": {
-    "@gitbeaker/core": "35.7.0",
+    "@gitbeaker/core": "35.8.1",
     "@gitbeaker/node": "35.7.0",
     "@octokit/plugin-retry": "4.0.3",
     "@octokit/rest": "19.0.5",
