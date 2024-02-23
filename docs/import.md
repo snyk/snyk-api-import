@@ -192,9 +192,11 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 - `CONCURRENT_IMPORTS` (optional) defaults to 15 repos at a time, which is the recommended amount to import at once as a max. Just 1 repo may have many projects inside which can trigger a many files at once to be requested from the user's SCM instance and some may have rate limiting in place. This script aims to help reduce the risk of hitting a rate limit.
 - `SNYK_API` (optional) defaults to `https://snyk.io/api/v1`
 
-## 3. Download & run
+## 3. Install and run
 
-Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/imported-targets.json`
+Install the tool from [npm](https://www.npmjs.com/):
+`npm install snyk-api-import@latest -g`
+and run with `DEBUG=snyk* npx snyk-api-import import --file=path/to/imported-targets.json`
 
 ## 4. Review logs
 When import is started via Snyk API, many files & targets will be added to an import job. This job when complete will provide logs of what projects could be detected, which failed and any errors that were encountered. For more details see [Import API documentation](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets)
@@ -227,11 +229,11 @@ Note:
 Command to run:
 
 - skip all previously imported into all orgs in a Group:
-  `snyk-api-import-macos list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
+  `npx snyk-api-import list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
 - skip all previously imported for a specific Organization:
-  `snyk-api-import-macos list:imported --integrationType=<integration-type> --orgId=<snyk_org_id>`
-- a single integration / projects source `snyk-api-import-macos list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
-- multiple integrations / projects sources `snyk-api-import-macos list:imported --integrationType=<integration-type> --integrationType=<integration-type> --orgId=<snyk_org_id>`
+  `npx snyk-api-import list:imported --integrationType=<integration-type> --orgId=<snyk_org_id>`
+- a single integration / projects source `npx snyk-api-import list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
+- multiple integrations / projects sources `npx snyk-api-import list:imported --integrationType=<integration-type> --integrationType=<integration-type> --orgId=<snyk_org_id>`
 
 Supported integration types:
 
