@@ -4,6 +4,7 @@
   ],
   "publish": [
     "@semantic-release/npm",
+    "path": "@semantic-release/github"
   ],
   "branches": ["master"]
 }
