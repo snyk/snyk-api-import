@@ -45,7 +45,8 @@ To kick off an import, your Lambda function will need your `SNYK_TOKEN`, `SNYK_O
 
 ### Suggested architecture for the Lambda function
 1. Get the "repository-name" and the "image-tag" from the event
-2. Install or download the latest [snyk-api-import tool](https://github.com/snyk-tech-services/snyk-api-import/releases)
+2. Install the latest snyk-api-import tool
+`npm install snyk-api-import@latest -g`
 3. Create a targets file for the tool using your SNYK_ORG_ID, ORG_INTEGRATION_ID as explained [here](https://github.com/snyk-tech-services/snyk-api-import/blob/master/docs/import.md#1-create-the-import-projectsjson-file). The import file shsould have the neccessary fileds as needed by our [import endpoint](https://snyk.docs.apiary.io/#reference/import-projects/import-targets), for example - an import file for a new image will look something like this:
 ```
 {
@@ -63,7 +64,7 @@ To kick off an import, your Lambda function will need your `SNYK_TOKEN`, `SNYK_O
 4. Set your `SNYK_TOKEN` and your `SNYK_LOG_PATH` as an enviroment variables
 5. Kick off an import by running the import command with refernce to the created import file, for example:
 ```
-DEBUG=snyk* snyk-api-import import --file=path/to/import-targets.json
+DEBUG=snyk* npx snyk-api-import import --file=path/to/import-targets.json
 ```
 6. Wait for the imported targets log file - "imported-targets.log" to be created
 7. Check that the log indicates a successful import

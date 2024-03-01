@@ -18,9 +18,7 @@
     "build": "tsc",
     "build-watch": "tsc -w",
     "prepare": "npm run build",
-    "snyk-test": "snyk test",
-    "pkg-binaries-linux": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t linux-x64-12.16.2 -o snyk-api-import-linux",
-    "pkg-binaries": "npx nexe@3.3.7 dist/index.js -r './dist/**/*.js' -t mac-x64-12.18.2 -o snyk-api-import-macos"
+    "snyk-test": "snyk test"
   },
   "types": "./dist/index.d.ts",
   "repository": {
@@ -55,7 +53,7 @@
     "rimraf": "3.0.2",
     "simple-git": "3.16.0",
     "sleep-promise": "8.0.1",
-    "snyk-request-manager": "1.8.3",
+    "snyk-request-manager": "1.8.4",
     "source-map-support": "^0.5.16",
     "split": "1.0.1",
     "yargs": "16.2.0"
