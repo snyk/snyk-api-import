@@ -95,11 +95,9 @@ The command will produce detailed logs for projects that were `updated` and thos
 - `SNYK_API` (optional) defaults to `https://snyk.io/api/v1`
 - `GITHUB_TOKEN` - SCM token that has read level or similar permissions to see information about repos like default branch & can list files in a repo
 
-## 2. Install & run
+## 2. Download & run
 
-Install the tool from [npm](https://www.npmjs.com/):
-`npm install snyk-api-import@latest -g`
-and run with `DEBUG=snyk* npx snyk-api-import import --file=path/to/imported-targets.json`
+Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/imported-targets.json`
 
 ## 3. Review logs
 
@@ -122,39 +120,39 @@ When running `sync` in `--dryRun` mode the logs will have `dryRun` as `true` so 
 ### Github.com
 
 In dry-run mode:
-`DEBUG=*snyk* SNYK_TOKEN=xxxx npx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github --exclusionGlobs=**/package.json,logs --dryRun=true`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github --exclusionGlobs=**/package.json,logs --dryRun=true`
 
 Live mode:
-`DEBUG=*snyk* SNYK_TOKEN=xxxx npx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github`
 
 ### GitHub Enterprise Server
 
 In dry-run mode:
-`DEBUG=*snyk* SNYK_TOKEN=xxxx npx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com --dryRun=true`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com --dryRun=true`
 
 Live mode:
-`DEBUG=*snyk* SNYK_TOKEN=xxxx npx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com --exclusionGlobs=**/*.yaml,logs`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com --exclusionGlobs=**/*.yaml,logs`
 
 ### GitHub Enterprise Cloud
 
 In dry-run mode:
-`DEBUG=*snyk* SNYK_TOKEN=xxxx npx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --dryRun=true`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --dryRun=true`
 
 Live mode:
-`DEBUG=*snyk* SNYK_TOKEN=xxxx npx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise`
 
 ### Only syncing Container projects (Dockerfiles)
 
 `--snykProduct` can be used to specify to sync projects belonging to Open Source, Container (Dockerfiles) or IaC products which represent files in Git repos.
-`DEBUG=*snyk* SNYK_TOKEN=xxxx npx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=container`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=container`
 
 ### Only syncing Open Source + Iac projects (Dockerfiles)
 
-`DEBUG=*snyk* SNYK_TOKEN=xxxx npx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=open-source --snykProduct=iac`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=open-source --snykProduct=iac`
 
 ### Exclude from syncing certain files & directories
 
-`DEBUG=*snyk* SNYK_TOKEN=xxxx npx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=open-source --snykProduct=iac --exclusionGlobs=**/*.yaml,logs,system-test`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=open-source --snykProduct=iac --exclusionGlobs=**/*.yaml,logs,system-test`
 
 # Known limitations
 
