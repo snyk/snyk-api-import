@@ -1,10 +1,89 @@
 {
   "prepare": [
     "@semantic-release/npm",
+    {
+      "//": "adds a file to identify a build as a standalone binary",
+      "path": "@semantic-release/exec",
+      "cmd": "echo '' > dist/STANDALONE"
+    },
+    {
+      "//": "build the macos",
+      "path": "@semantic-release/exec",
+      "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t mac-x64-12.18.2 -o snyk-api-import-macos"
+    },
+    {
+      "//": "build the linux",
+      "path": "@semantic-release/exec",
+      "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t linux-x64-12.16.2 -o snyk-api-import-linux"
+    },
+    {
+      "//": "build the alpine",
+      "path": "@semantic-release/exec",
+      "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t alpine-x64-12.9.1 -o snyk-api-import-alpine"
+    },
+    {
+      "//": "build the windows binaries",
+      "path": "@semantic-release/exec",
+      "cmd": "npx nexe@3.3.7 dist/index.js  -r './dist/**/*.js' -t windows-x64-12.18.2 -o snyk-api-import-win.exe"
+    },
+    {
+      "//": "shasum all binaries",
+      "path": "@semantic-release/exec",
+      "cmd": "shasum -a 256 snyk-api-import-linux > snyk-api-import-linux.sha256 && shasum -a 256 snyk-api-import-macos > snyk-api-import-macos.sha256 && shasum -a 256 snyk-api-import-win.exe > snyk-api-import-win.exe.sha256 && shasum -a 256 snyk-api-import-alpine > snyk-api-import-alpine.sha256"
+    },
+    {
+      "//": "removes the file we use to identify a build as a standalone binary",
+      "path": "@semantic-release/exec",
+      "cmd": "rm dist/STANDALONE"
+    }
   ],
   "publish": [
     "@semantic-release/npm",
-    "path": "@semantic-release/github"
+    {
+      "path": "@semantic-release/github",
+      "assets": [
+        {
+          "path": "./snyk-api-import-linux",
+          "name": "snyk-api-import-linux",
+          "label": "snyk-api-import-linux"
+        },
+        {
+          "path": "./snyk-api-import-linux.sha256",
+          "name": "snyk-api-import-linux.sha256",
+          "label": "snyk-api-import-linux.sha256"
+        },
+        {
+          "path": "./snyk-api-import-alpine",
+          "name": "snyk-api-import-alpine",
+          "label": "snyk-api-import-alpine"
+        },
+        {
+          "path": "./snyk-api-import-alpine.sha256",
+          "name": "snyk-api-import-alpine.sha256",
+          "label": "snyk-api-import-alpine.sha256"
+        },
+        {
+          "path": "./snyk-api-import-macos",
+          "name": "snyk-api-import-macos",
+          "label": "snyk-api-import-macos"
+        },
+        {
+          "path": "./snyk-api-import-macos.sha256",
+          "name": "snyk-api-import-macos.sha256",
+          "label": "snyk-api-import-macos.sha256"
+        },
+        {
+          "path": "./snyk-api-import-win.exe",
+          "name": "snyk-api-import-win.exe",
+          "label": "snyk-api-import-win.exe"
+        },
+        {
+          "path": "./snyk-api-import-win.exe.sha256",
+          "name": "snyk-api-import-win.exe.sha256",
+          "label": "snyk-api-import-win.exe.sha256"
+        }
+      ]
+    }
   ],
   "branches": ["master"]
 }

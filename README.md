@@ -39,14 +39,32 @@ If you need to adjust concurrency you can stop the script, change the concurrenc
   - [AWS automation example](docs/example-workflows/aws-automation-example.md)
 
 # Installation
+`snyk-api-import` CLI can be installed through multiple channels.
 
-Snyk snyk-api-import CLI is available as an [npm package](https://www.npmjs.com/package/snyk-api-import).
+## Standalone executables (macOS, Linux, Windows)
 
-Ensure you have [node.js installed](https://nodejs.org/en/learn/getting-started/how-to-install-nodejs), the `snyk-api-import` can then be installed by running:
+Use [GitHub Releases](https://github.com/snyk-tech-services/snyk-api-import/releases) to download a standalone executable of Snyk CLI for your platform.
+
+## More installation methods
+
+<details>
+  <summary>Install with npm or Yarn</summary>
+
+### Install with npm or Yarn
+
+[Snyk snyk-api-import CLI is available as an npm package](https://www.npmjs.com/package/snyk-api-import). If you have Node.js installed locally, you can install it by running:
 
 ```bash
 npm install snyk-api-import@latest -g
 ```
+
+or if you are using Yarn:
+
+```bash
+yarn global add snyk-api-import
+```
+
+</details>
 
 # Usage
 By default the `import` command will run if no command specified.
@@ -91,3 +109,5 @@ The logs can be explored using [Bunyan CLI](http://trentm.com/node-bunyan/bunyan
     snyk-api-import supports 100% of the same integration types and project sources as the <a href="https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets">Import API documentation</a>. If an example is not in the docs for your use case please see the API documentation
   </p>
 </details>
+
+
