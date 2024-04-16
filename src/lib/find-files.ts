@@ -114,6 +114,7 @@ function findFile(
       return path;
     }
   } else {
+    // deepcode ignore reDOS: path is supplied by trusted user of API (not externally supplied)
     if (matches(path, ignore)) {
       return null;
     }

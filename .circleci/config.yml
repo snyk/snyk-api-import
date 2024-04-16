@@ -1,66 +1,96 @@
 version: 2.1
 orbs:
-    snyk: snyk/snyk@1.1.2
-jobs:
-    build-test-monitor:
-        docker:
-            - image: circleci/node:12
-        steps:
-            - checkout
-            - run: npm install
-            - run: npm test
-            - run: npx semantic-release
-    build-test:
-        docker:
-            - image: circleci/node:12
-        steps:
-            - checkout
-            - run: npm install
-            - run: npm test
-            - run: npx tsc
-            - run: npm run pkg-binaries-linux
-            - run: ./snyk-api-import-linux help
-    build-test-from-fork:
-        docker:
-            - image: circleci/node:12
-        steps:
-            - checkout
-            - run: npm install
-            - run: npm test
-            - run: npx tsc
-workflows:
-    version: 2
-    nightly:
-        triggers:
-          - schedule:
-              cron: "0 0 * * *"
-              filters:
-                branches:
-                  only:
-                    - master
-        jobs:
-            - build-test-monitor:
-                context: SNYK
+  prodsec: snyk/prodsec-orb@1.1
 
-    build-test-monitor:
-        jobs:
-            - build-test-monitor:
-                context: SNYK
-                filters:
-                    branches:
-                        only:
-                            - master
-    build-test:
-        jobs:
-            - build-test:
-                context: SNYK
-                filters:
-                    branches:
-                        ignore:
-                        - master
-                        - /pull\/[0-9]+/
-            - build-test-from-fork:
-                filters:
-                    branches:
-                        only:
-                        - /pull\/[0-9]+/
+features_only: &features_only
+  filters:
+    branches:
+      ignore: master
+
+main_only: &main_only
+  filters:
+    branches:
+      only: master
+
+defaults: &defaults
+  resource_class: small
+  docker:
+    - image: circleci/node:12
+
+jobs:
+  security-scans:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: npm install
+      - prodsec/security_scans:
+          mode: auto
+          release-branch: master # TODO: remove when master branch is renamed
+          iac-scan: disabled
+          open-source-scan: critical # TODO: remove this once Axios vulns are fixed
+
+  build-test-monitor:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: npm install
+      - run: npm test
+      - run: npx semantic-release
+
+  build-test:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: npm install
+      - run: npm test
+      - run: npx tsc
+      - run: npm run pkg-binaries-linux
+      - run: ./snyk-api-import-linux help
+
+  build-test-from-fork:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: npm install
+      - run: npm test
+      - run: npx tsc
+
+workflows:
+  version: 2
+
+  CICD:
+    jobs:
+      - security-scans:
+          name: Security Scans
+          context: analysis_import
+
+      - prodsec/secrets-scan:
+          name: Scan repository for secrets
+          context: snyk-bot-slack
+          channel: snyk-on-snyk-analysis_import
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: '0 0 * * *'
+          <<: *main_only
+    jobs:
+      - build-test-monitor:
+          context: snyk-api-import
+
+  build-test-monitor:
+    jobs:
+      - build-test-monitor:
+          context: snyk-api-import
+          <<: *main_only
+
+  build-test:
+    jobs:
+      - build-test:
+          context: snyk-api-import
+          <<: *features_only
+      - build-test-from-fork:
+          filters:
+            branches:
+              only:
+                - /pull\/[0-9]+/
