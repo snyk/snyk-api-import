@@ -2,7 +2,7 @@
 
 ***
 
-[![Known Vulnerabilities](https://snyk.io/test/github/snyk-tech-services/snyk-api-import/badge.svg)](https://snyk.io/test/github/snyk/snyk-api-import)
+[![Known Vulnerabilities](https://snyk.io/test/github/snyk/snyk-api-import/badge.svg)](https://snyk.io/test/github/snyk/snyk-api-import)
 [![Inactively Maintained](https://img.shields.io/badge/Maintenance%20Level-Inactively%20Maintained-yellowgreen.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
 
 **This repository is in maintenance mode, no new features are being developed. Bug & security fixes will continue to be delivered. Open source contributions are welcome for small features & fixes (no breaking changes)**
@@ -43,7 +43,7 @@ If you need to adjust concurrency you can stop the script, change the concurrenc
 
 ## Standalone executables (macOS, Linux, Windows)
 
-Use [GitHub Releases](https://github.com/snyk-tech-services/snyk-api-import/releases) to download a standalone executable of Snyk CLI for your platform.
+Use [GitHub Releases](https://github.com/snyk/snyk-api-import/releases) to download a standalone executable of Snyk CLI for your platform.
 
 ## More installation methods
 
