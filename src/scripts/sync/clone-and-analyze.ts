@@ -46,6 +46,7 @@ export async function cloneAndAnalyze(
   if (!repoPath) {
     throw new Error('No location returned for clones repo to analyze');
   }
+  // deepcode ignore reDOS: path is supplied by trusted user of API (not externally supplied)
   const { files } = await find(
     repoPath,
     [...defaultExclusionGlobs, ...exclusionGlobs],
