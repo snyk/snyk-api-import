@@ -1,7 +1,6 @@
-- [ ] Tests written and linted [ℹ︎](https://github.com/snyk-tech-services/general/wiki/Tests)
+- [ ] Tests written and linted
 - [ ] Documentation written in Wiki/[README](../README.md)
 - [ ] Commit history is tidy & follows Contributing guidelines [ℹ︎](./CONTRIBUTING.md#commit-messages)
-
 
 ### What this does
 

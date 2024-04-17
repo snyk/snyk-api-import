@@ -91,11 +91,11 @@ describe('buildGitCloneUrl', () => {
     const url = github.buildGitCloneUrl({
       branch: 'main',
       archived: false,
-      sshUrl: 'https://git@github.com:snyk-tech-services/snyk-api-import.git',
-      cloneUrl: 'https://github.com/snyk-tech-services/snyk-api-import.git',
+      sshUrl: 'https://git@github.com:snyk/snyk-api-import.git',
+      cloneUrl: 'https://github.com/snyk/snyk-api-import.git',
     });
     expect(url).toEqual(
-      `https://secret_token:x-oauth-basic@github.com/snyk-tech-services/snyk-api-import.git`,
+      `https://secret_token:x-oauth-basic@github.com/snyk/snyk-api-import.git`,
     );
   });
 });

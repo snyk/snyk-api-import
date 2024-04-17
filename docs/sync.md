@@ -97,7 +97,7 @@ The command will produce detailed logs for projects that were `updated` and thos
 
 ## 2. Download & run
 
-Grab a binary from the [releases page](https://github.com/snyk-tech-services/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/imported-targets.json`
+Grab a binary from the [releases page](https://github.com/snyk/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/imported-targets.json`
 
 ## 3. Review logs
 

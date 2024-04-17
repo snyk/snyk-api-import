@@ -25,7 +25,7 @@
   "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/snyk-tech-services/snyk-api-import"
+    "url": "https://github.com/snyk/snyk-api-import"
   },
   "author": "Snyk Tech Services",
   "license": "Apache-2.0",
@@ -36,7 +36,7 @@
     "bin",
     "dist"
   ],
-  "homepage": "https://github.com/snyk-tech-services/snyk-api-import#readme",
+  "homepage": "https://github.com/snyk/snyk-api-import#readme",
   "dependencies": {
     "@gitbeaker/core": "35.7.0",
     "@gitbeaker/node": "35.7.0",
