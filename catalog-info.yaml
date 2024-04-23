@@ -1,0 +1,16 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: snyk-api-import
+  annotations:
+    circleci.com/project-slug: github/snyk/snyk-api-import
+    github.com/project-slug: snyk/snyk-api-import
+    github.com/team-slug: snyk/team-import
+  links:
+    - title: Team Asks Channel
+      url: https://snyk.slack.com/channels/ask-import
+      icon: message
+spec:
+  type: external-tooling
+  lifecycle: '-'
+  owner: team-import
