@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  prodsec: snyk/prodsec-orb@dev:cb98ec509ae7f8b666d11170f27bceac39f52c34
+  prodsec: snyk/prodsec-orb@dev:97450656184b5d3e31fd71075afa48d3a2fb4703
 
 features_only: &features_only
   filters:
