@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  prodsec: snyk/prodsec-orb@dev:97450656184b5d3e31fd71075afa48d3a2fb4703
+  prodsec: snyk/prodsec-orb@dev:807385175ebaf59aa6a54edf3398dafa2f496c91
 
 features_only: &features_only
   filters:
@@ -15,7 +15,7 @@ main_only: &main_only
 defaults: &defaults
   resource_class: small
   docker:
-    - image: circleci/node:12 # image: cimg/node:12.22
+    - image: circleci/node:12
 
 jobs:
   security-scans:
