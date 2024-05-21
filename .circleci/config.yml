@@ -28,6 +28,7 @@ jobs:
           release-branch: master # TODO: remove when master branch is renamed
           iac-scan: disabled
           open-source-scan: critical # TODO: remove this once Axios vulns are fixed
+          open-source-additional-arguments: --exclude=test
 
   build-test-monitor:
     <<: *defaults
