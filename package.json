@@ -48,7 +48,7 @@
     "bunyan": "1.8.15",
     "debug": "4.3.4",
     "lodash": "4.17.21",
-    "micromatch": "4.0.5",
+    "micromatch": "4.0.6",
     "needle": "2.9.1",
     "p-map": "4.0.0",
     "parse-link-header": "2.0.0",
