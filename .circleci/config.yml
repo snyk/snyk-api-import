@@ -43,7 +43,7 @@ jobs:
       - checkout
       - run: npm install
       - run: npm test
-      - run: npm run pkg-binaries-linux
+      - run: npm run pkg-binaries:linux
       - run: ./snyk-api-import-linux help
 
   build-test-from-fork:
