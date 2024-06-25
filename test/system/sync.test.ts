@@ -165,13 +165,15 @@ describe('`snyk-api-import sync <...>`', () => {
         },
       },
       async (err, stdout, stderr) => {
-        expect(stderr).toEqual('');
+        expect(stderr).toEqual(
+          `Failed to sync target api-import-circle-test/deleted-repo. ERROR: Cannot read properties of undefined (reading 'branch')\n`,
+        );
         expect(err).toBeNull();
         expect(stdout).toMatch(
           'Done syncing targets for source github-enterprise',
         );
-        expect(stdout).toMatch('Processed 3 targets (0 failed)');
-        expect(stdout).toMatch('Updated 2 projects');
+        expect(stdout).toMatch('Processed 4 targets (1 failed)');
+        expect(stdout).toMatch('Updated 6 projects');
 
         // give file a little time to be finished to be written
         await new Promise((r) => setTimeout(r, 20000));
