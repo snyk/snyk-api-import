@@ -39,10 +39,10 @@ describe('`snyk-api-import list:imported <...>`', () => {
                              pick the correct integrationID from each org in Snyk E.g.
                              --integrationType=github,
                              --integrationType=github-enterprise
-           [required] [choices: \\"github\\", \\"github-enterprise\\", \\"bitbucket-cloud\\", \\"gcr\\",
-                    \\"docker-hub\\", \\"gitlab\\", \\"azure-repos\\", \\"bitbucket-server\\"] [default:
-          [\\"github\\",\\"github-enterprise\\",\\"bitbucket-cloud\\",\\"gcr\\",\\"docker-hub\\",\\"gitlab\\",\\"a
-                                                        zure-repos\\",\\"bitbucket-server\\"]]
+           [required] [choices: "github", "github-enterprise", "bitbucket-cloud", "gcr",
+                    "docker-hub", "gitlab", "azure-repos", "bitbucket-server"] [default:
+          ["github","github-enterprise","bitbucket-cloud","gcr","docker-hub","gitlab","a
+                                                        zure-repos","bitbucket-server"]]
         "
       `);
     }).on('exit', (code) => {

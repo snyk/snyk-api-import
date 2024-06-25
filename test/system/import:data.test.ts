@@ -35,13 +35,13 @@ describe('`snyk-api-import import:data <...>`', () => {
           Options:
             --version    Show version number                                     [boolean]
             --help       Show help                                               [boolean]
-            --orgsData   Path to organizations data file generated with \\"orgs:create\\"
+            --orgsData   Path to organizations data file generated with "orgs:create"
                          command                                                [required]
             --source     The source of the targets to be imported e.g. Github, Github
                          Enterprise, Gitlab, Azure. This will be used to make an API call
                          to list all available entities per org
-              [required] [choices: \\"github\\", \\"github-enterprise\\", \\"gitlab\\", \\"azure-repos\\",
-                                \\"bitbucket-server\\", \\"bitbucket-cloud\\"] [default: \\"github\\"]
+              [required] [choices: "github", "github-enterprise", "gitlab", "azure-repos",
+                                "bitbucket-server", "bitbucket-cloud"] [default: "github"]
             --sourceUrl  Custom base url for the source API that can list organizations
                          (e.g. Github Enterprise url)"
         `);
