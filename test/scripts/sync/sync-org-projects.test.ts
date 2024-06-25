@@ -61,7 +61,7 @@ describe('updateTargets', () => {
         'github-enterprise': 'asffgg-2456-6addf-agg',
       });
 
-    jest.spyOn(fs, 'rmdirSync').mockImplementation(() => true);
+    jest.spyOn(fs, 'rmSync').mockImplementation(() => true);
   }, 1000);
 
   afterAll(async () => {
@@ -1112,7 +1112,7 @@ describe('updateOrgTargets', () => {
         github: 'abcw-12456-dafgsdf-ajrgrbz',
         'github-enterprise': 'asffgg-2456-6addf-agg',
       });
-    jest.spyOn(fs, 'rmdirSync').mockImplementation(() => true);
+    jest.spyOn(fs, 'rmSync').mockImplementation(() => true);
   });
   afterAll(() => {
     jest.restoreAllMocks();
