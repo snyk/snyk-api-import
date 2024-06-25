@@ -7,7 +7,7 @@ import { fetchReposForPage } from './list-repos';
 import { getGithubToken } from './get-github-token';
 
 const debug = debugLib('snyk:github');
-const githubClient = Octokit.plugin(retry);
+const githubClient = Octokit.plugin(retry as any);
 
 export async function githubOrganizationIsEmpty(
   orgName: string,

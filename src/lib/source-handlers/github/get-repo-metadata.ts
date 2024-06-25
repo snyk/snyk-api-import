@@ -5,7 +5,7 @@ import type { RepoMetaData, Target } from '../../types';
 import { getGithubToken } from './get-github-token';
 import { getGithubBaseUrl } from './github-base-url';
 
-const githubClient = Octokit.plugin(retry);
+const githubClient = Octokit.plugin(retry as any);
 const debug = debugLib('snyk:get-github-defaultBranch-script');
 
 export async function getGithubRepoMetaData(

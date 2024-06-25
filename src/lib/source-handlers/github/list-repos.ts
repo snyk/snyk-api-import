@@ -6,7 +6,7 @@ import { getGithubBaseUrl } from './github-base-url';
 import type { GithubRepoData } from './types';
 
 const debug = debugLib('snyk:list-repos-script');
-const githubClient = Octokit.plugin(retry);
+const githubClient = Octokit.plugin(retry as any);
 
 export async function fetchReposForPage(
   octokit: Octokit,
