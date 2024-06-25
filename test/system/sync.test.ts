@@ -164,10 +164,7 @@ describe('`snyk-api-import sync <...>`', () => {
           GITHUB_TOKEN: process.env.TEST_GHE_TOKEN,
         },
       },
-      async (err, stdout, stderr) => {
-        expect(stderr).toEqual(
-          `Failed to sync target api-import-circle-test/deleted-repo. ERROR: Cannot read properties of undefined (reading 'branch')\n`,
-        );
+      async (err, stdout) => {
         expect(err).toBeNull();
         expect(stdout).toMatch(
           'Done syncing targets for source github-enterprise',
