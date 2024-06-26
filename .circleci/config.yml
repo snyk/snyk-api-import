@@ -15,7 +15,7 @@ main_only: &main_only
 defaults: &defaults
   resource_class: small
   docker:
-    - image: circleci/node:12
+    - image: cimg/node:20.11.1
 
 jobs:
   security-scans:
@@ -27,7 +27,6 @@ jobs:
           mode: auto
           release-branch: master # TODO: remove when master branch is renamed
           iac-scan: disabled
-          open-source-scan: critical # TODO: remove this once Axios vulns are fixed
           open-source-additional-arguments: --exclude=test
 
   build-test-monitor:
@@ -44,8 +43,7 @@ jobs:
       - checkout
       - run: npm install
       - run: npm test
-      - run: npx tsc
-      - run: npm run pkg-binaries-linux
+      - run: npm run pkg-binaries:linux
       - run: ./snyk-api-import-linux help
 
   build-test-from-fork:
@@ -54,7 +52,6 @@ jobs:
       - checkout
       - run: npm install
       - run: npm test
-      - run: npx tsc
 
 workflows:
   version: 2

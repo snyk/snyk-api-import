@@ -9,7 +9,8 @@
     "declaration": true,
     "importHelpers": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "useUnknownInCatchVariables": false
   },
   "include": ["./src/**/**/*"]
 }
