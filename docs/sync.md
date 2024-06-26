@@ -12,7 +12,7 @@
       - [File renamed/moves/deleted](#file-renamedmovesdeleted)
       - [node\_modules, tests \& fixtures](#node_modules-tests--fixtures)
   - [Detecting \& importing new files not already monitored in Snyk](#detecting--importing-new-files-not-already-monitored-in-snyk)
-  - [Repository is archived](#repository-is-archived)
+  - [Repository is archived / deleted](#repository-is-archived--deleted)
 - [Kick off sync](#kick-off-sync)
   - [1. Set the env vars](#1-set-the-env-vars)
   - [2. Download \& run](#2-download--run)
@@ -77,9 +77,9 @@ Any projects that were imported but match the default exclusions list (deemed to
 While analyzing each target known to Snyk any new Snyk supported files found in the repo that do not have a corresponding project in Snyk will be imported in batches. Any files matching the default or user provided `exclusionGlobs` will be ignored.
 If a file has a corresponding de-activated project in Snyk, it will not be brought in again. Activate manually or via API if it should be active.
 
-## Repository is archived
+## Repository is archived / deleted
 
-If the repository is now marked as archived, all relevant Snyk projects will be de-activated.
+If the repository is now marked as archived or has been deleted (API returns 404), all relevant Snyk projects will be de-activated.
 # Kick off sync
 
 `sync` command will analyze existing projects & targets (repos) in Snyk organization and determine if any changes are needed.
