@@ -49,7 +49,7 @@ describe('Logs failed polls', () => {
     await new Promise((r) => setTimeout(r, 300));
     const failedLog = fs.readFileSync(failedPollsLogName, 'utf8');
     expect(failedLog).toMatch(
-      `"level":50,"orgId":"ORG-ID","locationUrl":"https://app.snyk.io/api/v1/org/ORG-ID/integrations/INTEGRATION-ID/import/IMPORT-ID","errorMessage":{"statusCode":500,"error":{"message":"Error calling Snyk api"}},"msg":"Failed to poll url"`,
+      `"level":50,"orgId":"ORG-ID","locationUrl":"https://api.snyk.io/v1/org/ORG-ID/integrations/INTEGRATION-ID/import/IMPORT-ID","errorMessage":{"statusCode":500,"error":{"message":"Error calling Snyk api"}},"msg":"Failed to poll url"`,
     );
   }, 240000);
 });
