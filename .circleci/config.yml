@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   prodsec: snyk/prodsec-orb@1.1
+  slack: circleci/slack@4.13.3
 
 features_only: &features_only
   filters:
@@ -16,6 +17,61 @@ defaults: &defaults
   resource_class: small
   docker:
     - image: cimg/node:20.11.1
+
+commands:
+  notify_slack_on_failure:
+    steps:
+      - slack/notify:
+          branch_pattern: main
+          channel: import-alerts
+          event: fail
+          mentions: '@team-import'
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "CICD pipeline failed :circleci-fail:",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Project*: ${CIRCLE_PROJECT_REPONAME}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Job*: ${CIRCLE_JOB}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch*: ${CIRCLE_BRANCH}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Author*: ${CIRCLE_USERNAME}"
+                    }
+                  ],
+                  "accessory": {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "emoji": true,
+                      "text": "View Job"
+                    },
+                    "value": "${CIRCLE_BUILD_URL}"
+                  }
+                }
+              ]
+            }
 
 jobs:
   security-scans:
@@ -36,6 +92,7 @@ jobs:
       - run: npm install
       - run: npm test
       - run: npx semantic-release
+      - notify_slack_on_failure
 
   build-test:
     <<: *defaults
@@ -74,12 +131,16 @@ workflows:
           <<: *main_only
     jobs:
       - build-test-monitor:
-          context: snyk-api-import
+          context:
+            - snyk-api-import
+            - snyk-bot-slack
 
   build-test-monitor:
     jobs:
       - build-test-monitor:
-          context: snyk-api-import
+          context:
+            - snyk-api-import
+            - snyk-bot-slack
           <<: *main_only
 
   build-test:
