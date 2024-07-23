@@ -92,7 +92,7 @@ The command will produce detailed logs for projects that were `updated` and thos
 
 - `SNYK_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
 - `SNYK_LOG_PATH` - the path to folder where all logs should be saved,it is recommended creating a dedicated logs folder per import you have running. (Note: all logs will append)
-- `SNYK_API` (optional) defaults to `https://snyk.io/api/v1`
+- `SNYK_API` (optional) defaults to `https://api.snyk.io/v1`
 - `GITHUB_TOKEN` - SCM token that has read level or similar permissions to see information about repos like default branch & can list files in a repo
 
 ## 2. Download & run

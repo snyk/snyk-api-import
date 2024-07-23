@@ -20,7 +20,7 @@ export class requestsManager {
           statusCode: 201,
           headers: {
             location:
-              'https://app.snyk.io/api/v1/org/ORG-ID/integrations/INTEGRATION-ID/import/IMPORT-ID',
+              'https://api.snyk.io/v1/org/ORG-ID/integrations/INTEGRATION-ID/import/IMPORT-ID',
           },
         });
       }
