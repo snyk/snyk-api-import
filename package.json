@@ -57,7 +57,7 @@
     "rimraf": "^5.0.7",
     "simple-git": "3.16.0",
     "sleep-promise": "8.0.1",
-    "snyk-request-manager": "1.8.4",
+    "snyk-request-manager": "1.8.6",
     "source-map-support": "^0.5.16",
     "split": "1.0.1",
     "yargs": "16.2.0"
