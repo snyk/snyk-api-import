@@ -79,6 +79,11 @@ The logs can be explored using [Bunyan CLI](http://trentm.com/node-bunyan/bunyan
 
 # FAQ
 <details>
+<summary>What is the minimum version of Node that the tool supports?</summary>
+<br/>
+  <p>Please check the <code>.nvmrc</code> file for the supported version of Node.</p>
+</details>
+<details>
 <summary><code>Error: ENFILE: file table overflow, open</code> or <code>Error: EMFILE, too many open files</code></summary>
 <br/>
   <p>If you see these errors then you may need to bump <b>ulimit</b> to allow more open file operations. In order to keep the operations more performant tool logs as soon as it is convenient rather than wait until very end of a loop and log a huge data structure. This means depending on number of concurrent imports set the tool may exceed the system default <b>ulimit</b>.</p>
