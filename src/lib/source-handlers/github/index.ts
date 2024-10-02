@@ -5,3 +5,4 @@ export * from './get-repo-metadata';
 export * from './types';
 export * from './is-configured';
 export * from './git-clone-url';
+export * from './validate-token';
