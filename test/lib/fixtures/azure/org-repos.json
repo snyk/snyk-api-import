@@ -58,7 +58,7 @@
       "remoteUrl": "https://dev.azure.com/remoteUrl",
       "sshUrl": "",
       "webUrl": "https://dev.azure.com/remoteUrl",
-      "isDisabled": false
+      "isDisabled": true
     }
   ],
   "count": 3
