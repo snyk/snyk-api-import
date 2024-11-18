@@ -70,7 +70,7 @@ describe('Testing azure-devops interaction', () => {
   });
   test('Test listAzureRepos with one page', async () => {
     const repos = await listAzureRepos('reposTestOrg', 'https://azure-tests');
-    expect(repos).toHaveLength(3);
+    expect(repos).toHaveLength(2);
   });
   test('listAzureRepos to fail', async () => {
     expect(async () => {

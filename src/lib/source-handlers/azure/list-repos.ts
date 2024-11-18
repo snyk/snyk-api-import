@@ -15,6 +15,7 @@ interface AzureReposResponse {
     name: string;
     project: { name: string };
     defaultBranch: string;
+    isDisabled: boolean;
   }[];
 }
 export async function fetchAllRepos(
@@ -61,9 +62,8 @@ async function getRepos(
     Response body: ${JSON.stringify(body)}`);
   }
   const { value: repos } = body;
-  repos.map((repo) => {
-    const { name, project, defaultBranch } = repo;
-    if (name && project && project.name && defaultBranch) {
+  repos.map(({ name, project, defaultBranch, isDisabled }) => {
+    if (name && project && project.name && defaultBranch && !isDisabled) {
       repoList.push({
         name,
         owner: project.name,
