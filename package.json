@@ -91,7 +91,7 @@
   },
   "overrides": {
     "snyk-request-manager": {
-      "axios": "1.7.4"
+      "axios": "1.7.6"
     }
   },
   "pkg": {
