@@ -22,6 +22,7 @@ describe('Import projects script', () => {
   process.env.SNYK_TOKEN = process.env.SNYK_TOKEN_TEST;
 
   afterAll(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     await deleteTestProjects(ORG_ID, discoveredProjects);
     await deleteFiles(logs);
     process.env = { ...OLD_ENV };
