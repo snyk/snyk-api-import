@@ -117,12 +117,12 @@ workflows:
     jobs:
       - security-scans:
           name: Security Scans
-          context: analysis_import
+          context: cs-engineers-org-tagger
 
       - prodsec/secrets-scan:
           name: Scan repository for secrets
           context: snyk-bot-slack
-          channel: snyk-on-snyk-analysis_import
+          channel: ask-cs-ops
 
   nightly:
     triggers:
