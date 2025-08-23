@@ -42,7 +42,7 @@
   "homepage": "https://github.com/snyk/snyk-api-import#readme",
   "dependencies": {
     "@gitbeaker/core": "35.7.0",
-    "@gitbeaker/node": "35.7.0",
+    "@gitbeaker/node": "35.8.1",
     "@octokit/plugin-retry": "4.0.3",
     "@octokit/rest": "19.0.5",
     "base-64": "^1.0.0",
