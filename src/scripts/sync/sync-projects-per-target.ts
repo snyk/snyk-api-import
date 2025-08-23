@@ -1,7 +1,10 @@
 import type { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 
-import { getGithubRepoMetaData } from '../../lib/source-handlers/github';
+import {
+  getGithubRepoMetaData,
+  validateToken,
+} from '../../lib/source-handlers/github';
 import { updateBranch } from '../../lib/project/update-branch';
 import type {
   SnykProject,
@@ -26,6 +29,16 @@ export function getMetaDataGenerator(
     [SupportedIntegrationTypesUpdateProject.GHE]: getGithubRepoMetaData,
   };
   return getDefaultBranchGenerators[origin];
+}
+
+export function getTokenValidator(
+  origin: SupportedIntegrationTypesUpdateProject,
+): (target: Target, host?: string | undefined) => Promise<{ valid: true }> {
+  const generator = {
+    [SupportedIntegrationTypesUpdateProject.GITHUB]: validateToken,
+    [SupportedIntegrationTypesUpdateProject.GHE]: validateToken,
+  };
+  return generator[origin];
 }
 
 export function getTargetConverter(
@@ -60,27 +73,56 @@ export async function syncProjectsForTarget(
 
   debug(`Syncing projects for target ${target.attributes.displayName}`);
   let targetMeta: RepoMetaData;
+  let isDeleted = false;
   const origin = target.attributes
     .origin as SupportedIntegrationTypesUpdateProject;
   const targetData = getTargetConverter(origin)(target);
+  const isTokenValid = await getTokenValidator(origin);
 
   try {
     targetMeta = await getMetaDataGenerator(origin)(targetData, host);
   } catch (e) {
-    //TODO: if repo is deleted, deactivate all projects
-    debug(e);
-    const error = `Getting default branch via ${origin} API failed with error: ${e.message}`;
-    projects.map((project) => {
-      failed.add({
-        errorMessage: error,
-        projectPublicId: project.id,
-        type: ProjectUpdateType.BRANCH,
-        from: project.branch!,
-        to: targetMeta.branch,
-        dryRun: config.dryRun,
-        target,
+    debug(`Failed to get metadata ${JSON.stringify(targetData)}: ` + e);
+    if (
+      e.status === 404 &&
+      (await isTokenValid(targetData, host)).valid === true
+    ) {
+      isDeleted = true;
+    } else {
+      const error = `Getting metadata from ${origin} API failed with error: ${e.message}`;
+      projects.map((project) => {
+        failed.add({
+          errorMessage: error,
+          projectPublicId: project.id,
+          type: ProjectUpdateType.BRANCH,
+          from: project.branch!,
+          to: 'unknown',
+          dryRun: config.dryRun,
+          target,
+        });
       });
-    });
+      return {
+        updated: Array.from(updated).map((t) => ({ ...t, target })),
+        failed: Array.from(failed).map((t) => ({ ...t, target })),
+      };
+    }
+  }
+
+  if (isDeleted || targetMeta!.archived) {
+    const res = await bulkDeactivateProjects(
+      requestManager,
+      orgId,
+      projects,
+      config.dryRun,
+    );
+
+    res.updated.map((t) => ({ ...t, target })).forEach((i) => updated.add(i));
+    res.failed.map((t) => ({ ...t, target })).forEach((i) => failed.add(i));
+
+    return {
+      updated: Array.from(updated).map((t) => ({ ...t, target })),
+      failed: Array.from(failed).map((t) => ({ ...t, target })),
+    };
   }
 
   const deactivate = [];
