@@ -43,7 +43,7 @@
   "dependencies": {
     "@gitbeaker/core": "35.7.0",
     "@gitbeaker/node": "35.7.0",
-    "@octokit/plugin-retry": "4.0.3",
+    "@octokit/plugin-retry": "4.1.6",
     "@octokit/rest": "19.0.5",
     "base-64": "^1.0.0",
     "bottleneck": "2.19.5",
