@@ -51,7 +51,7 @@ Each **import target** has the following keys:
 {
   // required
   "orgId": "<public_snyk_org_id>",
-  "integrationId": <"public_snyk_integration_id>",
+  "integrationId": "<public_snyk_integration_id>",
   "target": {..} // the identifier of where the projects can be found (for example branch, repo name and owner for Github)
 
    // optional
