@@ -12,10 +12,7 @@ describe('GitHub Cloud App Integration', () => {
   describe('isGitHubCloudAppConfigured', () => {
     it('should return true when properly configured', () => {
       process.env.GITHUB_APP_ID = '123456';
-      process.env.GITHUB_APP_PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEjWT2btf0F
-3gVb7uQ61hzGkf7+6fTWG5JTmcafqCe0xAMRfWVRMxdEuhOWG2UK2gfVe42O8BJU
------END RSA PRIVATE KEY-----`;
+      process.env.GITHUB_APP_PRIVATE_KEY = ``;
 
       const configured = githubCloudApp.isGitHubCloudAppConfigured();
       expect(configured).toBe(true);
@@ -23,10 +20,7 @@ MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEjWT2btf0F
 
     it('should return false when GITHUB_APP_ID is missing', () => {
       delete process.env.GITHUB_APP_ID;
-      process.env.GITHUB_APP_PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEjWT2btf0F
-3gVb7uQ61hzGkf7+6fTWG5JTmcafqCe0xAMRfWVRMxdEuhOWG2UK2gfVe42O8BJU
------END RSA PRIVATE KEY-----`;
+      process.env.GITHUB_APP_PRIVATE_KEY = ``;
 
       const configured = githubCloudApp.isGitHubCloudAppConfigured();
       expect(configured).toBe(false);
@@ -50,10 +44,7 @@ MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEjWT2btf0F
 
     it('should return false when app ID is not numeric', () => {
       process.env.GITHUB_APP_ID = 'not-numeric';
-      process.env.GITHUB_APP_PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEjWT2btf0F
-3gVb7uQ61hzGkf7+6fTWG5JTmcafqCe0xAMRfWVRMxdEuhOWG2UK2gfVe42O8BJU
------END RSA PRIVATE KEY-----`;
+      process.env.GITHUB_APP_PRIVATE_KEY = ``;
 
       const configured = githubCloudApp.isGitHubCloudAppConfigured();
       expect(configured).toBe(false);
@@ -63,10 +54,7 @@ MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEjWT2btf0F
   describe('getGitHubCloudAppConfigurationError', () => {
     it('should return error message for missing app ID', () => {
       delete process.env.GITHUB_APP_ID;
-      process.env.GITHUB_APP_PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEjWT2btf0F
-3gVb7uQ61hzGkf7+6fTWG5JTmcafqCe0xAMRfWVRMxdEuhOWG2UK2gfVe42O8BJU
------END RSA PRIVATE KEY-----`;
+      process.env.GITHUB_APP_PRIVATE_KEY = ``;
 
       const error = githubCloudApp.getGitHubCloudAppConfigurationError();
       expect(error).toContain('GITHUB_APP_ID environment variable is not set');
@@ -92,10 +80,7 @@ MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEjWT2btf0F
 
     it('should return error message for invalid app ID format', () => {
       process.env.GITHUB_APP_ID = 'not-numeric';
-      process.env.GITHUB_APP_PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEjWT2btf0F
-3gVb7uQ61hzGkf7+6fTWG5JTmcafqCe0xAMRfWVRMxdEuhOWG2UK2gfVe42O8BJU
------END RSA PRIVATE KEY-----`;
+      process.env.GITHUB_APP_PRIVATE_KEY = ``;
 
       const error = githubCloudApp.getGitHubCloudAppConfigurationError();
       expect(error).toContain('must be a numeric string');
