@@ -19,6 +19,7 @@ import {
   listBitbucketCloudRepos,
   BitbucketCloudRepoData,
 } from '../lib';
+import { listGitHubCloudAppRepos } from '../lib/source-handlers/github-cloud-app';
 
 const debug = debugLib('snyk:generate-targets-data');
 
@@ -37,6 +38,8 @@ async function githubEnterpriseRepos(
 
 const sourceGenerators = {
   [SupportedIntegrationTypesImportData.GITHUB]: listGithubRepos,
+  [SupportedIntegrationTypesImportData.GITHUB_CLOUD_APP]:
+    listGitHubCloudAppRepos,
   [SupportedIntegrationTypesImportData.GHE]: githubEnterpriseRepos,
   [SupportedIntegrationTypesImportData.GITLAB]: listGitlabRepos,
   [SupportedIntegrationTypesImportData.AZURE_REPOS]: listAzureRepos,

@@ -6,6 +6,10 @@ import {
   SnykOrgData,
 } from '../lib/source-handlers/github';
 import {
+  listGitHubCloudAppOrgs,
+  githubCloudAppOrganizationIsEmpty,
+} from '../lib/source-handlers/github-cloud-app';
+import {
   listGitlabGroups,
   gitlabGroupIsEmpty,
 } from '../lib/source-handlers/gitlab';
@@ -26,6 +30,8 @@ import { writeFile } from '../write-file';
 const sourceGenerators = {
   [SupportedIntegrationTypesImportOrgData.GITLAB]: listGitlabGroups,
   [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizations,
+  [SupportedIntegrationTypesImportOrgData.GITHUB_CLOUD_APP]:
+    listGitHubCloudAppOrgs,
   [SupportedIntegrationTypesImportOrgData.GHE]: githubEnterpriseOrganizations,
   [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]:
     listBitbucketServerProjects,
@@ -35,6 +41,8 @@ const sourceGenerators = {
 
 const sourceNotEmpty = {
   [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizationIsEmpty,
+  [SupportedIntegrationTypesImportOrgData.GITHUB_CLOUD_APP]:
+    githubCloudAppOrganizationIsEmpty,
   [SupportedIntegrationTypesImportOrgData.GHE]: githubOrganizationIsEmpty,
   [SupportedIntegrationTypesImportOrgData.GITLAB]: gitlabGroupIsEmpty,
   [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]:
@@ -47,6 +55,7 @@ export const entityName: {
   [source in SupportedIntegrationTypesImportOrgData]: string;
 } = {
   github: 'organization',
+  'github-cloud-app': 'organization',
   'github-enterprise': 'organization',
   gitlab: 'group',
   'bitbucket-server': 'project',
@@ -57,6 +66,7 @@ const exportFileName: {
   [source in SupportedIntegrationTypesImportOrgData]: string;
 } = {
   github: 'github-com',
+  'github-cloud-app': 'github-cloud-app',
   'github-enterprise': 'github-enterprise',
   gitlab: 'gitlab',
   'bitbucket-server': 'bitbucket-server',

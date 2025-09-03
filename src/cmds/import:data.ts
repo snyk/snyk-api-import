@@ -34,6 +34,7 @@ const entityName: {
   [source in SupportedIntegrationTypesImportData]: string;
 } = {
   github: 'org',
+  'github-cloud-app': 'org',
   'github-enterprise': 'org',
   gitlab: 'group',
   'azure-repos': 'org',
