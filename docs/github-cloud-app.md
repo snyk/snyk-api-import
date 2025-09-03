@@ -80,8 +80,7 @@ export GITHUB_APP_ID="123456"
 
 # Required: Your GitHub App private key (PEM format)
 export GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEjWT2btf0F
-3gVb7uQ61hzGkf7+6fTWG5JTmcafqCe0xAMRfWVRMxdEuhOWG2UK2gfVe42O8BJU
+your awesome token info
 ...
 -----END RSA PRIVATE KEY-----"
 ```
