@@ -36,6 +36,7 @@ const entityName: {
   [source in SupportedIntegrationTypesToListSnykTargets]: string;
 } = {
   github: 'repo',
+  'github-cloud-app': 'repo',
   'github-enterprise': 'repo',
   'bitbucket-cloud': 'repo',
   gcr: 'images',

@@ -69,6 +69,8 @@ export function imageProjectToTarget(
 
 export const targetGenerators = {
   [SupportedIntegrationTypesToListSnykTargets.GITHUB]: projectToTarget,
+  [SupportedIntegrationTypesToListSnykTargets.GITHUB_CLOUD_APP]:
+    projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.GITLAB]:
     gitlabProjectToImportLogTarget,
   [SupportedIntegrationTypesToListSnykTargets.GHE]: projectToTarget,

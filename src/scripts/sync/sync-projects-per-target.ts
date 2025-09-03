@@ -2,6 +2,7 @@ import type { requestsManager } from 'snyk-request-manager';
 import * as debugLib from 'debug';
 
 import { getGithubRepoMetaData } from '../../lib/source-handlers/github';
+import { getGitHubCloudAppRepoMetadata } from '../../lib/source-handlers/github-cloud-app';
 import { updateBranch } from '../../lib/project/update-branch';
 import type {
   SnykProject,
@@ -18,11 +19,26 @@ import { cloneAndAnalyze } from './clone-and-analyze';
 import { importSingleTarget } from './import-target';
 const debug = debugLib('snyk:sync-projects-per-target');
 
+// Wrapper function for GitHub Cloud App to match the expected signature
+async function getGitHubCloudAppRepoMetaData(
+  target: Target,
+  host?: string,
+): Promise<RepoMetaData> {
+  if (!target.owner || !target.name) {
+    throw new Error(
+      'GitHub Cloud App target must have owner and name properties',
+    );
+  }
+  return getGitHubCloudAppRepoMetadata(target.owner, target.name);
+}
+
 export function getMetaDataGenerator(
   origin: SupportedIntegrationTypesUpdateProject,
 ): (target: Target, host?: string | undefined) => Promise<RepoMetaData> {
   const getDefaultBranchGenerators = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]: getGithubRepoMetaData,
+    [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
+      getGitHubCloudAppRepoMetaData,
     [SupportedIntegrationTypesUpdateProject.GHE]: getGithubRepoMetaData,
   };
   return getDefaultBranchGenerators[origin];
@@ -33,6 +49,8 @@ export function getTargetConverter(
 ): (target: SnykTarget) => Target {
   const getTargetConverter = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]: snykTargetConverter,
+    [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
+      snykTargetConverter,
     [SupportedIntegrationTypesUpdateProject.GHE]: snykTargetConverter,
   };
   return getTargetConverter[origin];

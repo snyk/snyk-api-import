@@ -6,14 +6,32 @@ import * as os from 'os';
 import type { SimpleGitOptions } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import * as github from '../lib/source-handlers/github';
+import * as githubCloudApp from '../lib/source-handlers/github-cloud-app';
 import type { RepoMetaData } from './types';
 import { SupportedIntegrationTypesUpdateProject } from './types';
 import { deleteDirectory } from './delete-directory';
 
 const debug = debugLib('snyk:git-clone');
 
+// Wrapper function for GitHub Cloud App to match the expected signature
+async function buildGitHubCloudAppCloneUrl(
+  meta: RepoMetaData,
+): Promise<string> {
+  // Extract owner and repo from the clone URL
+  const urlMatch = meta.cloneUrl.match(
+    /github\.com[:/]([^/]+)\/([^/]+?)(?:\.git)?$/,
+  );
+  if (!urlMatch) {
+    throw new Error(`Invalid GitHub URL format: ${meta.cloneUrl}`);
+  }
+  const [, owner, repo] = urlMatch;
+  return githubCloudApp.getGitHubCloudAppCloneUrl(owner, repo);
+}
+
 const urlGenerators = {
   [SupportedIntegrationTypesUpdateProject.GITHUB]: github.buildGitCloneUrl,
+  [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
+    buildGitHubCloudAppCloneUrl,
   [SupportedIntegrationTypesUpdateProject.GHE]: github.buildGitCloneUrl,
 };
 
@@ -31,7 +49,7 @@ export async function gitClone(
     path.join(os.tmpdir(), `snyk-clone-${Date.now()}-${Math.random()}`),
   );
   try {
-    const cloneUrl = urlGenerators[integrationType](meta);
+    const cloneUrl = await urlGenerators[integrationType](meta);
     const options: Partial<SimpleGitOptions> = {
       baseDir: repoClonePath,
       binary: 'git',
