@@ -1,11 +1,15 @@
 import * as debugLib from 'debug';
-import * as bunyan from 'bunyan';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import { getLoggingPath } from '../lib';
 import { CREATED_ORG_LOG_NAME } from '../common';
 import type { CreatedOrgResponse } from '../lib';
 
 const debug = debugLib('snyk:create-orgs-script');
+
+// Store created orgs in memory to write them all at once
+const createdOrgsMap: { [groupId: string]: any[] } = {};
 
 export async function logCreatedOrg(
   groupId: string,
@@ -16,23 +20,35 @@ export async function logCreatedOrg(
   },
   loggingPath = getLoggingPath(),
 ): Promise<void> {
-  const log = bunyan.createLogger({
-    name: 'snyk:create-orgs-script',
-    level: 'info',
-    streams: [
-      {
-        level: 'info',
-        path: `${loggingPath}/${groupId}.${CREATED_ORG_LOG_NAME}`,
-      },
-    ],
-  });
-
   try {
     const integrations = Object.keys(integrationsData).map(
       (i) => `${i}:${integrationsData[i]}`,
     );
     const { id, name, created } = orgData;
-    log.info({ origName, id, name, created, integrations }, 'Created org');
+
+    // Add to in-memory collection
+    if (!createdOrgsMap[groupId]) {
+      createdOrgsMap[groupId] = [];
+    }
+
+    createdOrgsMap[groupId].push({
+      name: origName,
+      id,
+      created,
+      integrations,
+      msg: 'Created org',
+      time: new Date().toISOString(),
+      v: 0,
+    });
+
+    // Write the complete file (overwrite)
+    const fileName = `${groupId}.${CREATED_ORG_LOG_NAME}`;
+    const filePath = path.join(loggingPath, fileName);
+    const content = createdOrgsMap[groupId]
+      .map((org) => JSON.stringify(org))
+      .join('\n');
+
+    fs.writeFileSync(filePath, content);
   } catch (e) {
     debug(
       'Failed to log created organizations at location: ',
@@ -41,4 +57,9 @@ export async function logCreatedOrg(
     );
     // do nothing
   }
+}
+
+// Function to clear the in-memory data for a group (useful for testing or cleanup)
+export function clearCreatedOrgsForGroup(groupId: string): void {
+  delete createdOrgsMap[groupId];
 }

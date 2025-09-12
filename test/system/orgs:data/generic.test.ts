@@ -44,8 +44,8 @@ Options:
   --source             The source of the targets to be imported e.g. Github,
                        Github Enterprise, Gitlab, Bitbucket Server, Bitbucket
                        Cloud
-                   [required] [choices: "github", "github-enterprise", "gitlab",
-                      "bitbucket-server", "bitbucket-cloud"] [default: "github"]
+         [required] [choices: "github", "github-cloud-app", "github-enterprise",
+            "gitlab", "bitbucket-server", "bitbucket-cloud"] [default: "github"]
 `,
         );
       },

@@ -216,11 +216,13 @@ export async function createOrgs(
   let existing: Partial<NewOrExistingOrg>[] = [];
 
   if (includeExistingOrgsInOutput) {
+    // allExistingOrgs now only contains orgs that were requested to be created but already existed
     const res = await listExistingOrgsData(requestManager, allExistingOrgs);
     existing = res.existing;
-    allOrgs.push(...existing);
   }
-  const fileName = await saveCreatedOrgData(allOrgs);
+
+  // Only save newly created orgs to prevent duplicates on subsequent runs
+  const fileName = await saveCreatedOrgData(createdOrgs);
   return {
     orgs: createdOrgs,
     existing,

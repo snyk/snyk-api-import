@@ -53,11 +53,17 @@ function getGitHubAppConfig(): GitHubAppConfig {
 function createGitHubAppAuth(): any {
   const config = getGitHubAppConfig();
 
-  return createAppAuth({
+  const authConfig: any = {
     appId: config.appId,
     privateKey: config.privateKey,
-    installationId: config.installationId,
-  });
+  };
+
+  // Only add installationId if it's provided
+  if (config.installationId) {
+    authConfig.installationId = config.installationId;
+  }
+
+  return createAppAuth(authConfig);
 }
 
 /**
@@ -72,7 +78,15 @@ export async function getGitHubAppToken(): Promise<string> {
 
   try {
     const auth = createGitHubAppAuth();
-    const { token } = await auth({ type: 'installation' });
+    const config = getGitHubAppConfig();
+
+    // If installationId is provided, use it; otherwise let the app discover installations
+    const authOptions: any = { type: 'installation' };
+    if (config.installationId) {
+      authOptions.installationId = config.installationId;
+    }
+
+    const { token } = await auth(authOptions);
 
     // Cache the token with a 50-minute expiry (tokens are valid for 1 hour)
     cachedToken = token;
@@ -99,6 +113,24 @@ export async function getGitHubAppToken(): Promise<string> {
 export async function createGitHubAppClient(): Promise<Octokit> {
   const token = await getGitHubAppToken();
 
+  return new Octokit({
+    auth: token,
+    userAgent: 'snyk-api-import',
+  });
+}
+
+/**
+ * Creates an authenticated Octokit client for GitHub App (app-level, not installation-level)
+ * Used for listing installations
+ */
+export async function createGitHubAppClientForApp(): Promise<Octokit> {
+  const config = getGitHubAppConfig();
+  const auth = createAppAuth({
+    appId: config.appId,
+    privateKey: config.privateKey,
+  });
+
+  const { token } = await auth({ type: 'app' });
   return new Octokit({
     auth: token,
     userAgent: 'snyk-api-import',

@@ -136,13 +136,24 @@ export GITHUB_APP_INSTALLATION_ID="your-installation-id"
 Use `github-cloud-app` as the source type in your commands:
 
 ```bash
-# Generate organization data
+# 1. Generate organization data
 snyk-api-import orgs:data --source=github-cloud-app --groupId=your-group-id
 
-# Generate import targets
+# Optional: Use an existing Snyk organization as a template for settings
+snyk-api-import orgs:data --source=github-cloud-app --groupId=your-group-id --sourceOrgPublicId=your-template-org-id
+
+# 2. Create organizations in Snyk
+snyk-api-import orgs:create --file=group-your-group-id-github-cloud-app-orgs.json
+
+# 3. Set up GitHub Cloud App integration in each organization
+# IMPORTANT: You must manually configure the GitHub Cloud App integration in each 
+# organization through the Snyk UI or API before proceeding to step 4.
+# Go to each organization in Snyk and add the GitHub Cloud App integration.
+
+# 4. Generate import targets
 snyk-api-import import:data --source=github-cloud-app --orgsData=orgs-data.json
 
-# Sync projects
+# 5. Sync projects
 snyk-api-import sync --source=github-cloud-app --orgPublicId=your-org-id
 ```
 
@@ -171,6 +182,11 @@ snyk-api-import sync --source=github-cloud-app --orgPublicId=your-org-id
 4. **"No organizations found"**
    - Verify the app is installed on organizations (not just users)
    - Check that the app has access to the repositories you want to import
+
+5. **"Missing integrationId in import targets"**
+   - Ensure you have set up the GitHub Cloud App integration in each Snyk organization
+   - The integration must be configured through the Snyk UI before running `import:data`
+   - Check that the integration appears in the organization's integrations list
 
 ### Debug Mode
 
