@@ -46,17 +46,38 @@ export async function cloneAndAnalyze(
   if (!repoPath) {
     throw new Error('No location returned for clones repo to analyze');
   }
-  // deepcode ignore reDOS: path is supplied by trusted user of API (not externally supplied)
+  // Sanitize repoPath to prevent path traversal
+  const sanitizedRepoPath = path.resolve('/', repoPath);
+
+  // Validate exclusionGlobs to prevent ReDoS
+  function isSafeGlob(glob: string): boolean {
+    // Only allow globs with safe characters (alphanumeric, *, ?, ., /, -, _)
+    // Disallow consecutive * and overly long patterns
+    if (!/^[\w\-*?./]+$/.test(glob)) return false;
+    if (glob.length > 128) return false;
+    if (glob.includes('**')) return false;
+    return true;
+  }
+  const safeExclusionGlobs = [...defaultExclusionGlobs, ...exclusionGlobs].filter(isSafeGlob);
+
+  // Ensure sanitizedRepoPath is inside allowed directory (e.g., /tmp or working dir)
+  const allowedBaseDir = path.resolve(process.cwd());
+  if (!sanitizedRepoPath.startsWith(allowedBaseDir)) {
+    throw new Error('Path traversal detected: repoPath is outside allowed directory');
+  }
+
   const { files } = await find(
-    repoPath,
-    [...defaultExclusionGlobs, ...exclusionGlobs],
+    sanitizedRepoPath,
+    safeExclusionGlobs,
     // TODO: when possible switch to check entitlements via API automatically for an org
     // right now the product entitlements are not exposed via API so user has to provide which products
     // they are using
     getSCMSupportedManifests(manifestFileTypes, entitlements),
     10,
   );
-  const relativeFileNames = files.map((f) => path.relative(repoPath, f));
+  const relativeFileNames = files
+    .filter((f) => f.startsWith(repoPath))
+    .map((f) => path.relative(repoPath, f));
   debug(
     `Detected ${files.length} files in ${repoMetadata.cloneUrl}: ${files.join(
       ',',

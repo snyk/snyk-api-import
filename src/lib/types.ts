@@ -99,6 +99,8 @@ export enum SupportedIntegrationTypesUpdateProject {
   GITHUB = 'github',
   GITHUB_CLOUD_APP = 'github-cloud-app',
   GHE = 'github-enterprise',
+  BITBUCKET_CLOUD = 'bitbucket-cloud',
+  BITBUCKET_SERVER = 'bitbucket-server',
 }
 
 export enum SupportedProductsUpdateProject {

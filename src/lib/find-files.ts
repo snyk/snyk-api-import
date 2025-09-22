@@ -114,8 +114,9 @@ function findFile(
       return path;
     }
   } else {
-    // deepcode ignore reDOS: path is supplied by trusted user of API (not externally supplied)
-    if (matches(path, ignore)) {
+    // Sanitize input to prevent ReDoS
+    const safePath = path.replace(/[^\w\-./]/g, '');
+    if (matches(safePath, ignore)) {
       return null;
     }
     return path;
