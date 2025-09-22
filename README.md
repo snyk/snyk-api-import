@@ -21,149 +21,42 @@ If you need to adjust concurrency you can stop the script, change the concurrenc
 
 # Table of Contents
 - [Installation](#installation)
-- [Usage](#usage)
-- [FAQ](#faq)
-- Utilities
-  - [Creating orgs in Snyk](docs/orgs.md)
-  - [Generating import data](docs/import-data.md)
-  - [Mirroring Github.com/Github Enterprise organizations & repos in Snyk](docs/mirror-github.md)
-  - [GitHub Cloud App Integration](#github-cloud-app-integration)
-  - [Mirroring Gitlab organizations & repos in Snyk](docs/mirror-gitlab.md)
-  - [Mirroring Bitbucket Server organizations & repos in Snyk](docs/mirror-bitbucket-server.md)
-  - [Mirroring Bitbucket Cloud organizations & repos in Snyk](docs/mirror-bitbucket-cloud.md)
 
-- [Contributing](.github/CONTRIBUTING.md)
-- [Kicking off an import](docs/import.md)
-- [Sync: detecting changes in monitored repos and updating Snyk projects](docs/sync.md)
+# Bitbucket Cloud App Integration
 
-- Example workflows
-  - [AWS automation example](docs/example-workflows/aws-automation-example.md)
+See [docs/bitbucket-cloud-app.md](./docs/bitbucket-cloud-app.md) for setup, usage, and troubleshooting instructions.
+- **Workspace Scope**: Access is limited to workspaces where the app is authorized
 
-# Installation
-`snyk-api-import` CLI can be installed through multiple channels.
+## Troubleshooting
 
-## Standalone executables (macOS, Linux, Windows)
+### Common Issues
 
-Use [GitHub Releases](https://github.com/snyk/snyk-api-import/releases) to download a standalone executable of Snyk CLI for your platform.
+1. **"BITBUCKET_APP_CLIENT_ID environment variable is required"**
+  - Ensure `BITBUCKET_APP_CLIENT_ID` is set to your OAuth app's client ID
 
-## More installation methods
+2. **"BITBUCKET_APP_CLIENT_SECRET environment variable is required"**
+  - Ensure `BITBUCKET_APP_CLIENT_SECRET` is set to your OAuth app's client secret
 
-<details>
-  <summary>Install with npm or Yarn</summary>
+3. **"Failed to authenticate with Bitbucket Cloud App"**
+  - Verify the app credentials are correct
+  - Check that the app has the required permissions
 
-### Install with npm or Yarn
+4. **"No workspaces found"**
+  - Verify the app is authorized for the target workspaces
+  - Check that the app has access to the repositories you want to import
 
-[Snyk snyk-api-import CLI is available as an npm package](https://www.npmjs.com/package/snyk-api-import). If you have Node.js installed locally, you can install it by running:
+5. **"Missing integrationId in import targets"**
+  - Ensure you have set up the Bitbucket Cloud App integration in each Snyk organization
+  - The integration must be configured through the Snyk UI before running `import:data`
+  - Check that the integration appears in the organization's integrations list
 
-```bash
-npm install snyk-api-import@latest -g
-```
+### Debug Mode
 
-or if you are using Yarn:
+Run with debug logging to get more detailed error information:
 
 ```bash
-yarn global add snyk-api-import
+DEBUG=snyk* snyk-api-import orgs:data --source=bitbucket-cloud-app --groupId=your-group-id
 ```
-
-</details>
-
-# Usage
-By default the `import` command will run if no command specified.
-- `import` - kick off a an API powered import of repos/targets into existing Snyk orgs defined in [import configuration file](./docs/import.md). 100% support available for all project types supported via [Import API](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets).
-- `help` - show help & all available commands and their options
-- `orgs:data` - util generate data required to create Orgs via API.
-- `orgs:create` - util to create the Orgs in Snyk based on data file generated with `orgs:data` command.
-- `import:data` - util to generate data required to kick off an import.
-- `list:imported` - util to generate data to help skip previously imported targets during import.
-
-The logs can be explored using [Bunyan CLI](http://trentm.com/node-bunyan/bunyan.1.html)
-
-# GitHub Cloud App Integration
-
-The snyk-api-import tool now supports GitHub Cloud App authentication, providing enhanced security and functionality compared to traditional Personal Access Tokens.
-
-## Key Benefits
-
-- **Enhanced Security**: Uses GitHub App authentication with JWT tokens and installation tokens
-- **Higher Rate Limits**: 5000 requests/hour per installation (vs per user)
-- **Granular Permissions**: Repository access controlled at the GitHub App installation level
-- **Role-Based Access Control**: Application-level permissions instead of user-level
-
-## Setup Requirements
-
-### 1. Create a GitHub App
-
-1. Go to your organization's GitHub settings
-2. Navigate to "Developer settings" → "GitHub Apps"
-3. Click "New GitHub App"
-4. Configure the following settings:
-   - **App name**: Choose a descriptive name (e.g., "Snyk Import Tool")
-   - **Homepage URL**: Your organization's website
-   - **Webhook URL**: Leave empty (not required for this integration)
-   - **Repository permissions**:
-     - Contents: Read
-     - Metadata: Read
-     - Pull requests: Read
-     - Issues: Read
-   - **Organization permissions**:
-     - Members: Read
-   - **Subscribe to events**: Leave empty (not required)
-
-### 2. Install the GitHub App
-
-1. After creating the app, install it on your target organization(s)
-2. Note the **App ID** from the app settings
-3. Generate a **private key** and download it (PEM format)
-
-### 3. Configure Environment Variables
-
-Set the following environment variables:
-
-```bash
-export GITHUB_APP_ID="your-app-id"
-export GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
-your-private-key-content-here
------END RSA PRIVATE KEY-----"
-```
-
-**Optional**: If you want to target a specific installation:
-```bash
-export GITHUB_APP_INSTALLATION_ID="your-installation-id"
-```
-
-### 4. Usage
-
-Use `github-cloud-app` as the source type in your commands:
-
-```bash
-# 1. Generate organization data
-snyk-api-import orgs:data --source=github-cloud-app --groupId=your-group-id
-
-# Optional: Use an existing Snyk organization as a template for settings
-snyk-api-import orgs:data --source=github-cloud-app --groupId=your-group-id --sourceOrgPublicId=your-template-org-id
-
-# 2. Create organizations in Snyk
-snyk-api-import orgs:create --file=group-your-group-id-github-cloud-app-orgs.json
-
-# 3. Set up GitHub Cloud App integration in each organization
-# IMPORTANT: You must manually configure the GitHub Cloud App integration in each 
-# organization through the Snyk UI or API before proceeding to step 4.
-# Go to each organization in Snyk and add the GitHub Cloud App integration.
-
-# 4. Generate import targets
-snyk-api-import import:data --source=github-cloud-app --orgsData=orgs-data.json
-
-# 5. Sync projects
-snyk-api-import sync --source=github-cloud-app --orgPublicId=your-org-id
-```
-
-## Security Considerations
-
-- **Private Key Storage**: Store the private key securely and never commit it to version control
-- **Token Rotation**: GitHub App installation tokens are automatically rotated every hour
-- **Minimal Permissions**: The app only requests read permissions for repository metadata and contents
-- **Organization Scope**: Access is limited to organizations where the app is installed
-
 ## Troubleshooting
 
 ### Common Issues
