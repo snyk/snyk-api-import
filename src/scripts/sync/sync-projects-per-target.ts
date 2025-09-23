@@ -103,14 +103,15 @@ export async function syncProjectsForTarget(
         username: process.env.BITBUCKET_USERNAME,
         appPassword: process.env.BITBUCKET_APP_PASSWORD,
       };
-      const { bitbucketCloudCloneAndAnalyze } = await import('./bitbucket-cloud-clone-and-analyze');
       targetMeta = {
         branch: targetData.branch || 'main',
         cloneUrl: '',
         sshUrl: '',
         archived: false,
       };
-      const res = await bitbucketCloudCloneAndAnalyze(
+      const { bitbucketCloneAndAnalyze } = await import('./bitbucket-clone-and-analyze');
+      const res = await bitbucketCloneAndAnalyze(
+        'cloud',
         targetMeta,
         projects,
         {
@@ -132,15 +133,21 @@ export async function syncProjectsForTarget(
       createProjects = res.import;
     } else if (origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER) {
       // TODO: Replace with actual Data Center auth
-      const datacenterAuth = {};
-      const { bitbucketDatacenterCloneAndAnalyze } = await import('./bitbucket-datacenter-clone-and-analyze');
+      const sourceUrl = process.env.BITBUCKET_SERVER_URL;
+      const token = process.env.BITBUCKET_SERVER_TOKEN;
+      if (!sourceUrl || !token) {
+        throw new Error('BITBUCKET_SERVER_URL and BITBUCKET_SERVER_TOKEN must be set for Bitbucket Server sync');
+      }
+      const datacenterAuth = { sourceUrl, token };
       targetMeta = {
         branch: targetData.branch || 'main',
         cloneUrl: '',
         sshUrl: '',
         archived: false,
       };
-      const res = await bitbucketDatacenterCloneAndAnalyze(
+      const { bitbucketCloneAndAnalyze } = await import('./bitbucket-clone-and-analyze');
+      const res = await bitbucketCloneAndAnalyze(
+        'server',
         targetMeta,
         projects,
         {
