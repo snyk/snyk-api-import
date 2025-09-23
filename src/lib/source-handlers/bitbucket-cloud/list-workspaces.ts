@@ -1,9 +1,8 @@
 import * as debugLib from 'debug';
-import { OutgoingHttpHeaders } from 'http2';
 import base64 = require('base-64');
-import { BitbucketCloudWorkspaceData } from './types';
-import { getBitbucketCloudUsername } from './get-bitbucket-cloud-username';
-import { getBitbucketCloudPassword } from './get-bitbucket-cloud-password';
+import type { OutgoingHttpHeaders } from 'http2';
+import type { BitbucketCloudWorkspaceData } from './types';
+import { getBitbucketCloudAuth } from './get-bitbucket-cloud-auth';
 import { limiterForScm } from '../../limiters';
 import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
 
@@ -53,7 +52,7 @@ export async function getWorkspaces(
 ): Promise<{ workspaces: BitbucketCloudWorkspaceData[]; next?: string }> {
   const workspaces: BitbucketCloudWorkspaceData[] = [];
   const headers: OutgoingHttpHeaders = {
-    Authorization: `Basic ${base64.encode(username + ':' + password)}`,
+    authorization: `Basic ${base64.encode(username + ':' + password)}`,
   };
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
   const workspacesUrl =
@@ -87,12 +86,8 @@ export async function getWorkspaces(
 export async function listBitbucketCloudWorkspaces(): Promise<
   BitbucketCloudWorkspaceData[]
 > {
-  const bitbucketCloudUsername = getBitbucketCloudUsername();
-  const bitbucketCloudPassword = getBitbucketCloudPassword();
+  const { username, password } = getBitbucketCloudAuth();
   debug(`Fetching all workspaces data`);
-  const workspaces = await fetchAllWorkspaces(
-    bitbucketCloudUsername,
-    bitbucketCloudPassword,
-  );
+  const workspaces = await fetchAllWorkspaces(username, password);
   return workspaces;
 }
