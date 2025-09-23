@@ -20,4 +20,3 @@ export * from './source-handlers/github-cloud-app';
 export * from './source-handlers/azure';
 export * from './source-handlers/bitbucket-server';
 export * from './source-handlers/bitbucket-cloud';
-export * from './source-handlers/bitbucket-cloud-app';

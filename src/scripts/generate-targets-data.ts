@@ -16,10 +16,10 @@ import {
   listGitlabRepos,
   listAzureRepos,
   listBitbucketServerRepos,
-  listBitbucketCloudRepos,
 } from '../lib';
+import { listRepos as listBitbucketCloudRepos } from '../lib/source-handlers/bitbucket-cloud/list-repos';
+import type { BitbucketCloudAuthConfig } from '../lib/source-handlers/bitbucket-cloud/types';
 import { listGitHubCloudAppRepos } from '../lib/source-handlers/github-cloud-app';
-import { listBitbucketCloudAppRepos } from '../lib/source-handlers/bitbucket-cloud-app/listBitbucketCloudAppRepos';
 
 const debug = debugLib('snyk:generate-targets-data');
 
@@ -44,7 +44,7 @@ const sourceGenerators = {
   [SupportedIntegrationTypesImportData.AZURE_REPOS]: listAzureRepos,
   [SupportedIntegrationTypesImportData.BITBUCKET_SERVER]: listBitbucketServerRepos,
   [SupportedIntegrationTypesImportData.BITBUCKET_CLOUD]: listBitbucketCloudRepos,
-  [SupportedIntegrationTypesImportData.BITBUCKET_CLOUD_APP]: listBitbucketCloudAppRepos,
+  [SupportedIntegrationTypesImportData.BITBUCKET_CLOUD_APP]: listBitbucketCloudRepos, // Use unified handler
 };
 
 function validateRequiredOrgData(
@@ -97,13 +97,26 @@ export async function generateTargetsImportDataFile(
       let entities: Array<
         GithubRepoData | GitlabRepoData | AzureRepoData | BitbucketServerRepoData | BitbucketCloudRepoData
       > = [];
-      if (source === SupportedIntegrationTypesImportData.BITBUCKET_CLOUD_APP) {
-        // For Bitbucket Cloud App, pass BitbucketAppConfig and workspace
-        const config = {
-          clientId: process.env.BITBUCKET_APP_CLIENT_ID!,
-          clientSecret: process.env.BITBUCKET_APP_CLIENT_SECRET!,
-        };
-        entities = await sourceGenerators[source](config, topLevelEntity.name);
+      if (
+        source === SupportedIntegrationTypesImportData.BITBUCKET_CLOUD ||
+        source === SupportedIntegrationTypesImportData.BITBUCKET_CLOUD_APP
+      ) {
+        // Use unified BitbucketCloudAuthConfig for both cases
+  let config: BitbucketCloudAuthConfig;
+        if (source === SupportedIntegrationTypesImportData.BITBUCKET_CLOUD_APP) {
+          config = {
+            type: 'app',
+            clientId: process.env.BITBUCKET_APP_CLIENT_ID!,
+            clientSecret: process.env.BITBUCKET_APP_CLIENT_SECRET!,
+          };
+        } else {
+          config = {
+            type: 'user',
+            username: process.env.BITBUCKET_CLOUD_USERNAME!,
+            password: process.env.BITBUCKET_CLOUD_PASSWORD!,
+          };
+        }
+        entities = await listBitbucketCloudRepos(config, topLevelEntity.name);
       } else {
         entities = await sourceGenerators[source](topLevelEntity.name, sourceUrl!);
       }
