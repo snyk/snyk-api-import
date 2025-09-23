@@ -1,9 +1,10 @@
 import * as pMap from 'p-map';
+import type {
+  SnykOrgData} from '../lib/source-handlers/github';
 import {
   githubEnterpriseOrganizations,
   githubOrganizationIsEmpty,
-  githubOrganizations,
-  SnykOrgData,
+  githubOrganizations
 } from '../lib/source-handlers/github';
 import {
   listGitHubCloudAppOrgs,
@@ -21,34 +22,33 @@ import {
   bitbucketServerProjectIsEmpty,
   listBitbucketServerProjects,
 } from '../lib/source-handlers/bitbucket-server/';
-import {
-  CreateOrgData,
-  SupportedIntegrationTypesImportOrgData,
-} from '../lib/types';
+import type { CreateOrgData } from '../lib/types';
+import { SupportedIntegrationTypesImportOrgData } from '../lib/types';
 import { writeFile } from '../write-file';
+
+import {
+  listBitbucketCloudAppWorkspaces,
+  bitbucketCloudAppWorkspaceIsEmpty,
+} from '../lib/source-handlers/bitbucket-cloud-app';
 
 const sourceGenerators = {
   [SupportedIntegrationTypesImportOrgData.GITLAB]: listGitlabGroups,
   [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizations,
-  [SupportedIntegrationTypesImportOrgData.GITHUB_CLOUD_APP]:
-    listGitHubCloudAppOrgs,
+  [SupportedIntegrationTypesImportOrgData.GITHUB_CLOUD_APP]: listGitHubCloudAppOrgs,
   [SupportedIntegrationTypesImportOrgData.GHE]: githubEnterpriseOrganizations,
-  [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]:
-    listBitbucketServerProjects,
-  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD]:
-    listBitbucketCloudWorkspaces,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]: listBitbucketServerProjects,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD]: listBitbucketCloudWorkspaces,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD_APP]: listBitbucketCloudAppWorkspaces,
 };
 
 const sourceNotEmpty = {
   [SupportedIntegrationTypesImportOrgData.GITHUB]: githubOrganizationIsEmpty,
-  [SupportedIntegrationTypesImportOrgData.GITHUB_CLOUD_APP]:
-    githubCloudAppOrganizationIsEmpty,
+  [SupportedIntegrationTypesImportOrgData.GITHUB_CLOUD_APP]: githubCloudAppOrganizationIsEmpty,
   [SupportedIntegrationTypesImportOrgData.GHE]: githubOrganizationIsEmpty,
   [SupportedIntegrationTypesImportOrgData.GITLAB]: gitlabGroupIsEmpty,
-  [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]:
-    bitbucketServerProjectIsEmpty,
-  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD]:
-    bitbucketCloudWorkspaceIsEmpty,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_SERVER]: bitbucketServerProjectIsEmpty,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD]: bitbucketCloudWorkspaceIsEmpty,
+  [SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD_APP]: bitbucketCloudAppWorkspaceIsEmpty,
 };
 
 export const entityName: {
@@ -60,6 +60,7 @@ export const entityName: {
   gitlab: 'group',
   'bitbucket-server': 'project',
   'bitbucket-cloud': 'workspace',
+  'bitbucket-cloud-app': 'workspace',
 };
 
 const exportFileName: {
@@ -71,6 +72,7 @@ const exportFileName: {
   gitlab: 'gitlab',
   'bitbucket-server': 'bitbucket-server',
   'bitbucket-cloud': 'bitbucket-cloud',
+  'bitbucket-cloud-app': 'bitbucket-cloud-app',
 };
 
 export async function generateOrgImportDataFile(
@@ -86,14 +88,22 @@ export async function generateOrgImportDataFile(
 }> {
   const orgData: CreateOrgData[] = [];
   const skippedEmptyOrgs: SnykOrgData[] = [];
-  const topLevelEntities = await sourceGenerators[source](sourceUrl);
+  let topLevelEntities;
+  if (source === SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD_APP) {
+    // Bitbucket Cloud App expects BitbucketAppConfig, not a string
+    const clientId = process.env.BITBUCKET_APP_CLIENT_ID || '';
+    const clientSecret = process.env.BITBUCKET_APP_CLIENT_SECRET || '';
+    topLevelEntities = await sourceGenerators[source]({ clientId, clientSecret });
+  } else {
+    topLevelEntities = await sourceGenerators[source](sourceUrl ?? '');
+  }
 
   await pMap(
     topLevelEntities,
     async (org) => {
       try {
         if (skipEmptyOrgs) {
-          const isEmpty = await sourceNotEmpty[source](org.name, sourceUrl);
+          const isEmpty = await sourceNotEmpty[source](org.name, sourceUrl ?? '');
           if (isEmpty) {
             skippedEmptyOrgs.push(org);
             throw new Error(`Skipping empty ${entityName[source]} ${org.name}`);

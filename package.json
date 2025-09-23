@@ -46,7 +46,6 @@
     "@octokit/auth-app": "^5.0.0",
     "@octokit/plugin-retry": "4.0.3",
     "@octokit/rest": "19.0.5",
-    "tslib": "^2.6.0",
     "base-64": "^1.0.0",
     "bottleneck": "2.19.5",
     "bunyan": "1.8.15",
@@ -62,6 +61,7 @@
     "snyk-request-manager": "1.8.4",
     "source-map-support": "^0.5.16",
     "split": "1.0.1",
+    "tslib": "^2.6.0",
     "yargs": "16.2.0"
   },
   "devDependencies": {
@@ -93,7 +93,7 @@
   },
   "overrides": {
     "snyk-request-manager": {
-      "axios": "1.7.4"
+      "axios": "1.12.0"
     }
   },
   "pkg": {

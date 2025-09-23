@@ -82,6 +82,7 @@ export enum SupportedIntegrationTypesImportData {
   AZURE_REPOS = 'azure-repos',
   BITBUCKET_SERVER = 'bitbucket-server',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
+  BITBUCKET_CLOUD_APP = 'bitbucket-cloud-app',
 }
 
 // used to generate import data by connecting to the source via API
@@ -93,6 +94,7 @@ export enum SupportedIntegrationTypesImportOrgData {
   GITLAB = 'gitlab',
   BITBUCKET_SERVER = 'bitbucket-server',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
+  BITBUCKET_CLOUD_APP = 'bitbucket-cloud-app',
 }
 
 export enum SupportedIntegrationTypesUpdateProject {
