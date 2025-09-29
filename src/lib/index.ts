@@ -16,6 +16,7 @@ export * from './git-clone';
 
 export * from './source-handlers/github';
 export * from './source-handlers/gitlab';
+export * from './source-handlers/github-cloud-app';
 export * from './source-handlers/azure';
 export * from './source-handlers/bitbucket-server';
 export * from './source-handlers/bitbucket-cloud';

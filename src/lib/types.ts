@@ -76,6 +76,7 @@ export interface PollImportResponse {
 // and listing all repos / targets per given org
 export enum SupportedIntegrationTypesImportData {
   GITHUB = 'github',
+  GITHUB_CLOUD_APP = 'github-cloud-app',
   GHE = 'github-enterprise',
   GITLAB = 'gitlab',
   AZURE_REPOS = 'azure-repos',
@@ -87,6 +88,7 @@ export enum SupportedIntegrationTypesImportData {
 // and listing all orgs
 export enum SupportedIntegrationTypesImportOrgData {
   GITHUB = 'github',
+  GITHUB_CLOUD_APP = 'github-cloud-app',
   GHE = 'github-enterprise',
   GITLAB = 'gitlab',
   BITBUCKET_SERVER = 'bitbucket-server',
@@ -95,6 +97,7 @@ export enum SupportedIntegrationTypesImportOrgData {
 
 export enum SupportedIntegrationTypesUpdateProject {
   GITHUB = 'github',
+  GITHUB_CLOUD_APP = 'github-cloud-app',
   GHE = 'github-enterprise',
 }
 
@@ -115,6 +118,7 @@ export const productEntitlements: {
 // when we need to grab the integrationId from Snyk
 export enum SupportedIntegrationTypesToListSnykTargets {
   GITHUB = 'github',
+  GITHUB_CLOUD_APP = 'github-cloud-app',
   GHE = 'github-enterprise',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
   GCR = 'gcr',

@@ -26,6 +26,14 @@ export async function filterOutExistingOrgs(
   for (const org of orgs) {
     if (!uniqueOrgNames.has(org.name)) {
       newOrgs.push(org);
+    } else {
+      // Find the existing org that matches this requested org
+      const existingOrg = groupOrgs.find(
+        (groupOrg) => groupOrg.name === org.name,
+      );
+      if (existingOrg) {
+        existingOrgs.push(existingOrg);
+      }
     }
   }
   if (existingOrgs.length > 0) {
@@ -38,5 +46,5 @@ export async function filterOutExistingOrgs(
     );
   }
 
-  return { existingOrgs: groupOrgs, newOrgs };
+  return { existingOrgs, newOrgs };
 }

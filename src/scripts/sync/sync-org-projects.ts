@@ -10,6 +10,7 @@ import {
 import { listIntegrations } from '../../lib';
 import type { TargetFilters } from '../../lib';
 import { isGithubConfigured } from '../../lib';
+import { isGitHubCloudAppConfigured } from '../../lib/source-handlers/github-cloud-app';
 import { getLoggingPath, listTargets } from '../../lib';
 import { getFeatureFlag } from '../../lib/api/feature-flags';
 import type { SnykTarget, SyncTargetsConfig } from '../../lib/types';
@@ -28,6 +29,8 @@ export function isSourceConfigured(
 ): () => void {
   const getDefaultBranchGenerators = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]: isGithubConfigured,
+    [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
+      isGitHubCloudAppConfigured,
     [SupportedIntegrationTypesUpdateProject.GHE]: isGithubConfigured,
   };
   return getDefaultBranchGenerators[origin];
