@@ -109,9 +109,8 @@ export async function syncProjectsForTarget(
         sshUrl: '',
         archived: false,
       };
-      const { bitbucketCloneAndAnalyze } = await import('./bitbucket-clone-and-analyze');
-      const res = await bitbucketCloneAndAnalyze(
-        'cloud',
+      const res = await cloneAndAnalyze(
+        origin,
         targetMeta,
         projects,
         {
@@ -119,6 +118,7 @@ export async function syncProjectsForTarget(
           entitlements: config.entitlements,
           manifestTypes: config.manifestTypes,
         },
+        'cloud',
         bitbucketAuth,
         targetData,
       );
@@ -145,9 +145,8 @@ export async function syncProjectsForTarget(
         sshUrl: '',
         archived: false,
       };
-      const { bitbucketCloneAndAnalyze } = await import('./bitbucket-clone-and-analyze');
-      const res = await bitbucketCloneAndAnalyze(
-        'server',
+      const res = await cloneAndAnalyze(
+        origin,
         targetMeta,
         projects,
         {
@@ -155,6 +154,7 @@ export async function syncProjectsForTarget(
           entitlements: config.entitlements,
           manifestTypes: config.manifestTypes,
         },
+        'server',
         datacenterAuth,
         targetData,
       );

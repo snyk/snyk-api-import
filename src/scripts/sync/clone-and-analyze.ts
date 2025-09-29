@@ -1,25 +1,33 @@
+
 import * as debugLib from 'debug';
 import * as path from 'path';
+import axios from 'axios';
 import { defaultExclusionGlobs } from '../../common';
-
 import { find, getSCMSupportedManifests, gitClone } from '../../lib';
 import { getSCMSupportedProjectTypes } from '../../lib/supported-project-types/supported-manifests';
 import type {
   RepoMetaData,
   SnykProject,
-  SupportedIntegrationTypesUpdateProject,
   SyncTargetsConfig,
+  Target,
 } from '../../lib/types';
+import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { generateProjectDiffActions } from './generate-projects-diff-actions';
 import { deleteDirectory } from '../../lib/delete-directory';
+import { BitbucketCloudSyncClient } from '../../lib/source-handlers/bitbucket-cloud/sync-client';
+import type { BitbucketAuth } from '../../lib/source-handlers/bitbucket-cloud/sync-client';
 
 const debug = debugLib('snyk:clone-and-analyze');
+
 
 export async function cloneAndAnalyze(
   integrationType: SupportedIntegrationTypesUpdateProject,
   repoMetadata: RepoMetaData,
   snykMonitoredProjects: SnykProject[],
   config: Omit<SyncTargetsConfig, 'dryRun'>,
+  clientType?: 'cloud' | 'server',
+  auth?: BitbucketAuth | { sourceUrl: string; token: string },
+  target?: Target,
 ): Promise<{
   import: string[];
   remove: SnykProject[];
@@ -33,6 +41,58 @@ export async function cloneAndAnalyze(
     manifestTypes && manifestTypes.length > 0
       ? manifestTypes
       : getSCMSupportedProjectTypes(entitlements);
+
+  // Bitbucket Cloud/Server logic
+  if (
+    integrationType === SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD ||
+    integrationType === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER
+  ) {
+    let files: string[] = [];
+    if (clientType === 'cloud') {
+      if (!target?.owner || !target?.name) {
+        throw new Error('Bitbucket Cloud target must have owner and name properties');
+      }
+      const client = new BitbucketCloudSyncClient(auth as BitbucketAuth);
+      const workspace = target.owner;
+      const repoSlug = target.name;
+      const branch = repoMetadata.branch || 'main';
+      files = await client.listFiles(workspace, repoSlug, branch);
+    } else if (clientType === 'server') {
+      const projectKey = target?.projectKey;
+      const repoSlug = target?.repoSlug;
+      const sourceUrl = (auth as { sourceUrl: string }).sourceUrl;
+      const token = (auth as { token: string }).token;
+      if (!projectKey || !repoSlug || !sourceUrl || !token) {
+        throw new Error('Bitbucket Server sync requires projectKey, repoSlug, sourceUrl, and token');
+      }
+      const apiUrl = `${sourceUrl}/rest/api/1.0/projects/${projectKey}/repos/${repoSlug}/files`;
+      const headers = { authorization: `Bearer ${token}` };
+      try {
+        const res = await axios.get(apiUrl, { headers });
+        if (res.status === 200 && Array.isArray(res.data.values)) {
+          files = res.data.values;
+        }
+      } catch (err: any) {
+        throw new Error(`Failed to list files for Bitbucket Server repo: ${err.message}`);
+      }
+    } else {
+      throw new Error('Unknown Bitbucket client type');
+    }
+    // Filter files by exclusion globs and manifest types
+    const filteredFiles = files.filter((file: string) => {
+      if ([...defaultExclusionGlobs, ...exclusionGlobs].some((glob) => file.includes(glob))) {
+        return false;
+      }
+      return manifestFileTypes.some((type) => file.endsWith(type));
+    });
+    return generateProjectDiffActions(
+      filteredFiles,
+      snykMonitoredProjects,
+      manifestFileTypes,
+    );
+  }
+
+  // Generic SCM logic
   const { success, repoPath, gitResponse } = await gitClone(
     integrationType,
     repoMetadata,
