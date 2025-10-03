@@ -18,7 +18,7 @@ export async function listRepos(config: BitbucketCloudAuthConfig, workspace: str
     headers = { authorization: `Bearer ${config.token}` };
   } else if (config.type === 'user') {
     const token = await getBitbucketCloudToken(config);
-    headers = { authorization: `Basic ${token}` };
+    headers = { authorization: `Bearer ${token}` };
   }
   while (nextUrl) {
     debug(`Fetching page ${pageCount} for ${workspace}`);
@@ -30,7 +30,7 @@ export async function listRepos(config: BitbucketCloudAuthConfig, workspace: str
       resp.body.values.map((r: any) => ({
         owner: r.workspace?.slug || r.workspace?.uuid || workspace,
         name: r.slug || r.name,
-        branch: r.mainbranch?.name || '',
+        branch: r.mainbranch?.name || 'main',
       }))
     );
     nextUrl = resp.body.next;

@@ -105,9 +105,13 @@ export async function generateTargetsImportDataFile(
   let config: BitbucketCloudAuthConfig;
         if (source === SupportedIntegrationTypesImportData.BITBUCKET_CLOUD_APP) {
           config = {
-            type: 'app',
-            clientId: process.env.BITBUCKET_APP_CLIENT_ID!,
-            clientSecret: process.env.BITBUCKET_APP_CLIENT_SECRET!,
+            type: 'oauth',
+            token: process.env.BITBUCKET_CLOUD_OAUTH_TOKEN!,
+          };
+        } else if (process.env.BITBUCKET_CLOUD_API_TOKEN) {
+          config = {
+            type: 'api',
+            token: process.env.BITBUCKET_CLOUD_API_TOKEN!,
           };
         } else {
           config = {

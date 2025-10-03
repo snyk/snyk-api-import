@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
 
-export type BitbucketAuthType = 'basic' | 'oauth' | 'api';
+export type BitbucketAuthType = 'user' | 'oauth' | 'api';
 
 export interface BitbucketAuth {
   type: BitbucketAuthType;
@@ -16,14 +16,14 @@ export class BitbucketCloudSyncClient {
   private appPassword?: string;
 
   constructor(auth: BitbucketAuth) {
-    if (auth.type === 'basic' && auth.username && auth.appPassword) {
+    console.log(`Creating Bitbucket Cloud sync client with auth type ${auth.type}`);
+    if (auth.type === 'user' && auth.username && auth.appPassword) {
       this.username = auth.username;
       this.appPassword = auth.appPassword;
       this.client = axios.create({
         baseURL: 'https://api.bitbucket.org/2.0/',
-        auth: {
-          username: auth.username,
-          password: auth.appPassword,
+        headers: {
+          authorization: `Bearer ${Buffer.from(`${auth.username}:${auth.appPassword}`).toString('base64')}`,
         },
       });
     } else if (auth.type === 'api' || auth.type === 'oauth') {

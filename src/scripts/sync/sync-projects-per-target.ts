@@ -16,6 +16,11 @@ import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { deactivateProject, listProjects } from '../../lib';
 import pMap = require('p-map');
 import { cloneAndAnalyze } from './clone-and-analyze';
+import { getBitbucketCloudAuth } from '../../lib/source-handlers/bitbucket-cloud/get-bitbucket-cloud-auth';
+import type {
+  BitbucketAuth,
+  BitbucketAuthType,
+} from '../../lib/source-handlers/bitbucket-cloud/sync-client';
 import { importSingleTarget } from './import-target';
 const debug = debugLib('snyk:sync-projects-per-target');
 
@@ -34,22 +39,32 @@ async function getGitHubCloudAppRepoMetaData(
 export function getMetaDataGenerator(
   origin: SupportedIntegrationTypesUpdateProject,
 ): (target: Target, host?: string | undefined) => Promise<RepoMetaData> {
-  const getDefaultBranchGenerators: Record<SupportedIntegrationTypesUpdateProject, (target: Target, host?: string | undefined) => Promise<RepoMetaData>> = {
+  const getDefaultBranchGenerators: Record<
+    SupportedIntegrationTypesUpdateProject,
+    (target: Target, host?: string | undefined) => Promise<RepoMetaData>
+  > = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]: getGithubRepoMetaData,
-    [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]: getGitHubCloudAppRepoMetaData,
+    [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
+      getGitHubCloudAppRepoMetaData,
     [SupportedIntegrationTypesUpdateProject.GHE]: getGithubRepoMetaData,
-    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]: async (target: Target) => Promise.resolve({
-      branch: target.branch || 'main',
-      cloneUrl: '',
-      sshUrl: '',
-      archived: false,
-    }),
-    [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]: async (target: Target) => Promise.resolve({
-      branch: target.branch || 'main',
-      cloneUrl: '',
-      sshUrl: '',
-      archived: false,
-    }),
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]: async (
+      target: Target,
+    ) =>
+      Promise.resolve({
+        branch: typeof target.branch === 'string' ? target.branch : '',
+        cloneUrl: '',
+        sshUrl: '',
+        archived: false,
+      }),
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]: async (
+      target: Target,
+    ) =>
+      Promise.resolve({
+        branch: typeof target.branch === 'string' ? target.branch : '',
+        cloneUrl: '',
+        sshUrl: '',
+        archived: false,
+      }),
   };
   return getDefaultBranchGenerators[origin];
 }
@@ -57,12 +72,18 @@ export function getMetaDataGenerator(
 export function getTargetConverter(
   origin: SupportedIntegrationTypesUpdateProject,
 ): (target: SnykTarget) => Target {
-  const getTargetConverter: Record<SupportedIntegrationTypesUpdateProject, (target: SnykTarget) => Target> = {
+  const getTargetConverter: Record<
+    SupportedIntegrationTypesUpdateProject,
+    (target: SnykTarget) => Target
+  > = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]: snykTargetConverter,
-    [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]: snykTargetConverter,
+    [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
+      snykTargetConverter,
     [SupportedIntegrationTypesUpdateProject.GHE]: snykTargetConverter,
-    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]: snykTargetConverter,
-    [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]: snykTargetConverter,
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]:
+      snykTargetConverter,
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]:
+      snykTargetConverter,
   };
   return getTargetConverter[origin];
 }
@@ -89,22 +110,36 @@ export async function syncProjectsForTarget(
 
   debug(`Syncing projects for target ${target.attributes.displayName}`);
   let targetMeta: RepoMetaData;
-  const origin = target.attributes.origin as SupportedIntegrationTypesUpdateProject;
+  const origin = target.attributes
+    .origin as SupportedIntegrationTypesUpdateProject;
   const targetData = getTargetConverter(origin)(target);
 
   // Bitbucket Cloud/Server support
   let deactivate: SnykProject[] = [];
   let createProjects: string[] = [];
-  let bitbucketAuth;
+  // removed unused bitbucketAuth variable
   try {
     if (origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD) {
-      bitbucketAuth = {
-        type: 'basic' as const,
-        username: process.env.BITBUCKET_USERNAME,
-        appPassword: process.env.BITBUCKET_APP_PASSWORD,
-      };
+      // Use unified Bitbucket Cloud auth logic
+      const rawAuth = getBitbucketCloudAuth();
+      // Convert BitbucketCloudAuthMethod to BitbucketAuth for sync client
+      let bitbucketAuth: BitbucketAuth;
+      if (rawAuth.type === 'user') {
+        bitbucketAuth = {
+          type: 'user',
+          username: rawAuth.username,
+          appPassword: rawAuth.password,
+        };
+      } else if (rawAuth.type === 'api' || rawAuth.type === 'oauth') {
+        bitbucketAuth = {
+          type: rawAuth.type as BitbucketAuthType,
+          token: rawAuth.token,
+        };
+      } else {
+        throw new Error('Unsupported Bitbucket Cloud auth type');
+      }
       targetMeta = {
-        branch: targetData.branch || 'main',
+        branch: typeof targetData.branch === 'string' ? targetData.branch : '',
         cloneUrl: '',
         sshUrl: '',
         archived: false,
@@ -131,12 +166,16 @@ export async function syncProjectsForTarget(
       );
       deactivate = res.remove;
       createProjects = res.import;
-    } else if (origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER) {
+    } else if (
+      origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER
+    ) {
       // TODO: Replace with actual Data Center auth
       const sourceUrl = process.env.BITBUCKET_SERVER_URL;
       const token = process.env.BITBUCKET_SERVER_TOKEN;
       if (!sourceUrl || !token) {
-        throw new Error('BITBUCKET_SERVER_URL and BITBUCKET_SERVER_TOKEN must be set for Bitbucket Server sync');
+        throw new Error(
+          'BITBUCKET_SERVER_URL and BITBUCKET_SERVER_TOKEN must be set for Bitbucket Server sync',
+        );
       }
       const datacenterAuth = { sourceUrl, token };
       targetMeta = {
