@@ -1,24 +1,24 @@
 import * as _ from 'lodash';
 import * as debugLib from 'debug';
 
-import {
-  CreatedOrg,
-  ImportTarget,
-  SupportedIntegrationTypesImportData,
-} from '../lib/types';
+import type { CreatedOrg, ImportTarget } from '../lib/types';
+import { SupportedIntegrationTypesImportData } from '../lib/types';
 import { writeFile } from '../write-file';
-import {
+import type {
   GithubRepoData,
-  listGithubRepos,
-  listGitlabRepos,
   GitlabRepoData,
-  listAzureRepos,
   AzureRepoData,
-  listBitbucketServerRepos,
   BitbucketServerRepoData,
-  listBitbucketCloudRepos,
   BitbucketCloudRepoData,
 } from '../lib';
+import {
+  listGithubRepos,
+  listGitlabRepos,
+  listAzureRepos,
+  listBitbucketServerRepos,
+} from '../lib';
+import { listRepos as listBitbucketCloudRepos } from '../lib/source-handlers/bitbucket-cloud/list-repos';
+import type { BitbucketCloudAuthConfig } from '../lib/source-handlers/bitbucket-cloud/types';
 import { listGitHubCloudAppRepos } from '../lib/source-handlers/github-cloud-app';
 
 const debug = debugLib('snyk:generate-targets-data');
@@ -38,15 +38,13 @@ async function githubEnterpriseRepos(
 
 const sourceGenerators = {
   [SupportedIntegrationTypesImportData.GITHUB]: listGithubRepos,
-  [SupportedIntegrationTypesImportData.GITHUB_CLOUD_APP]:
-    listGitHubCloudAppRepos,
+  [SupportedIntegrationTypesImportData.GITHUB_CLOUD_APP]: listGitHubCloudAppRepos,
   [SupportedIntegrationTypesImportData.GHE]: githubEnterpriseRepos,
   [SupportedIntegrationTypesImportData.GITLAB]: listGitlabRepos,
   [SupportedIntegrationTypesImportData.AZURE_REPOS]: listAzureRepos,
-  [SupportedIntegrationTypesImportData.BITBUCKET_SERVER]:
-    listBitbucketServerRepos,
-  [SupportedIntegrationTypesImportData.BITBUCKET_CLOUD]:
-    listBitbucketCloudRepos,
+  [SupportedIntegrationTypesImportData.BITBUCKET_SERVER]: listBitbucketServerRepos,
+  [SupportedIntegrationTypesImportData.BITBUCKET_CLOUD]: listBitbucketCloudRepos,
+  [SupportedIntegrationTypesImportData.BITBUCKET_CLOUD_APP]: listBitbucketCloudRepos, // Use unified handler
 };
 
 function validateRequiredOrgData(
@@ -96,13 +94,36 @@ export async function generateTargetsImportDataFile(
     debug(`Processing ${name}`);
     try {
       validateRequiredOrgData(name, integrations, orgId);
-      const entities: Array<
-        | GithubRepoData
-        | GitlabRepoData
-        | AzureRepoData
-        | BitbucketServerRepoData
-        | BitbucketCloudRepoData
-      > = await sourceGenerators[source](topLevelEntity.name, sourceUrl!);
+      let entities: Array<
+        GithubRepoData | GitlabRepoData | AzureRepoData | BitbucketServerRepoData | BitbucketCloudRepoData
+      > = [];
+      if (
+        source === SupportedIntegrationTypesImportData.BITBUCKET_CLOUD ||
+        source === SupportedIntegrationTypesImportData.BITBUCKET_CLOUD_APP
+      ) {
+        // Use unified BitbucketCloudAuthConfig for both cases
+  let config: BitbucketCloudAuthConfig;
+        if (source === SupportedIntegrationTypesImportData.BITBUCKET_CLOUD_APP) {
+          config = {
+            type: 'oauth',
+            token: process.env.BITBUCKET_CLOUD_OAUTH_TOKEN!,
+          };
+        } else if (process.env.BITBUCKET_CLOUD_API_TOKEN) {
+          config = {
+            type: 'api',
+            token: process.env.BITBUCKET_CLOUD_API_TOKEN!,
+          };
+        } else {
+          config = {
+            type: 'user',
+            username: process.env.BITBUCKET_CLOUD_USERNAME!,
+            password: process.env.BITBUCKET_CLOUD_PASSWORD!,
+          };
+        }
+        entities = await listBitbucketCloudRepos(config, topLevelEntity.name);
+      } else {
+        entities = await sourceGenerators[source](topLevelEntity.name, sourceUrl!);
+      }
       entities.forEach((entity) => {
         targetsData.push({
           target: entity,

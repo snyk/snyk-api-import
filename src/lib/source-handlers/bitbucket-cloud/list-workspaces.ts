@@ -1,9 +1,8 @@
 import * as debugLib from 'debug';
-import { OutgoingHttpHeaders } from 'http2';
 import base64 = require('base-64');
-import { BitbucketCloudWorkspaceData } from './types';
-import { getBitbucketCloudUsername } from './get-bitbucket-cloud-username';
-import { getBitbucketCloudPassword } from './get-bitbucket-cloud-password';
+import type { OutgoingHttpHeaders } from 'http2';
+import type { BitbucketCloudWorkspaceData } from './types';
+import { getBitbucketCloudAuth } from './get-bitbucket-cloud-auth';
 import { limiterForScm } from '../../limiters';
 import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
 
@@ -17,13 +16,23 @@ interface BitbucketWorkspacesResponse {
   next?: string;
 }
 export async function fetchAllWorkspaces(
-  username: string,
-  password: string,
+  username?: string,
+  password?: string,
+  apiToken?: string,
 ): Promise<BitbucketCloudWorkspaceData[]> {
   let lastPage = false;
   let workspacesList: BitbucketCloudWorkspaceData[] = [];
   let pageCount = 1;
   let nextPageLink: string | undefined = undefined;
+  let token: string;
+  debug(`Username: ${username}, Password: ${password}, API Token: ${apiToken}`);
+  if (username && password) {
+    token = `${base64.encode(username + ':' + password)}`;
+  } else if (apiToken) {
+    token = apiToken;
+  } else {
+    throw new Error('Username/password or API token is required');
+  }
   while (!lastPage) {
     debug(`Fetching page ${pageCount}\n`);
     try {
@@ -33,7 +42,7 @@ export async function fetchAllWorkspaces(
       }: {
         workspaces: BitbucketCloudWorkspaceData[];
         next?: string;
-      } = await getWorkspaces(username, password, nextPageLink);
+      } = await getWorkspaces(token, nextPageLink);
       workspacesList = workspacesList.concat(workspaces);
       next
         ? ((lastPage = false), (nextPageLink = next))
@@ -47,17 +56,16 @@ export async function fetchAllWorkspaces(
 }
 
 export async function getWorkspaces(
-  username: string,
-  password: string,
+  token: string,
   nextPageLink?: string,
 ): Promise<{ workspaces: BitbucketCloudWorkspaceData[]; next?: string }> {
   const workspaces: BitbucketCloudWorkspaceData[] = [];
   const headers: OutgoingHttpHeaders = {
-    Authorization: `Basic ${base64.encode(username + ':' + password)}`,
+    authorization: `Bearer ${token}`,
   };
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
   const workspacesUrl =
-    nextPageLink ?? 'https://bitbucket.org/api/2.0/workspaces?pagelen=100';
+    nextPageLink ?? 'https://api.bitbucket.org/2.0/workspaces?pagelen=100';
   const { statusCode, body } =
     await limiterWithRateLimitRetries<BitbucketWorkspacesResponse>(
       'get',
@@ -87,12 +95,19 @@ export async function getWorkspaces(
 export async function listBitbucketCloudWorkspaces(): Promise<
   BitbucketCloudWorkspaceData[]
 > {
-  const bitbucketCloudUsername = getBitbucketCloudUsername();
-  const bitbucketCloudPassword = getBitbucketCloudPassword();
+  const auth = getBitbucketCloudAuth();
+  debug(`Auth: ${JSON.stringify(auth)}`);
   debug(`Fetching all workspaces data`);
-  const workspaces = await fetchAllWorkspaces(
-    bitbucketCloudUsername,
-    bitbucketCloudPassword,
-  );
-  return workspaces;
+  if (auth.type === 'user') {
+    const workspaces = await fetchAllWorkspaces(auth.username, auth.password);
+    console.log(workspaces);
+    return workspaces;
+  }
+  if (auth.type === 'api' || auth.type === 'oauth') {
+    const workspaces = await fetchAllWorkspaces(undefined, undefined, auth.token);
+    console.log(workspaces);
+    return workspaces;
+  }
+  // For API/OAuth tokens, Bitbucket Cloud does not support listing workspaces via token alone
+  throw new Error('Workspace listing requires username/password (app password).');
 }

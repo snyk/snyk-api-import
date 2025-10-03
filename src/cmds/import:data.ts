@@ -40,6 +40,7 @@ const entityName: {
   'azure-repos': 'org',
   'bitbucket-server': 'project',
   'bitbucket-cloud': 'workspace',
+  'bitbucket-cloud-app': 'workspace',
 };
 
 export async function generateOrgData(

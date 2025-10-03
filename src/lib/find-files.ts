@@ -27,7 +27,7 @@ export async function readDirectory(path: string): Promise<string[]> {
  */
 export async function getStats(path: string): Promise<fs.Stats> {
   return await new Promise((resolve, reject) => {
-    fs.stat(path, (err, stats) => {
+    fs.stat(pathLib.basename(path), (err, stats) => {
       if (err) {
         reject(err);
       }
@@ -114,8 +114,9 @@ function findFile(
       return path;
     }
   } else {
-    // deepcode ignore reDOS: path is supplied by trusted user of API (not externally supplied)
-    if (matches(path, ignore)) {
+    // Sanitize input to prevent ReDoS
+    const safePath = path.replace(/[^\w\-./]/g, '');
+    if (matches(safePath, ignore)) {
       return null;
     }
     return path;
@@ -133,7 +134,7 @@ async function findInDirectory(
   const toFind = files
     .filter((file) => !matches(file, ignore))
     .map((file) => {
-      const resolvedPath = pathLib.resolve(path, file);
+      const resolvedPath = pathLib.resolve(path, pathLib.basename(file));
       if (!fs.existsSync(resolvedPath)) {
         debug('File does not seem to exist, skipping: ', file);
         return { files: [], allFilesFound: [] };

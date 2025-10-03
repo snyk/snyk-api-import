@@ -29,9 +29,10 @@ export function isSourceConfigured(
 ): () => void {
   const getDefaultBranchGenerators = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]: isGithubConfigured,
-    [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
-      isGitHubCloudAppConfigured,
+    [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]: isGitHubCloudAppConfigured,
     [SupportedIntegrationTypesUpdateProject.GHE]: isGithubConfigured,
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]: () => {}, // Add real check if needed
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]: () => {}, // Add real check if needed
   };
   return getDefaultBranchGenerators[origin];
 }

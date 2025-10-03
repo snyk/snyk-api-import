@@ -14,6 +14,21 @@ import { deleteDirectory } from './delete-directory';
 const debug = debugLib('snyk:git-clone');
 
 // Wrapper function for GitHub Cloud App to match the expected signature
+// Wrapper function for Bitbucket Cloud to match the expected signature
+function buildBitbucketCloudCloneUrl(meta: RepoMetaData): string {
+  // Bitbucket Cloud clone URLs are typically in the format:
+  // https://<username>:<appPassword>@bitbucket.org/<owner>/<repo>.git
+  // For now, just return the cloneUrl from metadata (auth handled elsewhere)
+  return meta.cloneUrl;
+}
+
+// Wrapper function for Bitbucket Server to match the expected signature
+function buildBitbucketServerCloneUrl(meta: RepoMetaData): string {
+  // Bitbucket Server clone URLs are typically in the format:
+  // https://<username>:<appPassword>@<bitbucket-server-host>/<projectKey>/<repoSlug>.git
+  // For now, just return the cloneUrl from metadata (auth handled elsewhere)
+  return meta.cloneUrl;
+}
 async function buildGitHubCloudAppCloneUrl(
   meta: RepoMetaData,
 ): Promise<string> {
@@ -30,9 +45,10 @@ async function buildGitHubCloudAppCloneUrl(
 
 const urlGenerators = {
   [SupportedIntegrationTypesUpdateProject.GITHUB]: github.buildGitCloneUrl,
-  [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
-    buildGitHubCloudAppCloneUrl,
+  [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]: buildGitHubCloudAppCloneUrl,
   [SupportedIntegrationTypesUpdateProject.GHE]: github.buildGitCloneUrl,
+  [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]: buildBitbucketCloudCloneUrl,
+  [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]: buildBitbucketServerCloneUrl,
 };
 
 interface GitCloneResponse {
