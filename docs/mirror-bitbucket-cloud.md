@@ -1,6 +1,17 @@
 # Mirroring Bitbucket Cloud organizations and repos in Snyk
 In order to import the entirety of Bitbucket Cloud repos into Snyk you can use the available utils to make it possible in 4 commands.
-You will need to configure Bitbucket Cloud authentication and Snyk token as environment variables. Bitbucket Cloud supports three authentication methods:
+
+## Bitbucket Cloud Authentication Methods Explained
+
+Bitbucket Cloud supports three authentication methods:
+
+- **API Token**: `export BITBUCKET_CLOUD_API_TOKEN=***`
+- **OAuth Token**: `export BITBUCKET_CLOUD_OAUTH_TOKEN=***`
+- **Username & App Password**: `export BITBUCKET_CLOUD_USERNAME=***` and `export BITBUCKET_CLOUD_PASSWORD=***`
+
+> **Note:** Both "API token" and "OAuth token" refer to OAuth 2.0 access tokens, used as Bearer tokens (`Authorization: Bearer <token>`). Bitbucket Cloud does not provide a separate API token type; both environment variables should contain an OAuth access token. "Username & App Password" is a Basic Auth method, not an access token.
+
+Workspace listing (org discovery) requires username and app password. Repo import and other API calls support all three methods.
 
 - **API Token**: `export BITBUCKET_CLOUD_API_TOKEN=***`
 - **OAuth Token**: `export BITBUCKET_CLOUD_OAUTH_TOKEN=***`
