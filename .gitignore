@@ -13,5 +13,5 @@ local.*
 test/research
 .idea
 *.pem
-.github/docs/
-.github/instructions/
+.github/api-ref/*
+.github/instructions/*

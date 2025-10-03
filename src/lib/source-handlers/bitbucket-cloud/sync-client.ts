@@ -1,16 +1,13 @@
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
 
-export type BitbucketAuthType = 'basic' | 'oauth';
+export type BitbucketAuthType = 'basic' | 'oauth' | 'api';
 
 export interface BitbucketAuth {
   type: BitbucketAuthType;
   username?: string;
   appPassword?: string;
-  consumerKey?: string;
-  consumerSecret?: string;
-  accessToken?: string;
-  accessTokenSecret?: string;
+  token?: string; // For API or OAuth
 }
 
 export class BitbucketCloudSyncClient {
@@ -29,9 +26,16 @@ export class BitbucketCloudSyncClient {
           password: auth.appPassword,
         },
       });
+    } else if (auth.type === 'api' || auth.type === 'oauth') {
+      // Ignore username/appPassword for these types
+      this.client = axios.create({
+        baseURL: 'https://api.bitbucket.org/2.0/',
+        headers: {
+          authorization: `Bearer ${auth.token}`,
+        },
+      });
     } else {
-      // OAuth 1.0a support would go here (use a library like oauth-1.0a)
-      throw new Error('Only Basic Auth is implemented for Bitbucket Cloud sync at this time.');
+      throw new Error('Only Basic Auth, API token, or OAuth token are supported for Bitbucket Cloud sync.');
     }
   }
 

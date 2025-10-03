@@ -86,8 +86,12 @@ export async function getWorkspaces(
 export async function listBitbucketCloudWorkspaces(): Promise<
   BitbucketCloudWorkspaceData[]
 > {
-  const { username, password } = getBitbucketCloudAuth();
+  const auth = getBitbucketCloudAuth();
   debug(`Fetching all workspaces data`);
-  const workspaces = await fetchAllWorkspaces(username, password);
-  return workspaces;
+  if (auth.type === 'user') {
+    const workspaces = await fetchAllWorkspaces(auth.username, auth.password);
+    return workspaces;
+  }
+  // For API/OAuth tokens, Bitbucket Cloud does not support listing workspaces via token alone
+  throw new Error('Workspace listing requires username/password (app password).');
 }
