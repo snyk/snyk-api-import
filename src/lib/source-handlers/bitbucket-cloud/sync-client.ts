@@ -44,7 +44,8 @@ export class BitbucketCloudSyncClient {
 
   async listRepositories(workspace: string) {
     try {
-      const res = await this.client.get(`/repositories/${workspace}`);
+      const encWorkspace = encodeURIComponent(decodeURIComponent(workspace));
+      const res = await this.client.get(`/repositories/${encWorkspace}`);
       return res.data;
     } catch (err: any) {
       this.handleError(err);
@@ -53,7 +54,9 @@ export class BitbucketCloudSyncClient {
 
   async getRepository(workspace: string, repoSlug: string) {
     try {
-      const res = await this.client.get(`/repositories/${workspace}/${repoSlug}`);
+      const encWorkspace = encodeURIComponent(decodeURIComponent(workspace));
+      const encRepo = encodeURIComponent(decodeURIComponent(repoSlug));
+      const res = await this.client.get(`/repositories/${encWorkspace}/${encRepo}`);
       return res.data;
     } catch (err: any) {
       this.handleError(err);
@@ -62,7 +65,9 @@ export class BitbucketCloudSyncClient {
 
   async listBranches(workspace: string, repoSlug: string) {
     try {
-      const res = await this.client.get(`/repositories/${workspace}/${repoSlug}/refs/branches`);
+      const encWorkspace = encodeURIComponent(decodeURIComponent(workspace));
+      const encRepo = encodeURIComponent(decodeURIComponent(repoSlug));
+      const res = await this.client.get(`/repositories/${encWorkspace}/${encRepo}/refs/branches`);
       return res.data;
     } catch (err: any) {
       this.handleError(err);
