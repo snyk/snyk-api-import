@@ -69,16 +69,20 @@ export class BitbucketCloudSyncClient {
   async listFiles(workspace: string, repoSlug: string, branch: string) {
     try {
       const url = `/repositories/${workspace}/${repoSlug}/src/${branch}/`;
+      console.log(`[BitbucketCloudSyncClient] Requesting files: workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}', url='${url}'`);
       const res = await this.client.get(url);
       console.log('[BitbucketCloudSyncClient] Raw response from listFiles:', JSON.stringify(res.data, null, 2));
-      // Double-check Bitbucket API docs: files are in res.data.values, each with a 'path' property
       if (Array.isArray(res.data.values)) {
+        if (res.data.values.length === 0) {
+          console.warn(`[BitbucketCloudSyncClient] No files found for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}'. Repo may be empty or branch may not exist.`);
+        }
         return res.data.values.map((file: any) => file.path);
       } else {
-        console.warn('[BitbucketCloudSyncClient] No files found in response for branch:', branch);
+        console.error(`[BitbucketCloudSyncClient] Unexpected response format for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}'.`);
         return [];
       }
     } catch (err: any) {
+      console.error(`[BitbucketCloudSyncClient] Error listing files for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}':`, err?.response?.status, err?.response?.statusText, err?.message);
       this.handleError(err);
     }
   }
