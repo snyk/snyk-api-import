@@ -64,23 +64,31 @@ export async function cloneAndAnalyze(
       const repoSlug = target.name;
       // Fetch repository metadata to get the true default branch
       let repoInfo;
+      let defaultBranch = '';
       try {
         repoInfo = await client.getRepository(workspace, repoSlug);
+        if (repoInfo?.mainbranch?.name) {
+          defaultBranch = repoInfo.mainbranch.name;
+        } else {
+          // If repository info returns no mainbranch, fall back to provided branch
+          console.warn(`[Bitbucket] No main branch found in repository info for ${workspace}/${repoSlug}. Falling back to provided branch.`);
+          defaultBranch = target?.branch || repoMetadata.branch || '';
+        }
       } catch (err: any) {
-        // Authorization or API error: hard fail, do not proceed
-        const msg = err?.response?.status === 401 || err?.response?.status === 403
-          ? `[Bitbucket] Authorization failed for ${workspace}/${repoSlug}: ${err.message}`
-          : `[Bitbucket] Failed to fetch repository info for ${workspace}/${repoSlug}: ${err.message}`;
+        // Authorization errors — hard fail to avoid making changes
+        if (err?.response?.status === 401 || err?.response?.status === 403) {
+          const msg = `[Bitbucket] Authorization failed for ${workspace}/${repoSlug}: ${err.message}`;
+          console.error(msg);
+          throw new Error(msg);
+        }
+        // Non-auth errors — fall back to provided branch (helps tests and transient errors)
+        console.warn(`[Bitbucket] Could not fetch repository info for ${workspace}/${repoSlug}: ${err?.message}. Falling back to provided branch if available.`);
+        defaultBranch = target?.branch || repoMetadata.branch || '';
+      }
+      if (!defaultBranch) {
+        const msg = `[Bitbucket] Could not determine default branch for ${workspace}/${repoSlug}.`;
         console.error(msg);
         throw new Error(msg);
-      }
-      let defaultBranch = '';
-      if (repoInfo?.mainbranch?.name) {
-        defaultBranch = repoInfo.mainbranch.name;
-      } else {
-        const msg = `[Bitbucket] No main branch found for ${workspace}/${repoSlug}.`;
-        console.error(msg);
-        throw new Error(`Could not determine default branch for Bitbucket repo: ${workspace}/${repoSlug}`);
       }
       debug(`[Bitbucket] True default branch for ${workspace}/${repoSlug}: ${defaultBranch}`);
       debug(`[Bitbucket] Calling listFiles with workspace='${workspace}', repoSlug='${repoSlug}', branch='${defaultBranch}'`);
@@ -107,8 +115,11 @@ export async function cloneAndAnalyze(
         return manifestFileTypes.some((type: string) => file.endsWith(type));
       });
       console.log('[cloneAndAnalyze] Filtered Bitbucket files:', filteredFiles);
+      // generateProjectDiffActions expects repo manifest paths (the part after ':')
+      const manifestPaths = filteredFiles.map((f: string) => (f.includes(':') ? f.split(':')[1] : f));
+      console.log('[cloneAndAnalyze] Manifest paths passed to diff generator:', manifestPaths);
       return generateProjectDiffActions(
-        filteredFiles,
+        manifestPaths,
         snykMonitoredProjects,
         manifestFileTypes,
       );
@@ -124,10 +135,23 @@ export async function cloneAndAnalyze(
       const headers = { authorization: `Bearer ${token}` };
       try {
         const res = await axios.get(apiUrl, { headers });
+        if (res.status === 401 || res.status === 403) {
+          const msg = `[Bitbucket Server] Authorization failed for ${projectKey}/${repoSlug}: ${res.status} ${res.statusText}`;
+          console.error(msg);
+          throw new Error(msg);
+        }
         if (res.status === 200 && Array.isArray(res.data.values)) {
           files = res.data.values;
+        } else if (res.status && res.status !== 200) {
+          const msg = `[Bitbucket Server] Unexpected response listing files for ${projectKey}/${repoSlug}: ${res.status} ${res.statusText}`;
+          console.warn(msg);
         }
       } catch (err: any) {
+        if (err?.response && (err.response.status === 401 || err.response.status === 403)) {
+          const msg = `[Bitbucket Server] Authorization failed when listing files for ${projectKey}/${repoSlug}: ${err.message}`;
+          console.error(msg);
+          throw new Error(msg);
+        }
         throw new Error(`Failed to list files for Bitbucket Server repo: ${err.message}`);
       }
       // Bitbucket Server normalization and filtering
@@ -140,8 +164,11 @@ export async function cloneAndAnalyze(
         return manifestFileTypes.some((type: string) => file.endsWith(type));
       });
       console.log('[cloneAndAnalyze] Filtered Bitbucket Server files:', filteredFiles);
+      // generateProjectDiffActions expects repo manifest paths (the part after ':')
+      const manifestPaths = filteredFiles.map((f: string) => (f.includes(':') ? f.split(':')[1] : f));
+      console.log('[cloneAndAnalyze] Manifest paths passed to diff generator (server):', manifestPaths);
       return generateProjectDiffActions(
-        filteredFiles,
+        manifestPaths,
         snykMonitoredProjects,
         manifestFileTypes,
       );
@@ -197,10 +224,7 @@ export async function cloneAndAnalyze(
       snykMonitoredProjects,
       manifestFileTypes,
     );
-    // Propagate branch info for Bitbucket Cloud
-    return {
-      ...diffActions,
-      branch: repoMetadata.branch,
-    };
+    // Propagate branch info for Bitbucket Cloud only via repoMetadata earlier; return diffActions for generic SCM
+    return diffActions;
 }
 }
