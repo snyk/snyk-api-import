@@ -67,12 +67,48 @@ export async function cloneAndAnalyze(
       let defaultBranch = '';
       try {
         repoInfo = await client.getRepository(workspace, repoSlug);
+        // Log raw repository metadata for debugging/diagnostics
+        try {
+          console.log(`[cloneAndAnalyze] Raw repoInfo for ${workspace}/${repoSlug}:`, JSON.stringify(repoInfo, null, 2));
+        } catch (e) {
+          console.log(`[cloneAndAnalyze] Raw repoInfo (stringify failed) for ${workspace}/${repoSlug}:`, repoInfo);
+        }
         if (repoInfo?.mainbranch?.name) {
           defaultBranch = repoInfo.mainbranch.name;
         } else {
-          // If repository info returns no mainbranch, fall back to provided branch
-          console.warn(`[Bitbucket] No main branch found in repository info for ${workspace}/${repoSlug}. Falling back to provided branch.`);
-          defaultBranch = target?.branch || repoMetadata.branch || '';
+          // If repository info returns no mainbranch, attempt to find it via branches endpoint
+          console.warn(`[Bitbucket] No main branch found in repository info for ${workspace}/${repoSlug}. Attempting to detect default branch via branches API.`);
+          try {
+            const branchesResp: any = await client.listBranches(workspace, repoSlug);
+            // branchesResp may be an object with values array, or an array in some mocks
+            const branchValues = Array.isArray(branchesResp)
+              ? branchesResp
+              : branchesResp?.values || [];
+            // Look for explicit default marker
+            let detected: string | undefined;
+            for (const b of branchValues) {
+              if (!b) continue;
+              if (b.is_default || b.default || b.name === 'main' || b.name === 'master') {
+                detected = b.name || b;
+                break;
+              }
+            }
+            if (!detected && branchValues.length > 0) {
+              // fall back to first branch name
+              const first = branchValues[0];
+              detected = typeof first === 'string' ? first : first.name;
+            }
+            if (detected) {
+              defaultBranch = detected;
+              console.info(`[Bitbucket] Detected default branch for ${workspace}/${repoSlug} via branches API: ${defaultBranch}`);
+            } else {
+              console.warn(`[Bitbucket] Could not detect default branch via branches API for ${workspace}/${repoSlug}. Falling back to provided branch if available.`);
+              defaultBranch = target?.branch || repoMetadata.branch || '';
+            }
+          } catch (err) {
+            console.warn(`[Bitbucket] Failed to detect default branch via branches API for ${workspace}/${repoSlug}: ${err?.message}. Falling back to provided branch.`);
+            defaultBranch = target?.branch || repoMetadata.branch || '';
+          }
         }
       } catch (err: any) {
         // Authorization errors — hard fail to avoid making changes
