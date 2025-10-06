@@ -31,6 +31,7 @@ export async function cloneAndAnalyze(
 ): Promise<{
   import: string[];
   remove: SnykProject[];
+  branch?: string;
 }> {
   const {
     manifestTypes,
@@ -58,8 +59,10 @@ export async function cloneAndAnalyze(
       // Fetch repository metadata to get the true default branch
       const repoInfo = await client.getRepository(workspace, repoSlug);
       const defaultBranch = repoInfo?.mainbranch?.name || repoMetadata.branch || '';
-      console.log(`Listing files for ${workspace}/${repoSlug} on branch ${defaultBranch}`);
+      console.log(`[Bitbucket] True default branch for ${workspace}/${repoSlug}: ${defaultBranch}`);
       files = await client.listFiles(workspace, repoSlug, defaultBranch);
+      // Optionally propagate the branch for logging/upstream use
+      repoMetadata.branch = defaultBranch;
     } else if (clientType === 'server') {
       const projectKey = target?.projectKey;
       const repoSlug = target?.repoSlug;
@@ -153,9 +156,14 @@ export async function cloneAndAnalyze(
     debug(`Failed to delete ${repoPath}. Error was ${error}.`);
   }
 
-  return generateProjectDiffActions(
+  const diffActions = generateProjectDiffActions(
     relativeFileNames,
     snykMonitoredProjects,
     manifestFileTypes,
   );
+  // Propagate branch info for Bitbucket Cloud
+  return {
+    ...diffActions,
+    branch: repoMetadata.branch,
+  };
 }

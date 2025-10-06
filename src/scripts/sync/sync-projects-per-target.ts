@@ -139,7 +139,7 @@ export async function syncProjectsForTarget(
         throw new Error('Unsupported Bitbucket Cloud auth type');
       }
       targetMeta = {
-        branch: typeof targetData.branch === 'string' ? targetData.branch : '',
+        branch: '', // Let cloneAndAnalyze determine the correct branch
         cloneUrl: '',
         sshUrl: '',
         archived: false,
@@ -158,12 +158,17 @@ export async function syncProjectsForTarget(
         targetData,
       );
       debug(
-        'Bitbucket Cloud analysis finished',
+        `[Bitbucket Cloud] Analysis finished for branch: ${res.branch}`,
         JSON.stringify({
+          branch: res.branch,
           remove: res.remove.length,
           import: res.import.length,
         }),
       );
+      // Propagate branch from analysis result
+      if (res.branch) {
+        targetMeta.branch = res.branch;
+      }
       deactivate = res.remove;
       createProjects = res.import;
     } else if (
@@ -179,7 +184,7 @@ export async function syncProjectsForTarget(
       }
       const datacenterAuth = { sourceUrl, token };
       targetMeta = {
-        branch: typeof targetData.branch === 'string' ? targetData.branch : '',
+        branch: '', // Let cloneAndAnalyze determine the correct branch
         cloneUrl: '',
         sshUrl: '',
         archived: false,
