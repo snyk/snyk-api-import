@@ -33,6 +33,15 @@ export async function cloneAndAnalyze(
   remove: SnykProject[];
   branch?: string;
 }> {
+  // Validate exclusionGlobs to prevent ReDoS
+  function isSafeGlob(glob: string): boolean {
+    // Only allow globs with safe characters (alphanumeric, *, ?, ., /, -, _)
+    // Disallow consecutive * and overly long patterns
+    if (!/^[\w\-*?./]+$/.test(glob)) return false;
+    if (glob.length > 128) return false;
+    if (glob.includes('**')) return false;
+    return true;
+  }
   const {
     manifestTypes,
     entitlements = ['openSource'],
@@ -44,27 +53,39 @@ export async function cloneAndAnalyze(
       : getSCMSupportedProjectTypes(entitlements);
 
   // Bitbucket Cloud/Server logic
-  if (
-    integrationType === SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD ||
-    integrationType === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER
-  ) {
+  if (integrationType === SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD || integrationType === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER) {
     let files: string[] = [];
     if (clientType === 'cloud') {
       if (!target?.owner || !target?.name) {
         throw new Error('Bitbucket Cloud target must have owner and name properties');
       }
-  const client = new BitbucketCloudSyncClient(auth as BitbucketAuth);
-  const workspace = target.owner;
-  const repoSlug = target.name;
-  // Fetch repository metadata to get the true default branch
-  const repoInfo = await client.getRepository(workspace, repoSlug);
-  const defaultBranch = repoInfo?.mainbranch?.name || repoMetadata.branch || '';
-  debug(`[Bitbucket] True default branch for ${workspace}/${repoSlug}: ${defaultBranch}`);
-  debug(`[Bitbucket] Calling listFiles with workspace='${workspace}', repoSlug='${repoSlug}', branch='${defaultBranch}'`);
-  files = await client.listFiles(workspace, repoSlug, defaultBranch);
-  console.log('[cloneAndAnalyze] Files returned from Bitbucket Cloud:', files);
+      const client = new BitbucketCloudSyncClient(auth as BitbucketAuth);
+      const workspace = target.owner;
+      const repoSlug = target.name;
+      // Fetch repository metadata to get the true default branch
+      const repoInfo = await client.getRepository(workspace, repoSlug);
+      const defaultBranch = repoInfo?.mainbranch?.name || repoMetadata.branch || '';
+      debug(`[Bitbucket] True default branch for ${workspace}/${repoSlug}: ${defaultBranch}`);
+      debug(`[Bitbucket] Calling listFiles with workspace='${workspace}', repoSlug='${repoSlug}', branch='${defaultBranch}'`);
+      files = await client.listFiles(workspace, repoSlug, defaultBranch);
+      console.log('[cloneAndAnalyze] Files returned from Bitbucket Cloud:', files);
       // Optionally propagate the branch for logging/upstream use
       repoMetadata.branch = defaultBranch;
+      // Bitbucket Cloud normalization and filtering
+      const normalizedFiles = files.map((file: string) => `${workspace}/${repoSlug}:${file}`);
+      console.log('[cloneAndAnalyze] Normalized Bitbucket files:', normalizedFiles);
+      const filteredFiles = normalizedFiles.filter((file: string) => {
+        if ([...defaultExclusionGlobs, ...exclusionGlobs].some((glob: string) => file.includes(glob))) {
+          return false;
+        }
+        return manifestFileTypes.some((type: string) => file.endsWith(type));
+      });
+      console.log('[cloneAndAnalyze] Filtered Bitbucket files:', filteredFiles);
+      return generateProjectDiffActions(
+        filteredFiles,
+        snykMonitoredProjects,
+        manifestFileTypes,
+      );
     } else if (clientType === 'server') {
       const projectKey = target?.projectKey;
       const repoSlug = target?.repoSlug;
@@ -83,89 +104,77 @@ export async function cloneAndAnalyze(
       } catch (err: any) {
         throw new Error(`Failed to list files for Bitbucket Server repo: ${err.message}`);
       }
+      // Bitbucket Server normalization and filtering
+      const normalizedFiles = files.map((file: string) => `${projectKey}/${repoSlug}:${file}`);
+      console.log('[cloneAndAnalyze] Normalized Bitbucket Server files:', normalizedFiles);
+      const filteredFiles = normalizedFiles.filter((file: string) => {
+        if ([...defaultExclusionGlobs, ...exclusionGlobs].some((glob: string) => file.includes(glob))) {
+          return false;
+        }
+        return manifestFileTypes.some((type: string) => file.endsWith(type));
+      });
+      console.log('[cloneAndAnalyze] Filtered Bitbucket Server files:', filteredFiles);
+      return generateProjectDiffActions(
+        filteredFiles,
+        snykMonitoredProjects,
+        manifestFileTypes,
+      );
     } else {
       throw new Error('Unknown Bitbucket client type');
     }
-    // Filter files by exclusion globs and manifest types
-    const filteredFiles = files.filter((file: string) => {
-      if ([...defaultExclusionGlobs, ...exclusionGlobs].some((glob) => file.includes(glob))) {
-        return false;
+  } else {
+    // Generic SCM logic
+    const { success, repoPath, gitResponse } = await gitClone(
+      integrationType,
+      repoMetadata,
+    );
+    debug('Clone response', { success, repoPath, gitResponse });
+
+    if (!success) {
+      throw new Error(gitResponse);
+    }
+
+    if (!repoPath || typeof repoPath !== 'string') {
+      throw new Error('No location returned for clones repo to analyze');
+    }
+    // Sanitize repoPath to prevent path traversal
+    const sanitizedRepoPath = path.resolve('/', repoPath);
+    const safeExclusionGlobs = [...defaultExclusionGlobs, ...exclusionGlobs].filter(isSafeGlob);
+
+    // Ensure sanitizedRepoPath is inside allowed directory (e.g., /tmp or working dir)
+    const allowedBaseDir = path.resolve(process.cwd());
+    if (!sanitizedRepoPath.startsWith(allowedBaseDir)) {
+      throw new Error('Path traversal detected: repoPath is outside allowed directory');
+    }
+
+    const { files: foundFiles } = await find(
+      sanitizedRepoPath,
+      safeExclusionGlobs,
+      getSCMSupportedManifests(manifestFileTypes, entitlements),
+      10,
+    );
+    const relativeFileNames = foundFiles
+      .filter((f: string) => repoPath && f.startsWith(repoPath))
+      .map((f: string) => repoPath ? path.relative(repoPath, f) : f);
+    debug(`Detected ${foundFiles.length} files in ${repoMetadata.cloneUrl}: ${foundFiles.join(',')}`);
+
+    try {
+      if (repoPath) {
+        await deleteDirectory(repoPath!);
       }
-      return manifestFileTypes.some((type) => file.endsWith(type));
-    });
-    return generateProjectDiffActions(
-      filteredFiles,
+    } catch (error) {
+      debug(`Failed to delete ${repoPath}. Error was ${error}.`);
+    }
+
+    const diffActions = generateProjectDiffActions(
+      relativeFileNames,
       snykMonitoredProjects,
       manifestFileTypes,
     );
-  }
-
-  // Generic SCM logic
-  const { success, repoPath, gitResponse } = await gitClone(
-    integrationType,
-    repoMetadata,
-  );
-  debug('Clone response', { success, repoPath, gitResponse });
-
-  if (!success) {
-    throw new Error(gitResponse);
-  }
-
-  if (!repoPath) {
-    throw new Error('No location returned for clones repo to analyze');
-  }
-  // Sanitize repoPath to prevent path traversal
-  const sanitizedRepoPath = path.resolve('/', repoPath);
-
-  // Validate exclusionGlobs to prevent ReDoS
-  function isSafeGlob(glob: string): boolean {
-    // Only allow globs with safe characters (alphanumeric, *, ?, ., /, -, _)
-    // Disallow consecutive * and overly long patterns
-    if (!/^[\w\-*?./]+$/.test(glob)) return false;
-    if (glob.length > 128) return false;
-    if (glob.includes('**')) return false;
-    return true;
-  }
-  const safeExclusionGlobs = [...defaultExclusionGlobs, ...exclusionGlobs].filter(isSafeGlob);
-
-  // Ensure sanitizedRepoPath is inside allowed directory (e.g., /tmp or working dir)
-  const allowedBaseDir = path.resolve(process.cwd());
-  if (!sanitizedRepoPath.startsWith(allowedBaseDir)) {
-    throw new Error('Path traversal detected: repoPath is outside allowed directory');
-  }
-
-  const { files } = await find(
-    sanitizedRepoPath,
-    safeExclusionGlobs,
-    // TODO: when possible switch to check entitlements via API automatically for an org
-    // right now the product entitlements are not exposed via API so user has to provide which products
-    // they are using
-    getSCMSupportedManifests(manifestFileTypes, entitlements),
-    10,
-  );
-  const relativeFileNames = files
-    .filter((f) => f.startsWith(repoPath))
-    .map((f) => path.relative(repoPath, f));
-  debug(
-    `Detected ${files.length} files in ${repoMetadata.cloneUrl}: ${files.join(
-      ',',
-    )}`,
-  );
-
-  try {
-    await deleteDirectory(repoPath);
-  } catch (error) {
-    debug(`Failed to delete ${repoPath}. Error was ${error}.`);
-  }
-
-  const diffActions = generateProjectDiffActions(
-    relativeFileNames,
-    snykMonitoredProjects,
-    manifestFileTypes,
-  );
-  // Propagate branch info for Bitbucket Cloud
-  return {
-    ...diffActions,
-    branch: repoMetadata.branch,
-  };
+    // Propagate branch info for Bitbucket Cloud
+    return {
+      ...diffActions,
+      branch: repoMetadata.branch,
+    };
+}
 }
