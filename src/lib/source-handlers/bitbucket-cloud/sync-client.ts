@@ -69,25 +69,46 @@ export class BitbucketCloudSyncClient {
     }
   }
 
-  async listFiles(workspace: string, repoSlug: string, branch: string) {
+  async listFiles(workspace: string, repoSlug: string, branch: string): Promise<string[]> {
     try {
-      const url = `/repositories/${workspace}/${repoSlug}/src/${branch}/`;
-      console.log(`[BitbucketCloudSyncClient] Requesting files: workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}', url='${url}'`);
-      const res = await this.client.get(url);
-      console.log('[BitbucketCloudSyncClient] Raw response from listFiles:', JSON.stringify(res.data, null, 2));
-      if (Array.isArray(res.data.values)) {
-        if (res.data.values.length === 0) {
-          console.warn(`[BitbucketCloudSyncClient] No files found for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}'. Repo may be empty or branch may not exist.`);
+      // Use max_depth to include subdirectories up to a reasonable limit and follow pagination
+      let url = `/repositories/${workspace}/${repoSlug}/src/${branch}/?pagelen=100&max_depth=10`;
+      console.log(`[BitbucketCloudSyncClient] Requesting files (recursive): workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}', url='${url}'`);
+      const allPaths: string[] = [];
+      while (url) {
+        const res = await this.client.get(url);
+        console.log('[BitbucketCloudSyncClient] Raw response page from listFiles:', res?.data?.values?.length ?? 0);
+        if (res && res.data && Array.isArray(res.data.values)) {
+          // Collect only file entries. API returns objects with type 'commit_file' or 'commit_directory'.
+          for (const entry of res.data.values) {
+            if (!entry) continue;
+            // Some responses may return simple strings in mocked tests — handle both shapes
+            if (typeof entry === 'string') {
+              allPaths.push(entry);
+            } else if (entry.type === 'commit_file' || !entry.type) {
+              if (entry.path) allPaths.push(entry.path);
+            }
+          }
+          // Follow pagination if present
+          if (res.data.next) {
+            url = res.data.next;
+          } else {
+            url = '';
+          }
+        } else {
+          console.error(`[BitbucketCloudSyncClient] Unexpected response format for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}'.`);
+          break;
         }
-        return res.data.values.map((file: any) => file.path);
-      } else {
-        console.error(`[BitbucketCloudSyncClient] Unexpected response format for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}'.`);
-        return [];
       }
+      if (allPaths.length === 0) {
+        console.warn(`[BitbucketCloudSyncClient] No files found for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}'. Repo may be empty or branch may not exist.`);
+      }
+      return allPaths;
     } catch (err: any) {
       console.error(`[BitbucketCloudSyncClient] Error listing files for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}':`, err?.response?.status, err?.response?.statusText, err?.message);
       this.handleError(err);
     }
+    return [];
   }
 
   private handleError(err: any) {
