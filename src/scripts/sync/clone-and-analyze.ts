@@ -53,14 +53,15 @@ export async function cloneAndAnalyze(
       if (!target?.owner || !target?.name) {
         throw new Error('Bitbucket Cloud target must have owner and name properties');
       }
-      const client = new BitbucketCloudSyncClient(auth as BitbucketAuth);
-      const workspace = target.owner;
-      const repoSlug = target.name;
-      // Fetch repository metadata to get the true default branch
-      const repoInfo = await client.getRepository(workspace, repoSlug);
-      const defaultBranch = repoInfo?.mainbranch?.name || repoMetadata.branch || '';
-      console.log(`[Bitbucket] True default branch for ${workspace}/${repoSlug}: ${defaultBranch}`);
-      files = await client.listFiles(workspace, repoSlug, defaultBranch);
+  const client = new BitbucketCloudSyncClient(auth as BitbucketAuth);
+  const workspace = target.owner;
+  const repoSlug = target.name;
+  // Fetch repository metadata to get the true default branch
+  const repoInfo = await client.getRepository(workspace, repoSlug);
+  const defaultBranch = repoInfo?.mainbranch?.name || repoMetadata.branch || '';
+  debug(`[Bitbucket] True default branch for ${workspace}/${repoSlug}: ${defaultBranch}`);
+  debug(`[Bitbucket] Calling listFiles with workspace='${workspace}', repoSlug='${repoSlug}', branch='${defaultBranch}'`);
+  files = await client.listFiles(workspace, repoSlug, defaultBranch);
       // Optionally propagate the branch for logging/upstream use
       repoMetadata.branch = defaultBranch;
     } else if (clientType === 'server') {

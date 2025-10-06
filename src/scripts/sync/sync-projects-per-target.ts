@@ -345,9 +345,7 @@ export async function bulkUpdateProjectsBranch(
             dryRun,
           });
           debug(
-            `Default branch updated from ${project.branch!} to ${branch} for ${
-              project.id
-            }`,
+            `[Branch Update] Project: ${project.name} (ID: ${project.id}) - Branch changed from '${project.branch!}' to '${branch}' for integration '${project.origin}'`,
           );
         }
       } catch (e) {
