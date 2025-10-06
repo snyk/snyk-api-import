@@ -63,11 +63,37 @@ export async function cloneAndAnalyze(
       const workspace = target.owner;
       const repoSlug = target.name;
       // Fetch repository metadata to get the true default branch
-      const repoInfo = await client.getRepository(workspace, repoSlug);
-      const defaultBranch = repoInfo?.mainbranch?.name || repoMetadata.branch || '';
+      let repoInfo;
+      try {
+        repoInfo = await client.getRepository(workspace, repoSlug);
+      } catch (err: any) {
+        // Authorization or API error: hard fail, do not proceed
+        const msg = err?.response?.status === 401 || err?.response?.status === 403
+          ? `[Bitbucket] Authorization failed for ${workspace}/${repoSlug}: ${err.message}`
+          : `[Bitbucket] Failed to fetch repository info for ${workspace}/${repoSlug}: ${err.message}`;
+        console.error(msg);
+        throw new Error(msg);
+      }
+      let defaultBranch = '';
+      if (repoInfo?.mainbranch?.name) {
+        defaultBranch = repoInfo.mainbranch.name;
+      } else {
+        const msg = `[Bitbucket] No main branch found for ${workspace}/${repoSlug}.`;
+        console.error(msg);
+        throw new Error(`Could not determine default branch for Bitbucket repo: ${workspace}/${repoSlug}`);
+      }
       debug(`[Bitbucket] True default branch for ${workspace}/${repoSlug}: ${defaultBranch}`);
       debug(`[Bitbucket] Calling listFiles with workspace='${workspace}', repoSlug='${repoSlug}', branch='${defaultBranch}'`);
-      files = await client.listFiles(workspace, repoSlug, defaultBranch);
+      try {
+        files = await client.listFiles(workspace, repoSlug, defaultBranch);
+      } catch (err: any) {
+        // Authorization or API error: hard fail, do not proceed
+        const msg = err?.response?.status === 401 || err?.response?.status === 403
+          ? `[Bitbucket] Authorization failed when listing files for ${workspace}/${repoSlug}: ${err.message}`
+          : `[Bitbucket] Failed to list files for ${workspace}/${repoSlug}: ${err.message}`;
+        console.error(msg);
+        throw new Error(msg);
+      }
       console.log('[cloneAndAnalyze] Files returned from Bitbucket Cloud:', files);
       // Optionally propagate the branch for logging/upstream use
       repoMetadata.branch = defaultBranch;
