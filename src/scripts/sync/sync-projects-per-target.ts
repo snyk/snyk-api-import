@@ -169,7 +169,9 @@ export async function syncProjectsForTarget(
       if (res.branch) {
         targetMeta.branch = res.branch;
       }
-      deactivate = res.remove;
+  // Only deactivate projects whose branch does not match the detected default branch
+  const detectedBranch = targetMeta.branch;
+  deactivate = res.remove.filter((p) => p.branch !== detectedBranch);
       createProjects = res.import;
     } else if (
       origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER
