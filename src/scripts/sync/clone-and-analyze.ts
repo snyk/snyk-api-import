@@ -55,10 +55,11 @@ export async function cloneAndAnalyze(
       const client = new BitbucketCloudSyncClient(auth as BitbucketAuth);
       const workspace = target.owner;
       const repoSlug = target.name;
-      const branch = repoMetadata.branch;
-      // Remove console.log before merging
-      console.log(`Listing files for ${workspace}/${repoSlug} on branch ${branch}`);
-      files = await client.listFiles(workspace, repoSlug, branch);
+      // Fetch repository metadata to get the true default branch
+      const repoInfo = await client.getRepository(workspace, repoSlug);
+      const defaultBranch = repoInfo?.mainbranch?.name || repoMetadata.branch || '';
+      console.log(`Listing files for ${workspace}/${repoSlug} on branch ${defaultBranch}`);
+      files = await client.listFiles(workspace, repoSlug, defaultBranch);
     } else if (clientType === 'server') {
       const projectKey = target?.projectKey;
       const repoSlug = target?.repoSlug;

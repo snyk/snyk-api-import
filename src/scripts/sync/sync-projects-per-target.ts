@@ -179,7 +179,7 @@ export async function syncProjectsForTarget(
       }
       const datacenterAuth = { sourceUrl, token };
       targetMeta = {
-        branch: targetData.branch || 'main',
+        branch: typeof targetData.branch === 'string' ? targetData.branch : '',
         cloneUrl: '',
         sshUrl: '',
         archived: false,
