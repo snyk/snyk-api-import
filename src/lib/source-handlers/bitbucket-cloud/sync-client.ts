@@ -70,7 +70,14 @@ export class BitbucketCloudSyncClient {
     try {
       const url = `/repositories/${workspace}/${repoSlug}/src/${branch}/`;
       const res = await this.client.get(url);
-      return res.data.values.map((file: any) => file.path);
+      console.log('[BitbucketCloudSyncClient] Raw response from listFiles:', JSON.stringify(res.data, null, 2));
+      // Double-check Bitbucket API docs: files are in res.data.values, each with a 'path' property
+      if (Array.isArray(res.data.values)) {
+        return res.data.values.map((file: any) => file.path);
+      } else {
+        console.warn('[BitbucketCloudSyncClient] No files found in response for branch:', branch);
+        return [];
+      }
     } catch (err: any) {
       this.handleError(err);
     }

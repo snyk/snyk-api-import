@@ -62,6 +62,7 @@ export async function cloneAndAnalyze(
   debug(`[Bitbucket] True default branch for ${workspace}/${repoSlug}: ${defaultBranch}`);
   debug(`[Bitbucket] Calling listFiles with workspace='${workspace}', repoSlug='${repoSlug}', branch='${defaultBranch}'`);
   files = await client.listFiles(workspace, repoSlug, defaultBranch);
+  console.log('[cloneAndAnalyze] Files returned from Bitbucket Cloud:', files);
       // Optionally propagate the branch for logging/upstream use
       repoMetadata.branch = defaultBranch;
     } else if (clientType === 'server') {
