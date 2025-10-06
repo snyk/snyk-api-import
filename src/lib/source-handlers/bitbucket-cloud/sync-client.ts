@@ -75,12 +75,25 @@ export class BitbucketCloudSyncClient {
   // URL-encode components (especially branch) because branch names can contain slashes
   const encWorkspace = encodeURIComponent(workspace);
   const encRepo = encodeURIComponent(repoSlug);
-  const encBranch = encodeURIComponent(branch);
+      // Prevent double-encoding: if branch is already encoded, decode then encode
+      let branchToEncode = branch;
+      try {
+        branchToEncode = decodeURIComponent(branch);
+      } catch (e) {
+        // ignore decode errors and use raw branch
+      }
+      const encBranch = encodeURIComponent(branchToEncode);
   let url = `/repositories/${encWorkspace}/${encRepo}/src/${encBranch}/?pagelen=100&max_depth=10`;
   console.log(`[BitbucketCloudSyncClient] Requesting files (recursive): workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}', url='${url}'`);
       const allPaths: string[] = [];
       while (url) {
         const res = await this.client.get(url);
+        // Log the actual request URL axios used (config.url) to help diagnose malformed URLs
+        try {
+          console.log('[BitbucketCloudSyncClient] Requested URL:', res?.config?.url || url);
+        } catch (e) {
+          console.log('[BitbucketCloudSyncClient] Requested URL (fallback):', url);
+        }
         console.log('[BitbucketCloudSyncClient] Raw response page from listFiles:', res?.data?.values?.length ?? 0);
         if (res && res.data && Array.isArray(res.data.values)) {
           // Collect only file entries. API returns objects with type 'commit_file' or 'commit_directory'.
@@ -109,7 +122,12 @@ export class BitbucketCloudSyncClient {
       }
       return allPaths;
     } catch (err: any) {
-      console.error(`[BitbucketCloudSyncClient] Error listing files for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}':`, err?.response?.status, err?.response?.statusText, err?.message);
+      // Try to get the request URL that caused the error
+      const reqUrl = err?.config?.url || err?.request?.path || 'unknown';
+      console.error(`[BitbucketCloudSyncClient] Error listing files for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}':`, err?.response?.status, err?.response?.statusText, err?.message, 'requestUrl:', reqUrl);
+      if (err?.response?.status === 404) {
+        throw new Error(`Bitbucket API returned 404 Not Found for ${workspace}/${repoSlug} (url: ${reqUrl}). This may indicate a malformed URL, a missing branch, or insufficient permissions.`);
+      }
       this.handleError(err);
     }
     return [];
