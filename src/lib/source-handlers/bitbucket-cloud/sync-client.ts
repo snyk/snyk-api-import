@@ -71,9 +71,13 @@ export class BitbucketCloudSyncClient {
 
   async listFiles(workspace: string, repoSlug: string, branch: string): Promise<string[]> {
     try {
-      // Use max_depth to include subdirectories up to a reasonable limit and follow pagination
-      let url = `/repositories/${workspace}/${repoSlug}/src/${branch}/?pagelen=100&max_depth=10`;
-      console.log(`[BitbucketCloudSyncClient] Requesting files (recursive): workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}', url='${url}'`);
+  // Use max_depth to include subdirectories up to a reasonable limit and follow pagination
+  // URL-encode components (especially branch) because branch names can contain slashes
+  const encWorkspace = encodeURIComponent(workspace);
+  const encRepo = encodeURIComponent(repoSlug);
+  const encBranch = encodeURIComponent(branch);
+  let url = `/repositories/${encWorkspace}/${encRepo}/src/${encBranch}/?pagelen=100&max_depth=10`;
+  console.log(`[BitbucketCloudSyncClient] Requesting files (recursive): workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}', url='${url}'`);
       const allPaths: string[] = [];
       while (url) {
         const res = await this.client.get(url);
