@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+// Removed unused eslint-disable directive
 // Mock for GitHub Cloud App authentication and API calls
 export const mockGitHubAppToken = 'mock-github-app-token';
 export const mockInstallationId = 12345;
