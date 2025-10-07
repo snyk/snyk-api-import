@@ -1,5 +1,4 @@
 module.exports = {
-  setupFiles: ['<rootDir>/jest.setup-env.js'],
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   collectCoverageFrom: ['lib/**/*.ts'],
