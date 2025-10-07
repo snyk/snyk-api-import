@@ -13,3 +13,4 @@ local.*
 test/research
 .idea
 *.pem
+.env
