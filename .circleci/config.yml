@@ -16,7 +16,7 @@ main_only: &main_only
 defaults: &defaults
   resource_class: small
   docker:
-    - image: cimg/node:20.11.1
+    - image: cimg/node:22.20.0
 
 commands:
   notify_slack_on_failure:
