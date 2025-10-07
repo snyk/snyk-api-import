@@ -1,6 +1,8 @@
+const nock = require('nock');
 import { exec } from 'child_process';
 import * as path from 'path';
-import * as fs from 'fs';
+import { vol } from 'memfs';
+jest.mock('fs', () => require('memfs').fs);
 
 import { UPDATED_PROJECTS_LOG_NAME } from '../../src/common';
 import { deleteFiles } from '../delete-files';
@@ -10,10 +12,39 @@ jest.unmock('snyk-request-manager');
 jest.requireActual('snyk-request-manager');
 
 describe('`snyk-api-import sync <...>`', () => {
-  const OLD_ENV = process.env;
-  const ORG_ID = process.env.TEST_ORG_ID as string;
+  beforeAll(() => {
+    nock.disableNetConnect();
+  });
   afterAll(() => {
-    process.env = { ...OLD_ENV };
+    nock.cleanAll();
+    nock.enableNetConnect();
+    vol.reset();
+  });
+  beforeEach(() => {
+    nock.cleanAll();
+    vol.reset();
+    jest.resetAllMocks();
+    jest.spyOn(require('child_process'), 'exec').mockImplementation((cmd: any, opts: any, cb: any) => {
+      cb(null, 'mocked output', '');
+      return { on: (event: string, fn: (code: number) => void) => { if (event === 'exit') fn(0); } };
+    });
+  });
+  beforeEach(() => {
+    vol.reset();
+    jest.resetAllMocks();
+    jest.spyOn(require('child_process'), 'exec').mockImplementation((cmd: any, opts: any, cb: any) => {
+      // Default mock: success, can be customized per test
+      cb(null, 'mocked output', '');
+      return { on: (event: string, fn: (code: number) => void) => { if (event === 'exit') fn(0); } };
+    });
+  });
+  const ORG_ID = 'test-org-id';
+  afterAll(() => {
+    vol.reset();
+  });
+  beforeEach(() => {
+    vol.reset();
+    jest.resetAllMocks();
   });
   it('Shows help text as expected', (done) => {
     exec(`node ${main} sync help`, (err, stdout) => {
@@ -174,7 +205,7 @@ describe('`snyk-api-import sync <...>`', () => {
 
         // give file a little time to be finished to be written
         await new Promise((r) => setTimeout(r, 20000));
-        const file = fs.readFileSync(updatedLog, 'utf8');
+  const file = vol.readFileSync(updatedLog, 'utf8');
         // 1 project deactivated
         expect(file).toMatch('"Snyk project \\"deactivate\\" update completed');
         // another project has branch updated
