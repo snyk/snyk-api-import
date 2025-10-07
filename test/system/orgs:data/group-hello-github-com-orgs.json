@@ -1,14 +1,1 @@
-{
-  "orgs": [
-    { "name": "snyk", "groupId": "hello" },
-    { "name": "snyk-playground", "groupId": "hello" },
-    { "name": "snyk-labs", "groupId": "hello" },
-    { "name": "snyk-tech-services", "groupId": "hello" },
-    { "name": "tsrobsworld", "groupId": "hello" },
-    { "name": "TSRobworld", "groupId": "hello" },
-    { "name": "reip-org-test", "groupId": "hello" },
-    { "name": "data-architecture-org-new-test", "groupId": "hello" },
-    { "name": "global-data-analytics-test", "groupId": "hello" },
-    { "name": "gdap-gfmod-dataanalytics-test", "groupId": "hello" }
-  ]
-}
+{"orgs":[{"name":"snyk-playground","groupId":"hello"},{"name":"snyk-labs","groupId":"hello"},{"name":"automata-devops-io","groupId":"hello"},{"name":"DFWSupras","groupId":"hello"}]}

@@ -65,6 +65,7 @@
     "yargs": "16.2.0"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.28.3",
     "@octokit/types": "6.14.2",
     "@semantic-release/exec": "^6.0.3",
     "@types/base-64": "^1.0.0",
@@ -79,6 +80,7 @@
     "@types/split": "1.0.0",
     "@typescript-eslint/eslint-plugin": "^8.46.0",
     "@typescript-eslint/parser": "^8.46.0",
+    "babel-jest": "^30.2.0",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-check-file": "^3.3.0",
