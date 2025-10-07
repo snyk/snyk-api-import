@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// Removed unused eslint-disable-next-line directive
 export class requestsManager {
   params: unknown;
   constructor(params: unknown = {}) {
