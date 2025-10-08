@@ -25,8 +25,8 @@ describe('GitHub Cloud App import:data integration', () => {
     });
 
     // Mock the loadFile function by creating a temporary file
-    const fs = require('fs'); // eslint-disable-line @typescript-eslint/no-var-requires
-    const path = require('path'); // eslint-disable-line @typescript-eslint/no-var-requires
+  const fs = require('fs');
+  const path = require('path');
     const tempFile = path.join(__dirname, 'temp-orgs-data.json');
 
     try {
@@ -64,8 +64,8 @@ describe('GitHub Cloud App import:data integration', () => {
       ],
     });
 
-    const fs = require('fs'); // eslint-disable-line @typescript-eslint/no-var-requires
-    const path = require('path'); // eslint-disable-line @typescript-eslint/no-var-requires
+  const fs = require('fs');
+  const path = require('path');
     const tempFile = path.join(__dirname, 'temp-orgs-data.json');
 
     try {
@@ -106,8 +106,8 @@ describe('GitHub Cloud App import:data integration', () => {
       ],
     });
 
-    const fs = require('fs'); // eslint-disable-line @typescript-eslint/no-var-requires
-    const path = require('path'); // eslint-disable-line @typescript-eslint/no-var-requires
+  const fs = require('fs');
+  const path = require('path');
     const tempFile = path.join(__dirname, 'temp-orgs-data.json');
 
     try {

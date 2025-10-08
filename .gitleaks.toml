@@ -1,0 +1,8 @@
+[[allowlists]]
+description = "Allow specific paths"
+paths = [
+  '''test/''',
+  '''readme.md''',
+  '''gitleaks.toml''',
+  '''docs/''',
+]
