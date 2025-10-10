@@ -14,13 +14,15 @@ import type {
 import { ProjectUpdateType } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { deactivateProject, listProjects } from '../../lib';
-import pMap = require('p-map');
+import * as pMap from 'p-map';
 import { cloneAndAnalyze } from './clone-and-analyze';
 import { getBitbucketCloudAuth } from '../../lib/source-handlers/bitbucket-cloud/get-bitbucket-cloud-auth';
 import type {
   BitbucketAuth,
   BitbucketAuthType,
 } from '../../lib/source-handlers/bitbucket-cloud/sync-client';
+import { getBitbucketAppRepoMetaData } from '../../lib/source-handlers/bitbucket-cloud-app/get-bitbucket-app-repo-metadata';
+import { getBitbucketAppToken } from '../../lib/source-handlers/bitbucket-cloud-app/get-bitbucket-app-token';
 import { importSingleTarget } from './import-target';
 const debug = debugLib('snyk:sync-projects-per-target');
 
@@ -56,6 +58,8 @@ export function getMetaDataGenerator(
         sshUrl: '',
         archived: false,
       }),
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
+      getBitbucketAppRepoMetaData,
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]: async (
       target: Target,
     ) =>
@@ -81,6 +85,8 @@ export function getTargetConverter(
       snykTargetConverter,
     [SupportedIntegrationTypesUpdateProject.GHE]: snykTargetConverter,
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]:
+      snykTargetConverter,
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
       snykTargetConverter,
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]:
       snykTargetConverter,
@@ -110,8 +116,36 @@ export async function syncProjectsForTarget(
 
   debug(`Syncing projects for target ${target.attributes.displayName}`);
   let targetMeta: RepoMetaData;
-  const origin = target.attributes
-    .origin as SupportedIntegrationTypesUpdateProject;
+  // Map Snyk origin strings to our SupportedIntegrationTypesUpdateProject enum
+  function mapSnykOriginToUpdateProject(
+    s: string | undefined,
+  ): SupportedIntegrationTypesUpdateProject {
+    if (!s) {
+      throw new Error('Target origin is missing');
+    }
+    switch (s) {
+      case 'bitbucket-connect-app':
+        return SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP;
+      case 'bitbucket-cloud':
+        return SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD;
+      case 'github-cloud-app':
+        return SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP;
+      case 'github':
+        return SupportedIntegrationTypesUpdateProject.GITHUB;
+      case 'github-enterprise':
+        return SupportedIntegrationTypesUpdateProject.GHE;
+      case 'bitbucket-server':
+        return SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER;
+      default:
+        // Fallback: assume the value matches our enum string
+        return s as SupportedIntegrationTypesUpdateProject;
+    }
+  }
+
+  const origin = mapSnykOriginToUpdateProject(
+    (target as any).attributes?.origin ||
+      (target as any).relationships?.integration?.attributes?.integration_type,
+  );
   const targetData = getTargetConverter(origin)(target);
 
   // Bitbucket Cloud/Server support
@@ -165,13 +199,67 @@ export async function syncProjectsForTarget(
           import: res.import.length,
         }),
       );
+      // Verbose per-target logging for debugging
+      console.log('[syncProjectsForTarget] Target:', target.attributes.displayName);
+      console.log('[syncProjectsForTarget] Snyk monitored projects:', projects.map((p) => p.name));
+      console.log('[syncProjectsForTarget] Detected imports (files to import):', res.import);
+      console.log('[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):', res.remove.map((p) => p.name));
       // Propagate branch from analysis result
       if (res.branch) {
         targetMeta.branch = res.branch;
       }
-  // Only deactivate projects whose branch does not match the detected default branch
-  const detectedBranch = targetMeta.branch;
-  deactivate = res.remove.filter((p) => p.branch !== detectedBranch);
+      // Only deactivate projects whose branch does not match the detected default branch
+      const detectedBranch = targetMeta.branch;
+      deactivate = res.remove.filter((p) => p.branch !== detectedBranch);
+      createProjects = res.import;
+    } else if (
+      origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP
+    ) {
+      // Use app token (client_credentials) to access workspace-scoped repos via API
+      const token = await getBitbucketAppToken();
+      const bitbucketAuth: BitbucketAuth = {
+        type: 'oauth',
+        token,
+      } as BitbucketAuth;
+
+      targetMeta = {
+        branch: '',
+        cloneUrl: '',
+        sshUrl: '',
+        archived: false,
+      };
+
+      const res = await cloneAndAnalyze(
+        origin,
+        targetMeta,
+        projects,
+        {
+          exclusionGlobs: config.exclusionGlobs,
+          entitlements: config.entitlements,
+          manifestTypes: config.manifestTypes,
+        },
+        'cloud',
+        bitbucketAuth,
+        targetData,
+      );
+      debug(
+        `[Bitbucket Cloud App] Analysis finished for branch: ${res.branch}`,
+        JSON.stringify({
+          branch: res.branch,
+          remove: res.remove.length,
+          import: res.import.length,
+        }),
+      );
+      // Verbose per-target logging for debugging
+      console.log('[syncProjectsForTarget] Target:', target.attributes.displayName);
+      console.log('[syncProjectsForTarget] Snyk monitored projects:', projects.map((p) => p.name));
+      console.log('[syncProjectsForTarget] Detected imports (files to import):', res.import);
+      console.log('[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):', res.remove.map((p) => p.name));
+      if (res.branch) {
+        targetMeta.branch = res.branch;
+      }
+      const detectedBranchApp = targetMeta.branch;
+      deactivate = res.remove.filter((p) => p.branch !== detectedBranchApp);
       createProjects = res.import;
     } else if (
       origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER
@@ -211,6 +299,11 @@ export async function syncProjectsForTarget(
           import: res.import.length,
         }),
       );
+      // Verbose per-target logging for debugging
+      console.log('[syncProjectsForTarget] Target:', target.attributes.displayName);
+      console.log('[syncProjectsForTarget] Snyk monitored projects:', projects.map((p) => p.name));
+      console.log('[syncProjectsForTarget] Detected imports (files to import):', res.import);
+      console.log('[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):', res.remove.map((p) => p.name));
       deactivate = res.remove;
       createProjects = res.import;
     } else {
@@ -230,6 +323,11 @@ export async function syncProjectsForTarget(
             import: res.import.length,
           }),
         );
+        // Verbose per-target logging for debugging (non-bitbucket paths)
+        console.log('[syncProjectsForTarget] Target:', target.attributes.displayName);
+        console.log('[syncProjectsForTarget] Snyk monitored projects:', projects.map((p) => p.name));
+        console.log('[syncProjectsForTarget] Detected imports (files to import):', res.import);
+        console.log('[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):', res.remove.map((p) => p.name));
         deactivate = res.remove;
         createProjects = res.import;
       }
@@ -264,7 +362,7 @@ export async function syncProjectsForTarget(
       requestManager,
       orgId,
       branchUpdateProjects,
-      targetMeta!.branch,
+      targetMeta!.branch ?? '',
       config.dryRun,
     ),
     bulkDeactivateProjects(requestManager, orgId, deactivate, config.dryRun),
@@ -273,7 +371,7 @@ export async function syncProjectsForTarget(
       orgId,
       createProjects,
       integrationId,
-      { ...targetData, branch: targetMeta!.branch },
+      { ...targetData, branch: targetMeta!.branch ?? '' },
       config.dryRun,
     ),
   ];
@@ -322,7 +420,7 @@ export async function bulkUpdateProjectsBranch(
 ): Promise<{ updated: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
   const updatedProjects: ProjectUpdate[] = [];
   const failedProjects: ProjectUpdateFailure[] = [];
-  await pMap(
+  await (pMap as any)(
     projects,
     async (project: SnykProject) => {
       try {
@@ -345,7 +443,11 @@ export async function bulkUpdateProjectsBranch(
             dryRun,
           });
           debug(
-            `[Branch Update] Project: ${project.name} (ID: ${project.id}) - Branch changed from '${project.branch!}' to '${branch}' for integration '${project.origin}'`,
+            `[Branch Update] Project: ${project.name} (ID: ${
+              project.id
+            }) - Branch changed from '${project.branch!}' to '${branch}' for integration '${
+              project.origin
+            }'`,
           );
         }
       } catch (e) {
@@ -377,7 +479,7 @@ export async function bulkDeactivateProjects(
     return { updated, failed };
   }
   debug(`De-activating projects: ${projects.map((p) => p.id).join(',')}`);
-  await pMap(
+  await (pMap as any)(
     projects,
     async (project: SnykProject) => {
       if (!dryRun) {

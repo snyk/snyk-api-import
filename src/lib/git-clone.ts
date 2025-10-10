@@ -45,10 +45,15 @@ async function buildGitHubCloudAppCloneUrl(
 
 const urlGenerators = {
   [SupportedIntegrationTypesUpdateProject.GITHUB]: github.buildGitCloneUrl,
-  [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]: buildGitHubCloudAppCloneUrl,
+  [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
+    buildGitHubCloudAppCloneUrl,
   [SupportedIntegrationTypesUpdateProject.GHE]: github.buildGitCloneUrl,
-  [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]: buildBitbucketCloudCloneUrl,
-  [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]: buildBitbucketServerCloneUrl,
+  [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]:
+    buildBitbucketCloudCloneUrl,
+  [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
+    buildBitbucketCloudCloneUrl,
+  [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]:
+    buildBitbucketServerCloneUrl,
 };
 
 interface GitCloneResponse {
@@ -74,10 +79,13 @@ export async function gitClone(
     };
     debug(`Trying to shallow clone repo: ${meta.cloneUrl}`);
     const git = simpleGit(options);
-    const output = await git.clone(cloneUrl, repoClonePath, {
-      '--depth': '1',
-      '--branch': meta.branch,
-    });
+    const cloneArgs: Record<string, string> = {};
+    cloneArgs['--depth'] = '1';
+    if (meta.branch) {
+      cloneArgs['--branch'] = meta.branch;
+    }
+
+    const output = await git.clone(cloneUrl, repoClonePath, cloneArgs);
 
     debug(`Repo ${meta.cloneUrl} was cloned`);
     return {

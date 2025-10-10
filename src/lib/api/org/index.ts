@@ -48,6 +48,44 @@ export async function listIntegrations(
   return res.data || {};
 }
 
+/**
+ * Create an integration for a Snyk org.
+ * Note: creating integrations may require admin permissions and a specific
+ * payload depending on the integration type (e.g. Bitbucket Cloud App). This
+ * helper performs a POST to `/org/{orgId}/integrations` with the provided
+ * body and returns the API response. It does not validate the payload shape.
+ */
+export async function createIntegration(
+  requestManager: requestsManager,
+  orgId: string,
+  body: Record<string, unknown>,
+): Promise<any> {
+  getApiToken();
+  getSnykHost();
+  debug(`Creating integration for org: ${orgId}`);
+
+  if (!orgId) {
+    throw new Error(
+      `Missing required parameters. Please ensure you have set: orgId, body.`,
+    );
+  }
+
+  const res = await requestManager.request({
+    verb: 'post',
+    url: `/org/${orgId.trim()}/integrations`,
+    body: JSON.stringify(body),
+  });
+
+  const statusCode = res.statusCode || res.status;
+  if (!statusCode || (statusCode !== 200 && statusCode !== 201)) {
+    throw new Error(
+      'Expected a 200/201 response, instead received: ' +
+        JSON.stringify({ data: res.data || res.body, status: statusCode }),
+    );
+  }
+  return res.data || res.body || {};
+}
+
 const defaultDisabledSettings = {
   'new-issues-remediations': {
     enabled: false,

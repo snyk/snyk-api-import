@@ -1,14 +1,14 @@
 import * as debugLib from 'debug';
 import type { BitbucketCloudRepoData, BitbucketCloudAuthConfig } from './types';
 import { getBitbucketCloudToken } from './get-token';
-import needle = require('needle');
+import * as needle from 'needle';
 
 const debug = debugLib('snyk:bitbucket-cloud');
 
-
-
-
-export async function listRepos(config: BitbucketCloudAuthConfig, workspace: string): Promise<BitbucketCloudRepoData[]> {
+export async function listRepos(
+  config: BitbucketCloudAuthConfig,
+  workspace: string,
+): Promise<BitbucketCloudRepoData[]> {
   const url = `https://api.bitbucket.org/2.0/repositories/${workspace}`;
   let repos: BitbucketCloudRepoData[] = [];
   let nextUrl: string | undefined = url;
@@ -18,11 +18,14 @@ export async function listRepos(config: BitbucketCloudAuthConfig, workspace: str
     headers = { authorization: `Bearer ${config.token}` };
   } else if (config.type === 'user') {
     const token = await getBitbucketCloudToken(config);
-    headers = { authorization: `Bearer ${token}` };
+    // For username + app password auth, Bitbucket expects HTTP Basic auth
+    headers = { authorization: `Basic ${token}` };
   }
   while (nextUrl) {
     debug(`Fetching page ${pageCount} for ${workspace}`);
-    const resp: needle.NeedleResponse = await needle('get', nextUrl, { headers });
+    const resp: needle.NeedleResponse = await needle('get', nextUrl, {
+      headers,
+    });
     if (resp.statusCode !== 200 || !resp.body.values) {
       throw new Error(`Failed to list Bitbucket repos: ${resp.statusCode}`);
     }
@@ -31,7 +34,7 @@ export async function listRepos(config: BitbucketCloudAuthConfig, workspace: str
         owner: r.workspace?.slug || r.workspace?.uuid || workspace,
         name: r.slug || r.name,
         branch: r.mainbranch?.name || 'main',
-      }))
+      })),
     );
     nextUrl = resp.body.next;
     pageCount++;

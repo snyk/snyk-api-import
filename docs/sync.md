@@ -97,6 +97,8 @@ The command will produce detailed logs for projects that were `updated` and thos
 - `BITBUCKET_USERNAME` - Bitbucket username for API access (Bitbucket Cloud/Server)
 - `BITBUCKET_APP_PASSWORD` - Bitbucket app password for API access (Bitbucket Cloud/Server)
 
+- Note: When using the `bitbucket-cloud-app` source, the tool will perform `git clone` operations using the clone URL returned in repository metadata. Private repositories require clone credentials (HTTPS credentials or SSH access via deploy keys). Make sure the environment running `sync` has appropriate Git credentials or SSH keys available.
+
 ## 2. Download & run
 
 Grab a binary from the [releases page](https://github.com/snyk/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/imported-targets.json`

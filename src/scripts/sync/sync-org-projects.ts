@@ -10,6 +10,7 @@ import {
 import { listIntegrations } from '../../lib';
 import type { TargetFilters } from '../../lib';
 import { isGithubConfigured } from '../../lib';
+import { isBitbucketCloudAppConfigured } from '../../lib/source-handlers/bitbucket-cloud-app';
 import { isGitHubCloudAppConfigured } from '../../lib/source-handlers/github-cloud-app';
 import { getLoggingPath, listTargets } from '../../lib';
 import { getFeatureFlag } from '../../lib/api/feature-flags';
@@ -29,9 +30,12 @@ export function isSourceConfigured(
 ): () => void {
   const getDefaultBranchGenerators = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]: isGithubConfigured,
-    [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]: isGitHubCloudAppConfigured,
+    [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
+      isGitHubCloudAppConfigured,
     [SupportedIntegrationTypesUpdateProject.GHE]: isGithubConfigured,
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]: () => {}, // Add real check if needed
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
+      isBitbucketCloudAppConfigured,
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]: () => {}, // Add real check if needed
   };
   return getDefaultBranchGenerators[origin];
@@ -104,7 +108,7 @@ export async function updateOrgTargets(
       'customBranch',
       publicOrgId,
     );
-  } catch (e) {
+  } catch {
     throw new Error(
       `Org ${publicOrgId} was not found or you may not have the correct permissions to access the org`,
     );
@@ -121,9 +125,23 @@ export async function updateOrgTargets(
     allowedSources,
     async (source: SupportedIntegrationTypesUpdateProject) => {
       isSourceConfigured(source)();
+      // Map CLI/source enum to the Snyk API "origin" string values where they differ
+      function mapSourceToSnykOrigin(
+        s: SupportedIntegrationTypesUpdateProject,
+      ): string {
+        switch (s) {
+          case SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP:
+            // Snyk represents Bitbucket Cloud App (Connect App) as 'bitbucket-connect-app'
+            return 'bitbucket-connect-app';
+          default:
+            // For other values the enum string matches the Snyk origin
+            return s as string;
+        }
+      }
+
       const filters: TargetFilters = {
         limit: 100,
-        origin: source,
+        origin: mapSourceToSnykOrigin(source),
         excludeEmpty: true,
       };
       console.log(`Listing all targets for source ${source}`);
@@ -132,6 +150,7 @@ export async function updateOrgTargets(
         publicOrgId,
         filters,
       );
+      console.log(`Found ${targets.length} targets for source ${source}`);
       console.log(`Resolving integration ID for source ${source}`);
       const integrationsData = await listIntegrations(
         requestManager,

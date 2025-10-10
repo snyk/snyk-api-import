@@ -14,7 +14,10 @@ export function generateProjectDiffActions(
 
   // Log the manifests and Snyk projects being compared
   console.log('[generateProjectDiffActions] Repo manifests:', repoManifests);
-  console.log('[generateProjectDiffActions] Snyk project manifests:', snykMonitoredProjects.map((p) => p.name));
+  console.log(
+    '[generateProjectDiffActions] Snyk project manifests:',
+    snykMonitoredProjects.map((p) => p.name),
+  );
 
   // any files in the repo, not in Snyk already should be imported
   for (const manifest of repoManifests) {

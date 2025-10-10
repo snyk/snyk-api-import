@@ -20,6 +20,6 @@ export function getBitbucketCloudAuth(): BitbucketCloudAuthMethod {
     return { type: 'user', username, appPassword: password, password };
   }
   throw new Error(
-    'No Bitbucket Cloud authentication found. Please set BITBUCKET_CLOUD_API_TOKEN, BITBUCKET_CLOUD_OAUTH_TOKEN, or BITBUCKET_CLOUD_USERNAME and BITBUCKET_CLOUD_PASSWORD.'
+    'No Bitbucket Cloud authentication found. Please set BITBUCKET_CLOUD_API_TOKEN, BITBUCKET_CLOUD_OAUTH_TOKEN, or BITBUCKET_CLOUD_USERNAME and BITBUCKET_CLOUD_PASSWORD.',
   );
 }

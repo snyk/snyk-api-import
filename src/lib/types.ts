@@ -93,6 +93,7 @@ export enum SupportedIntegrationTypesImportOrgData {
   GITLAB = 'gitlab',
   BITBUCKET_SERVER = 'bitbucket-server',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
+  BITBUCKET_CLOUD_APP = 'bitbucket-cloud-app',
 }
 
 export enum SupportedIntegrationTypesUpdateProject {
@@ -100,6 +101,7 @@ export enum SupportedIntegrationTypesUpdateProject {
   GITHUB_CLOUD_APP = 'github-cloud-app',
   GHE = 'github-enterprise',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
+  BITBUCKET_CLOUD_APP = 'bitbucket-cloud-app',
   BITBUCKET_SERVER = 'bitbucket-server',
 }
 
@@ -219,7 +221,8 @@ export interface SnykTargetRelationships {
 }
 
 export interface RepoMetaData {
-  branch: string;
+  // branch may be undefined when unknown; callers should handle default behavior
+  branch?: string;
   cloneUrl: string;
   sshUrl: string;
   archived: boolean;

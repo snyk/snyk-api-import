@@ -25,14 +25,15 @@ export async function getFeatureFlag(
 
     return enabled;
   } catch (err: any) {
-    const res = err.message?.response?.data;
-    const message = res?.userMessage || res?.message || err.message?.message;
+    // Support multiple axios error shapes: err.response?.data or err.message?.response?.data
+    const res = err?.response?.data || err?.message?.response?.data ||
+      err?.message?.response || undefined;
+    const message = res?.userMessage || res?.message || err?.message || err?.toString();
 
-    if (
-      res &&
-      res.ok === false &&
-      res?.userMessage?.includes('feature enabled')
-    ) {
+    // Some Snyk API responses indicate the feature is not enabled (403) with
+    // a userMessage like "Org X doesn't have 'custom-branch' feature enabled".
+    // Treat that as the flag being disabled.
+    if (res && res.ok === false && typeof res.userMessage === 'string' && res.userMessage.includes('feature enabled')) {
       debug(`Feature flag ${featureFlagName} is not enabled for Org ${orgId}`);
       return false;
     }

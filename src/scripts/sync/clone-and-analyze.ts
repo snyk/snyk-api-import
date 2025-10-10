@@ -1,10 +1,10 @@
-
 import * as debugLib from 'debug';
 import * as path from 'path';
 import axios from 'axios';
 import { defaultExclusionGlobs } from '../../common';
 import { find, getSCMSupportedManifests, gitClone } from '../../lib';
 import { getSCMSupportedProjectTypes } from '../../lib/supported-project-types/supported-manifests';
+import * as micromatch from 'micromatch';
 import type {
   RepoMetaData,
   SnykProject,
@@ -18,7 +18,6 @@ import { BitbucketCloudSyncClient } from '../../lib/source-handlers/bitbucket-cl
 import type { BitbucketAuth } from '../../lib/source-handlers/bitbucket-cloud/sync-client';
 
 const debug = debugLib('snyk:clone-and-analyze');
-
 
 export async function cloneAndAnalyze(
   integrationType: SupportedIntegrationTypesUpdateProject,
@@ -47,17 +46,30 @@ export async function cloneAndAnalyze(
     entitlements = ['openSource'],
     exclusionGlobs = [],
   } = config;
-  const manifestFileTypes =
+  // Two things are needed:
+  // - filePatterns: glob/file patterns used to match files in the repo (e.g. 'pom.xml', 'package.json', '*Dockerfile*')
+  // - manifestProjectTypes: the Snyk project types used to decide which projects can be deactivated (e.g. 'maven', 'npm')
+  const filePatterns = getSCMSupportedManifests(manifestTypes, entitlements);
+
+  const manifestProjectTypes =
     manifestTypes && manifestTypes.length > 0
       ? manifestTypes
       : getSCMSupportedProjectTypes(entitlements);
 
   // Bitbucket Cloud/Server logic
-  if (integrationType === SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD || integrationType === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER) {
+  if (
+    integrationType ===
+      SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD ||
+    integrationType ===
+      SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP ||
+    integrationType === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER
+  ) {
     let files: string[] = [];
     if (clientType === 'cloud') {
       if (!target?.owner || !target?.name) {
-        throw new Error('Bitbucket Cloud target must have owner and name properties');
+        throw new Error(
+          'Bitbucket Cloud target must have owner and name properties',
+        );
       }
       const client = new BitbucketCloudSyncClient(auth as BitbucketAuth);
       const workspace = target.owner;
@@ -69,17 +81,28 @@ export async function cloneAndAnalyze(
         repoInfo = await client.getRepository(workspace, repoSlug);
         // Log raw repository metadata for debugging/diagnostics
         try {
-          console.log(`[cloneAndAnalyze] Raw repoInfo for ${workspace}/${repoSlug}:`, JSON.stringify(repoInfo, null, 2));
-        } catch (e) {
-          console.log(`[cloneAndAnalyze] Raw repoInfo (stringify failed) for ${workspace}/${repoSlug}:`, repoInfo);
+          debug(
+            `[cloneAndAnalyze] Raw repoInfo for ${workspace}/${repoSlug}:`,
+            JSON.stringify(repoInfo, null, 2),
+          );
+        } catch (err) {
+          debug(
+            `[cloneAndAnalyze] Raw repoInfo (stringify failed) for ${workspace}/${repoSlug}: ${err?.message || 'stringify error'}`,
+            repoInfo,
+          );
         }
         if (repoInfo?.mainbranch?.name) {
           defaultBranch = repoInfo.mainbranch.name;
         } else {
           // If repository info returns no mainbranch, attempt to find it via branches endpoint
-          console.warn(`[Bitbucket] No main branch found in repository info for ${workspace}/${repoSlug}. Attempting to detect default branch via branches API.`);
+          debug(
+            `[Bitbucket] No main branch found in repository info for ${workspace}/${repoSlug}. Attempting to detect default branch via branches API.`,
+          );
           try {
-            const branchesResp: any = await client.listBranches(workspace, repoSlug);
+            const branchesResp: any = await client.listBranches(
+              workspace,
+              repoSlug,
+            );
             // branchesResp may be an object with values array, or an array in some mocks
             const branchValues = Array.isArray(branchesResp)
               ? branchesResp
@@ -88,7 +111,12 @@ export async function cloneAndAnalyze(
             let detected: string | undefined;
             for (const b of branchValues) {
               if (!b) continue;
-              if (b.is_default || b.default || b.name === 'main' || b.name === 'master') {
+              if (
+                b.is_default ||
+                b.default ||
+                b.name === 'main' ||
+                b.name === 'master'
+              ) {
                 detected = b.name || b;
                 break;
               }
@@ -100,13 +128,19 @@ export async function cloneAndAnalyze(
             }
             if (detected) {
               defaultBranch = detected;
-              console.info(`[Bitbucket] Detected default branch for ${workspace}/${repoSlug} via branches API: ${defaultBranch}`);
+              debug(
+                `[Bitbucket] Detected default branch for ${workspace}/${repoSlug} via branches API: ${defaultBranch}`,
+              );
             } else {
-              console.warn(`[Bitbucket] Could not detect default branch via branches API for ${workspace}/${repoSlug}. Falling back to provided branch if available.`);
+              debug(
+                `[Bitbucket] Could not detect default branch via branches API for ${workspace}/${repoSlug}. Falling back to provided branch if available.`,
+              );
               defaultBranch = target?.branch || repoMetadata.branch || '';
             }
           } catch (err) {
-            console.warn(`[Bitbucket] Failed to detect default branch via branches API for ${workspace}/${repoSlug}: ${err?.message}. Falling back to provided branch.`);
+            debug(
+              `[Bitbucket] Failed to detect default branch via branches API for ${workspace}/${repoSlug}: ${err?.message}. Falling back to provided branch.`,
+            );
             defaultBranch = target?.branch || repoMetadata.branch || '';
           }
         }
@@ -118,7 +152,9 @@ export async function cloneAndAnalyze(
           throw new Error(msg);
         }
         // Non-auth errors — fall back to provided branch (helps tests and transient errors)
-        console.warn(`[Bitbucket] Could not fetch repository info for ${workspace}/${repoSlug}: ${err?.message}. Falling back to provided branch if available.`);
+        debug(
+          `[Bitbucket] Could not fetch repository info for ${workspace}/${repoSlug}: ${err?.message}. Falling back to provided branch if available.`,
+        );
         defaultBranch = target?.branch || repoMetadata.branch || '';
       }
       if (!defaultBranch) {
@@ -126,46 +162,83 @@ export async function cloneAndAnalyze(
         console.error(msg);
         throw new Error(msg);
       }
-      debug(`[Bitbucket] True default branch for ${workspace}/${repoSlug}: ${defaultBranch}`);
-      debug(`[Bitbucket] Calling listFiles with workspace='${workspace}', repoSlug='${repoSlug}', branch='${defaultBranch}'`);
+      debug(
+        `[Bitbucket] True default branch for ${workspace}/${repoSlug}: ${defaultBranch}`,
+      );
+      debug(
+        `[Bitbucket] Calling listFiles with workspace='${workspace}', repoSlug='${repoSlug}', branch='${defaultBranch}'`,
+      );
       try {
         files = await client.listFiles(workspace, repoSlug, defaultBranch);
       } catch (err: any) {
         // Authorization or API error: hard fail, do not proceed
-        const msg = err?.response?.status === 401 || err?.response?.status === 403
-          ? `[Bitbucket] Authorization failed when listing files for ${workspace}/${repoSlug}: ${err.message}`
-          : `[Bitbucket] Failed to list files for ${workspace}/${repoSlug}: ${err.message}`;
+        const msg =
+          err?.response?.status === 401 || err?.response?.status === 403
+            ? `[Bitbucket] Authorization failed when listing files for ${workspace}/${repoSlug}: ${err.message}`
+            : `[Bitbucket] Failed to list files for ${workspace}/${repoSlug}: ${err.message}`;
         console.error(msg);
         throw new Error(msg);
       }
-      console.log('[cloneAndAnalyze] Files returned from Bitbucket Cloud:', files);
+      debug('[cloneAndAnalyze] Files returned from Bitbucket Cloud:', files);
       // Optionally propagate the branch for logging/upstream use
       repoMetadata.branch = defaultBranch;
       // Bitbucket Cloud normalization and filtering
-      const normalizedFiles = files.map((file: string) => `${workspace}/${repoSlug}:${file}`);
-      console.log('[cloneAndAnalyze] Normalized Bitbucket files:', normalizedFiles);
+      const normalizedFiles = files.map(
+        (file: string) => `${workspace}/${repoSlug}:${file}`,
+      );
+      debug('[cloneAndAnalyze] Normalized Bitbucket files:', normalizedFiles);
       const filteredFiles = normalizedFiles.filter((file: string) => {
-        if ([...defaultExclusionGlobs, ...exclusionGlobs].some((glob: string) => file.includes(glob))) {
+        if (
+          [...defaultExclusionGlobs, ...exclusionGlobs].some((glob: string) =>
+            file.includes(glob),
+          )
+        ) {
           return false;
         }
-        return manifestFileTypes.some((type: string) => file.endsWith(type));
+        // Match against file patterns (supports exact filenames and globs)
+        return filePatterns.some((pattern: string) =>
+          // micromatch expects just the path part after the ':' if present
+          (() => {
+            const candidate = file.includes(':') ? file.split(':')[1] : file;
+            try {
+              return micromatch.isMatch(candidate, pattern) || candidate.endsWith(pattern);
+            } catch {
+              // on invalid pattern fall back to simple endsWith
+              return candidate.endsWith(pattern);
+            }
+          })(),
+        );
       });
-      console.log('[cloneAndAnalyze] Filtered Bitbucket files:', filteredFiles);
+      debug('[cloneAndAnalyze] Filtered Bitbucket files:', filteredFiles);
+      if (!filteredFiles || filteredFiles.length === 0) {
+        console.warn(
+          `[cloneAndAnalyze] No supported manifest files found for ${workspace}/${repoSlug} on branch '${defaultBranch}'. This may indicate an empty repository, a missing branch, or insufficient permissions for the provided credentials/token.`,
+        );
+      }
       // generateProjectDiffActions expects repo manifest paths (the part after ':')
-      const manifestPaths = filteredFiles.map((f: string) => (f.includes(':') ? f.split(':')[1] : f));
-      console.log('[cloneAndAnalyze] Manifest paths passed to diff generator:', manifestPaths);
-      return generateProjectDiffActions(
+      const manifestPaths = filteredFiles.map((f: string) =>
+        f.includes(':') ? f.split(':')[1] : f,
+      );
+      debug(
+        '[cloneAndAnalyze] Manifest paths passed to diff generator:',
+        manifestPaths,
+      );
+      const diff = generateProjectDiffActions(
         manifestPaths,
         snykMonitoredProjects,
-        manifestFileTypes,
+        manifestProjectTypes,
       );
+      // Return the detected default branch so callers can use it for branch updates
+      return { ...diff, branch: defaultBranch };
     } else if (clientType === 'server') {
       const projectKey = target?.projectKey;
       const repoSlug = target?.repoSlug;
       const sourceUrl = (auth as { sourceUrl: string }).sourceUrl;
       const token = (auth as { token: string }).token;
       if (!projectKey || !repoSlug || !sourceUrl || !token) {
-        throw new Error('Bitbucket Server sync requires projectKey, repoSlug, sourceUrl, and token');
+        throw new Error(
+          'Bitbucket Server sync requires projectKey, repoSlug, sourceUrl, and token',
+        );
       }
       const apiUrl = `${sourceUrl}/rest/api/1.0/projects/${projectKey}/repos/${repoSlug}/files`;
       const headers = { authorization: `Bearer ${token}` };
@@ -183,31 +256,63 @@ export async function cloneAndAnalyze(
           console.warn(msg);
         }
       } catch (err: any) {
-        if (err?.response && (err.response.status === 401 || err.response.status === 403)) {
+        if (
+          err?.response &&
+          (err.response.status === 401 || err.response.status === 403)
+        ) {
           const msg = `[Bitbucket Server] Authorization failed when listing files for ${projectKey}/${repoSlug}: ${err.message}`;
           console.error(msg);
           throw new Error(msg);
         }
-        throw new Error(`Failed to list files for Bitbucket Server repo: ${err.message}`);
+        throw new Error(
+          `Failed to list files for Bitbucket Server repo: ${err.message}`,
+        );
       }
       // Bitbucket Server normalization and filtering
-      const normalizedFiles = files.map((file: string) => `${projectKey}/${repoSlug}:${file}`);
-      console.log('[cloneAndAnalyze] Normalized Bitbucket Server files:', normalizedFiles);
+      const normalizedFiles = files.map(
+        (file: string) => `${projectKey}/${repoSlug}:${file}`,
+      );
+      console.log(
+        '[cloneAndAnalyze] Normalized Bitbucket Server files:',
+        normalizedFiles,
+      );
       const filteredFiles = normalizedFiles.filter((file: string) => {
-        if ([...defaultExclusionGlobs, ...exclusionGlobs].some((glob: string) => file.includes(glob))) {
+        if (
+          [...defaultExclusionGlobs, ...exclusionGlobs].some((glob: string) =>
+            file.includes(glob),
+          )
+        ) {
           return false;
         }
-        return manifestFileTypes.some((type: string) => file.endsWith(type));
+        const candidate = file.includes(':') ? file.split(':')[1] : file;
+        return filePatterns.some((pattern: string) => {
+          try {
+            return micromatch.isMatch(candidate, pattern) || candidate.endsWith(pattern);
+          } catch {
+            return candidate.endsWith(pattern);
+          }
+        });
       });
-      console.log('[cloneAndAnalyze] Filtered Bitbucket Server files:', filteredFiles);
+      console.log(
+        '[cloneAndAnalyze] Filtered Bitbucket Server files:',
+        filteredFiles,
+      );
       // generateProjectDiffActions expects repo manifest paths (the part after ':')
-      const manifestPaths = filteredFiles.map((f: string) => (f.includes(':') ? f.split(':')[1] : f));
-      console.log('[cloneAndAnalyze] Manifest paths passed to diff generator (server):', manifestPaths);
-      return generateProjectDiffActions(
+      const manifestPaths = filteredFiles.map((f: string) =>
+        f.includes(':') ? f.split(':')[1] : f,
+      );
+      console.log(
+        '[cloneAndAnalyze] Manifest paths passed to diff generator (server):',
+        manifestPaths,
+      );
+      const diff = generateProjectDiffActions(
         manifestPaths,
         snykMonitoredProjects,
-        manifestFileTypes,
+        manifestProjectTypes,
       );
+      // For server, prefer repoMetadata.branch if set, otherwise fall back to target.branch
+      const branchForServer = repoMetadata.branch || target?.branch || '';
+      return { ...diff, branch: branchForServer };
     } else {
       throw new Error('Unknown Bitbucket client type');
     }
@@ -228,24 +333,38 @@ export async function cloneAndAnalyze(
     }
     // Sanitize repoPath to prevent path traversal
     const sanitizedRepoPath = path.resolve('/', repoPath);
-    const safeExclusionGlobs = [...defaultExclusionGlobs, ...exclusionGlobs].filter(isSafeGlob);
+    const safeExclusionGlobs = [
+      ...defaultExclusionGlobs,
+      ...exclusionGlobs,
+    ].filter(isSafeGlob);
 
     // Ensure sanitizedRepoPath is inside allowed directory (e.g., /tmp or working dir)
     const allowedBaseDir = path.resolve(process.cwd());
     if (!sanitizedRepoPath.startsWith(allowedBaseDir)) {
-      throw new Error('Path traversal detected: repoPath is outside allowed directory');
+      throw new Error(
+        'Path traversal detected: repoPath is outside allowed directory',
+      );
     }
 
     const { files: foundFiles } = await find(
       sanitizedRepoPath,
       safeExclusionGlobs,
-      getSCMSupportedManifests(manifestFileTypes, entitlements),
+      filePatterns,
       10,
     );
     const relativeFileNames = foundFiles
       .filter((f: string) => repoPath && f.startsWith(repoPath))
-      .map((f: string) => repoPath ? path.relative(repoPath, f) : f);
-    debug(`Detected ${foundFiles.length} files in ${repoMetadata.cloneUrl}: ${foundFiles.join(',')}`);
+      .map((f: string) => (repoPath ? path.relative(repoPath, f) : f));
+    if (!relativeFileNames || relativeFileNames.length === 0) {
+      console.warn(
+        `[cloneAndAnalyze] No supported manifest files detected in cloned repo at ${repoPath}. This may indicate the repo is empty, the clone failed, or manifest files are in excluded paths.`,
+      );
+    }
+    debug(
+      `Detected ${foundFiles.length} files in ${
+        repoMetadata.cloneUrl
+      }: ${foundFiles.join(',')}`,
+    );
 
     try {
       if (repoPath) {
@@ -258,9 +377,9 @@ export async function cloneAndAnalyze(
     const diffActions = generateProjectDiffActions(
       relativeFileNames,
       snykMonitoredProjects,
-      manifestFileTypes,
+      manifestProjectTypes,
     );
     // Propagate branch info for Bitbucket Cloud only via repoMetadata earlier; return diffActions for generic SCM
     return diffActions;
-}
+  }
 }

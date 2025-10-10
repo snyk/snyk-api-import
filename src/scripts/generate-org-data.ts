@@ -1,10 +1,9 @@
 import * as pMap from 'p-map';
-import type {
-  SnykOrgData} from '../lib/source-handlers/github';
+import type { SnykOrgData } from '../lib/source-handlers/github';
 import {
   githubEnterpriseOrganizations,
   githubOrganizationIsEmpty,
-  githubOrganizations
+  githubOrganizations,
 } from '../lib/source-handlers/github';
 import {
   listGitHubCloudAppOrgs,
@@ -19,6 +18,10 @@ import {
   listBitbucketCloudWorkspaces,
 } from '../lib/source-handlers/bitbucket-cloud/';
 import {
+  bitbucketCloudAppWorkspaceIsEmpty,
+  listBitbucketCloudAppWorkspaces,
+} from '../lib/source-handlers/bitbucket-cloud-app';
+import {
   bitbucketServerProjectIsEmpty,
   listBitbucketServerProjects,
 } from '../lib/source-handlers/bitbucket-server/';
@@ -26,7 +29,10 @@ import type { CreateOrgData } from '../lib/types';
 import type { SupportedIntegrationTypesImportOrgData } from '../lib/types';
 import { writeFile } from '../write-file';
 export const sourceGenerators: {
-  [key in SupportedIntegrationTypesImportOrgData | 'github-cloud-app']: (url: string) => Promise<any[]>;
+  [key in
+    | SupportedIntegrationTypesImportOrgData
+    | 'github-cloud-app'
+    | 'bitbucket-cloud-app']: (url: string) => Promise<any[]>;
 } = {
   github: githubOrganizations,
   'github-cloud-app': listGitHubCloudAppOrgs,
@@ -34,21 +40,31 @@ export const sourceGenerators: {
   gitlab: listGitlabGroups,
   'bitbucket-server': listBitbucketServerProjects,
   'bitbucket-cloud': listBitbucketCloudWorkspaces,
+  'bitbucket-cloud-app': listBitbucketCloudAppWorkspaces,
 };
 
 export const sourceNotEmpty: {
-  [key in SupportedIntegrationTypesImportOrgData | 'github-cloud-app']: (...args: any[]) => Promise<boolean>;
+  [key in
+    | SupportedIntegrationTypesImportOrgData
+    | 'github-cloud-app'
+    | 'bitbucket-cloud-app']: (...args: any[]) => Promise<boolean>;
 } = {
   github: githubOrganizationIsEmpty,
   'github-cloud-app': githubCloudAppOrganizationIsEmpty,
   'github-enterprise': githubOrganizationIsEmpty,
   gitlab: gitlabGroupIsEmpty,
   'bitbucket-server': bitbucketServerProjectIsEmpty,
-  'bitbucket-cloud': (...args: any[]) => bitbucketCloudWorkspaceIsEmpty(args[0], args[1]),
+  'bitbucket-cloud': (...args: any[]) =>
+    bitbucketCloudWorkspaceIsEmpty(args[0], args[1]),
+  'bitbucket-cloud-app': (...args: any[]) =>
+    bitbucketCloudAppWorkspaceIsEmpty(args[0], args[1]),
 };
 
 export const entityName: {
-  [key in SupportedIntegrationTypesImportOrgData | 'github-cloud-app']: string;
+  [key in
+    | SupportedIntegrationTypesImportOrgData
+    | 'github-cloud-app'
+    | 'bitbucket-cloud-app']: string;
 } = {
   github: 'organization',
   'github-cloud-app': 'organization',
@@ -56,10 +72,14 @@ export const entityName: {
   gitlab: 'group',
   'bitbucket-server': 'project',
   'bitbucket-cloud': 'workspace',
+  'bitbucket-cloud-app': 'workspace',
 };
 
 export const exportFileName: {
-  [key in SupportedIntegrationTypesImportOrgData | 'github-cloud-app']: string;
+  [key in
+    | SupportedIntegrationTypesImportOrgData
+    | 'github-cloud-app'
+    | 'bitbucket-cloud-app']: string;
 } = {
   github: 'github-com',
   'github-cloud-app': 'github-cloud-app',
@@ -67,10 +87,14 @@ export const exportFileName: {
   gitlab: 'gitlab',
   'bitbucket-server': 'bitbucket-server',
   'bitbucket-cloud': 'bitbucket-cloud',
+  'bitbucket-cloud-app': 'bitbucket-cloud-app',
 };
 
 export async function generateOrgData(
-  source: SupportedIntegrationTypesImportOrgData | 'github-cloud-app',
+  source:
+    | SupportedIntegrationTypesImportOrgData
+    | 'github-cloud-app'
+    | 'bitbucket-cloud-app',
   groupId: string,
   sourceOrgId?: string,
   sourceUrl?: string,

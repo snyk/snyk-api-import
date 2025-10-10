@@ -75,6 +75,7 @@ describe('cloneAndAnalyze', () => {
         username: 'fakeuser',
         appPassword: 'fakepass',
       };
+  jest.spyOn(BitbucketCloudSyncClient.prototype, 'getRepository').mockResolvedValue({ mainbranch: { name: 'main' } } as any);
   jest.spyOn(BitbucketCloudSyncClient.prototype, 'listFiles').mockImplementation(async () => ['package.json', 'newfile.json']);
       const target = { owner: 'workspace', name: 'repo', branch: 'main' };
       const result = await cloneAndAnalyze(
@@ -88,6 +89,50 @@ describe('cloneAndAnalyze', () => {
       );
   expect(result.import).toEqual([]);
   expect(result.remove).toEqual([]);
+    });
+
+    it('Bitbucket Cloud App: returns correct import/remove lists (uses token)', async () => {
+      const projects: SnykProject[] = [
+        {
+          name: 'workspace/repo:package.json',
+          id: '789',
+          created: '2022-01-01T00:00:00.000Z',
+          origin: 'bitbucket-cloud-app',
+          type: 'npm',
+          branch: 'main',
+          status: 'active',
+        },
+      ];
+      const repoMeta: RepoMetaData = {
+        branch: 'main',
+        archived: false,
+        cloneUrl: '',
+        sshUrl: '',
+      };
+      const config = {
+        dryRun: false,
+        entitlements: ['openSource' as any],
+        manifestTypes: ['package.json'],
+        exclusionGlobs: [],
+      };
+      const bitbucketAuth = {
+        type: 'oauth' as any,
+        token: 'app-token',
+      };
+      jest.spyOn(BitbucketCloudSyncClient.prototype, 'getRepository').mockResolvedValue({ mainbranch: { name: 'main' } } as any);
+      jest.spyOn(BitbucketCloudSyncClient.prototype, 'listFiles').mockImplementation(async () => ['package.json', 'newfile.json']);
+      const target = { owner: 'workspace', name: 'repo', branch: 'main' };
+      const result = await cloneAndAnalyze(
+        SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP,
+        repoMeta,
+        projects,
+        config,
+        'cloud',
+        bitbucketAuth,
+        target,
+      );
+      expect(result.import).toEqual([]);
+      expect(result.remove).toEqual([]);
     });
 
     it('Bitbucket Server: returns correct import/remove lists', async () => {

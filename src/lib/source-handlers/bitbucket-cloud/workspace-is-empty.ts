@@ -1,9 +1,11 @@
 import type { BitbucketCloudAuthConfig } from './types';
 import { getBitbucketCloudToken } from './get-token';
-import needle = require('needle');
+import * as needle from 'needle';
 
-
-export async function bitbucketCloudWorkspaceIsEmpty(config: BitbucketCloudAuthConfig, workspace: string): Promise<boolean> {
+export async function bitbucketCloudWorkspaceIsEmpty(
+  config: BitbucketCloudAuthConfig,
+  workspace: string,
+): Promise<boolean> {
   const token = await getBitbucketCloudToken(config);
   let headers;
   if (config.type === 'user') {
