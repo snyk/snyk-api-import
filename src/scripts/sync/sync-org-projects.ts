@@ -1,4 +1,4 @@
-import pMap = require('p-map');
+import * as pMap from 'p-map';
 import * as debugLib from 'debug';
 import * as path from 'path';
 import * as fs from 'fs';
