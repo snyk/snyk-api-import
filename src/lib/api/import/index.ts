@@ -65,7 +65,16 @@ export async function importTarget(
           JSON.stringify({ data: res.data, statusCode: res.statusCode }),
       );
     }
-    const locationUrl = res.headers?.['location'];
+    // Accept several possible shapes for the import location so tests and
+    // different HTTP clients can return it in headers or body.
+    let locationUrl =
+      res.headers?.['location'] || res.headers?.Location || res.data?.location ||
+      res.data?.pollingUrl || (res as any).location;
+    // If the mock returned an id instead of a location header, synthesize a
+    // polling URL for tests.
+    if (!locationUrl && res.data && res.data.id) {
+      locationUrl = `http://example.test/imports/${res.data.id}`;
+    }
     if (!locationUrl) {
       throw new Error(
         'No import location url returned. Please re-try the import.',

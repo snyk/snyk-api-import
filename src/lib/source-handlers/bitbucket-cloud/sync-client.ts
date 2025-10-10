@@ -167,13 +167,19 @@ export class BitbucketCloudSyncClient {
               const normalizedNext = (() => {
                 try {
                   // If nextRaw is a relative URL, URL requires a base; use the API base
-                  const base = new URL(this.client.defaults.baseURL || 'https://api.bitbucket.org/2.0/');
+                  const base = new URL(
+                    this.client.defaults.baseURL ||
+                      'https://api.bitbucket.org/2.0/',
+                  );
                   const u = new URL(nextRaw, base);
                   // If pagination uses query param 'at', normalize that param
                   if (u.searchParams && u.searchParams.has('at')) {
                     try {
                       const rawAt = u.searchParams.get('at') || '';
-                      u.searchParams.set('at', encodeURIComponent(decodeURIComponent(rawAt)));
+                      u.searchParams.set(
+                        'at',
+                        encodeURIComponent(decodeURIComponent(rawAt)),
+                      );
                     } catch {
                       // fallback: set encoded value
                       const rawAt = u.searchParams.get('at') || '';
@@ -185,9 +191,13 @@ export class BitbucketCloudSyncClient {
                     const srcIndex = parts.findIndex((p) => p === 'src');
                     if (srcIndex !== -1 && parts.length > srcIndex + 1) {
                       try {
-                        parts[srcIndex + 1] = encodeURIComponent(decodeURIComponent(parts[srcIndex + 1]));
+                        parts[srcIndex + 1] = encodeURIComponent(
+                          decodeURIComponent(parts[srcIndex + 1]),
+                        );
                       } catch {
-                        parts[srcIndex + 1] = encodeURIComponent(parts[srcIndex + 1]);
+                        parts[srcIndex + 1] = encodeURIComponent(
+                          parts[srcIndex + 1],
+                        );
                       }
                       u.pathname = parts.join('/');
                     }

@@ -38,7 +38,8 @@ export async function cloneAndAnalyze(
     // Disallow consecutive * and overly long patterns
     if (!/^[\w\-*?./]+$/.test(glob)) return false;
     if (glob.length > 128) return false;
-    if (glob.includes('**')) return false;
+    // Allow standard double-star globs ("**/path") but disallow three or more consecutive stars which are suspicious
+    if (/\*{3,}/.test(glob)) return false;
     return true;
   }
   const {
@@ -87,7 +88,9 @@ export async function cloneAndAnalyze(
           );
         } catch (err) {
           debug(
-            `[cloneAndAnalyze] Raw repoInfo (stringify failed) for ${workspace}/${repoSlug}: ${err?.message || 'stringify error'}`,
+            `[cloneAndAnalyze] Raw repoInfo (stringify failed) for ${workspace}/${repoSlug}: ${
+              err?.message || 'stringify error'
+            }`,
             repoInfo,
           );
         }
@@ -201,7 +204,10 @@ export async function cloneAndAnalyze(
           (() => {
             const candidate = file.includes(':') ? file.split(':')[1] : file;
             try {
-              return micromatch.isMatch(candidate, pattern) || candidate.endsWith(pattern);
+              return (
+                micromatch.isMatch(candidate, pattern) ||
+                candidate.endsWith(pattern)
+              );
             } catch {
               // on invalid pattern fall back to simple endsWith
               return candidate.endsWith(pattern);
@@ -287,7 +293,10 @@ export async function cloneAndAnalyze(
         const candidate = file.includes(':') ? file.split(':')[1] : file;
         return filePatterns.some((pattern: string) => {
           try {
-            return micromatch.isMatch(candidate, pattern) || candidate.endsWith(pattern);
+            return (
+              micromatch.isMatch(candidate, pattern) ||
+              candidate.endsWith(pattern)
+            );
           } catch {
             return candidate.endsWith(pattern);
           }

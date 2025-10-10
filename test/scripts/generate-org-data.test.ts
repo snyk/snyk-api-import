@@ -1,6 +1,76 @@
+// Mock source handlers to avoid real network calls
+jest.mock('../../src/lib/source-handlers/github', () => ({
+  githubOrganizations: async () => [{ name: 'org1' }, { name: 'org2' }],
+  githubEnterpriseOrganizations: async (url?: string) => {
+    if (!url) {
+      throw new Error('Bad credentials');
+    }
+    return [
+      { name: 'empty-org', url: url || 'https://ghe.example', id: 1 },
+      { name: 'org2', url: url || 'https://ghe.example', id: 2 },
+    ];
+  },
+  githubOrganizationIsEmpty: async (name: string) => name === 'empty-org',
+}));
+
+jest.mock('../../src/lib/source-handlers/github-cloud-app', () => ({
+  listGitHubCloudAppOrgs: async () => [{ name: 'app-org' }],
+  githubCloudAppOrganizationIsEmpty: async () => false,
+}));
+
+jest.mock('../../src/lib/source-handlers/gitlab', () => ({
+  listGitlabGroups: async (url?: string) => {
+    const token = process.env.GITLAB_TOKEN;
+    if (!token || token === 'invalid-token') {
+      const err: any = new Error('401 (Unauthorized)');
+      err.statusCode = 401;
+      throw err;
+    }
+    return [
+      { name: 'empty-group', id: 1 },
+      { name: 'group2', id: 2 },
+    ];
+  },
+  gitlabGroupIsEmpty: async (name: string) => name === 'empty-group',
+}));
+
+jest.mock('../../src/lib/source-handlers/bitbucket-cloud', () => ({
+  listBitbucketCloudWorkspaces: async () => {
+    const user = process.env.BITBUCKET_CLOUD_USERNAME;
+    const pass = process.env.BITBUCKET_CLOUD_PASSWORD;
+    if (!user || !pass || pass === 'wrong_password') {
+      const err: any = new Error('Bad credentials');
+      err.statusCode = 401;
+      throw err;
+    }
+    return [{ name: 'bb-workspace' }];
+  },
+  bitbucketCloudWorkspaceIsEmpty: async () => false,
+}));
+
+jest.mock('../../src/lib/source-handlers/bitbucket-cloud-app', () => ({
+  listBitbucketCloudAppWorkspaces: async () => [{ name: 'bb-app-workspace' }],
+  bitbucketCloudAppWorkspaceIsEmpty: async () => false,
+}));
+
+jest.mock('../../src/lib/source-handlers/bitbucket-server', () => ({
+  listBitbucketServerProjects: async () => [{ name: 'proj1' }],
+  bitbucketServerProjectIsEmpty: async () => false,
+}));
+
 import { SupportedIntegrationTypesImportOrgData } from '../../src/lib/types';
-import { generateOrgImportDataFile } from '../../src/scripts/generate-org-data';
+import { generateOrgData as generateOrgImportDataFile } from '../../src/scripts/generate-org-data';
 import { deleteFiles } from '../delete-files';
+
+// Provide default test environment variables so tests that expect
+// successful mocked network calls don't fail when TEST_* vars are not set
+process.env.TEST_GHE_URL = process.env.TEST_GHE_URL || 'https://ghe.example';
+process.env.TEST_GHE_TOKEN = process.env.TEST_GHE_TOKEN || 'test-ghe-token';
+process.env.TEST_GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN || 'test-gitlab-token';
+process.env.TEST_GITLAB_BASE_URL =
+  process.env.TEST_GITLAB_BASE_URL || 'https://gitlab.example';
+process.env.BBC_USERNAME = process.env.BBC_USERNAME || 'bb-user';
+process.env.BBC_PASSWORD = process.env.BBC_PASSWORD || 'bb-pass';
 
 describe('generateOrgImportDataFile Github script', () => {
   const OLD_ENV = process.env;

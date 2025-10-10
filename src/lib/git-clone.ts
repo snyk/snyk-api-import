@@ -16,17 +16,30 @@ const debug = debugLib('snyk:git-clone');
 // Wrapper function for GitHub Cloud App to match the expected signature
 // Wrapper function for Bitbucket Cloud to match the expected signature
 function buildBitbucketCloudCloneUrl(meta: RepoMetaData): string {
-  // Bitbucket Cloud clone URLs are typically in the format:
-  // https://<username>:<appPassword>@bitbucket.org/<owner>/<repo>.git
-  // For now, just return the cloneUrl from metadata (auth handled elsewhere)
-  return meta.cloneUrl;
+  return chooseCloneUrl(meta);
 }
 
 // Wrapper function for Bitbucket Server to match the expected signature
 function buildBitbucketServerCloneUrl(meta: RepoMetaData): string {
-  // Bitbucket Server clone URLs are typically in the format:
-  // https://<username>:<appPassword>@<bitbucket-server-host>/<projectKey>/<repoSlug>.git
-  // For now, just return the cloneUrl from metadata (auth handled elsewhere)
+  return chooseCloneUrl(meta);
+}
+
+/**
+ * Choose the best clone URL for a repo metadata record.
+ * Prefers SSH when BITBUCKET_USE_SSH is true or an SSH agent is present.
+ */
+export function chooseCloneUrl(meta: RepoMetaData): string {
+  // Prefer SSH when explicitly requested or when an SSH agent/socket is available
+  const useSshEnv = process.env.BITBUCKET_USE_SSH;
+  const shouldPreferSsh =
+    (typeof useSshEnv === 'string' &&
+      /^(1|true|yes)$/i.test(useSshEnv.trim())) ||
+    !!process.env.SSH_AUTH_SOCK;
+
+  if (shouldPreferSsh && meta.sshUrl) {
+    return meta.sshUrl;
+  }
+
   return meta.cloneUrl;
 }
 async function buildGitHubCloudAppCloneUrl(

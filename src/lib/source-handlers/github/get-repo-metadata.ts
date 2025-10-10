@@ -8,10 +8,10 @@ import { getGithubBaseUrl } from './github-base-url';
 const githubClient = Octokit.plugin(retry as any);
 const debug = debugLib('snyk:get-github-defaultBranch-script');
 
-export async function getGithubRepoMetaData(
+export const getGithubRepoMetaData = async (
   target: Target,
   host?: string,
-): Promise<RepoMetaData> {
+): Promise<RepoMetaData> => {
   const githubToken = getGithubToken();
   const baseUrl = getGithubBaseUrl(host);
   const octokit: Octokit = new githubClient({
@@ -31,4 +31,4 @@ export async function getGithubRepoMetaData(
     sshUrl: response.data.ssh_url!,
     archived: response.data.archived!,
   };
-}
+};

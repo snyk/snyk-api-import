@@ -3,8 +3,8 @@ import * as debugLib from 'debug';
 import * as qs from 'querystring';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
-import { requestsManager } from 'snyk-request-manager';
-import { Org } from '../../types';
+import type { requestsManager } from 'snyk-request-manager';
+import type { Org } from '../../types';
 
 const debug = debugLib('snyk:api-group');
 
@@ -114,7 +114,11 @@ export async function listOrgsPerPage(
     page: pageNumber,
   };
   const orgs = await listOrgs(requestManager, groupId, params);
-  const hasNextPage = orgs.length ? true : false;
+  // There is a next page only when the returned page has the maximum number
+  // of items (i.e. it's 'full'). If fewer items are returned then we've
+  // reached the final page. Previously this used a truthy check which
+  // caused an infinite loop when any orgs existed.
+  const hasNextPage = orgs.length === perPage;
   data.push(...orgs);
   return { orgs: data, hasNextPage };
 }

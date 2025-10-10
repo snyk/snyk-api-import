@@ -39,7 +39,7 @@ You will need to have setup in advance:
 
 Any logs will be generated at `SNYK_LOG_PATH` directory.
 
-# What will change?
+## What will change?
 
 ## Branches
 
@@ -80,7 +80,8 @@ If a file has a corresponding de-activated project in Snyk, it will not be broug
 ## Repository is archived
 
 If the repository is now marked as archived, all relevant Snyk projects will be de-activated.
-# Kick off sync
+
+## Kick off sync
 
 `sync` command will analyze existing projects & targets (repos) in Snyk organization and determine if any changes are needed.
 
@@ -96,8 +97,10 @@ The command will produce detailed logs for projects that were `updated` and thos
 - `GITHUB_TOKEN` - SCM token that has read level or similar permissions to see information about repos like default branch & can list files in a repo
 - `BITBUCKET_USERNAME` - Bitbucket username for API access (Bitbucket Cloud/Server)
 - `BITBUCKET_APP_PASSWORD` - Bitbucket app password for API access (Bitbucket Cloud/Server)
+- `BITBUCKET_USE_SSH` - Optional. When set to `1`, `true`, or `yes` (case-insensitive) the tool will prefer SSH clone URLs when available. The tool will also prefer SSH automatically if an SSH agent is detected via `SSH_AUTH_SOCK`.
 
 - Note: When using the `bitbucket-cloud-app` source, the tool will perform `git clone` operations using the clone URL returned in repository metadata. Private repositories require clone credentials (HTTPS credentials or SSH access via deploy keys). Make sure the environment running `sync` has appropriate Git credentials or SSH keys available.
+  - Tip: To prefer SSH clones (and avoid embedding credentials into HTTPS URLs) set `BITBUCKET_USE_SSH=true` or run the process with an SSH agent (presence of `SSH_AUTH_SOCK`). When SSH is preferred and the repo metadata includes an `sshUrl`, the tool will use that URL for `git clone`.
 
 ## 2. Download & run
 
@@ -175,7 +178,7 @@ Live mode:
 
 `DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=open-source --snykProduct=iac --exclusionGlobs=**/*.yaml,logs,system-test`
 
-# Known limitations
+## Known limitations
 
 - Any organizations using a custom branch feature are currently not supported, `sync` will not continue.
 - Any organizations that previously used the custom feature flag should ideally delete all existing projects & re-import to restore the project names to standard format (do not include a branch in the project name). `sync` will work regardless but may cause confusion as the project name will reference a branch that is not likely to be the actual branch being tested.

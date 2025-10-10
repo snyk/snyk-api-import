@@ -48,44 +48,7 @@ export async function listIntegrations(
   return res.data || {};
 }
 
-/**
- * Create an integration for a Snyk org.
- * Note: creating integrations may require admin permissions and a specific
- * payload depending on the integration type (e.g. Bitbucket Cloud App). This
- * helper performs a POST to `/org/{orgId}/integrations` with the provided
- * body and returns the API response. It does not validate the payload shape.
- */
-export async function createIntegration(
-  requestManager: requestsManager,
-  orgId: string,
-  body: Record<string, unknown>,
-): Promise<any> {
-  getApiToken();
-  getSnykHost();
-  debug(`Creating integration for org: ${orgId}`);
-
-  if (!orgId) {
-    throw new Error(
-      `Missing required parameters. Please ensure you have set: orgId, body.`,
-    );
-  }
-
-  const res = await requestManager.request({
-    verb: 'post',
-    url: `/org/${orgId.trim()}/integrations`,
-    body: JSON.stringify(body),
-  });
-
-  const statusCode = res.statusCode || res.status;
-  if (!statusCode || (statusCode !== 200 && statusCode !== 201)) {
-    throw new Error(
-      'Expected a 200/201 response, instead received: ' +
-        JSON.stringify({ data: res.data || res.body, status: statusCode }),
-    );
-  }
-  return res.data || res.body || {};
-}
-
+/* eslint-disable @typescript-eslint/naming-convention */
 const defaultDisabledSettings = {
   'new-issues-remediations': {
     enabled: false,
@@ -102,6 +65,7 @@ const defaultDisabledSettings = {
     enabled: false,
   },
 };
+/* eslint-enable @typescript-eslint/naming-convention */
 
 interface NotificationSettings {
   [name: string]: {
@@ -260,9 +224,15 @@ async function listAllProjects(
       } = await getProjectsPage(requestManager, orgId, filters, nextPageLink);
 
       projectsList.push(...projects);
-      next
-        ? ((lastPage = false), (nextPageLink = next))
-        : ((lastPage = true), (nextPageLink = ''));
+      if (next) {
+        lastPage = false;
+        nextPageLink = next;
+      } else {
+        lastPage = true;
+        // Use undefined to indicate there's no next page; an empty string
+        // would be treated as a valid URL later (and cause malformed requests).
+        nextPageLink = undefined;
+      }
       pageCount++;
     } catch (e) {
       debug('Failed to get projects for ', orgId, e);
@@ -333,11 +303,11 @@ export interface TargetFilters {
   displayName?: string;
   excludeEmpty?: boolean;
 }
-export async function listTargets(
+export const listTargets = async (
   requestManager: requestsManager,
   orgId: string,
   config?: TargetFilters,
-): Promise<{ targets: SnykTarget[] }> {
+): Promise<{ targets: SnykTarget[] }> => {
   getApiToken();
   getSnykHost();
   debug(`Listing all targets for org: ${orgId}`);
@@ -352,7 +322,7 @@ export async function listTargets(
   const targets = await listAllSnykTargets(requestManager, orgId, config);
 
   return { targets };
-}
+};
 
 export async function listAllSnykTargets(
   requestManager: requestsManager,
@@ -370,9 +340,13 @@ export async function listAllSnykTargets(
         await getSnykTarget(requestManager, orgId, nextPageLink, config);
 
       targetsList.push(...targets);
-      next
-        ? ((lastPage = false), (nextPageLink = next))
-        : ((lastPage = true), (nextPageLink = undefined));
+      if (next) {
+        lastPage = false;
+        nextPageLink = next;
+      } else {
+        lastPage = true;
+        nextPageLink = undefined;
+      }
       pageCount++;
     } catch (e) {
       debug('Failed to get targets for ', orgId, e);

@@ -1,7 +1,8 @@
 import * as bunyan from 'bunyan';
 import * as _ from 'lodash';
+import * as fs from 'fs';
 
-import { ImportTarget } from './../lib/types';
+import type { ImportTarget } from './../lib/types';
 import { IMPORT_LOG_NAME, targetProps } from './../common';
 import { getLoggingPath } from './../lib';
 import { generateTargetId } from '../generate-target-id';
@@ -13,6 +14,16 @@ export async function logImportedTargets(
   message = 'Target requested for import',
 ): Promise<void> {
   try {
+    try {
+      if (loggingPath) {
+        fs.mkdirSync(loggingPath, { recursive: true } as any);
+      } else {
+        loggingPath = getLoggingPath();
+        fs.mkdirSync(loggingPath, { recursive: true } as any);
+      }
+    } catch {
+      // ignore
+    }
     // only properties available on Target allowed here, must keep them in sync
     const log = bunyan.createLogger({
       name: 'snyk:import-projects-script',
@@ -38,7 +49,7 @@ export async function logImportedTargets(
         message,
       );
     }
-  } catch (e) {
+  } catch {
     // do nothing
   }
 }

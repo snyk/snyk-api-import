@@ -1,24 +1,92 @@
 # Mirroring Bitbucket Cloud organizations and repos in Snyk
-In order to import the entirety of Bitbucket Cloud repos into Snyk you can use the available utils to make it possible in 4 commands.
-You will need to configure Bitbucket Cloud username and password and Snyk token as environment variable to proceed.
-Please refer to individual documentation pages for more detailed info, however the general steps are:
 
-1. `export BITBUCKET_CLOUD_USERNAME=***`, `export BITBUCKET_CLOUD_PASSWORD=***` and `export SNYK_TOKEN=***`
-2. Generate organization data e.g. `snyk-api-import orgs:data --source=bitbucket-cloud --groupId=<snyk_group_id>` [Full instructions](./orgs.md)
-3. Create organizations in Snyk `snyk-api-import orgs:create --file=orgs.json` [Full instructions](./orgs.md) will create a `snyk-created-orgs.json` file with Snyk organization ids and integration ids that are needed for import.
-4. Generate import data `snyk-api-import import:data --orgsData=snyk-created-orgs.json --source=bitbucket-cloud` [Full instructions](./import-data.md)
-5. Run import `DEBUG=*snyk* snyk-api-import import`[Full instructions](./import.md)
+This document shows the basic flow to import Bitbucket Cloud repositories into Snyk using the provided utilities.
 
-## Note about cloud-app clone URLs
+## Prerequisites
 
-- When using the `bitbucket-cloud-app` source the tool prefers HTTPS clone URLs by default. Private repositories may require credentials for HTTPS cloning; provide these via a CI credential helper, an app-password for a service account, or configure SSH deploy keys if you prefer SSH-based cloning.
+- A Snyk API token: `export SNYK_TOKEN=...`
+- Bitbucket Cloud credentials (one of the following — see [Authentication and env vars](#authentication-and-env-vars) below):
+  - username + app password, or
+  - API token, or
+  - OAuth token (client_credentials / app-scoped token)
 
-## Re-importing new repos & orgs only while Mirroring
-Once initial import is complete you may want to periodically check for new repos and make sure they are added into Snyk. To do this a similar flow to what is described above with a few small changes can be used:
-1. `export BITBUCKET_CLOUD_USERNAME=***`, `export BITBUCKET_CLOUD_PASSWORD=***` and `export SNYK_TOKEN=***`
-2. Generate organization data in Snyk and skip any that do not have any repos via `--skipEmptyOrg` `snyk-api-import orgs:data --source=bitbucket-cloud --groupId=<snyk_group_id> --skipEmptyOrg` [Full instructions](./orgs.md)
-3. Create organizations in Snyk and this time skip any that have been created already with `--noDuplicateNames` parameter `snyk-api-import orgs:create --file=orgs.json --noDuplicateNames` [Full instructions](./orgs.md) will create a `snyk-created-orgs.json` file with Snyk organization ids and integration ids that are needed for import.
-4. Generate import data `snyk-api-import import:data --orgsData=snyk-created-orgs.json --source=bitbucket-cloud` [Full instructions](./import-data.md)
-5. Optional. Generate the previously imported log to skip all previously imported repos a Group (see full [documentation](./import.md#to-skip-all-previously-imported-targets)):
-`snyk-api-import-macos list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
-6. Run import `DEBUG=*snyk* snyk-api-import import` [Full instructions](./import.md)
+## Quick import steps
+
+1. Make sure the required environment variables are set (see examples below).
+2. Generate organization data:
+
+   `snyk-api-import orgs:data --source=bitbucket-cloud --groupId=<snyk_group_id>`
+3. Create organizations in Snyk:
+
+   `snyk-api-import orgs:create --file=orgs.json` — this produces `snyk-created-orgs.json` with Snyk org and integration IDs.
+4. Generate import data for those orgs:
+
+   `snyk-api-import import:data --orgsData=snyk-created-orgs.json --source=bitbucket-cloud`
+5. Run the import (use DEBUG for verbose output):
+
+   `DEBUG=*snyk* snyk-api-import import`
+
+## Periodic re-import (only new repos/orgs)
+
+To periodically add new repositories that appear in Bitbucket Cloud:
+
+1. Regenerate organization data and skip empty orgs:
+
+   `snyk-api-import orgs:data --source=bitbucket-cloud --groupId=<snyk_group_id> --skipEmptyOrg`
+2. Create any missing Snyk orgs (skip duplicates):
+
+   `snyk-api-import orgs:create --file=orgs.json --noDuplicateNames`
+3. Generate import data and run the import as above.
+
+## Authentication and env vars
+
+Supported Bitbucket Cloud auth methods (you may set multiple env vars; the tool will pick by precedence unless overridden):
+
+- username + app password (needed for listing workspaces):
+  - `BITBUCKET_CLOUD_USERNAME`
+  - `BITBUCKET_CLOUD_PASSWORD` (app password)
+
+- API token (works for many API operations):
+  - `BITBUCKET_CLOUD_API_TOKEN`
+
+- OAuth token (client_credentials/app-scoped token):
+  - `BITBUCKET_CLOUD_OAUTH_TOKEN`
+
+## Notes
+
+- Empty or whitespace-only env values are ignored.
+- Default precedence when multiple credentials exist: API token -> OAuth token -> username/app password.
+- Some operations (for example, listing workspaces) require username + app password. If a caller needs a specific method, code should request it explicitly; otherwise the app will use the precedence rule.
+- You can force a specific method by setting:
+  - `BITBUCKET_CLOUD_AUTH_METHOD=api|oauth|user`
+
+## Examples
+
+Export a Snyk token and an API token:
+
+```bash
+export SNYK_TOKEN=...
+export BITBUCKET_CLOUD_API_TOKEN=...
+```
+
+Force using OAuth (when multiple values exist):
+
+```bash
+export BITBUCKET_CLOUD_OAUTH_TOKEN=...
+export BITBUCKET_CLOUD_AUTH_METHOD=oauth
+```
+
+If you need the full feature set (workspace listing + imports), provide username + app password:
+
+```bash
+export BITBUCKET_CLOUD_USERNAME=myuser
+export BITBUCKET_CLOUD_PASSWORD=myappassword
+export SNYK_TOKEN=...
+```
+
+## Troubleshooting
+
+- If workspace listing fails, ensure `BITBUCKET_CLOUD_USERNAME` and `BITBUCKET_CLOUD_PASSWORD` are set (workspace listing requires app-password Basic auth).
+- If file listing or API calls return 401/403, check the token type and that the environment variable is non-empty (whitespace-only values are ignored).
+
+For more detailed options and examples, see the linked docs in this repository (orgs.md, import-data.md, import.md).

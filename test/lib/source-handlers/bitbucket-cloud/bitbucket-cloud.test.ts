@@ -19,11 +19,11 @@ describe('Test Bitbucket Cloud script', () => {
     expect(workspaces[0]).toHaveProperty('name', expect.any(String));
   }, 60000);
   it('listBitbucketCloudRepos script', async () => {
-    const { username, password } = getBitbucketCloudAuth();
+  const auth = getBitbucketCloudAuth('user') as { type: 'user'; username: string; appPassword?: string; password?: string };
     const config = {
       type: "user" as const,
-      username,
-      password,
+      username: auth.username,
+      password: (auth.appPassword || auth.password || '') as string,
     };
     const repos = await listBitbucketCloudRepos(config, 'snyktestscmgroup');
     expect(repos).toBeTruthy();
@@ -34,11 +34,11 @@ describe('Test Bitbucket Cloud script', () => {
     });
   });
   it('listBitbucketCloudRepos script to throw', async () => {
-    const { username, password } = getBitbucketCloudAuth();
+  const auth = getBitbucketCloudAuth('user') as { type: 'user'; username: string; appPassword?: string; password?: string };
     const config = {
       type: "user" as const,
-      username,
-      password,
+      username: auth.username,
+      password: (auth.appPassword || auth.password || '') as string,
     };
     await expect(listBitbucketCloudRepos(config, 'non-existing-project')).rejects.toThrow();
   });

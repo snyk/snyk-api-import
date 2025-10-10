@@ -17,11 +17,12 @@ export async function requestWithRateLimitHandling(
 
   while (attempt < maxRetries) {
     try {
-      res = await requestManager.request({
-        verb,
-        url,
-        body: JSON.stringify(body),
-      });
+      // Log the outgoing request for debugging in tests
+      // eslint-disable-next-line no-console
+      console.log(`[requestWithRateLimitHandling] ${verb.toUpperCase()} ${url}`);
+      res = await requestManager.request({ verb, url, body: JSON.stringify(body) });
+      // eslint-disable-next-line no-console
+      console.log(`[requestWithRateLimitHandling] response: ${JSON.stringify(res)}`);
       break;
     } catch (e: any) {
       res = e;

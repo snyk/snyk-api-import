@@ -1,5 +1,6 @@
 import * as bunyan from 'bunyan';
 import * as debugLib from 'debug';
+import * as fs from 'fs';
 
 import { getLoggingPath } from './../lib';
 import { FAILED_POLLS_LOG_NAME } from './../common';
@@ -16,6 +17,17 @@ export async function logFailedPollUrls(
 ): Promise<void> {
   try {
     const orgId = locationUrl.split('/').slice(-5)[0];
+    try {
+      if (loggingPath) {
+        fs.mkdirSync(loggingPath, { recursive: true } as any);
+      } else {
+        loggingPath = getLoggingPath();
+        fs.mkdirSync(loggingPath, { recursive: true } as any);
+      }
+    } catch {
+      // ignore
+    }
+
     const log = bunyan.createLogger({
       name: 'snyk:import-projects-script',
       level: 'error',
@@ -28,7 +40,7 @@ export async function logFailedPollUrls(
     });
     debug({ orgId, locationUrl, ...errorData }, 'Failed to poll url');
     log.error({ orgId, locationUrl, ...errorData }, 'Failed to poll url');
-  } catch (e) {
+  } catch {
     // do nothing
   }
 }

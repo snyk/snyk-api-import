@@ -24,7 +24,7 @@ describe('BitbucketCloudSyncClient URL encoding', () => {
 
     expect(fakeInstance.get).toHaveBeenCalledTimes(1);
     expect(fakeInstance.get).toHaveBeenCalledWith(
-      `/repositories/${encodeURIComponent('org')}/${encodeURIComponent('repo')}/src/${encodeURIComponent('feature/branch')}/?pagelen=100&max_depth=10`,
+      `/repositories/${encodeURIComponent('org')}/${encodeURIComponent('repo')}/src/?at=${encodeURIComponent('feature/branch')}&pagelen=100&max_depth=10`,
     );
     expect(files).toEqual(['package.json', 'src/lib/file.js']);
   });

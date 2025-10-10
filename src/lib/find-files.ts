@@ -27,7 +27,7 @@ export async function readDirectory(path: string): Promise<string[]> {
  */
 export async function getStats(path: string): Promise<fs.Stats> {
   return await new Promise((resolve, reject) => {
-    fs.stat(pathLib.basename(path), (err, stats) => {
+    fs.stat(path, (err, stats) => {
       if (err) {
         reject(err);
       }

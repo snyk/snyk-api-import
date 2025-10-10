@@ -154,15 +154,25 @@ export async function syncProjectsForTarget(
   // removed unused bitbucketAuth variable
   try {
     if (origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD) {
-      // Use unified Bitbucket Cloud auth logic
-      const rawAuth = getBitbucketCloudAuth();
+      // Choose Bitbucket Cloud auth explicitly. Prefer API token, then OAuth,
+      // then fall back to username/appPassword (Basic) when no token is present.
+      let rawAuth;
+      try {
+        rawAuth = getBitbucketCloudAuth('api');
+      } catch {
+        try {
+          rawAuth = getBitbucketCloudAuth('oauth');
+        } catch {
+          rawAuth = getBitbucketCloudAuth('user');
+        }
+      }
       // Convert BitbucketCloudAuthMethod to BitbucketAuth for sync client
       let bitbucketAuth: BitbucketAuth;
       if (rawAuth.type === 'user') {
         bitbucketAuth = {
           type: 'user',
           username: rawAuth.username,
-          appPassword: rawAuth.password,
+          appPassword: rawAuth.appPassword || rawAuth.password,
         };
       } else if (rawAuth.type === 'api' || rawAuth.type === 'oauth') {
         bitbucketAuth = {
@@ -200,10 +210,22 @@ export async function syncProjectsForTarget(
         }),
       );
       // Verbose per-target logging for debugging
-      console.log('[syncProjectsForTarget] Target:', target.attributes.displayName);
-      console.log('[syncProjectsForTarget] Snyk monitored projects:', projects.map((p) => p.name));
-      console.log('[syncProjectsForTarget] Detected imports (files to import):', res.import);
-      console.log('[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):', res.remove.map((p) => p.name));
+      console.log(
+        '[syncProjectsForTarget] Target:',
+        target.attributes.displayName,
+      );
+      console.log(
+        '[syncProjectsForTarget] Snyk monitored projects:',
+        projects.map((p) => p.name),
+      );
+      console.log(
+        '[syncProjectsForTarget] Detected imports (files to import):',
+        res.import,
+      );
+      console.log(
+        '[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):',
+        res.remove.map((p) => p.name),
+      );
       // Propagate branch from analysis result
       if (res.branch) {
         targetMeta.branch = res.branch;
@@ -251,10 +273,22 @@ export async function syncProjectsForTarget(
         }),
       );
       // Verbose per-target logging for debugging
-      console.log('[syncProjectsForTarget] Target:', target.attributes.displayName);
-      console.log('[syncProjectsForTarget] Snyk monitored projects:', projects.map((p) => p.name));
-      console.log('[syncProjectsForTarget] Detected imports (files to import):', res.import);
-      console.log('[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):', res.remove.map((p) => p.name));
+      console.log(
+        '[syncProjectsForTarget] Target:',
+        target.attributes.displayName,
+      );
+      console.log(
+        '[syncProjectsForTarget] Snyk monitored projects:',
+        projects.map((p) => p.name),
+      );
+      console.log(
+        '[syncProjectsForTarget] Detected imports (files to import):',
+        res.import,
+      );
+      console.log(
+        '[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):',
+        res.remove.map((p) => p.name),
+      );
       if (res.branch) {
         targetMeta.branch = res.branch;
       }
@@ -300,10 +334,22 @@ export async function syncProjectsForTarget(
         }),
       );
       // Verbose per-target logging for debugging
-      console.log('[syncProjectsForTarget] Target:', target.attributes.displayName);
-      console.log('[syncProjectsForTarget] Snyk monitored projects:', projects.map((p) => p.name));
-      console.log('[syncProjectsForTarget] Detected imports (files to import):', res.import);
-      console.log('[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):', res.remove.map((p) => p.name));
+      console.log(
+        '[syncProjectsForTarget] Target:',
+        target.attributes.displayName,
+      );
+      console.log(
+        '[syncProjectsForTarget] Snyk monitored projects:',
+        projects.map((p) => p.name),
+      );
+      console.log(
+        '[syncProjectsForTarget] Detected imports (files to import):',
+        res.import,
+      );
+      console.log(
+        '[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):',
+        res.remove.map((p) => p.name),
+      );
       deactivate = res.remove;
       createProjects = res.import;
     } else {
@@ -324,10 +370,22 @@ export async function syncProjectsForTarget(
           }),
         );
         // Verbose per-target logging for debugging (non-bitbucket paths)
-        console.log('[syncProjectsForTarget] Target:', target.attributes.displayName);
-        console.log('[syncProjectsForTarget] Snyk monitored projects:', projects.map((p) => p.name));
-        console.log('[syncProjectsForTarget] Detected imports (files to import):', res.import);
-        console.log('[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):', res.remove.map((p) => p.name));
+        console.log(
+          '[syncProjectsForTarget] Target:',
+          target.attributes.displayName,
+        );
+        console.log(
+          '[syncProjectsForTarget] Snyk monitored projects:',
+          projects.map((p) => p.name),
+        );
+        console.log(
+          '[syncProjectsForTarget] Detected imports (files to import):',
+          res.import,
+        );
+        console.log(
+          '[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):',
+          res.remove.map((p) => p.name),
+        );
         deactivate = res.remove;
         createProjects = res.import;
       }

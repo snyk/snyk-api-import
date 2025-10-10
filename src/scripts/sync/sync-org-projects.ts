@@ -239,10 +239,10 @@ export async function updateTargets(
         processedTargets += 1;
 
         if (updated.length) {
-          await logUpdatedProjects(orgId, updated);
+          await logUpdatedProjects(orgId, updated, loggingPath);
         }
         if (failed.length) {
-          await logFailedToUpdateProjects(orgId, failed);
+          await logFailedToUpdateProjects(orgId, failed, loggingPath);
         }
       } catch (e) {
         failedTargets += 1;
@@ -251,7 +251,7 @@ export async function updateTargets(
         console.warn(
           `Failed to sync target ${target.attributes.displayName}. ERROR: ${errorMessage}`,
         );
-        await logFailedSync(orgId, target, errorMessage, loggingPath);
+  await logFailedSync(orgId, target, errorMessage, loggingPath);
       } finally {
         console.log(
           `Finished processing target ${target.attributes.displayName}`,

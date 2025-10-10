@@ -40,15 +40,19 @@ export async function listBitbucketCloudAppRepos(
     }
     if (!resp.body || !resp.body.values) {
       throw new Error(
-        `Unexpected response when listing Bitbucket Cloud App repos for workspace '${workspace}'. HTTP status: ${resp && resp.statusCode}. Body: ${JSON.stringify(
-          resp && resp.body,
-        )}`,
+        `Unexpected response when listing Bitbucket Cloud App repos for workspace '${workspace}'. HTTP status: ${
+          resp && resp.statusCode
+        }. Body: ${JSON.stringify(resp && resp.body)}`,
       );
     }
     // If the first page contains no repos, warn explicitly. This typically
     // means the app is not installed on the workspace or the app token lacks
     // permissions to list repositories.
-    if (page === 1 && Array.isArray(resp.body.values) && resp.body.values.length === 0) {
+    if (
+      page === 1 &&
+      Array.isArray(resp.body.values) &&
+      resp.body.values.length === 0
+    ) {
       console.warn(
         `[Bitbucket Cloud App] No repositories returned for workspace '${workspace}' (page=1). The app may not be installed on this workspace or may lack repository read permissions.`,
       );
