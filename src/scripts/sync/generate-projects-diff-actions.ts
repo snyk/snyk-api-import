@@ -12,8 +12,14 @@ export function generateProjectDiffActions(
   const filesToImport: string[] = [];
   const remove: SnykProject[] = [];
 
-  // any files in the repo, not in Snyk already should be
-  // imported
+  // Log the manifests and Snyk projects being compared
+  console.log('[generateProjectDiffActions] Repo manifests:', repoManifests);
+  console.log(
+    '[generateProjectDiffActions] Snyk project manifests:',
+    snykMonitoredProjects.map((p) => p.name),
+  );
+
+  // any files in the repo, not in Snyk already should be imported
   for (const manifest of repoManifests) {
     const snykProjectManifests = snykMonitoredProjects.map(
       (p) => p.name.split(':')[1],

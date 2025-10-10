@@ -1,7 +1,8 @@
 import * as debugLib from 'debug';
 import * as bunyan from 'bunyan';
+import * as fs from 'fs';
 
-import { Target } from './../lib/types';
+import type { Target } from './../lib/types';
 import { getLoggingPath } from './../lib';
 import { FAILED_LOG_NAME } from './../common';
 
@@ -18,6 +19,17 @@ export async function logFailedImports(
   loggingPath: string = getLoggingPath(),
   locationUrl?: string,
 ): Promise<void> {
+  try {
+    if (loggingPath) {
+      fs.mkdirSync(loggingPath, { recursive: true } as any);
+    } else {
+      loggingPath = getLoggingPath();
+      fs.mkdirSync(loggingPath, { recursive: true } as any);
+    }
+  } catch {
+    // ignore
+  }
+
   const log = bunyan.createLogger({
     name: 'snyk:import-projects-script',
     level: 'error',
@@ -37,7 +49,7 @@ export async function logFailedImports(
       { integrationId, locationUrl, target, errorData: { ...errorData } },
       'Failed to import target',
     );
-  } catch (e) {
+  } catch {
     log.error(
       { integrationId, locationUrl, target, errorData: { ...errorData } },
       'Failed to log failed imports at location',

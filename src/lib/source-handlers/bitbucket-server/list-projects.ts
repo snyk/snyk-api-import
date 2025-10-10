@@ -1,6 +1,6 @@
 import * as debugLib from 'debug';
-import { OutgoingHttpHeaders } from 'http2';
-import { BitbucketServerProjectData } from './types';
+import type { OutgoingHttpHeaders } from 'http2';
+import type { BitbucketServerProjectData } from './types';
 import { getBitbucketServerToken } from './get-bitbucket-server-token';
 import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
 import { limiterForScm } from '../../limiters';
@@ -51,7 +51,7 @@ const getProjects = async (
   isLastPage: boolean;
   start: number;
 }> => {
-  const headers: OutgoingHttpHeaders = { Authorization: `Bearer ${token}` };
+  const headers: OutgoingHttpHeaders = { authorization: `Bearer ${token}` };
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
   const { body, statusCode } =
     await limiterWithRateLimitRetries<BitbucketProjectsResponse>(

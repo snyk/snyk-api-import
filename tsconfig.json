@@ -13,5 +13,7 @@
     "useUnknownInCatchVariables": false,
     "types": ["node", "jest"]
   },
-  "include": ["./src/**/**/*"]
+  "include": ["src/**/*"],
+  "rootDir": "./src",
+  "baseUrl": "./src"
 }

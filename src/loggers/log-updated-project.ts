@@ -1,4 +1,5 @@
 import * as bunyan from 'bunyan';
+import * as fs from 'fs';
 
 import { UPDATED_PROJECTS_LOG_NAME } from './../common';
 import { getLoggingPath } from './../lib';
@@ -10,6 +11,17 @@ export async function logUpdatedProjects(
   loggingPath: string = getLoggingPath(),
 ): Promise<void> {
   try {
+    try {
+      if (loggingPath) {
+        fs.mkdirSync(loggingPath, { recursive: true } as any);
+      } else {
+        loggingPath = getLoggingPath();
+        fs.mkdirSync(loggingPath, { recursive: true } as any);
+      }
+    } catch {
+      // ignore
+    }
+
     const log = bunyan.createLogger({
       name: 'snyk:sync-org-projects',
       level: 'info',
@@ -39,7 +51,7 @@ export async function logUpdatedProjects(
         `Snyk project "${update.type}" update completed`,
       );
     });
-  } catch (e) {
+  } catch {
     // do nothing
   }
 }
