@@ -17,6 +17,12 @@ Required environment variables
 
 - `BITBUCKET_APP_CLIENT_ID` — OAuth client ID (required)
 - `BITBUCKET_APP_CLIENT_SECRET` — OAuth client secret (required)
+
+  Note: This document assumes a confidential (private) Bitbucket Cloud App with a client secret. If you are using a public consumer, the client_credentials flow will fail. In that case, either:
+
+  - Use the `bitbucket-cloud` source (interactive/app-password flows) for interactive workflows, or
+  - Provision a confidential Bitbucket Cloud App (with a client secret) for non-interactive CI automation.
+
 - `SNYK_TOKEN` — Snyk API token used for creating orgs and importing projects (required)
 - `BITBUCKET_APP_API_BASE` — Optional: alternate Bitbucket API base URL (default: `https://api.bitbucket.org/2.0/`)
 

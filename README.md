@@ -32,6 +32,8 @@ If you need to adjust concurrency you can stop the script, change the concurrenc
   - [Mirroring Bitbucket Cloud organizations & repos in Snyk](docs/mirror-bitbucket-cloud.md)
   - [Bitbucket Cloud App](docs/mirror-bitbucket-cloud-app.md)
 
+Note: For non-interactive CI usage with Bitbucket Cloud App prefer a confidential (private) Bitbucket Cloud App that includes a client secret. Public consumers do not support the client_credentials grant and require interactive flows; see `docs/mirror-bitbucket-cloud-app.md` for details.
+
 - [Contributing](.github/CONTRIBUTING.md)
 - [Kicking off an import](docs/import.md)
 - [Sync: detecting changes in monitored repos and updating Snyk projects](docs/sync.md)
