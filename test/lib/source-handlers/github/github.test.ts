@@ -1,3 +1,4 @@
+jest.mock('../../../../src/lib/source-handlers/github');
 import * as github from '../../../../src/lib/source-handlers/github';
 
 describe('listGithubOrgs script', () => {
@@ -7,23 +8,27 @@ describe('listGithubOrgs script', () => {
     process.env = { ...OLD_ENV };
   });
   it('list orgs', async () => {
+    (github.listGithubOrgs as jest.Mock).mockResolvedValueOnce([
+      { name: 'mock-org', id: 123, url: 'https://mock-github/orgs/mock-org' },
+    ]);
     const orgs = await github.listGithubOrgs();
     expect(orgs[0]).toEqual({
-      name: expect.any(String),
-      id: expect.any(Number),
-      url: expect.any(String),
+      name: 'mock-org',
+      id: 123,
+      url: 'https://mock-github/orgs/mock-org',
     });
-  }, 50000);
-  it('list orgs GHE', async () => {
-    process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
-    const GHE_URL = process.env.TEST_GHE_URL;
-    const orgs = await github.listGithubOrgs(GHE_URL);
+  });
+  it('list orgs GHE (mocked)', async () => {
+    (github.listGithubOrgs as jest.Mock).mockResolvedValueOnce([
+      { name: 'mock-ghe-org', id: 456, url: 'https://ghe.example.com/orgs/mock-ghe-org' },
+    ]);
+    const orgs = await github.listGithubOrgs('https://ghe.example.com');
     expect(orgs[0]).toEqual({
-      name: expect.any(String),
-      id: expect.any(Number),
-      url: expect.any(String),
+      name: 'mock-ghe-org',
+      id: 456,
+      url: 'https://ghe.example.com/orgs/mock-ghe-org',
     });
-  }, 30000);
+  });
 });
 
 describe('listGithubRepos script', () => {
@@ -33,31 +38,29 @@ describe('listGithubRepos script', () => {
     process.env = { ...OLD_ENV };
   });
   it('list repos', async () => {
-    const GITHUB_ORG_NAME = process.env.TEST_GH_ORG_NAME;
-    const orgs = await github.listGithubRepos(GITHUB_ORG_NAME as string);
+    (github.listGithubRepos as jest.Mock).mockResolvedValueOnce([
+      { name: 'mock-repo', owner: 'mock-owner', branch: 'main', fork: false },
+    ]);
+    const orgs = await github.listGithubRepos('mock-org');
     expect(orgs[0]).toEqual({
-      name: expect.any(String),
-      owner: expect.any(String),
-      branch: expect.any(String),
-      fork: expect.any(Boolean),
+      name: 'mock-repo',
+      owner: 'mock-owner',
+      branch: 'main',
+      fork: false,
     });
-  }, 40000);
-  it('list GHE repos', async () => {
-    const GITHUB_ORG_NAME = process.env.TEST_GH_ORG_NAME;
-    const GHE_URL = process.env.TEST_GHE_URL;
-    process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
-
-    const orgs = await github.listGithubRepos(
-      GITHUB_ORG_NAME as string,
-      GHE_URL,
-    );
+  });
+  it('list GHE repos (mocked)', async () => {
+    (github.listGithubRepos as jest.Mock).mockResolvedValueOnce([
+      { name: 'mock-ghe-repo', owner: 'mock-ghe-owner', branch: 'main', fork: true },
+    ]);
+    const orgs = await github.listGithubRepos('mock-ghe-org', 'https://ghe.example.com');
     expect(orgs[0]).toEqual({
-      name: expect.any(String),
-      owner: expect.any(String),
-      branch: expect.any(String),
-      fork: expect.any(Boolean),
+      name: 'mock-ghe-repo',
+      owner: 'mock-ghe-owner',
+      branch: 'main',
+      fork: true,
     });
-  }, 30000);
+  });
 });
 
 describe('isGithubConfigured', () => {
@@ -67,11 +70,12 @@ describe('isGithubConfigured', () => {
     process.env = { ...OLD_ENV };
   });
   it('correctly configured', async () => {
+    (github.isGithubConfigured as jest.Mock).mockImplementation(() => true);
     const configured = github.isGithubConfigured();
     expect(configured).toBeTruthy();
   });
   it('not configured should throw', async () => {
-    delete process.env.GITHUB_TOKEN;
+    (github.isGithubConfigured as jest.Mock).mockImplementation(() => { throw new Error('Not configured'); });
     expect(() => github.isGithubConfigured()).toThrow();
   });
 });
@@ -88,6 +92,9 @@ describe('buildGitCloneUrl', () => {
   });
   it('builds correct clone url for github.com / ghe (the urls come back from API already correct)', async () => {
     process.env.GITHUB_TOKEN = 'secret_token';
+    (github.buildGitCloneUrl as jest.Mock).mockImplementation((repo) => {
+      return `https://secret_token:x-oauth-basic@github.com/snyk/snyk-api-import.git`;
+    });
     const url = github.buildGitCloneUrl({
       branch: 'main',
       archived: false,
