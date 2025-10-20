@@ -1,9 +1,6 @@
 import { requestsManager } from 'snyk-request-manager';
 import { getFeatureFlag } from '../../../../src/lib/api/feature-flags';
 
-jest.unmock('snyk-request-manager');
-jest.requireActual('snyk-request-manager');
-
 describe('getFeatureFlag', () => {
   const requestManager = new requestsManager({
     userAgentPrefix: 'snyk-api-import:tests',

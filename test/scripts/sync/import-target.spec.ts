@@ -10,8 +10,7 @@ const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 const GHE_INTEGRATION_ID = process.env.GHE_INTEGRATION_ID as string;
 
-jest.unmock('snyk-request-manager');
-jest.requireActual('snyk-request-manager');
+// Use mock requests manager mapped in jest.config for offline testing
 
 describe('Import projects script', () => {
   const discoveredProjects: Project[] = [];

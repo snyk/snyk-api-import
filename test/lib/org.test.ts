@@ -8,8 +8,7 @@ import {
 const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 
-jest.unmock('snyk-request-manager');
-jest.requireActual('snyk-request-manager');
+// Use the mapped test mock for snyk-request-manager so tests run offline
 
 // TODO: Those tests needs to be mocked and move the existing once to the system test folder
 describe('Org notification settings', () => {

@@ -6,8 +6,7 @@ const GROUP_ID = process.env.TEST_GROUP_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 const ORG_NAME = process.env.TEST_ORG_NAME as string;
 
-jest.unmock('snyk-request-manager');
-jest.requireActual('snyk-request-manager');
+// Use the mapped test mock for snyk-request-manager so tests run offline
 
 describe('Orgs API', () => {
   const OLD_ENV = process.env;

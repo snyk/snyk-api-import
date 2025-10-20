@@ -97,7 +97,8 @@
   "overrides": {
     "snyk-request-manager": {
       "axios": "^1.11.0"
-    }
+    },
+    "inflight": "1.0.6"
   },
   "pkg": {
     "scripts": [

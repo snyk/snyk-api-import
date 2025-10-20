@@ -15,9 +15,7 @@ import { SupportedIntegrationTypesToListSnykTargets } from '../../src/lib/types'
 const ORG_ID = process.env.TEST_ORG_ID as string;
 const SNYK_API_TEST = process.env.SNYK_API_TEST as string;
 const GROUP_ID = process.env.TEST_GROUP_ID as string;
-
-jest.unmock('snyk-request-manager');
-jest.requireActual('snyk-request-manager');
+// Use the mapped mock for snyk-request-manager so tests run hermetically
 
 describe('Generate imported targets based on Snyk data', () => {
   let logs: string[];

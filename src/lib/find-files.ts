@@ -41,6 +41,30 @@ interface FindFilesRes {
   allFilesFound: string[];
 }
 
+// Exported helper to sanitize glob/filter inputs. Accepts an array of strings
+// and returns a filtered array containing only safe patterns. This function is
+// intentionally conservative to prevent malicious input from reaching the
+// glob-to-regex pipeline (micromatch) and mitigate ReDoS risks.
+export function sanitizeGlobs(globs: string[] = []): string[] {
+  if (!Array.isArray(globs)) return [];
+  const allowed = '[]ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-./*?';
+  const out: string[] = [];
+  for (const g of globs) {
+    if (!g || typeof g !== 'string') continue;
+    if (g.length > 256) continue;
+    if (g.includes('\0')) continue;
+    let ok = true;
+    for (let i = 0; i < g.length; i++) {
+      if (allowed.indexOf(g[i]) === -1) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) out.push(g);
+  }
+  return out;
+}
+
 /**
  * Find all files in given search path. Returns paths to files found.
  *
@@ -108,14 +132,16 @@ function findFile(
   filter: string[] = [],
   ignore: string[] = [],
 ): string | null {
+  const safeIgnore = sanitizeGlobs(ignore);
+  const safeFilter = sanitizeGlobs(filter);
   if (filter.length > 0) {
     const filename = pathLib.basename(path);
-    if (matches(filename, filter) || matches(path, filter)) {
+    if (matches(filename, safeFilter) || matches(path, safeFilter)) {
       return path;
     }
   } else {
     // deepcode ignore reDOS: path is supplied by trusted user of API (not externally supplied)
-    if (matches(path, ignore)) {
+    if (matches(path, safeIgnore)) {
       return null;
     }
     return path;
@@ -155,5 +181,54 @@ async function findInDirectory(
 }
 
 function matches(filePath: string, globs: string[]): boolean {
-  return globs.some((glob) => micromatch.isMatch(filePath, '**/' + glob));
+  // Ensure globs are sanitized at the boundary to prevent unsanitized input
+  // from reaching micromatch (which can compile unsafe regexes).
+  const safeGlobs = sanitizeGlobs(globs || []);
+  globs = safeGlobs;
+  // If the provided pattern looks like a glob (contains wildcard chars)
+  // we delegate to micromatch. For simple filename matches (most callers
+  // pass concrete filenames like `package.json`) use safe string
+  // comparisons to avoid compiling user input into regular expressions
+  // which can lead to ReDoS.
+  const isGlob = (s: string) => {
+    if (!s || typeof s !== 'string') return false;
+    // basic heuristic: presence of glob meta-characters
+    return s.includes('*') || s.includes('?') || s.includes('[') || s.includes(']');
+  };
+
+  const isSafeGlob = (s: string) => {
+    if (!s || typeof s !== 'string') return false;
+    // refuse overly long patterns
+    if (s.length > 256) return false;
+    // only allow a conservative set of characters in globs to avoid regex bombs
+    // permitted: alphanumerics, dash, underscore, dot, slashes and glob meta
+    const allowed = '[]ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-./*?';
+    for (let i = 0; i < s.length; i++) {
+      if (allowed.indexOf(s[i]) === -1) return false;
+    }
+    return true;
+  };
+
+  return globs.some((glob) => {
+    if (!glob || typeof glob !== 'string') return false;
+    // Limit length to a reasonable amount to avoid pathological input
+    if (glob.length > 1024) return false;
+    if (isGlob(glob)) {
+      // Only use micromatch for glob patterns that pass our safety checks.
+      if (!isSafeGlob(glob)) return false;
+      return micromatch.isMatch(filePath, '**/' + glob);
+    }
+    // Treat as literal filename. Match by basename or by trailing path
+    // segment to support both absolute and relative paths.
+    try {
+      const base = pathLib.basename(filePath);
+      if (base === glob) return true;
+      // also allow matching when the filePath ends with the given segment
+      if (filePath.endsWith('/' + glob) || filePath.endsWith('\\' + glob)) return true;
+    } catch {
+      // defensive: fall back to micromatch if something unexpected occurs
+      return micromatch.isMatch(filePath, '**/' + glob);
+    }
+    return false;
+  });
 }
