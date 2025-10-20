@@ -47,7 +47,8 @@ interface FindFilesRes {
 // glob-to-regex pipeline (micromatch) and mitigate ReDoS risks.
 export function sanitizeGlobs(globs: string[] = []): string[] {
   if (!Array.isArray(globs)) return [];
-  const allowed = '[]ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-./*?';
+  const allowed =
+    '[]ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-./*?';
   const out: string[] = [];
   for (const g of globs) {
     if (!g || typeof g !== 'string') continue;
@@ -193,7 +194,9 @@ function matches(filePath: string, globs: string[]): boolean {
   const isGlob = (s: string) => {
     if (!s || typeof s !== 'string') return false;
     // basic heuristic: presence of glob meta-characters
-    return s.includes('*') || s.includes('?') || s.includes('[') || s.includes(']');
+    return (
+      s.includes('*') || s.includes('?') || s.includes('[') || s.includes(']')
+    );
   };
 
   const isSafeGlob = (s: string) => {
@@ -202,7 +205,8 @@ function matches(filePath: string, globs: string[]): boolean {
     if (s.length > 256) return false;
     // only allow a conservative set of characters in globs to avoid regex bombs
     // permitted: alphanumerics, dash, underscore, dot, slashes and glob meta
-    const allowed = '[]ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-./*?';
+    const allowed =
+      '[]ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-./*?';
     for (let i = 0; i < s.length; i++) {
       if (allowed.indexOf(s[i]) === -1) return false;
     }
@@ -224,7 +228,8 @@ function matches(filePath: string, globs: string[]): boolean {
       const base = pathLib.basename(filePath);
       if (base === glob) return true;
       // also allow matching when the filePath ends with the given segment
-      if (filePath.endsWith('/' + glob) || filePath.endsWith('\\' + glob)) return true;
+      if (filePath.endsWith('/' + glob) || filePath.endsWith('\\' + glob))
+        return true;
     } catch {
       // defensive: fall back to micromatch if something unexpected occurs
       return micromatch.isMatch(filePath, '**/' + glob);

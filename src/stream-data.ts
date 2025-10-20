@@ -34,9 +34,7 @@ export async function streamData<DataType>(
   return parsedJson;
 }
 
-export async function streamJson(
-  fileStream: any,
-): Promise<string> {
+export async function streamJson(fileStream: any): Promise<string> {
   let data = '';
   return new Promise((resolve, reject) => {
     fileStream
@@ -53,4 +51,3 @@ export async function streamJson(
       .on('end', async () => resolve(data));
   });
 }
-

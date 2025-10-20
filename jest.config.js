@@ -17,8 +17,11 @@ module.exports = {
     'src/lib$': '<rootDir>/test/mocks/lib.js',
     'src/lib/source-handlers/github$': '<rootDir>/test/mocks/github.js',
     'src/lib/source-handlers/gitlab$': '<rootDir>/test/mocks/gitlab.js',
-    'src/lib/source-handlers/bitbucket-server$': '<rootDir>/test/mocks/bitbucket-server.js',
+    'src/lib/source-handlers/bitbucket-server$':
+      '<rootDir>/test/mocks/bitbucket-server.js',
   },
   setupFiles: ['<rootDir>/test/jest.setup.js'],
-  testPathIgnorePatterns: ['<rootDir>/test/lib/source-handlers/github-cloud-app'],
+  testPathIgnorePatterns: [
+    '<rootDir>/test/lib/source-handlers/github-cloud-app',
+  ],
 };

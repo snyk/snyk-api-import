@@ -49,7 +49,11 @@ export async function cloneAndAnalyze(
   }
   // validate and sanitize repoPath to prevent path traversal and other injection issues
   const safeRepoPath = path.resolve(repoPath as string);
-  if (!safeRepoPath || safeRepoPath.length === 0 || safeRepoPath.length > 1024) {
+  if (
+    !safeRepoPath ||
+    safeRepoPath.length === 0 ||
+    safeRepoPath.length > 1024
+  ) {
     throw new Error('Invalid repo path returned from gitClone');
   }
   if (safeRepoPath.includes('\0')) {
@@ -61,14 +65,18 @@ export async function cloneAndAnalyze(
   if (pathSegments.includes('..')) {
     throw new Error('Invalid repo path (contains parent directory traversal)');
   }
-  if (!fs.existsSync(safeRepoPath) || !fs.statSync(safeRepoPath).isDirectory()) {
+  if (
+    !fs.existsSync(safeRepoPath) ||
+    !fs.statSync(safeRepoPath).isDirectory()
+  ) {
     throw new Error('Repo path does not exist or is not a directory');
   }
 
   // sanitize glob patterns to reduce ReDoS risk and bad patterns
   const sanitizeGlobs = (globs: string[] = []) => {
     if (!Array.isArray(globs)) return [] as string[];
-    const allowed = '[]ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-./*?';
+    const allowed =
+      '[]ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-./*?';
     const out: string[] = [];
     for (const g of globs) {
       if (!g || typeof g !== 'string') continue;
@@ -86,8 +94,13 @@ export async function cloneAndAnalyze(
     return out;
   };
 
-  const safeExclusions = sanitizeGlobs([...defaultExclusionGlobs, ...exclusionGlobs]);
-  const safeManifests = sanitizeGlobs(getSCMSupportedManifests(manifestFileTypes, entitlements));
+  const safeExclusions = sanitizeGlobs([
+    ...defaultExclusionGlobs,
+    ...exclusionGlobs,
+  ]);
+  const safeManifests = sanitizeGlobs(
+    getSCMSupportedManifests(manifestFileTypes, entitlements),
+  );
 
   // To avoid passing potentially dynamic glob patterns into the file-finder
   // (which could flow into regex compilation), retrieve all files and then
@@ -100,7 +113,8 @@ export async function cloneAndAnalyze(
   const allFilesRes = await find(safeRepoPath, [], [], 10);
   let files = allFilesRes.files;
 
-  const hasGlobMeta = (s: string) => s.includes('*') || s.includes('?') || s.includes('[') || s.includes(']');
+  const hasGlobMeta = (s: string) =>
+    s.includes('*') || s.includes('?') || s.includes('[') || s.includes(']');
   // only respect literal exclusions (no wildcard/regex patterns)
   const literalExclusions = safeExclusions.filter((g) => g && !hasGlobMeta(g));
   if (literalExclusions.length > 0) {
