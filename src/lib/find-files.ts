@@ -94,7 +94,8 @@ export async function find(
   // and that `matches` only ever receives sanitized patterns.
   let safeIgnore = sanitizeGlobs(ignore);
   // ensure node_modules is always ignored
-  if (!safeIgnore.includes('node_modules')) safeIgnore = [...safeIgnore, 'node_modules'];
+  if (!safeIgnore.includes('node_modules'))
+    safeIgnore = [...safeIgnore, 'node_modules'];
   const safeFilter = sanitizeGlobs(filter);
   try {
     if (levelsDeep < 0) {
