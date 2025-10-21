@@ -2,9 +2,8 @@ import { jest } from '@jest/globals';
 import * as urlLib from 'url';
 // nock may be loaded in tests; import lazily to check for active interceptors
 let nockLib: any;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  nockLib = require('nock');
+  try {
+    nockLib = require('nock');
 } catch {
   nockLib = null;
 }

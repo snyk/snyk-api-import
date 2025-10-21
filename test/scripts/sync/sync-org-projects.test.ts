@@ -17,16 +17,12 @@ import type {
 import { ProjectUpdateType } from '../../../src/lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../../src/lib/types';
 // Use require for modules that tests spy on so properties are mutable under Jest
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const lib = require('../../../src/lib');
 import * as clone from '../../../src/scripts/sync/clone-and-analyze';
 import * as projectApi from '../../../src/lib/api/project';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const gitCloneMod = require('../../../src/lib/git-clone');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 // Require the concrete modules that export the functions we want to spy on
 const github = require('../../../src/lib/source-handlers/github/get-repo-metadata');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const orgApi = require('../../../src/lib/api/org');
 import * as featureFlags from '../../../src/lib/api/feature-flags';
 import * as updateProjectsLog from '../../../src/loggers/log-updated-project';

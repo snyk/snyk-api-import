@@ -19,8 +19,7 @@ describe('createOrgs script', () => {
   beforeEach(() => {
     // Avoid redefining properties on the re-exported index module. Instead,
     // directly override the concrete module that implements getLoggingPath.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const glp = require('../../src/lib/get-logging-path');
+  const glp = require('../../src/lib/get-logging-path');
     if (glp && typeof glp.getLoggingPath === 'function') {
       try {
         glp.getLoggingPath = () => process.env.SNYK_LOG_PATH || '.';

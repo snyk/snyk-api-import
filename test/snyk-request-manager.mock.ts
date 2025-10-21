@@ -10,9 +10,8 @@ export class requestsManager {
 
   async request({ verb = 'get', url, body, useRESTApi = false }: any) {
     this.lastRequest = { verb, url, body, useRESTApi };
-    // Log requests in tests to help debugging
-    // eslint-disable-next-line no-console
-    console.log(`[mock.request] ${verb.toUpperCase()} ${url}`);
+  // Log requests in tests to help debugging
+  console.log(`[mock.request] ${verb.toUpperCase()} ${url}`);
 
     // Targets/projects endpoints return { data: { values: [...] } } or similar
     if (url && url.includes('/targets')) {
@@ -30,9 +29,8 @@ export class requestsManager {
     // Import endpoint: POST to the integrations import should return 201 with a
     // Location header so importTarget can poll the returned URL.
     if (verb && verb.toLowerCase() === 'post' && url && url.includes('/integrations') && url.includes('/import')) {
-      // console log to help debug tests
-      // eslint-disable-next-line no-console
-      console.log(`[mock] returning import location for ${url}`);
+  // console log to help debug tests
+  console.log(`[mock] returning import location for ${url}`);
       return {
         statusCode: 201,
         data: {},
