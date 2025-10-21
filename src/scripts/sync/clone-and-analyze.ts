@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { defaultExclusionGlobs } from '../../common';
 
-import { find, getSCMSupportedManifests, gitClone } from '../../lib';
+import { getSCMSupportedManifests, gitClone } from '../../lib';
 import { getSCMSupportedProjectTypes } from '../../lib/supported-project-types/supported-manifests';
 import type {
   RepoMetaData,
@@ -75,8 +75,10 @@ export async function cloneAndAnalyze(
   // sanitize glob patterns to reduce ReDoS risk and bad patterns
   const sanitizeGlobs = (globs: string[] = []) => {
     if (!Array.isArray(globs)) return [] as string[];
+    // See find-files sanitize rules: avoid character classes and limit to a
+    // conservative set of characters to reduce ReDoS risk.
     const allowed =
-      '[]ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-./*?';
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-./*?';
     const out: string[] = [];
     for (const g of globs) {
       if (!g || typeof g !== 'string') continue;
@@ -103,15 +105,44 @@ export async function cloneAndAnalyze(
   );
 
   // To avoid passing potentially dynamic glob patterns into the file-finder
-  // (which could flow into regex compilation), retrieve all files and then
-  // filter by a conservative whitelist of known manifest basenames plus any
-  // sanitized literal manifest names. This eliminates the risk of untrusted
-  // input being compiled into regular expressions.
-  // Do not pass exclusion globs to `find` to avoid any possibility of
-  // untrusted pattern -> regex flow. Instead retrieve all files and apply
-  // only literal exclusions locally (no glob meta-characters).
-  const allFilesRes = await find(safeRepoPath, [], [], 10);
-  let files = allFilesRes.files;
+  // (which could flow into regex compilation), perform a local, explicit
+  // filesystem walk that does not use any glob matching or the shared
+  // `find` implementation. This ensures there is no taint flow into the
+  // `matches` sink and reduces the surface area Snyk can report against.
+  const collectAllFiles = async (dirPath: string, maxDepth = 10) => {
+    const out: string[] = [];
+    const walk = async (current: string, depth: number) => {
+      if (depth < 0) return;
+      let entries: string[];
+      try {
+        entries = await fs.promises.readdir(current);
+      } catch (err) {
+        debug(`Failed reading directory ${current}: ${err}`);
+        return;
+      }
+      for (const entry of entries) {
+        // skip node_modules explicitly
+        if (entry === 'node_modules') continue;
+        const full = path.join(current, entry);
+        let stat: fs.Stats | null = null;
+        try {
+          stat = await fs.promises.stat(full);
+        } catch (err) {
+          debug(`Failed stating ${full}: ${err}`);
+          continue;
+        }
+        if (stat.isDirectory()) {
+          await walk(full, depth - 1);
+        } else if (stat.isFile()) {
+          out.push(full);
+        }
+      }
+    };
+    await walk(dirPath, maxDepth);
+    return out;
+  };
+
+  let files = await collectAllFiles(safeRepoPath, 10);
 
   const hasGlobMeta = (s: string) =>
     s.includes('*') || s.includes('?') || s.includes('[') || s.includes(']');
