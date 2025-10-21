@@ -162,7 +162,7 @@ export async function createOrgs(
   for (const groupId in orgsPerGroup) {
     let orgsToCreate = orgsPerGroup[groupId];
     debug(`Finding existing organizations in group ${groupId}`);
-  // (debug logging removed)
+    // (debug logging removed)
 
     const { newOrgs, existingOrgs } = await separateExistingOrganizations(
       loggingPath,
@@ -224,8 +224,12 @@ export async function createOrgs(
   // Determine what to save: when includeExistingOrgsInOutput is true, save
   // both created and existing orgs requested by the run. Otherwise save
   // only the newly created orgs.
-  const toSave = includeExistingOrgsInOutput ? [...createdOrgs, ...existing] : [];
-  const fileName = await saveCreatedOrgData(toSave as Partial<NewOrExistingOrg>[]);
+  const toSave = includeExistingOrgsInOutput
+    ? [...createdOrgs, ...existing]
+    : [];
+  const fileName = await saveCreatedOrgData(
+    toSave as Partial<NewOrExistingOrg>[],
+  );
   return {
     orgs: createdOrgs,
     existing,

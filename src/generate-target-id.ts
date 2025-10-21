@@ -8,6 +8,6 @@ export function generateTargetId(
   integrationId: string,
   target: Target,
 ): string {
-  const targetData =  _.pick(target, ...targetProps)
+  const targetData = _.pick(target, ...targetProps);
   return `${orgId}:${integrationId}:${Object.values(targetData).join(':')}`;
 }

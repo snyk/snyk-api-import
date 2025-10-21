@@ -3,8 +3,4 @@
 import * as yargs from 'yargs';
 export * from './lib';
 
-yargs
-  .commandDir('cmds')
-  .help()
-  .demandCommand()
-  .argv
+yargs.commandDir('cmds').help().demandCommand().argv;
