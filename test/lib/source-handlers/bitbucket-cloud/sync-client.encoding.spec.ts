@@ -18,7 +18,7 @@ describe('BitbucketCloudSyncClient URL encoding', () => {
     });
     mockedAxios.create.mockReturnValue(fakeInstance);
 
-    const client = new BitbucketCloudSyncClient({ type: 'api', token: 'tok' });
+  const client = new BitbucketCloudSyncClient({ type: 'basic', username: 'user', appPassword: 'pass' } as any);
 
     const files = await client.listFiles('org', 'repo', 'feature/branch');
 
@@ -38,7 +38,7 @@ describe('BitbucketCloudSyncClient URL encoding', () => {
     });
     mockedAxios.create.mockReturnValue(fakeInstance);
 
-    const client = new BitbucketCloudSyncClient({ type: 'api', token: 'tok' });
+  const client = new BitbucketCloudSyncClient({ type: 'basic', username: 'user', appPassword: 'pass' } as any);
 
     // Pass branch already percent-encoded
     await client.listFiles('org', 'repo', 'feature%2Fbranch');
@@ -55,7 +55,7 @@ describe('BitbucketCloudSyncClient URL encoding', () => {
     fakeInstance.get.mockResolvedValue({ data: { dummy: true }, config: { url: '/repositories/org%2Fname/repo%2Fwith%2Fslash' } });
     mockedAxios.create.mockReturnValue(fakeInstance);
 
-    const client = new BitbucketCloudSyncClient({ type: 'api', token: 'tok' });
+  const client = new BitbucketCloudSyncClient({ type: 'basic', username: 'user', appPassword: 'pass' } as any);
 
     await client.getRepository('org/name', 'repo/with/slash');
     await client.listBranches('org/name', 'repo/with/slash');

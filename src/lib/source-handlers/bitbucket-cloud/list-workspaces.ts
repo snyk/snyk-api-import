@@ -106,22 +106,33 @@ export async function getWorkspaces(
 export async function listBitbucketCloudWorkspaces(): Promise<
   BitbucketCloudWorkspaceData[]
 > {
-  // Listing workspaces requires a username/app password (Basic auth).
-  // Force explicit selection of the 'user' auth method so callers cannot
-  // accidentally attempt to list workspaces with a token.
+  // Historically we required username/app password (Basic auth) for
+  // workspace listing, but the underlying API supports bearer tokens too.
+  // Accept any available Bitbucket Cloud auth (api, oauth, or user) and
+  // translate it to the parameters expected by fetchAllWorkspaces.
   let auth;
   try {
-    auth = getBitbucketCloudAuth('user');
+    // Ask getBitbucketCloudAuth() to pick the available auth according to
+    // precedence or an explicit BITBUCKET_CLOUD_AUTH_METHOD override.
+    auth = getBitbucketCloudAuth();
   } catch {
     throw new Error(
-      'Workspace listing requires username and app password. Please set BITBUCKET_CLOUD_USERNAME and BITBUCKET_CLOUD_PASSWORD (app password) or call getBitbucketCloudAuth("user").',
+      'Workspace listing requires authentication. Please set one of: BITBUCKET_CLOUD_API_TOKEN, BITBUCKET_CLOUD_OAUTH_TOKEN, or BITBUCKET_CLOUD_USERNAME and BITBUCKET_CLOUD_PASSWORD (app password).',
     );
   }
   debug(`Auth: ${JSON.stringify(auth)}`);
   debug(`Fetching all workspaces data`);
-  if (auth.type !== 'user') {
-    throw new Error('Expected user auth for workspace listing');
+  // Map auth types to the fetchAllWorkspaces parameters:
+  // - user -> username + appPassword (Basic)
+  // - api/oauth -> apiToken (Bearer)
+  if (auth.type === 'user') {
+    const workspaces = await fetchAllWorkspaces(
+      auth.username,
+      auth.appPassword,
+    );
+    return workspaces;
   }
-  const workspaces = await fetchAllWorkspaces(auth.username, auth.appPassword);
+  // api or oauth
+  const workspaces = await fetchAllWorkspaces(undefined, undefined, auth.token);
   return workspaces;
 }

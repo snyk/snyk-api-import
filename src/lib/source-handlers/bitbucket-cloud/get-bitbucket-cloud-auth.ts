@@ -114,7 +114,7 @@ export function getBitbucketCloudAuth(
   }
 
   // No explicit method requested and no env override. Choose by precedence
-  // (API token -> OAuth -> username/password) but don't error if multiple are set.
+  // (username/password -> API token -> OAuth) but don't error if multiple are set.
   const count = Number(!!api) + Number(!!oauth) + Number(!!user);
   if (count === 0) {
     throw new Error(
@@ -124,17 +124,23 @@ export function getBitbucketCloudAuth(
 
   if (count > 1) {
     debug(
-      'Multiple Bitbucket Cloud auth env vars detected; using precedence API -> OAuth -> user. To select a specific method, call getBitbucketCloudAuth(method) or set BITBUCKET_CLOUD_AUTH_METHOD.',
+      'Multiple Bitbucket Cloud auth env vars detected; using precedence user -> API -> OAuth. To select a specific method, call getBitbucketCloudAuth(method) or set BITBUCKET_CLOUD_AUTH_METHOD.',
     );
   }
 
+  // Prefer username+appPassword when available because some Bitbucket
+  // API endpoints (workspace/repo listing and file listing) require Basic
+  // auth using an app password. Falling back to token-based auth is still
+  // supported but is lower precedence.
+  if (user) {
+    return {
+      type: 'user',
+      username: user.username,
+      appPassword: user.password,
+      password: user.password,
+    };
+  }
   if (api) return { type: 'api', token: api };
-  if (oauth) return { type: 'oauth', token: oauth };
-  // user must be present here
-  return {
-    type: 'user',
-    username: user!.username,
-    appPassword: user!.password,
-    password: user!.password,
-  };
+  // oauth must be present here
+  return { type: 'oauth', token: oauth! };
 }

@@ -108,10 +108,12 @@ export async function handler(argv: {
     source,
     orgPublicId,
     sourceUrl,
-    dryRun = false,
+    // prefer explicit camelCase but also accept legacy/lowercase `--dryrun`
     snykProduct = [SupportedProductsUpdateProject.OPEN_SOURCE],
     exclusionGlobs,
-  } = argv;
+  } = argv as any;
+  // Normalize dryRun to accept either --dryRun or --dryrun (some callers/CLI shells use lower-case)
+  const dryRun: boolean = Boolean((argv as any).dryRun ?? (argv as any).dryrun ?? false);
   debug('ℹ️  Options: ' + JSON.stringify(argv));
 
   if (Array.isArray(source)) {
@@ -136,7 +138,8 @@ export async function handler(argv: {
 
   const products = Array.isArray(snykProduct) ? snykProduct : [snykProduct];
   for (const p of products) {
-    entitlements.push(productEntitlements[p]);
+    // ensure correct enum typing for indexing productEntitlements
+    entitlements.push(productEntitlements[p as SupportedProductsUpdateProject]);
   }
   console.log(
     `ℹ️  Running sync for ${source} projects in org: ${orgPublicId} (products to be synced: ${products.join(

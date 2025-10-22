@@ -216,7 +216,7 @@ export async function syncProjectsForTarget(
       );
       console.log(
         '[syncProjectsForTarget] Snyk monitored projects:',
-        projects.map((p) => p.name),
+        projects.map((p: SnykProject) => p.name),
       );
       console.log(
         '[syncProjectsForTarget] Detected imports (files to import):',
@@ -224,7 +224,7 @@ export async function syncProjectsForTarget(
       );
       console.log(
         '[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):',
-        res.remove.map((p) => p.name),
+        res.remove.map((p: SnykProject) => p.name),
       );
       // Propagate branch from analysis result
       if (res.branch) {
@@ -232,7 +232,7 @@ export async function syncProjectsForTarget(
       }
       // Only deactivate projects whose branch does not match the detected default branch
       const detectedBranch = targetMeta.branch;
-      deactivate = res.remove.filter((p) => p.branch !== detectedBranch);
+  deactivate = res.remove.filter((p: SnykProject) => p.branch !== detectedBranch);
       createProjects = res.import;
     } else if (
       origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP
@@ -279,7 +279,7 @@ export async function syncProjectsForTarget(
       );
       console.log(
         '[syncProjectsForTarget] Snyk monitored projects:',
-        projects.map((p) => p.name),
+        projects.map((p: SnykProject) => p.name),
       );
       console.log(
         '[syncProjectsForTarget] Detected imports (files to import):',
@@ -287,13 +287,13 @@ export async function syncProjectsForTarget(
       );
       console.log(
         '[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):',
-        res.remove.map((p) => p.name),
+        res.remove.map((p: SnykProject) => p.name),
       );
       if (res.branch) {
         targetMeta.branch = res.branch;
       }
       const detectedBranchApp = targetMeta.branch;
-      deactivate = res.remove.filter((p) => p.branch !== detectedBranchApp);
+  deactivate = res.remove.filter((p: SnykProject) => p.branch !== detectedBranchApp);
       createProjects = res.import;
     } else if (
       origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER
@@ -340,7 +340,7 @@ export async function syncProjectsForTarget(
       );
       console.log(
         '[syncProjectsForTarget] Snyk monitored projects:',
-        projects.map((p) => p.name),
+        projects.map((p: SnykProject) => p.name),
       );
       console.log(
         '[syncProjectsForTarget] Detected imports (files to import):',
@@ -348,7 +348,7 @@ export async function syncProjectsForTarget(
       );
       console.log(
         '[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):',
-        res.remove.map((p) => p.name),
+        res.remove.map((p: SnykProject) => p.name),
       );
       deactivate = res.remove;
       createProjects = res.import;

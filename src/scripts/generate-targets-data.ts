@@ -109,9 +109,18 @@ export async function generateTargetsImportDataFile(
         | BitbucketRepoData
       > = [];
       if (source === SupportedIntegrationTypesImportData.BITBUCKET_CLOUD) {
-        // legacy non-app flow: choose API / OAuth token or username/app-password
+        // legacy non-app flow: prefer username/app-password (interactive
+        // and many listing endpoints require Basic auth with an app
+        // password). Fall back to API or OAuth tokens if user creds are
+        // not available.
         let config: BitbucketCloudAuthConfig;
-        if (process.env.BITBUCKET_CLOUD_API_TOKEN) {
+        if (process.env.BITBUCKET_CLOUD_USERNAME && process.env.BITBUCKET_CLOUD_PASSWORD) {
+          config = {
+            type: 'user',
+            username: process.env.BITBUCKET_CLOUD_USERNAME!,
+            password: process.env.BITBUCKET_CLOUD_PASSWORD!,
+          };
+        } else if (process.env.BITBUCKET_CLOUD_API_TOKEN) {
           config = {
             type: 'api',
             token: process.env.BITBUCKET_CLOUD_API_TOKEN!,
@@ -122,11 +131,7 @@ export async function generateTargetsImportDataFile(
             token: process.env.BITBUCKET_CLOUD_OAUTH_TOKEN!,
           };
         } else {
-          config = {
-            type: 'user',
-            username: process.env.BITBUCKET_CLOUD_USERNAME!,
-            password: process.env.BITBUCKET_CLOUD_PASSWORD!,
-          };
+          throw new Error('No Bitbucket Cloud authentication env vars found for generating targets data. Please set BITBUCKET_CLOUD_USERNAME and BITBUCKET_CLOUD_PASSWORD, or BITBUCKET_CLOUD_API_TOKEN, or BITBUCKET_CLOUD_OAUTH_TOKEN.');
         }
         entities = await listBitbucketCloudRepos(config, topLevelEntity.name);
       } else if (

@@ -19,21 +19,12 @@ export class BitbucketCloudSyncClient {
   private appPassword?: string;
 
   constructor(auth: BitbucketAuth) {
-    // Prefer token-based auth (API token or OAuth) when a token is supplied.
-    // Otherwise, fall back to username/appPassword Basic auth (user/basic).
+    // Enforce username + appPassword (Basic) auth for Bitbucket Cloud sync.
+    // Token-based auth (API/OAuth) is not accepted for sync operations.
     if (auth && auth.token) {
-      debug(
-        `Creating Bitbucket Cloud sync client using Bearer token (${
-          auth.type || 'token'
-        })`,
+      throw new Error(
+        'Bitbucket Cloud sync requires username + appPassword (user/basic) authentication. Token-based auth (API/OAuth) is not supported for sync operations.',
       );
-      this.client = axios.create({
-        baseURL: 'https://api.bitbucket.org/2.0/',
-        headers: {
-          authorization: `Bearer ${auth.token}`,
-        },
-      });
-      return;
     }
 
     // Support 'basic' as an alias for user/appPassword basic auth
@@ -54,6 +45,9 @@ export class BitbucketCloudSyncClient {
           username: this.username,
           password: this.appPassword,
         },
+        // Ensure redirects are followed predictably when Bitbucket returns
+        // a 302 -> /src/{sha}/ redirect. Follow up to 10 redirects.
+        maxRedirects: 10,
       });
       return;
     }
@@ -107,8 +101,8 @@ export class BitbucketCloudSyncClient {
     try {
       // Use max_depth to include subdirectories up to a reasonable limit and follow pagination
       // URL-encode components (especially branch) because branch names can contain slashes
-      const encWorkspace = encodeURIComponent(workspace);
-      const encRepo = encodeURIComponent(repoSlug);
+  const encWorkspace = encodeURIComponent(decodeURIComponent(workspace));
+  const encRepo = encodeURIComponent(decodeURIComponent(repoSlug));
       // Prevent double-encoding: if branch is already encoded, decode then encode
       // Encode individual path segments so that literal '/' characters in branch
       // names are preserved as separators (Bitbucket expects slashes in branch
@@ -119,21 +113,203 @@ export class BitbucketCloudSyncClient {
       } catch {
         // ignore decode errors and use raw branch
       }
-      // Use the 'at' query parameter to select the branch/commit. This avoids
-      // embedding branch names (which may contain '/') in the path and running
-      // into inconsistent encoding/404 behavior. Encode the full branch value
-      // for use in the query param.
-      const encBranchForQuery = encodeURIComponent(branchToEncode);
-      let url = `/repositories/${encWorkspace}/${encRepo}/src/?at=${encBranchForQuery}&pagelen=100&max_depth=10`;
-      console.log(
+      // Resolve branch name to a commit SHA when possible. Some Bitbucket
+      // API variants or repo setups can parse branch names with '/' badly
+      // (e.g., treating 'feature/dev' as 'feature'). Resolving to a commit
+      // SHA and using that for the `at` param is more robust.
+      let resolvedSha: string | undefined;
+      try {
+        const branchSearchRes = await this.client.get(
+          `/repositories/${encWorkspace}/${encRepo}/refs/branches`,
+          {
+            params: {
+              q: `name = "${branchToEncode}"`,
+              pagelen: 1,
+            },
+          },
+        );
+        if (
+          branchSearchRes &&
+          branchSearchRes.data &&
+          Array.isArray(branchSearchRes.data.values) &&
+          branchSearchRes.data.values.length > 0
+        ) {
+          const first = branchSearchRes.data.values[0];
+          const target = first?.target;
+          // Bitbucket responses can vary: target.hash, target.sha, or
+          // target.shas (array) are all observed in different API shapes.
+          if (target) {
+            if (typeof target === 'string') {
+              resolvedSha = target;
+            } else if (target.hash) {
+              resolvedSha = target.hash;
+            } else if (target.sha) {
+              resolvedSha = target.sha;
+            } else if (Array.isArray(target.shas) && target.shas.length > 0) {
+              resolvedSha = target.shas[0];
+            }
+          }
+          // Also check for older shapes where the 'shas' array may be on the
+          // parent object (e.g., error payloads / refs responses in some
+          // configurations).
+          if (!resolvedSha && Array.isArray(first?.shas) && first.shas.length) {
+            resolvedSha = first.shas[0];
+          }
+          if (resolvedSha) {
+            debug(
+              `[BitbucketCloudSyncClient] Resolved branch '${branch}' to commit ${resolvedSha}`,
+            );
+          }
+        }
+  } catch {
+        // If the query-based lookup fails (permissions, parsing), try a
+        // direct branch ref endpoint which accepts the branch name as a
+        // path segment. Some Bitbucket setups return data for the direct
+        // ref endpoint even when the search query does not match.
+        try {
+          const directRef = await this.client.get(
+            `/repositories/${encWorkspace}/${encRepo}/refs/branches/${encodeURIComponent(
+              branchToEncode,
+            )}`,
+          );
+          const directFirst = directRef?.data;
+          // directFirst may be the branch object itself
+          const directTarget = directFirst?.target || directFirst;
+          if (directTarget) {
+            if (directTarget.hash) resolvedSha = directTarget.hash;
+            else if (directTarget.sha) resolvedSha = directTarget.sha;
+            else if (Array.isArray(directTarget.shas) && directTarget.shas.length)
+              resolvedSha = directTarget.shas[0];
+          }
+          if (resolvedSha) {
+            debug(
+              `[BitbucketCloudSyncClient] Resolved branch '${branch}' to commit ${resolvedSha} via direct refs/branches/{branch}`,
+            );
+          }
+  } catch {
+          // As a last resort, try the commits endpoint for the branch; this
+          // returns commits for the branch and the first entry has the hash.
+          try {
+            const commitsRes = await this.client.get(
+              `/repositories/${encWorkspace}/${encRepo}/commits/${encodeURIComponent(
+                branchToEncode,
+              )}`,
+              { params: { pagelen: 1 } },
+            );
+            if (
+              commitsRes &&
+              commitsRes.data &&
+              Array.isArray(commitsRes.data.values) &&
+              commitsRes.data.values.length > 0
+            ) {
+              resolvedSha = commitsRes.data.values[0]?.hash || commitsRes.data.values[0]?.sha;
+              if (resolvedSha) {
+                debug(
+                  `[BitbucketCloudSyncClient] Resolved branch '${branch}' to commit ${resolvedSha} via commits/{branch}`,
+                );
+              }
+            }
+          } catch {
+            // ignore and fall back to using the branch name
+          }
+        }
+      }
+
+      // Prefer using the path-style URL with the commit SHA when available
+      // because Bitbucket sometimes mis-parses branch names that contain
+      // slashes (e.g., feature/dev). Using the SHA as a path segment avoids
+      // that ambiguity and is more reliable.
+      let url: string;
+      if (resolvedSha) {
+        // Use path-style with SHA as the segment
+        url = `/repositories/${encWorkspace}/${encRepo}/src/${encodeURIComponent(
+          resolvedSha,
+        )}/?pagelen=100&max_depth=10`;
+      } else {
+        // Fall back to query-param form when SHA not resolved
+        const encBranchForQuery = encodeURIComponent(branchToEncode);
+        url = `/repositories/${encWorkspace}/${encRepo}/src/?at=${encBranchForQuery}&pagelen=100&max_depth=10`;
+      }
+      debug(
         `[BitbucketCloudSyncClient] Requesting files (recursive): workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}', url='${url}'`,
       );
       const allPaths: string[] = [];
       while (url) {
-        const res = await this.client.get(url);
+        let res;
+        try {
+          res = await this.client.get(url);
+        } catch (err: any) {
+          // If Bitbucket returns 404 for the query-param form, try to
+          // recover using any candidate commit SHAs returned in the error
+          // payload (some Bitbucket responses include `error.data.shas`) or
+          // fall back to path-style forms.
+          if (err?.response?.status === 404) {
+            try {
+              const body = err.response?.data || {};
+              // Try common shapes: { error: { data: { shas: [...] } } } or { data: { shas: [...] } }
+              const candidateShas =
+                body?.error?.data?.shas || body?.data?.shas || body?.shas;
+              if (Array.isArray(candidateShas) && candidateShas.length > 0) {
+                const candidateSha = candidateShas[0];
+                if (candidateSha && typeof candidateSha === 'string') {
+                  const shaUrl = `/repositories/${encWorkspace}/${encRepo}/src/?at=${encodeURIComponent(
+                    candidateSha,
+                  )}&pagelen=100&max_depth=10`;
+                  debug(
+                    `[BitbucketCloudSyncClient] 404 contained candidate shas; retrying with sha ${candidateSha}: ${shaUrl}`,
+                  );
+                  res = await this.client.get(shaUrl);
+                }
+              }
+            } catch {
+              // ignore and proceed to existing path-style fallbacks
+            }
+            try {
+              // Try encoded branch in the path first: some Bitbucket API
+              // variants expect the branch path segment to be percent-encoded
+              // (e.g., feature%2Fdev) rather than a raw 'feature/dev' segment.
+              const encBranchPath = encodeURIComponent(
+                (() => {
+                  try {
+                    return decodeURIComponent(branch);
+                  } catch {
+                    return branch;
+                  }
+                })(),
+              );
+              const altUrl = `/repositories/${encWorkspace}/${encRepo}/src/${encBranchPath}/?pagelen=100&max_depth=10`;
+              debug(
+                `[BitbucketCloudSyncClient] Query-param listing returned 404; retrying with encoded path-style URL: ${altUrl}`,
+              );
+              res = await this.client.get(altUrl);
+            } catch {
+              try {
+                // If encoded path also fails, try the raw branch in the path
+                // (literal slashes) which some setups expect.
+                const branchRaw = (() => {
+                  try {
+                    return decodeURIComponent(branch);
+                  } catch {
+                    return branch;
+                  }
+                })();
+                const altUrlRaw = `/repositories/${encWorkspace}/${encRepo}/src/${branchRaw}/?pagelen=100&max_depth=10`;
+                debug(
+                  `[BitbucketCloudSyncClient] Encoded path retry failed; retrying with raw path-style URL: ${altUrlRaw}`,
+                );
+                res = await this.client.get(altUrlRaw);
+              } catch {
+                // rethrow original error to be handled below
+                throw err;
+              }
+            }
+          } else {
+            throw err;
+          }
+        }
         // Log the actual request URL axios used (config.url) to help diagnose malformed URLs
         try {
-          console.log(
+          debug(
             '[BitbucketCloudSyncClient] Requested URL:',
             res?.config?.url || url,
           );
@@ -143,7 +319,7 @@ export class BitbucketCloudSyncClient {
             url,
           );
         }
-        console.log(
+        debug(
           '[BitbucketCloudSyncClient] Raw response page from listFiles:',
           res?.data?.values?.length ?? 0,
         );
@@ -160,8 +336,8 @@ export class BitbucketCloudSyncClient {
           }
           // Follow pagination if present
           if (res.data.next) {
-            // Bitbucket may include un-encoded branch names in the `next` link.
-            // Normalize the next URL by ensuring the branch path segment is URL-encoded.
+              // Bitbucket may include un-encoded branch names in the `next` link.
+              // Normalize the next URL by ensuring the branch path segment is URL-encoded.
             try {
               const nextRaw: string = res.data.next;
               const normalizedNext = (() => {
@@ -215,7 +391,7 @@ export class BitbucketCloudSyncClient {
             url = '';
           }
         } else {
-          console.error(
+                  debug(
             `[BitbucketCloudSyncClient] Unexpected response format for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}'.`,
           );
           break;
@@ -238,9 +414,28 @@ export class BitbucketCloudSyncClient {
         'requestUrl:',
         reqUrl,
       );
+      // When Bitbucket responds 404, surface the response body and headers to
+      // aid debugging of malformed 'at' params, permission issues, or API
+      // gateway differences. This information is intentionally logged here
+      // (not thrown) so the operator can inspect the exact shape returned by
+      // the server.
       if (err?.response?.status === 404) {
+        try {
+          const respData = err.response?.data;
+          const respHeaders = err.response?.headers;
+          console.error(
+            `[BitbucketCloudSyncClient] 404 response body for ${workspace}/${repoSlug}:`,
+            typeof respData === 'string' ? respData : JSON.stringify(respData, null, 2),
+          );
+          console.error(
+            `[BitbucketCloudSyncClient] 404 response headers for ${workspace}/${repoSlug}:`,
+            JSON.stringify(respHeaders || {}, null, 2),
+          );
+        } catch (dumpErr) {
+          console.error('[BitbucketCloudSyncClient] Failed to stringify 404 response', dumpErr);
+        }
         throw new Error(
-          `Bitbucket API returned 404 Not Found for ${workspace}/${repoSlug} (url: ${reqUrl}). This may indicate a malformed URL, a missing branch, or insufficient permissions.`,
+          `Bitbucket API returned 404 Not Found for ${workspace}/${repoSlug} (url: ${reqUrl}). This may indicate a malformed URL, a missing branch, or insufficient permissions. See logs for response body and headers.`,
         );
       }
       this.handleError(err);

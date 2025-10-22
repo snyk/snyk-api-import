@@ -7,8 +7,7 @@ This document shows the basic flow to import Bitbucket Cloud repositories into S
 - A Snyk API token: `export SNYK_TOKEN=...`
 - Bitbucket Cloud credentials (one of the following — see [Authentication and env vars](#authentication-and-env-vars) below):
   - username + app password, or
-  - API token, or
-  - OAuth token (client_credentials / app-scoped token)
+
 
 ## Quick import steps
 
@@ -46,11 +45,6 @@ Supported Bitbucket Cloud auth methods (you may set multiple env vars; the tool 
   - `BITBUCKET_CLOUD_USERNAME`
   - `BITBUCKET_CLOUD_PASSWORD` (app password)
 
-- API token (works for many API operations):
-  - `BITBUCKET_CLOUD_API_TOKEN`
-
-- OAuth token (client_credentials/app-scoped token):
-  - `BITBUCKET_CLOUD_OAUTH_TOKEN`
 
 ## Notes
 
@@ -61,22 +55,6 @@ Supported Bitbucket Cloud auth methods (you may set multiple env vars; the tool 
   - `BITBUCKET_CLOUD_AUTH_METHOD=api|oauth|user`
 
 ## Examples
-
-Export a Snyk token and an API token:
-
-```bash
-export SNYK_TOKEN=...
-export BITBUCKET_CLOUD_API_TOKEN=...
-```
-
-Force using OAuth (when multiple values exist):
-
-```bash
-export BITBUCKET_CLOUD_OAUTH_TOKEN=...
-export BITBUCKET_CLOUD_AUTH_METHOD=oauth
-```
-
-If you need the full feature set (workspace listing + imports), provide username + app password:
 
 ```bash
 export BITBUCKET_CLOUD_USERNAME=myuser

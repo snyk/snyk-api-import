@@ -9,6 +9,7 @@ describe('getBitbucketCloudAuth helper', () => {
     'BITBUCKET_CLOUD_OAUTH_TOKEN',
     'BITBUCKET_CLOUD_USERNAME',
     'BITBUCKET_CLOUD_PASSWORD',
+    'BITBUCKET_CLOUD_AUTH_METHOD',
   ];
   const origEnv = { ...process.env };
 
@@ -61,8 +62,9 @@ describe('getBitbucketCloudAuth helper', () => {
     process.env.BITBUCKET_CLOUD_OAUTH_TOKEN = 'oauthtok';
     process.env.BITBUCKET_CLOUD_API_TOKEN = 'apitok';
     const auth = getBitbucketCloudAuth();
-    expect(auth).toHaveProperty('type', 'api');
-  expect(auth).toHaveProperty('token', 'apitok');
+    // New precedence prefers username+appPassword when present
+    expect(auth).toHaveProperty('type', 'user');
+    expect(auth).toHaveProperty('username', 'bob');
     const available = getAvailableBitbucketCloudAuths();
     expect(available.api).toBeDefined();
     expect(available.oauth).toBeDefined();

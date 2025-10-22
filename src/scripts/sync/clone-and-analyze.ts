@@ -174,13 +174,89 @@ export async function cloneAndAnalyze(
       try {
         files = await client.listFiles(workspace, repoSlug, defaultBranch);
       } catch (err: any) {
+        // If it's a 404, attempt a lightweight probe before giving up. Some
+        // Bitbucket setups return 404 for branch-name query forms but allow
+        // accessing by commit SHA. Try commits/{branch}?pagelen=1 and then
+        // src/?at=<sha> once; if that succeeds treat it as success and
+        // continue. This avoids creating failure logs for transient or
+        // branch-name parsing issues.
+        if (err?.response?.status === 404) {
+          try {
+            const encWorkspace = encodeURIComponent(decodeURIComponent(workspace));
+            const encRepo = encodeURIComponent(decodeURIComponent(repoSlug));
+            const encBranch = encodeURIComponent(
+              (() => {
+                try {
+                  return decodeURIComponent(defaultBranch || '');
+                } catch {
+                  return defaultBranch || '';
+                }
+              })(),
+            );
+            // Helper to build axios options from provided auth
+            const buildAxiosOptions = () => {
+              const opts: any = {};
+              try {
+                if (auth && (auth as any).token) {
+                  opts.headers = { authorization: `Bearer ${(auth as any).token}` };
+                } else if (auth && (auth as any).username) {
+                  opts.auth = {
+                    username: (auth as any).username,
+                    password: (auth as any).appPassword || (auth as any).password,
+                  };
+                }
+              } catch {
+                // ignore
+              }
+              return opts;
+            };
+
+            // Try commits endpoint to get top commit SHA via axios
+            const commitsRes: any = await axios.get(
+              `https://api.bitbucket.org/2.0/repositories/${encWorkspace}/${encRepo}/commits/${encBranch}`,
+              { ...buildAxiosOptions(), params: { pagelen: 1 } },
+            );
+            const maybeSha =
+              commitsRes?.data?.values && commitsRes.data.values.length
+                ? commitsRes.data.values[0]?.hash || commitsRes.data.values[0]?.sha
+                : undefined;
+            if (maybeSha) {
+              // Try src by SHA (small pagelen to keep it light) via axios
+              const srcRes: any = await axios.get(
+                `https://api.bitbucket.org/2.0/repositories/${encWorkspace}/${encRepo}/src/?at=${encodeURIComponent(
+                  maybeSha,
+                )}&pagelen=10&max_depth=1`,
+                buildAxiosOptions(),
+              );
+              if (srcRes && srcRes.data && Array.isArray(srcRes.data.values)) {
+                // Convert to simple file path list like listFiles would
+                files = srcRes.data.values
+                  .filter((e: any) => e && (typeof e === 'string' || e.path))
+                  .map((e: any) => (typeof e === 'string' ? e : e.path));
+                debug(
+                  `[cloneAndAnalyze] Resolved branch '${defaultBranch}' via probe to SHA ${maybeSha} and retrieved ${files.length} files`,
+                );
+              }
+            }
+          } catch (probeErr) {
+            // probe failed — fall through to original error handling below
+            debug(
+              `[cloneAndAnalyze] Probe after 404 failed for ${workspace}/${repoSlug}: ${probeErr?.message}`,
+            );
+          }
+        }
         // Authorization or API error: hard fail, do not proceed
         const msg =
           err?.response?.status === 401 || err?.response?.status === 403
             ? `[Bitbucket] Authorization failed when listing files for ${workspace}/${repoSlug}: ${err.message}`
             : `[Bitbucket] Failed to list files for ${workspace}/${repoSlug}: ${err.message}`;
-        console.error(msg);
-        throw new Error(msg);
+        // If files were populated by the probe above, don't treat as error
+        if (files && files.length) {
+          debug(`[cloneAndAnalyze] Probe succeeded after initial listFiles 404; continuing for ${workspace}/${repoSlug}`);
+        } else {
+          console.error(msg);
+          throw new Error(msg);
+        }
       }
       debug('[cloneAndAnalyze] Files returned from Bitbucket Cloud:', files);
       // Optionally propagate the branch for logging/upstream use

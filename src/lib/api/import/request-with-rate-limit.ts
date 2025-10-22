@@ -1,5 +1,6 @@
 import 'source-map-support/register';
 import * as debugLib from 'debug';
+import { inspect } from 'util';
 import type { requestsManager } from 'snyk-request-manager';
 
 const debug = debugLib('snyk:api-import');
@@ -9,6 +10,7 @@ export async function requestWithRateLimitHandling(
   url: string,
   verb: string,
   body = {},
+  requestOptions?: Record<string, any>,
 ): Promise<any> {
   const maxRetries = 7;
   let attempt = 0;
@@ -18,7 +20,6 @@ export async function requestWithRateLimitHandling(
   while (attempt < maxRetries) {
     try {
       // Log the outgoing request for debugging in tests
-      // eslint-disable-next-line no-console
       console.log(
         `[requestWithRateLimitHandling] ${verb.toUpperCase()} ${url}`,
       );
@@ -26,26 +27,33 @@ export async function requestWithRateLimitHandling(
         verb,
         url,
         body: JSON.stringify(body),
+        // allow callers to forward additional request options (e.g. useRESTApi)
+        ...(requestOptions || {}),
       });
-      // eslint-disable-next-line no-console
-      console.log(
-        `[requestWithRateLimitHandling] response: ${JSON.stringify(res)}`,
-      );
+      console.log(`[requestWithRateLimitHandling] response: ${inspect(res, { depth: 2 })}`);
       break;
     } catch (e: any) {
       res = e;
-      if (e.data.code === 401) {
-        console.error(
-          `ERROR: ${e.data.message}. Please check the token and try again.`,
-        );
+      // Defensive extraction of status/code since different errors may have
+      // different shapes (e.data.code, e.status, e.statusCode, e.response.status)
+      const code =
+        (e && (e.data && e.data.code)) || e.status || e.statusCode || (e.response && e.response.status) || undefined;
+  const errMsg = (e && (e.data && e.data.message)) || e.message || inspect(e, { depth: 2 });
+
+  // Log a sanitized error for diagnostics
+  console.error(`requestWithRateLimitHandling error (code=${code}): ${errMsg}`);
+
+      if (code === 401) {
+        console.error(`ERROR: ${errMsg}. Please check the token and try again.`);
         break;
       }
-      if ([404, 504, 400].includes(e.data.code)) {
+      if ([404, 504, 400].includes(code)) {
         break;
       }
-      attempt += 1;
-      debug('Failed:' + JSON.stringify(e));
-      if (e.data.code === 429) {
+  attempt += 1;
+  // Avoid JSON.stringify on potential circular structures
+  debug('Failed:' + inspect(e, { depth: 2 }));
+      if (code === 429) {
         const sleepTime = 600_000 * attempt; // 10 mins x attempt with a max of ~ 1hr
         console.error(
           `Received a rate limit error, sleeping for ${sleepTime} ms (attempt # ${attempt})`,
@@ -53,6 +61,15 @@ export async function requestWithRateLimitHandling(
         await new Promise((r) => setTimeout(r, sleepTime));
       }
     }
+  }
+
+  // If res is an error object (request failed after retries), throw it so
+  // callers (importTarget) can handle the original error shape and log
+  // useful diagnostics (status, headers, response body, etc.). Returning
+  // the error caused callers to treat it as a successful response and
+  // produced misleading "Expected a 201 response" errors.
+  if (res && (res instanceof Error || res.response)) {
+    throw res;
   }
 
   return res;

@@ -25,7 +25,7 @@ describe('BitbucketCloudSyncClient auth', () => {
   });
 
   it('throws on 401 when listing files', async () => {
-    const auth: BitbucketAuth = { type: 'api', token: 'token' } as any;
+    const auth: BitbucketAuth = { type: 'basic', username: 'user', appPassword: 'pass' } as any;
     const fakeInstance = { get: jest.fn() } as any;
     // When listFiles calls client.get, it should throw with response.status 401
     const error: any = new Error('Unauthorized');

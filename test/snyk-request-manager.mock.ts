@@ -38,9 +38,9 @@ export class requestsManager {
       };
     }
 
-    // Group orgs listing: /group/:groupId/orgs
-    if (url && /\/group\/([^/]+)\/orgs/.test(url)) {
-      const m = url.match(/\/group\/([^/]+)\/orgs/);
+    // Group orgs listing: accept both v1 singular '/group/:groupId/orgs' and REST plural '/groups/:groupId/orgs'
+    if (url && (/\/groups\/([^/]+)\/orgs/.test(url) || /\/group\/([^/]+)\/orgs/.test(url))) {
+      const m = url.match(/(?:\/groups\/|\/group\/)([^/]+)\/orgs/);
       const groupId = (m && m[1]) || 'group-id';
       // Return no existing orgs by default so createOrgs will attempt creation.
       return {
@@ -49,8 +49,8 @@ export class requestsManager {
       };
     }
 
-    // Create org endpoint
-    if (verb && verb.toLowerCase() === 'post' && url && url.includes('/org')) {
+    // Create org endpoint (accept POST /orgs and POST /org)
+    if (verb && verb.toLowerCase() === 'post' && url && (url.includes('/orgs') || url.includes('/org'))) {
       let parsed: any = {};
       try {
         parsed = typeof body === 'string' ? JSON.parse(body) : body || {};
