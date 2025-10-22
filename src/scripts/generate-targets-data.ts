@@ -156,9 +156,22 @@ export async function generateTargetsImportDataFile(
             userAgentPrefix: 'snyk-api-import:generate-targets-data',
           });
           const res = await listIntegrations(rm, orgId);
-          integrationId = res[source];
+          // Snyk may represent some integrations with a different key
+          // (for example Bitbucket Cloud App is represented as
+          // 'bitbucket-connect-app' in Snyk). Map the CLI source to the
+          // expected Snyk integration key for lookup when they differ.
+          const mapSourceToSnykIntegrationKey = (s: string) => {
+            switch (s) {
+              case 'bitbucket-cloud-app':
+                return 'bitbucket-connect-app';
+              default:
+                return s;
+            }
+          };
+          const integrationKey = mapSourceToSnykIntegrationKey(source as string);
+          integrationId = res[integrationKey];
           debug(
-            `Looked up integrationId for org ${orgId} source ${source}: ${integrationId}`,
+            `Looked up integrationId for org ${orgId} source ${source} (key=${integrationKey}): ${integrationId}`,
           );
         } catch (err) {
           debug(

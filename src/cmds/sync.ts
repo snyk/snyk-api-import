@@ -112,8 +112,24 @@ export async function handler(argv: {
     snykProduct = [SupportedProductsUpdateProject.OPEN_SOURCE],
     exclusionGlobs,
   } = argv as any;
-  // Normalize dryRun to accept either --dryRun or --dryrun (some callers/CLI shells use lower-case)
-  const dryRun: boolean = Boolean((argv as any).dryRun ?? (argv as any).dryrun ?? false);
+  // Normalize dryRun so that an explicit flag wins regardless of builder default.
+  // Yargs may populate both camelCase and dashed/lowercase variants and also
+  // initialize the camelCase with the builder default (false). Use strict
+  // checks for `=== true` so an explicit `--dryrun` (or --dry-run) will be
+  // honored even when argv.dryRun exists and is the default false.
+  const rawArgv = argv as any;
+  const parseBool = (v: unknown) => {
+    if (v === true || v === 1) return true;
+    if (typeof v === 'string') {
+      const s = v.toLowerCase().trim();
+      return s === 'true' || s === '1';
+    }
+    return false;
+  };
+  const dryRun: boolean =
+    parseBool(rawArgv.dryRun) || parseBool(rawArgv.dryrun) || parseBool(rawArgv['dry-run']);
+  // Log the normalized value so users can verify which form was picked up
+  console.log(`ℹ️  Resolved dryRun=${dryRun} (argv.dryRun=${String((rawArgv as any).dryRun)}, argv.dryrun=${String((rawArgv as any).dryrun)}, argv['dry-run']=${String((rawArgv as any)['dry-run'])})`);
   debug('ℹ️  Options: ' + JSON.stringify(argv));
 
   if (Array.isArray(source)) {

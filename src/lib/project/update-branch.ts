@@ -15,6 +15,15 @@ export async function updateBranch(
   const { branch, projectPublicId } = project;
   let updated = false;
   try {
+    // If we couldn't determine a default branch (empty string), do not
+    // update the project's branch in Snyk. This avoids accidentally
+    // clearing existing branch information when analysis failed or when
+    // the SCM probe couldn't resolve the default branch.
+    if (!defaultBranch || defaultBranch.trim() === '') {
+      debug(`Detected empty default branch for project ${projectPublicId}; skipping update`);
+      return { updated };
+    }
+
     if (branch != defaultBranch) {
       debug(`Default branch has changed for Snyk project ${projectPublicId}`);
       if (!dryRun) {

@@ -19,12 +19,20 @@ export class BitbucketCloudSyncClient {
   private appPassword?: string;
 
   constructor(auth: BitbucketAuth) {
-    // Enforce username + appPassword (Basic) auth for Bitbucket Cloud sync.
-    // Token-based auth (API/OAuth) is not accepted for sync operations.
+    // Support both Basic (username/appPassword) and token-based (API/OAuth)
+    // auth for Bitbucket Cloud API calls. Token-based auth is used by the
+    // Bitbucket Cloud App (client_credentials) flow and is acceptable for
+    // API-based operations such as listing repositories and files. Note
+    // that token auth does not provide git clone credentials; clones still
+    // require app-password or SSH keys when needed.
     if (auth && auth.token) {
-      throw new Error(
-        'Bitbucket Cloud sync requires username + appPassword (user/basic) authentication. Token-based auth (API/OAuth) is not supported for sync operations.',
-      );
+      debug('Creating Bitbucket Cloud sync client using token-based auth');
+      this.client = axios.create({
+        baseURL: 'https://api.bitbucket.org/2.0/',
+        headers: { authorization: `Bearer ${auth.token}` },
+        maxRedirects: 10,
+      });
+      return;
     }
 
     // Support 'basic' as an alias for user/appPassword basic auth
