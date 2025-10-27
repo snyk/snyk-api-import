@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as yargs from 'yargs';
 const debug = debugLib('snyk:orgs-data-script');
 

@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 const debug = debugLib('snyk:bitbucket-cloud-auth');
 
 export type BitbucketCloudAuthMethod =

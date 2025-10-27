@@ -1,11 +1,9 @@
-import * as debugLib from 'debug';
-import * as _ from 'lodash';
+import debugLib from 'debug';
+import * as lodash from 'lodash';
 import * as yargs from 'yargs';
 import { getLoggingPath } from '../lib/get-logging-path';
-import {
-  CommandResult,
-  SupportedIntegrationTypesToListSnykTargets,
-} from '../lib/types';
+import type { CommandResult } from '../lib/types';
+import { SupportedIntegrationTypesToListSnykTargets } from '../lib/types';
 const debug = debugLib('snyk:generate-data-script');
 
 import { generateSnykImportedTargets } from '../scripts/generate-imported-targets-from-snyk';
@@ -32,6 +30,7 @@ export const builder = {
   },
 };
 
+/* eslint-disable @typescript-eslint/naming-convention */
 const entityName: {
   [source in SupportedIntegrationTypesToListSnykTargets]: string;
 } = {
@@ -45,6 +44,7 @@ const entityName: {
   'azure-repos': 'repo',
   'bitbucket-server': 'repo',
 };
+/* eslint-enable @typescript-eslint/naming-convention */
 
 export async function createListImported(
   integrationType: SupportedIntegrationTypesToListSnykTargets,
@@ -64,7 +64,7 @@ export async function createListImported(
       );
     }
 
-    const integrationTypes = _.castArray(integrationType);
+    const integrationTypes = lodash.castArray(integrationType);
     const { targets, fileName, failedOrgs } = await generateSnykImportedTargets(
       { groupId, orgId },
       integrationTypes,

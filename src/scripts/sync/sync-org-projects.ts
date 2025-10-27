@@ -1,5 +1,5 @@
-import * as pMap from 'p-map';
-import * as debugLib from 'debug';
+import pMap from 'p-map';
+import debugLib from 'debug';
 import * as path from 'path';
 import * as fs from 'fs';
 import { requestsManager } from 'snyk-request-manager';

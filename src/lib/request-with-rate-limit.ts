@@ -1,7 +1,7 @@
-import * as needle from 'needle';
-import Bottleneck from 'bottleneck';
-import * as debugLib from 'debug';
-import { OutgoingHttpHeaders } from 'http2';
+import needle from 'needle';
+import type { default as bottleneckType } from 'bottleneck';
+import debugLib from 'debug';
+import type { OutgoingHttpHeaders } from 'http2';
 
 const debug = debugLib('snyk:limiter');
 
@@ -9,7 +9,7 @@ export async function limiterWithRateLimitRetries<ResponseType>(
   verb: needle.NeedleHttpVerbs,
   url: string,
   headers: OutgoingHttpHeaders,
-  limiter: Bottleneck,
+  limiter: bottleneckType,
   rateLimitSleepTime: number,
 ): Promise<{
   statusCode: number;
@@ -24,7 +24,7 @@ export async function limiterWithRateLimitRetries<ResponseType>(
   const maxRetries = 7;
   let attempt = 0;
   const encodedUrl = encodeURI(url);
-  limiter.on('failed', async (error, jobInfo) => {
+  limiter.on('failed', async (error: any, jobInfo: any) => {
     const id = jobInfo.options.id;
     debug(`Job ${id} failed: ${error}`);
     if (jobInfo.retryCount === 0) {

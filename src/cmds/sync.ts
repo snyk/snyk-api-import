@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as yargs from 'yargs';
 const debug = debugLib('snyk:sync-cmd');
 
@@ -127,9 +127,17 @@ export async function handler(argv: {
     return false;
   };
   const dryRun: boolean =
-    parseBool(rawArgv.dryRun) || parseBool(rawArgv.dryrun) || parseBool(rawArgv['dry-run']);
+    parseBool(rawArgv.dryRun) ||
+    parseBool(rawArgv.dryrun) ||
+    parseBool(rawArgv['dry-run']);
   // Log the normalized value so users can verify which form was picked up
-  console.log(`ℹ️  Resolved dryRun=${dryRun} (argv.dryRun=${String((rawArgv as any).dryRun)}, argv.dryrun=${String((rawArgv as any).dryrun)}, argv['dry-run']=${String((rawArgv as any)['dry-run'])})`);
+  console.log(
+    `ℹ️  Resolved dryRun=${dryRun} (argv.dryRun=${String(
+      (rawArgv as any).dryRun,
+    )}, argv.dryrun=${String(
+      (rawArgv as any).dryrun,
+    )}, argv['dry-run']=${String((rawArgv as any)['dry-run'])})`,
+  );
   debug('ℹ️  Options: ' + JSON.stringify(argv));
 
   if (Array.isArray(source)) {

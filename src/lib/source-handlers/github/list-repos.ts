@@ -1,11 +1,11 @@
 import { Octokit } from '@octokit/rest';
 import { retry } from '@octokit/plugin-retry';
-import * as debugLib from 'debug';
+import debugModule from 'debug';
 import { getGithubToken } from './get-github-token';
 import { getGithubBaseUrl } from './github-base-url';
 import type { GithubRepoData } from './types';
 
-const debug = debugLib('snyk:list-repos-script');
+const debug = debugModule('snyk:list-repos-script');
 const githubClient = Octokit.plugin(retry as any);
 
 export async function fetchReposForPage(
@@ -18,11 +18,13 @@ export async function fetchReposForPage(
   hasNextPage: boolean;
 }> {
   const repoData: GithubRepoData[] = [];
+
   const params = {
     per_page: perPage,
     page: pageNumber,
     org: orgName,
   };
+
   const res = await octokit.repos.listForOrg(params);
   const repos = res && res.data;
   const hasNextPage = repos.length ? true : false;

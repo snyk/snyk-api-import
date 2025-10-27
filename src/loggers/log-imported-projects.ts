@@ -1,8 +1,8 @@
 import * as bunyan from 'bunyan';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 
 import { getLoggingPath } from './../lib';
-import { Project } from './../lib/types';
+import type { Project } from './../lib/types';
 import { IMPORTED_PROJECTS_LOG_NAME } from './../common';
 
 const debug = debugLib('snyk:import-projects-script');
@@ -32,7 +32,7 @@ export async function logImportedProjects(
         'Imported project',
       );
     });
-  } catch (e) {
+  } catch {
     // do nothing
   }
 }

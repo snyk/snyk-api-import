@@ -8,19 +8,21 @@ This document shows the basic flow to import Bitbucket Cloud repositories into S
 - Bitbucket Cloud credentials (one of the following — see [Authentication and env vars](#authentication-and-env-vars) below):
   - username + app password, or
 
-
 ## Quick import steps
 
 1. Make sure the required environment variables are set (see examples below).
 2. Generate organization data:
 
    `snyk-api-import orgs:data --source=bitbucket-cloud --groupId=<snyk_group_id>`
+
 3. Create organizations in Snyk:
 
    `snyk-api-import orgs:create --file=orgs.json` — this produces `snyk-created-orgs.json` with Snyk org and integration IDs.
+
 4. Generate import data for those orgs:
 
    `snyk-api-import import:data --orgsData=snyk-created-orgs.json --source=bitbucket-cloud`
+
 5. Run the import (use DEBUG for verbose output):
 
    `DEBUG=*snyk* snyk-api-import import`
@@ -32,9 +34,11 @@ To periodically add new repositories that appear in Bitbucket Cloud:
 1. Regenerate organization data and skip empty orgs:
 
    `snyk-api-import orgs:data --source=bitbucket-cloud --groupId=<snyk_group_id> --skipEmptyOrg`
+
 2. Create any missing Snyk orgs (skip duplicates):
 
    `snyk-api-import orgs:create --file=orgs.json --noDuplicateNames`
+
 3. Generate import data and run the import as above.
 
 ## Authentication and env vars
@@ -44,7 +48,6 @@ Supported Bitbucket Cloud auth methods (you may set multiple env vars; the tool 
 - username + app password (needed for listing workspaces):
   - `BITBUCKET_CLOUD_USERNAME`
   - `BITBUCKET_CLOUD_PASSWORD` (app password)
-
 
 ## Notes
 

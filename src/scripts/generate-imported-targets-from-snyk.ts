@@ -1,8 +1,8 @@
 import { requestsManager } from 'snyk-request-manager';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as path from 'path';
-import * as pMap from 'p-map';
-import * as _ from 'lodash';
+import pMap from 'p-map';
+import lodash from 'lodash';
 
 import type { FilePath, SnykProject, Target } from '../lib/types';
 import { SupportedIntegrationTypesToListSnykTargets } from '../lib/types';
@@ -160,7 +160,7 @@ export async function generateSnykImportedTargets(
           }
           uniqueTargets.add(targetId);
           const importedTarget = {
-            target: _.pick(target, ...targetProps),
+            target: lodash.pick(target, ...targetProps),
             integrationId,
             orgId,
           };
@@ -181,7 +181,7 @@ export async function generateSnykImportedTargets(
           undefined,
           'Target exists in Snyk',
         );
-      } catch (e) {
+      } catch {
         failedOrgs.push(org);
         console.warn(
           `Failed to process projects for organization ${

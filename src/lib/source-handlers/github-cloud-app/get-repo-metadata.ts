@@ -1,5 +1,5 @@
 import { createGitHubAppClient } from './get-github-app-token';
-import { RepoMetaData } from '../../types';
+import type { RepoMetaData } from '../../types';
 
 /**
  * Gets repository metadata for a specific repository

@@ -10,12 +10,15 @@ export async function githubCloudAppOrganizationIsEmpty(
     const octokit = await createGitHubAppClient();
 
     // Get the first page of repositories to check if any exist
-    const response = await octokit.repos.listForOrg({
+
+    const params = {
       org: orgName,
-      type: 'all',
+      type: 'all' as const,
       per_page: 1, // We only need to check if at least one exists
       page: 1,
-    });
+    };
+
+    const response = await octokit.repos.listForOrg(params);
 
     // If we get any repositories, the organization is not empty
     return response.data.length === 0;

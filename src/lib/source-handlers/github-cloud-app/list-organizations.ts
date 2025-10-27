@@ -1,12 +1,8 @@
-import { Octokit } from '@octokit/rest';
-import { retry } from '@octokit/plugin-retry';
 import {
   createGitHubAppClientForApp,
   createGitHubAppClient,
 } from './get-github-app-token';
-import { GitHubCloudAppOrgInfo, GitHubInstallation } from './types';
-
-const githubClient = Octokit.plugin(retry as any);
+import type { GitHubCloudAppOrgInfo, GitHubInstallation } from './types';
 
 /**
  * Lists all organizations accessible to the GitHub App
@@ -35,8 +31,11 @@ export async function listGitHubCloudAppOrgs(): Promise<
         try {
           const installationClient = await createGitHubAppClient();
 
-          // Try to list repositories to verify access
-          const reposResponse = await installationClient.repos.listForOrg({
+          // Try to list repositories to verify access. `per_page` is an API
+          // parameter and intentionally uses snake_case. Disable the naming
+          // convention rule for these API parameters on the same line.
+
+          await installationClient.repos.listForOrg({
             org: installation.account.login,
             type: 'all',
             per_page: 1, // We only need to check if we can access repos
@@ -77,6 +76,9 @@ export async function getInstallationDetails(
 ): Promise<GitHubInstallation> {
   try {
     const octokit = await createGitHubAppClient();
+    // `installation_id` is an API parameter that uses snake_case — disable
+    // the naming convention rule for this API parameter on the same line.
+
     const response = await octokit.apps.getInstallation({
       installation_id: installationId,
     });

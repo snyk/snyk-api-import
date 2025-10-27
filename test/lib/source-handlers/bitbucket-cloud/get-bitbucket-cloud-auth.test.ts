@@ -34,7 +34,7 @@ describe('getBitbucketCloudAuth helper', () => {
     process.env.BITBUCKET_CLOUD_API_TOKEN = 'apitoken123';
     const auth = getBitbucketCloudAuth();
     expect(auth).toHaveProperty('type', 'api');
-  expect(auth).toHaveProperty('token', 'apitoken123');
+    expect(auth).toHaveProperty('token', 'apitoken123');
   });
 
   it('returns oauth when only BITBUCKET_CLOUD_OAUTH_TOKEN is set', () => {
@@ -42,17 +42,22 @@ describe('getBitbucketCloudAuth helper', () => {
     process.env.BITBUCKET_CLOUD_OAUTH_TOKEN = 'oauthtoken123';
     const auth = getBitbucketCloudAuth();
     expect(auth).toHaveProperty('type', 'oauth');
-  expect(auth).toHaveProperty('token', 'oauthtoken123');
+    expect(auth).toHaveProperty('token', 'oauthtoken123');
   });
 
   it('returns user when username and password are set', () => {
     clearVars();
     process.env.BITBUCKET_CLOUD_USERNAME = 'alice';
     process.env.BITBUCKET_CLOUD_PASSWORD = 'p@ssw0rd';
-  const auth = getBitbucketCloudAuth() as { type: 'user'; username: string; appPassword?: string; password?: string };
-  expect(auth).toHaveProperty('type', 'user');
-  expect(auth).toHaveProperty('username', 'alice');
-  expect(auth.appPassword || auth.password).toBe('p@ssw0rd');
+    const auth = getBitbucketCloudAuth() as {
+      type: 'user';
+      username: string;
+      appPassword?: string;
+      password?: string;
+    };
+    expect(auth).toHaveProperty('type', 'user');
+    expect(auth).toHaveProperty('username', 'alice');
+    expect(auth.appPassword || auth.password).toBe('p@ssw0rd');
   });
 
   it('follows precedence api -> oauth -> user when multiple are present', () => {
@@ -76,8 +81,8 @@ describe('getBitbucketCloudAuth helper', () => {
     process.env.BITBUCKET_CLOUD_USERNAME = 'carol';
     process.env.BITBUCKET_CLOUD_PASSWORD = 'pw2';
     const auth = getBitbucketCloudAuth('user');
-  expect(auth).toHaveProperty('type', 'user');
-  expect(auth).toHaveProperty('username', 'carol');
+    expect(auth).toHaveProperty('type', 'user');
+    expect(auth).toHaveProperty('username', 'carol');
   });
 
   it('throws when explicit method requested but not present', () => {
@@ -104,6 +109,6 @@ describe('getBitbucketCloudAuth helper', () => {
     process.env.BITBUCKET_CLOUD_AUTH_METHOD = 'oauth';
     const auth = getBitbucketCloudAuth();
     expect(auth).toHaveProperty('type', 'oauth');
-  expect(auth).toHaveProperty('token', 'oauthtokoverride');
+    expect(auth).toHaveProperty('token', 'oauthtokoverride');
   });
 });

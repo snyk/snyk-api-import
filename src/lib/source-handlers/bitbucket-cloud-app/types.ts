@@ -16,7 +16,7 @@ export interface BitbucketRepoData {
   // Keep the Bitbucket API field name here to match the upstream payload
   // (Bitbucket returns `full_name`). We intentionally preserve the
   // underscore style to make mapping trivial and avoid extra transform logic.
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   full_name?: string;
   owner?: string;
   branch?: string;

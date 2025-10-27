@@ -1,5 +1,5 @@
 import * as bunyan from 'bunyan';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 
 import { FAILED_PROJECTS_LOG_NAME } from './../common';
 import type { Project } from './../lib/types';

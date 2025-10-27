@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as path from 'path';
 import axios from 'axios';
 import { defaultExclusionGlobs } from '../../common';
@@ -182,7 +182,9 @@ export async function cloneAndAnalyze(
         // branch-name parsing issues.
         if (err?.response?.status === 404) {
           try {
-            const encWorkspace = encodeURIComponent(decodeURIComponent(workspace));
+            const encWorkspace = encodeURIComponent(
+              decodeURIComponent(workspace),
+            );
             const encRepo = encodeURIComponent(decodeURIComponent(repoSlug));
             const encBranch = encodeURIComponent(
               (() => {
@@ -198,11 +200,14 @@ export async function cloneAndAnalyze(
               const opts: any = {};
               try {
                 if (auth && (auth as any).token) {
-                  opts.headers = { authorization: `Bearer ${(auth as any).token}` };
+                  opts.headers = {
+                    authorization: `Bearer ${(auth as any).token}`,
+                  };
                 } else if (auth && (auth as any).username) {
                   opts.auth = {
                     username: (auth as any).username,
-                    password: (auth as any).appPassword || (auth as any).password,
+                    password:
+                      (auth as any).appPassword || (auth as any).password,
                   };
                 }
               } catch {
@@ -218,7 +223,8 @@ export async function cloneAndAnalyze(
             );
             const maybeSha =
               commitsRes?.data?.values && commitsRes.data.values.length
-                ? commitsRes.data.values[0]?.hash || commitsRes.data.values[0]?.sha
+                ? commitsRes.data.values[0]?.hash ||
+                  commitsRes.data.values[0]?.sha
                 : undefined;
             if (maybeSha) {
               // Try src by SHA (small pagelen to keep it light) via axios
@@ -252,7 +258,9 @@ export async function cloneAndAnalyze(
             : `[Bitbucket] Failed to list files for ${workspace}/${repoSlug}: ${err.message}`;
         // If files were populated by the probe above, don't treat as error
         if (files && files.length) {
-          debug(`[cloneAndAnalyze] Probe succeeded after initial listFiles 404; continuing for ${workspace}/${repoSlug}`);
+          debug(
+            `[cloneAndAnalyze] Probe succeeded after initial listFiles 404; continuing for ${workspace}/${repoSlug}`,
+          );
         } else {
           console.error(msg);
           throw new Error(msg);

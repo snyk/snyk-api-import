@@ -37,7 +37,9 @@ jest.mock('../../src/lib/source-handlers/github-cloud-app', () => ({
 }));
 
 jest.mock('../../src/lib/api/org', () => ({
-  listIntegrations: async () => ({ github: 'github-********-********-********' }),
+  listIntegrations: async () => ({
+    github: 'github-********-********-********',
+  }),
 }));
 
 // Provide default TEST_* environment variables so tests run without external setup
@@ -46,8 +48,10 @@ process.env.TEST_GHE_URL = process.env.TEST_GHE_URL || 'https://ghe.example';
 process.env.TEST_GHE_TOKEN = process.env.TEST_GHE_TOKEN || 'test-ghe-token';
 process.env.TEST_GITLAB_BASE_URL =
   process.env.TEST_GITLAB_BASE_URL || 'https://gitlab.example';
-process.env.TEST_GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN || 'test-gitlab-token';
-process.env.TEST_GITLAB_ORG_NAME = process.env.TEST_GITLAB_ORG_NAME || 'test-gitlab-org';
+process.env.TEST_GITLAB_TOKEN =
+  process.env.TEST_GITLAB_TOKEN || 'test-gitlab-token';
+process.env.TEST_GITLAB_ORG_NAME =
+  process.env.TEST_GITLAB_ORG_NAME || 'test-gitlab-org';
 
 import * as path from 'path';
 import type { CreatedOrg } from '../../src/lib/types';

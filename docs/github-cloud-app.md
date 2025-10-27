@@ -8,14 +8,14 @@ GitHub Cloud App integration provides enhanced security and functionality compar
 
 ## Key Differences from Personal Access Token
 
-| Feature | Personal Access Token | GitHub Cloud App |
-|---------|----------------------|------------------|
-| Authentication | User token | App JWT + Installation token |
-| Rate Limits | 5000 requests/hour per user | 5000 requests/hour per installation |
-| Access Control | User-based | App-based with granular permissions |
-| RBAC | User account level | Application level |
-| Token Lifecycle | Manual rotation | Automatic rotation (1 hour) |
-| Security | User credentials | App-specific credentials |
+| Feature         | Personal Access Token       | GitHub Cloud App                    |
+| --------------- | --------------------------- | ----------------------------------- |
+| Authentication  | User token                  | App JWT + Installation token        |
+| Rate Limits     | 5000 requests/hour per user | 5000 requests/hour per installation |
+| Access Control  | User-based                  | App-based with granular permissions |
+| RBAC            | User account level          | Application level                   |
+| Token Lifecycle | Manual rotation             | Automatic rotation (1 hour)         |
+| Security        | User credentials            | App-specific credentials            |
 
 ## Prerequisites
 
@@ -33,6 +33,7 @@ GitHub Cloud App integration provides enhanced security and functionality compar
 4. Fill in the required information:
 
    **Basic Information:**
+
    - App name: `Snyk Import Tool` (or your preferred name)
    - Homepage URL: Your organization's website
    - App description: `Integration for importing repositories into Snyk`
@@ -40,12 +41,14 @@ GitHub Cloud App integration provides enhanced security and functionality compar
    **Permissions:**
 
    **Repository permissions:**
+
    - Contents: `Read` (required to access repository files)
    - Metadata: `Read` (required to access repository metadata)
    - Pull requests: `Read` (optional, for future enhancements)
    - Issues: `Read` (optional, for future enhancements)
 
    **Organization permissions:**
+
    - Members: `Read` (required to list organization members)
 
    **Subscribe to events:** Leave empty (not required for this integration)
@@ -86,6 +89,7 @@ your awesome token info
 ```
 
 **Optional configuration:**
+
 ```bash
 # Optional: Target specific installation (if you have multiple)
 export GITHUB_APP_INSTALLATION_ID="789012"
@@ -143,6 +147,7 @@ GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----..."
 For CI/CD environments, use your platform's secret management:
 
 **GitHub Actions:**
+
 ```yaml
 env:
   GITHUB_APP_ID: ${{ secrets.GITHUB_APP_ID }}
@@ -150,6 +155,7 @@ env:
 ```
 
 **GitLab CI:**
+
 ```yaml
 variables:
   GITHUB_APP_ID: $GITHUB_APP_ID
@@ -161,10 +167,12 @@ variables:
 ### Common Error Messages
 
 #### "GITHUB_APP_ID environment variable is required"
+
 - **Cause**: The `GITHUB_APP_ID` environment variable is not set
 - **Solution**: Set the environment variable with your GitHub App's numeric ID
 
 #### "GITHUB_APP_PRIVATE_KEY must be in PEM format"
+
 - **Cause**: The private key is not in proper PEM format
 - **Solution**: Ensure the private key includes the full PEM headers:
   ```
@@ -174,6 +182,7 @@ variables:
   ```
 
 #### "Failed to authenticate with GitHub App"
+
 - **Cause**: Authentication failed with GitHub
 - **Solutions**:
   - Verify the app is installed on the target organization
@@ -182,6 +191,7 @@ variables:
   - Verify the app ID is correct
 
 #### "No organizations found"
+
 - **Cause**: No accessible organizations found
 - **Solutions**:
   - Verify the app is installed on organizations (not just users)
@@ -189,6 +199,7 @@ variables:
   - Ensure the app is installed on the correct organization
 
 #### "Failed to list repositories for organization"
+
 - **Cause**: Cannot access repositories in the organization
 - **Solutions**:
   - Verify the app has "Contents: Read" permission
@@ -206,6 +217,7 @@ DEBUG=snyk* snyk-api-import orgs:data --source=github-cloud-app --groupId=your-g
 ### Verification Steps
 
 1. **Test App Installation**:
+
    ```bash
    # This should list your installed organizations
    snyk-api-import orgs:data --source=github-cloud-app --groupId=test
@@ -230,6 +242,7 @@ If you're currently using Personal Access Token authentication, you can migrate 
 ## Rate Limits
 
 GitHub Cloud App provides:
+
 - **5000 requests per hour per installation**
 - **Automatic token rotation** every hour
 - **Better rate limit handling** compared to user tokens

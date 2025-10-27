@@ -1,5 +1,5 @@
 import * as bunyan from 'bunyan';
-import * as _ from 'lodash';
+import lodash from 'lodash';
 import * as fs from 'fs';
 
 import type { ImportTarget } from './../lib/types';
@@ -40,7 +40,7 @@ export async function logImportedTargets(
       const { integrationId, target, orgId } = data;
       log.info(
         {
-          target: _.pick(target, ...targetProps),
+          target: lodash.pick(target, ...targetProps),
           locationUrl,
           orgId,
           integrationId,

@@ -26,7 +26,10 @@ describe('Bitbucket Server auth handling', () => {
       manifestTypes: ['package.json'],
       exclusionGlobs: [],
     };
-    const datacenterAuth = { sourceUrl: 'http://bitbucket-server', token: 'servertoken' };
+    const datacenterAuth = {
+      sourceUrl: 'http://bitbucket-server',
+      token: 'servertoken',
+    };
     const target = { projectKey: 'PROJ', repoSlug: 'repo', branch: 'main' };
 
     const error: any = new Error('Unauthorized');

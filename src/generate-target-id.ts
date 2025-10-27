@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import lodash from 'lodash';
 
 import { targetProps } from './common';
 import type { Target } from './lib/types';
@@ -8,6 +8,6 @@ export function generateTargetId(
   integrationId: string,
   target: Target,
 ): string {
-  const targetData = _.pick(target, ...targetProps);
+  const targetData = lodash.pick(target, ...targetProps);
   return `${orgId}:${integrationId}:${Object.values(targetData).join(':')}`;
 }

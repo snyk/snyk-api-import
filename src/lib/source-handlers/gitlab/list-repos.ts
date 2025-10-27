@@ -1,12 +1,12 @@
 import { Gitlab } from '@gitbeaker/node';
-import * as debugLib from 'debug';
+import debugModule from 'debug';
 import { getToken } from './get-token';
 
 import { getBaseUrl } from './get-base-url';
-import * as gitBeakerTypes from '@gitbeaker/core';
-import { GitlabRepoData } from './types';
+import type * as gitBeakerTypes from '@gitbeaker/core';
+import type { GitlabRepoData } from './types';
 
-const debug = debugLib('snyk:list-repos-script');
+const debug = debugModule('snyk:list-repos-script');
 
 export async function fetchGitlabReposForPage(
   client: gitBeakerTypes.Gitlab,
@@ -19,7 +19,6 @@ export async function fetchGitlabReposForPage(
 }> {
   const repoData: GitlabRepoData[] = [];
   const params: gitBeakerTypes.Types.BaseRequestOptions = {
-    // eslint-disable-next-line @typescript-eslint/camelcase
     perPage,
     page: pageNumber,
     with_shared: false,

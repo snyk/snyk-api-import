@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as yargs from 'yargs';
 import { getLoggingPath } from '../lib/get-logging-path';
 const debug = debugLib('snyk:generate-data-script');
@@ -30,6 +30,7 @@ export const builder = {
   },
 };
 
+/* eslint-disable @typescript-eslint/naming-convention */
 const entityName: {
   [source in SupportedIntegrationTypesImportData]: string;
 } = {
@@ -42,6 +43,8 @@ const entityName: {
   'bitbucket-cloud': 'workspace',
   'bitbucket-cloud-app': 'workspace',
 };
+
+/* eslint-enable @typescript-eslint/naming-convention */
 
 export async function generateOrgData(
   source: SupportedIntegrationTypesImportData,

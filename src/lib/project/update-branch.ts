@@ -1,4 +1,4 @@
-import debug = require('debug');
+import debug from 'debug';
 import type { requestsManager } from 'snyk-request-manager';
 import { updateProject } from '../api/project';
 
@@ -20,7 +20,9 @@ export async function updateBranch(
     // clearing existing branch information when analysis failed or when
     // the SCM probe couldn't resolve the default branch.
     if (!defaultBranch || defaultBranch.trim() === '') {
-      debug(`Detected empty default branch for project ${projectPublicId}; skipping update`);
+      debug(
+        `Detected empty default branch for project ${projectPublicId}; skipping update`,
+      );
       return { updated };
     }
 

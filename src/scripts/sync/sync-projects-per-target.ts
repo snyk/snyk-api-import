@@ -1,5 +1,5 @@
 import type { requestsManager } from 'snyk-request-manager';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 
 import { getGithubRepoMetaData } from '../../lib/source-handlers/github';
 import { getGitHubCloudAppRepoMetadata } from '../../lib/source-handlers/github-cloud-app';
@@ -14,7 +14,7 @@ import type {
 import { ProjectUpdateType } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { deactivateProject, listProjects } from '../../lib';
-import * as pMap from 'p-map';
+import pMap from 'p-map';
 import { cloneAndAnalyze } from './clone-and-analyze';
 import { getBitbucketCloudAuth } from '../../lib/source-handlers/bitbucket-cloud/get-bitbucket-cloud-auth';
 import type {
@@ -232,7 +232,9 @@ export async function syncProjectsForTarget(
       }
       // Only deactivate projects whose branch does not match the detected default branch
       const detectedBranch = targetMeta.branch;
-  deactivate = res.remove.filter((p: SnykProject) => p.branch !== detectedBranch);
+      deactivate = res.remove.filter(
+        (p: SnykProject) => p.branch !== detectedBranch,
+      );
       createProjects = res.import;
     } else if (
       origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP
@@ -293,7 +295,9 @@ export async function syncProjectsForTarget(
         targetMeta.branch = res.branch;
       }
       const detectedBranchApp = targetMeta.branch;
-  deactivate = res.remove.filter((p: SnykProject) => p.branch !== detectedBranchApp);
+      deactivate = res.remove.filter(
+        (p: SnykProject) => p.branch !== detectedBranchApp,
+      );
       createProjects = res.import;
     } else if (
       origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER

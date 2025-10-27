@@ -1,5 +1,5 @@
 import 'source-map-support/register';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as qs from 'querystring';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
@@ -58,7 +58,9 @@ export async function createOrg(
     return res.data;
   } catch (e: any) {
     if (e && e.name === 'NotFoundError') {
-      debug('v1 create org returned 404; retrying POST /orgs against REST API base');
+      debug(
+        'v1 create org returned 404; retrying POST /orgs against REST API base',
+      );
       const res2 = await requestManager.request({
         verb: 'post',
         url: `/orgs`,

@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as bunyan from 'bunyan';
 import * as fs from 'fs';
 

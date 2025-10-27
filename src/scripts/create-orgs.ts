@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -135,7 +135,7 @@ export async function createOrgs(
   }
   try {
     orgsData = await streamData<CreateOrgData>(orgsFilePath, 'orgs');
-  } catch (e) {
+  } catch {
     throw new Error(`Failed to parse organizations from ${filePath}`);
   }
   debug(`Loaded ${orgsData.length} organizations to create ${Date.now()}`);

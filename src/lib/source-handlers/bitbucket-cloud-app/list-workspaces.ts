@@ -1,5 +1,5 @@
 import type { BitbucketWorkspace } from './types';
-import * as needle from 'needle';
+import needle from 'needle';
 import { getBitbucketAppToken } from './get-bitbucket-app-token';
 
 export async function listBitbucketCloudAppWorkspaces(

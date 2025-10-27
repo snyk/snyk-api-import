@@ -1,6 +1,6 @@
 import type { BitbucketCloudAuthConfig } from './types';
 import { getBitbucketCloudToken } from './get-token';
-import * as needle from 'needle';
+import needle from 'needle';
 
 export async function bitbucketCloudWorkspaceIsEmpty(
   config: BitbucketCloudAuthConfig,

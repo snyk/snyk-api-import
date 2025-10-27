@@ -1,4 +1,4 @@
-import * as needle from 'needle';
+import needle from 'needle';
 import type { BitbucketCloudAppConfig } from './types';
 
 let cachedToken: string | null = null;

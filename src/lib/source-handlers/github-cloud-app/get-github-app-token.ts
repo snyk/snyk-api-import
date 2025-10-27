@@ -1,6 +1,6 @@
 import { createAppAuth } from '@octokit/auth-app';
 import { Octokit } from '@octokit/rest';
-import { GitHubAppConfig } from './types';
+import type { GitHubAppConfig } from './types';
 
 let cachedToken: string | null = null;
 let tokenExpiry: number | null = null;

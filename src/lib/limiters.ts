@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import Bottleneck from 'bottleneck';
 
 export async function limiterForScm(

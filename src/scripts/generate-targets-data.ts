@@ -1,5 +1,5 @@
 import { intersection, uniqBy } from 'lodash';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 
 import type { CreatedOrg, ImportTarget } from '../lib/types';
 import { SupportedIntegrationTypesImportData } from '../lib/types';
@@ -114,7 +114,10 @@ export async function generateTargetsImportDataFile(
         // password). Fall back to API or OAuth tokens if user creds are
         // not available.
         let config: BitbucketCloudAuthConfig;
-        if (process.env.BITBUCKET_CLOUD_USERNAME && process.env.BITBUCKET_CLOUD_PASSWORD) {
+        if (
+          process.env.BITBUCKET_CLOUD_USERNAME &&
+          process.env.BITBUCKET_CLOUD_PASSWORD
+        ) {
           config = {
             type: 'user',
             username: process.env.BITBUCKET_CLOUD_USERNAME!,
@@ -131,7 +134,9 @@ export async function generateTargetsImportDataFile(
             token: process.env.BITBUCKET_CLOUD_OAUTH_TOKEN!,
           };
         } else {
-          throw new Error('No Bitbucket Cloud authentication env vars found for generating targets data. Please set BITBUCKET_CLOUD_USERNAME and BITBUCKET_CLOUD_PASSWORD, or BITBUCKET_CLOUD_API_TOKEN, or BITBUCKET_CLOUD_OAUTH_TOKEN.');
+          throw new Error(
+            'No Bitbucket Cloud authentication env vars found for generating targets data. Please set BITBUCKET_CLOUD_USERNAME and BITBUCKET_CLOUD_PASSWORD, or BITBUCKET_CLOUD_API_TOKEN, or BITBUCKET_CLOUD_OAUTH_TOKEN.',
+          );
         }
         entities = await listBitbucketCloudRepos(config, topLevelEntity.name);
       } else if (
@@ -168,7 +173,9 @@ export async function generateTargetsImportDataFile(
                 return s;
             }
           };
-          const integrationKey = mapSourceToSnykIntegrationKey(source as string);
+          const integrationKey = mapSourceToSnykIntegrationKey(
+            source as string,
+          );
           integrationId = res[integrationKey];
           debug(
             `Looked up integrationId for org ${orgId} source ${source} (key=${integrationKey}): ${integrationId}`,

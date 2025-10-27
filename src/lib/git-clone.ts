@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';

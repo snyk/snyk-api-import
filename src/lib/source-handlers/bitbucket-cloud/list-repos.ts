@@ -1,7 +1,7 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import type { BitbucketCloudRepoData, BitbucketCloudAuthConfig } from './types';
 import { getBitbucketCloudToken } from './get-token';
-import * as needle from 'needle';
+import needle from 'needle';
 
 const debug = debugLib('snyk:bitbucket-cloud');
 

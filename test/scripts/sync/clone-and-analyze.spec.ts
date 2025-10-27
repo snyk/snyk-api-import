@@ -4,19 +4,45 @@ jest.mock('../../../src/lib', () => {
     ...original,
     gitClone: jest.fn(async () => {
       const testName = expect.getState().currentTestName;
-      if (testName?.includes('processing empty repository with no branch throws')) {
-        return { success: false, repoPath: undefined, gitResponse: 'fatal: Remote branch master not found in upstream origin' };
+      if (
+        testName?.includes('processing empty repository with no branch throws')
+      ) {
+        return {
+          success: false,
+          repoPath: undefined,
+          gitResponse:
+            'fatal: Remote branch master not found in upstream origin',
+        };
       }
-      return { success: true, repoPath: `${process.cwd()}/mock-repo`, gitResponse: 'ok' };
+      return {
+        success: true,
+        repoPath: `${process.cwd()}/mock-repo`,
+        gitResponse: 'ok',
+      };
     }),
     find: jest.fn(async (repoPath: string) => {
       const testName = expect.getState().currentTestName;
       let files: string[] = [];
-      if (testName?.includes('diff between files in the repo vs monitored in Snyk (defaults to OS)')) {
+      if (
+        testName?.includes(
+          'diff between files in the repo vs monitored in Snyk (defaults to OS)',
+        )
+      ) {
         files = [`${repoPath}/Gemfile.lock`];
-      } else if (testName?.includes('diff between files in the repo vs monitored in Snyk (with IAC enabled)')) {
-        files = [`${repoPath}/Gemfile.lock`, `${repoPath}/bundler-app/Gemfile.lock`];
-      } else if (testName?.includes('detects changes needed for a particular ecosystem (npm)')) {
+      } else if (
+        testName?.includes(
+          'diff between files in the repo vs monitored in Snyk (with IAC enabled)',
+        )
+      ) {
+        files = [
+          `${repoPath}/Gemfile.lock`,
+          `${repoPath}/bundler-app/Gemfile.lock`,
+        ];
+      } else if (
+        testName?.includes(
+          'detects changes needed for a particular ecosystem (npm)',
+        )
+      ) {
         files = [`${repoPath}/npm-project/package.json`];
       } else if (testName?.includes('no changes needed')) {
         // Return all monitored project files so remove: []
@@ -28,10 +54,19 @@ jest.mock('../../../src/lib', () => {
           `${repoPath}/npm-project/package.json`,
           `${repoPath}/npm-project-with-policy/package.json`,
         ];
-      } else if (testName?.includes('processing repository with no supported manifests > nothing to do')) {
+      } else if (
+        testName?.includes(
+          'processing repository with no supported manifests > nothing to do',
+        )
+      ) {
         files = [];
-      } else if (testName?.includes('correctly matches python files using globs')) {
-        files = [`${repoPath}/requirements/dev.txt`, `${repoPath}/requirements/prod.txt`];
+      } else if (
+        testName?.includes('correctly matches python files using globs')
+      ) {
+        files = [
+          `${repoPath}/requirements/dev.txt`,
+          `${repoPath}/requirements/prod.txt`,
+        ];
       }
       return { files, allFilesFound: files };
     }),
@@ -75,8 +110,12 @@ describe('cloneAndAnalyze', () => {
         username: 'fakeuser',
         appPassword: 'fakepass',
       };
-  jest.spyOn(BitbucketCloudSyncClient.prototype, 'getRepository').mockResolvedValue({ mainbranch: { name: 'main' } } as any);
-  jest.spyOn(BitbucketCloudSyncClient.prototype, 'listFiles').mockImplementation(async () => ['package.json', 'newfile.json']);
+      jest
+        .spyOn(BitbucketCloudSyncClient.prototype, 'getRepository')
+        .mockResolvedValue({ mainbranch: { name: 'main' } } as any);
+      jest
+        .spyOn(BitbucketCloudSyncClient.prototype, 'listFiles')
+        .mockImplementation(async () => ['package.json', 'newfile.json']);
       const target = { owner: 'workspace', name: 'repo', branch: 'main' };
       const result = await cloneAndAnalyze(
         SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD,
@@ -87,8 +126,8 @@ describe('cloneAndAnalyze', () => {
         bitbucketAuth,
         target,
       );
-  expect(result.import).toEqual([]);
-  expect(result.remove).toEqual([]);
+      expect(result.import).toEqual([]);
+      expect(result.remove).toEqual([]);
     });
 
     it('Bitbucket Cloud App: returns correct import/remove lists (uses token)', async () => {
@@ -119,8 +158,12 @@ describe('cloneAndAnalyze', () => {
         type: 'oauth' as any,
         token: 'app-token',
       };
-      jest.spyOn(BitbucketCloudSyncClient.prototype, 'getRepository').mockResolvedValue({ mainbranch: { name: 'main' } } as any);
-      jest.spyOn(BitbucketCloudSyncClient.prototype, 'listFiles').mockImplementation(async () => ['package.json', 'newfile.json']);
+      jest
+        .spyOn(BitbucketCloudSyncClient.prototype, 'getRepository')
+        .mockResolvedValue({ mainbranch: { name: 'main' } } as any);
+      jest
+        .spyOn(BitbucketCloudSyncClient.prototype, 'listFiles')
+        .mockImplementation(async () => ['package.json', 'newfile.json']);
       const target = { owner: 'workspace', name: 'repo', branch: 'main' };
       const result = await cloneAndAnalyze(
         SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP,
@@ -159,8 +202,16 @@ describe('cloneAndAnalyze', () => {
         manifestTypes: ['package.json'],
         exclusionGlobs: [],
       };
-      const datacenterAuth = { sourceUrl: 'http://bitbucket-server', token: 'servertoken' };
-  jest.spyOn(axios, 'get').mockResolvedValue({ status: 200, data: { values: ['package.json', 'other.txt'] } });
+      const datacenterAuth = {
+        sourceUrl: 'http://bitbucket-server',
+        token: 'servertoken',
+      };
+      jest
+        .spyOn(axios, 'get')
+        .mockResolvedValue({
+          status: 200,
+          data: { values: ['package.json', 'other.txt'] },
+        });
       const target = { projectKey: 'PROJ', repoSlug: 'repo', branch: 'main' };
       const result = await cloneAndAnalyze(
         SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER,
@@ -171,8 +222,8 @@ describe('cloneAndAnalyze', () => {
         datacenterAuth,
         target,
       );
-  expect(result.import).toEqual([]);
-  expect(result.remove).toEqual([]);
+      expect(result.import).toEqual([]);
+      expect(result.remove).toEqual([]);
     });
   });
   const OLD_ENV = process.env;
@@ -516,7 +567,9 @@ describe('cloneAndAnalyze', () => {
             entitlements: ['openSource'],
           },
         ),
-      ).rejects.toThrow('fatal: Remote branch master not found in upstream origin');
+      ).rejects.toThrow(
+        'fatal: Remote branch master not found in upstream origin',
+      );
     }, 70000);
 
     it('correctly matches python files using globs', async () => {
@@ -562,90 +615,99 @@ describe('cloneAndAnalyze', () => {
     beforeEach(() => {
       process.env.GITHUB_TOKEN = process.env.TEST_GHE_TOKEN;
     });
-    (GHE_URL ? it : it.skip)('identifies correctly that all files need importing since the target is empty', async () => {
-      // Arrange
-      const projects: SnykProject[] = [];
-      const repoMeta: RepoMetaData = {
-        branch: 'master',
-        archived: false,
-        cloneUrl: `https://${GHE_URL!.host}/snyk-fixtures/mono-repo.git`,
-        sshUrl: `git@${GHE_URL!.host}/snyk-fixtures/mono-repo.git`,
-      };
-      // Act
-      const res = await cloneAndAnalyze(
-        SupportedIntegrationTypesUpdateProject.GITHUB,
-        repoMeta,
-        projects,
-        {
-          entitlements: ['openSource'],
-        },
-      );
-      // Assert
-      expect(res).toStrictEqual({
-        import: [
-          'Gemfile.lock',
-          'build.gradle',
-          'build.sbt',
-          'multi-module/pom.xml',
-          'multi-module/server/pom.xml',
-          'multi-module/webapp/pom.xml',
-          'package.json',
-          'pom.xml',
-          'requirements.txt',
-          'single-module/pom.xml',
-        ],
-        remove: [],
-      });
-    });
-    (GHE_URL ? it : it.skip)('identifies correctly the diff between files in the repo vs monitored in Snyk (with IAC & Docker enabled)', async () => {
-      // Arrange
-      const projects: SnykProject[] = [];
-      const repoMeta: RepoMetaData = {
-        branch: 'master',
-        archived: false,
-        cloneUrl: `https://${GHE_URL!.host}/snyk-fixtures/docker-goof.git`,
-        sshUrl: `git@${GHE_URL!.host}/snyk-fixtures/docker-goof.git`,
-      };
-      // Act
-      const res = await cloneAndAnalyze(
-        SupportedIntegrationTypesUpdateProject.GITHUB,
-        repoMeta,
-        projects,
-        {
-          entitlements: [
-            'openSource',
-            'infrastructureAsCode',
-            'dockerfileFromScm',
+    (GHE_URL ? it : it.skip)(
+      'identifies correctly that all files need importing since the target is empty',
+      async () => {
+        // Arrange
+        const projects: SnykProject[] = [];
+        const repoMeta: RepoMetaData = {
+          branch: 'master',
+          archived: false,
+          cloneUrl: `https://${GHE_URL!.host}/snyk-fixtures/mono-repo.git`,
+          sshUrl: `git@${GHE_URL!.host}/snyk-fixtures/mono-repo.git`,
+        };
+        // Act
+        const res = await cloneAndAnalyze(
+          SupportedIntegrationTypesUpdateProject.GITHUB,
+          repoMeta,
+          projects,
+          {
+            entitlements: ['openSource'],
+          },
+        );
+        // Assert
+        expect(res).toStrictEqual({
+          import: [
+            'Gemfile.lock',
+            'build.gradle',
+            'build.sbt',
+            'multi-module/pom.xml',
+            'multi-module/server/pom.xml',
+            'multi-module/webapp/pom.xml',
+            'package.json',
+            'pom.xml',
+            'requirements.txt',
+            'single-module/pom.xml',
           ],
-        },
-      );
-      // Assert
-      expect(res).toStrictEqual({
-        import: ['Dockerfile'],
-        remove: [],
-      });
-    });
-    (GHE_URL ? it : it.skip)('repo appears empty when entitlements not enabled', async () => {
-      // Arrange
-      const projects: SnykProject[] = [];
-      const repoMeta: RepoMetaData = {
-        branch: 'master',
-        archived: false,
-        cloneUrl: `https://${GHE_URL!.host}/snyk-fixtures/docker-goof.git`,
-        sshUrl: `git@${GHE_URL!.host}/snyk-fixtures/docker-goof.git`,
-      };
-      // Act
-      const res = await cloneAndAnalyze(
-        SupportedIntegrationTypesUpdateProject.GITHUB,
-        repoMeta,
-        projects,
-        { entitlements: ['openSource'] },
-      );
-      // Assert
-      expect(res).toStrictEqual({
-        import: [],
-        remove: [],
-      });
-    });
+          remove: [],
+        });
+      },
+    );
+    (GHE_URL ? it : it.skip)(
+      'identifies correctly the diff between files in the repo vs monitored in Snyk (with IAC & Docker enabled)',
+      async () => {
+        // Arrange
+        const projects: SnykProject[] = [];
+        const repoMeta: RepoMetaData = {
+          branch: 'master',
+          archived: false,
+          cloneUrl: `https://${GHE_URL!.host}/snyk-fixtures/docker-goof.git`,
+          sshUrl: `git@${GHE_URL!.host}/snyk-fixtures/docker-goof.git`,
+        };
+        // Act
+        const res = await cloneAndAnalyze(
+          SupportedIntegrationTypesUpdateProject.GITHUB,
+          repoMeta,
+          projects,
+          {
+            entitlements: [
+              'openSource',
+              'infrastructureAsCode',
+              'dockerfileFromScm',
+            ],
+          },
+        );
+        // Assert
+        expect(res).toStrictEqual({
+          import: ['Dockerfile'],
+          remove: [],
+        });
+      },
+    );
+    (GHE_URL ? it : it.skip)(
+      'repo appears empty when entitlements not enabled',
+      async () => {
+        // Arrange
+        const projects: SnykProject[] = [];
+        const repoMeta: RepoMetaData = {
+          branch: 'master',
+          archived: false,
+          cloneUrl: `https://${GHE_URL!.host}/snyk-fixtures/docker-goof.git`,
+          sshUrl: `git@${GHE_URL!.host}/snyk-fixtures/docker-goof.git`,
+        };
+        // Act
+        const res = await cloneAndAnalyze(
+          SupportedIntegrationTypesUpdateProject.GITHUB,
+          repoMeta,
+          projects,
+          { entitlements: ['openSource'] },
+        );
+        // Assert
+        expect(res).toStrictEqual({
+          import: [],
+          remove: [],
+        });
+      },
+    );
   });
 });

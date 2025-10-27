@@ -12,7 +12,11 @@ describe('BitbucketCloudSyncClient branch->SHA fallback', () => {
   });
 
   it('resolves branch to sha and retries with candidate sha on 404', async () => {
-    const auth: BitbucketAuth = { type: 'basic', username: 'user', appPassword: 'pass' } as any;
+    const auth: BitbucketAuth = {
+      type: 'basic',
+      username: 'user',
+      appPassword: 'pass',
+    } as any;
 
     // fake axios instance used by the client
     const fakeInstance: any = {
@@ -33,7 +37,9 @@ describe('BitbucketCloudSyncClient branch->SHA fallback', () => {
     const notFoundError: any = new Error('Not Found');
     notFoundError.response = {
       status: 404,
-      data: { error: { data: { shas: ['deadbeefcafebabe1234567890abcdef12345678'] } } },
+      data: {
+        error: { data: { shas: ['deadbeefcafebabe1234567890abcdef12345678'] } },
+      },
     };
 
     // 3) retry with sha returns 200 with file list
@@ -45,29 +51,35 @@ describe('BitbucketCloudSyncClient branch->SHA fallback', () => {
     // Arrange an implementation based on the requested URL so order doesn't
     // matter and different URL forms are handled.
     fakeInstance.get.mockImplementation((url: string) => {
-      if (typeof url !== 'string') return Promise.resolve({ data: { values: [] } });
-      if (url.includes('/refs/branches')) return Promise.resolve(refsResponse as any);
-      if (url.includes('src/?at=feature%2Fdev')) return Promise.reject(notFoundError);
+      if (typeof url !== 'string')
+        return Promise.resolve({ data: { values: [] } });
+      if (url.includes('/refs/branches'))
+        return Promise.resolve(refsResponse as any);
+      if (url.includes('src/?at=feature%2Fdev'))
+        return Promise.reject(notFoundError);
       if (url.includes('deadbeefcafebabe1234567890abcdef12345678'))
         return Promise.resolve(shaResponse as any);
-      if (url.includes('/src/feature%2Fdev/')) return Promise.resolve(shaResponse as any);
+      if (url.includes('/src/feature%2Fdev/'))
+        return Promise.resolve(shaResponse as any);
       return Promise.resolve({ data: { values: [] } } as any);
     });
 
     const client = new BitbucketCloudSyncClient(auth);
 
-  const files = await client.listFiles('workspace', 'repo', 'feature/dev');
+    const files = await client.listFiles('workspace', 'repo', 'feature/dev');
 
-  expect(files).toEqual(['README.md', 'package.json']);
+    expect(files).toEqual(['README.md', 'package.json']);
 
     // Verify the client tried the encoded query and then retried with sha URL
     expect(fakeInstance.get).toHaveBeenCalled();
     const calls = fakeInstance.get.mock.calls.map((c: any[]) => c[0]);
-  // first call should be refs search path
-  expect(calls[0]).toEqual(expect.stringContaining('refs/branches'));
-  // second call should be the query-param src with branch
-  expect(calls[1]).toEqual(expect.stringContaining('src/?at='));
-  // third call should include the sha
-  expect(calls[2]).toEqual(expect.stringContaining('deadbeefcafebabe1234567890abcdef12345678'));
+    // first call should be refs search path
+    expect(calls[0]).toEqual(expect.stringContaining('refs/branches'));
+    // second call should be the query-param src with branch
+    expect(calls[1]).toEqual(expect.stringContaining('src/?at='));
+    // third call should include the sha
+    expect(calls[2]).toEqual(
+      expect.stringContaining('deadbeefcafebabe1234567890abcdef12345678'),
+    );
   });
 });

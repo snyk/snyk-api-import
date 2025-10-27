@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as micromatch from 'micromatch';
 import * as pathLib from 'path';
-import * as debugModule from 'debug';
+import debugModule from 'debug';
+
 const debug = debugModule('snyk:find-files');
 
 /**

@@ -66,7 +66,8 @@ import { deleteFiles } from '../delete-files';
 // successful mocked network calls don't fail when TEST_* vars are not set
 process.env.TEST_GHE_URL = process.env.TEST_GHE_URL || 'https://ghe.example';
 process.env.TEST_GHE_TOKEN = process.env.TEST_GHE_TOKEN || 'test-ghe-token';
-process.env.TEST_GITLAB_TOKEN = process.env.TEST_GITLAB_TOKEN || 'test-gitlab-token';
+process.env.TEST_GITLAB_TOKEN =
+  process.env.TEST_GITLAB_TOKEN || 'test-gitlab-token';
 process.env.TEST_GITLAB_BASE_URL =
   process.env.TEST_GITLAB_BASE_URL || 'https://gitlab.example';
 process.env.BBC_USERNAME = process.env.BBC_USERNAME || 'bb-user';

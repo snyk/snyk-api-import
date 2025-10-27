@@ -24,19 +24,31 @@ describe('`snyk-api-import sync <...>`', () => {
     nock.cleanAll();
     vol.reset();
     jest.resetAllMocks();
-    jest.spyOn(require('child_process'), 'exec').mockImplementation((cmd: any, opts: any, cb: any) => {
-      cb(null, 'mocked output', '');
-      return { on: (event: string, fn: (code: number) => void) => { if (event === 'exit') fn(0); } };
-    });
+    jest
+      .spyOn(require('child_process'), 'exec')
+      .mockImplementation((cmd: any, opts: any, cb: any) => {
+        cb(null, 'mocked output', '');
+        return {
+          on: (event: string, fn: (code: number) => void) => {
+            if (event === 'exit') fn(0);
+          },
+        };
+      });
   });
   beforeEach(() => {
     vol.reset();
     jest.resetAllMocks();
-    jest.spyOn(require('child_process'), 'exec').mockImplementation((cmd: any, opts: any, cb: any) => {
-      // Default mock: success, can be customized per test
-      cb(null, 'mocked output', '');
-      return { on: (event: string, fn: (code: number) => void) => { if (event === 'exit') fn(0); } };
-    });
+    jest
+      .spyOn(require('child_process'), 'exec')
+      .mockImplementation((cmd: any, opts: any, cb: any) => {
+        // Default mock: success, can be customized per test
+        cb(null, 'mocked output', '');
+        return {
+          on: (event: string, fn: (code: number) => void) => {
+            if (event === 'exit') fn(0);
+          },
+        };
+      });
   });
   const ORG_ID = 'test-org-id';
   afterAll(() => {
@@ -205,7 +217,7 @@ describe('`snyk-api-import sync <...>`', () => {
 
         // give file a little time to be finished to be written
         await new Promise((r) => setTimeout(r, 20000));
-  const file = vol.readFileSync(updatedLog, 'utf8');
+        const file = vol.readFileSync(updatedLog, 'utf8');
         // 1 project deactivated
         expect(file).toMatch('"Snyk project \\"deactivate\\" update completed');
         // another project has branch updated

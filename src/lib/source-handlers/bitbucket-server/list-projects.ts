@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import type { OutgoingHttpHeaders } from 'http2';
 import type { BitbucketServerProjectData } from './types';
 import { getBitbucketServerToken } from './get-bitbucket-server-token';

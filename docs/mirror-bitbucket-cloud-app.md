@@ -1,6 +1,6 @@
 # Mirroring Bitbucket Cloud (App) organizations and repos in Snyk
 
-This document explains how to use the Bitbucket Cloud *App* (OAuth2 client credentials) flow with snyk-api-import.
+This document explains how to use the Bitbucket Cloud _App_ (OAuth2 client credentials) flow with snyk-api-import.
 
 Summary
 
@@ -102,6 +102,7 @@ jobs:
 Troubleshooting
 
 - 401 / 403 when calling Bitbucket API:
+
   - Verify `BITBUCKET_APP_CLIENT_ID` and `BITBUCKET_APP_CLIENT_SECRET` are correct.
   - Confirm the OAuth consumer has the necessary scopes and access to the target workspaces.
   - Enable debug logging: `DEBUG=*snyk*` to see the HTTP requests and responses.

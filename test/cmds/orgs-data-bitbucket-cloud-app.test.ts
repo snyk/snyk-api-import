@@ -9,8 +9,8 @@ describe('CLI orgs:data --source=bitbucket-cloud-app', () => {
     await expect(
       generateOrgImportData(
         SupportedIntegrationTypesImportOrgData.BITBUCKET_CLOUD_APP,
-        'dummy-group-id'
-      )
+        'dummy-group-id',
+      ),
     ).resolves.toMatchObject({ exitCode: 1 });
     process.env = original;
   });

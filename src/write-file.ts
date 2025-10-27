@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import { getLoggingPath } from './lib';
 const debug = debugLib('snyk:write-file');
 

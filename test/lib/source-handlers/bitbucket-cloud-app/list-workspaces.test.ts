@@ -1,4 +1,7 @@
-import { listBitbucketCloudAppWorkspaces, bitbucketCloudAppWorkspaceIsEmpty } from '../../../../src/lib/source-handlers/bitbucket-cloud-app/list-workspaces';
+import {
+  listBitbucketCloudAppWorkspaces,
+  bitbucketCloudAppWorkspaceIsEmpty,
+} from '../../../../src/lib/source-handlers/bitbucket-cloud-app/list-workspaces';
 
 jest.mock('needle');
 const needle = require('needle') as jest.MockedFunction<any>;
@@ -15,9 +18,13 @@ describe('bitbucket cloud app workspaces', () => {
     process.env.BITBUCKET_APP_CLIENT_SECRET = 'secret';
 
     // first call: token exchange
-    needle.mockResolvedValueOnce({ body: { access_token: 'tok', expires_in: 3600 } });
+    needle.mockResolvedValueOnce({
+      body: { access_token: 'tok', expires_in: 3600 },
+    });
     // second call: list workspaces
-    needle.mockResolvedValueOnce({ body: { values: [{ uuid: 'u1', name: 'n1', slug: 's1' }] } });
+    needle.mockResolvedValueOnce({
+      body: { values: [{ uuid: 'u1', name: 'n1', slug: 's1' }] },
+    });
 
     const ws = await listBitbucketCloudAppWorkspaces();
     expect(ws).toEqual([{ uuid: 'u1', name: 'n1', slug: 's1' }]);
@@ -27,7 +34,9 @@ describe('bitbucket cloud app workspaces', () => {
     process.env.BITBUCKET_APP_CLIENT_ID = 'id';
     process.env.BITBUCKET_APP_CLIENT_SECRET = 'secret';
 
-    needle.mockResolvedValueOnce({ body: { access_token: 'tok', expires_in: 3600 } });
+    needle.mockResolvedValueOnce({
+      body: { access_token: 'tok', expires_in: 3600 },
+    });
     needle.mockResolvedValueOnce({ body: { size: 0 } });
 
     const res = await bitbucketCloudAppWorkspaceIsEmpty('myws');

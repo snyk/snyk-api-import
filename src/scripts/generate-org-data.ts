@@ -1,4 +1,5 @@
-import * as pMap from 'p-map';
+/* eslint-disable @typescript-eslint/naming-convention */
+import pMap from 'p-map';
 import type { SnykOrgData } from '../lib/source-handlers/github';
 import {
   githubEnterpriseOrganizations,

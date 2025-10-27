@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 
 const debug = debugLib('snyk:bitbucket-cloud-sync-client');
 
@@ -109,8 +109,8 @@ export class BitbucketCloudSyncClient {
     try {
       // Use max_depth to include subdirectories up to a reasonable limit and follow pagination
       // URL-encode components (especially branch) because branch names can contain slashes
-  const encWorkspace = encodeURIComponent(decodeURIComponent(workspace));
-  const encRepo = encodeURIComponent(decodeURIComponent(repoSlug));
+      const encWorkspace = encodeURIComponent(decodeURIComponent(workspace));
+      const encRepo = encodeURIComponent(decodeURIComponent(repoSlug));
       // Prevent double-encoding: if branch is already encoded, decode then encode
       // Encode individual path segments so that literal '/' characters in branch
       // names are preserved as separators (Bitbucket expects slashes in branch
@@ -169,7 +169,7 @@ export class BitbucketCloudSyncClient {
             );
           }
         }
-  } catch {
+      } catch {
         // If the query-based lookup fails (permissions, parsing), try a
         // direct branch ref endpoint which accepts the branch name as a
         // path segment. Some Bitbucket setups return data for the direct
@@ -186,7 +186,10 @@ export class BitbucketCloudSyncClient {
           if (directTarget) {
             if (directTarget.hash) resolvedSha = directTarget.hash;
             else if (directTarget.sha) resolvedSha = directTarget.sha;
-            else if (Array.isArray(directTarget.shas) && directTarget.shas.length)
+            else if (
+              Array.isArray(directTarget.shas) &&
+              directTarget.shas.length
+            )
               resolvedSha = directTarget.shas[0];
           }
           if (resolvedSha) {
@@ -194,7 +197,7 @@ export class BitbucketCloudSyncClient {
               `[BitbucketCloudSyncClient] Resolved branch '${branch}' to commit ${resolvedSha} via direct refs/branches/{branch}`,
             );
           }
-  } catch {
+        } catch {
           // As a last resort, try the commits endpoint for the branch; this
           // returns commits for the branch and the first entry has the hash.
           try {
@@ -210,7 +213,9 @@ export class BitbucketCloudSyncClient {
               Array.isArray(commitsRes.data.values) &&
               commitsRes.data.values.length > 0
             ) {
-              resolvedSha = commitsRes.data.values[0]?.hash || commitsRes.data.values[0]?.sha;
+              resolvedSha =
+                commitsRes.data.values[0]?.hash ||
+                commitsRes.data.values[0]?.sha;
               if (resolvedSha) {
                 debug(
                   `[BitbucketCloudSyncClient] Resolved branch '${branch}' to commit ${resolvedSha} via commits/{branch}`,
@@ -344,8 +349,8 @@ export class BitbucketCloudSyncClient {
           }
           // Follow pagination if present
           if (res.data.next) {
-              // Bitbucket may include un-encoded branch names in the `next` link.
-              // Normalize the next URL by ensuring the branch path segment is URL-encoded.
+            // Bitbucket may include un-encoded branch names in the `next` link.
+            // Normalize the next URL by ensuring the branch path segment is URL-encoded.
             try {
               const nextRaw: string = res.data.next;
               const normalizedNext = (() => {
@@ -399,7 +404,7 @@ export class BitbucketCloudSyncClient {
             url = '';
           }
         } else {
-                  debug(
+          debug(
             `[BitbucketCloudSyncClient] Unexpected response format for workspace='${workspace}', repoSlug='${repoSlug}', branch='${branch}'.`,
           );
           break;
@@ -433,14 +438,19 @@ export class BitbucketCloudSyncClient {
           const respHeaders = err.response?.headers;
           console.error(
             `[BitbucketCloudSyncClient] 404 response body for ${workspace}/${repoSlug}:`,
-            typeof respData === 'string' ? respData : JSON.stringify(respData, null, 2),
+            typeof respData === 'string'
+              ? respData
+              : JSON.stringify(respData, null, 2),
           );
           console.error(
             `[BitbucketCloudSyncClient] 404 response headers for ${workspace}/${repoSlug}:`,
             JSON.stringify(respHeaders || {}, null, 2),
           );
         } catch (dumpErr) {
-          console.error('[BitbucketCloudSyncClient] Failed to stringify 404 response', dumpErr);
+          console.error(
+            '[BitbucketCloudSyncClient] Failed to stringify 404 response',
+            dumpErr,
+          );
         }
         throw new Error(
           `Bitbucket API returned 404 Not Found for ${workspace}/${repoSlug} (url: ${reqUrl}). This may indicate a malformed URL, a missing branch, or insufficient permissions. See logs for response body and headers.`,

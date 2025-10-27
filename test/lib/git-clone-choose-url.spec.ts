@@ -39,7 +39,10 @@ describe('gitClone uses chosen clone URL', () => {
     expect(mockClone).toHaveBeenCalledTimes(1);
     // clone(url, repoClonePath, cloneArgs)
     expect(mockClone.mock.calls[0][0]).toBe(meta.sshUrl);
-    expect(mockClone.mock.calls[0][2]).toMatchObject({ '--depth': '1', '--branch': 'master' });
+    expect(mockClone.mock.calls[0][2]).toMatchObject({
+      '--depth': '1',
+      '--branch': 'master',
+    });
     expect(res.success).toBe(true);
   });
 

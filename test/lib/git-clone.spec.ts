@@ -28,17 +28,14 @@ describe('gitClone (mocked simple-git)', () => {
 
   it('successfully clones a repo (github)', async () => {
     process.env.SNYK_LOG_PATH = __dirname;
-  (mockClone as any).mockResolvedValue('');
+    (mockClone as any).mockResolvedValue('');
 
-    const res = await gitClone(
-      SupportedIntegrationTypesUpdateProject.GITHUB,
-      {
-        branch: 'master',
-        archived: false,
-        cloneUrl: 'https://github.com/snyk-fixtures/monorepo-simple.git',
-        sshUrl: 'git@github.com:snyk-fixtures/monorepo-simple.git',
-      },
-    );
+    const res = await gitClone(SupportedIntegrationTypesUpdateProject.GITHUB, {
+      branch: 'master',
+      archived: false,
+      cloneUrl: 'https://github.com/snyk-fixtures/monorepo-simple.git',
+      sshUrl: 'git@github.com:snyk-fixtures/monorepo-simple.git',
+    });
 
     expect(res).toEqual({
       gitResponse: '',
@@ -50,17 +47,16 @@ describe('gitClone (mocked simple-git)', () => {
 
   it('fails to clone a repo for non-existent branch (github)', async () => {
     process.env.SNYK_LOG_PATH = __dirname;
-  (mockClone as any).mockRejectedValue(new Error('Remote branch non-existent not found in upstream origin'));
-
-    const res = await gitClone(
-      SupportedIntegrationTypesUpdateProject.GITHUB,
-      {
-        branch: 'non-existent',
-        archived: false,
-        cloneUrl: 'https://github.com/snyk-fixtures/monorepo-simple.git',
-        sshUrl: 'git@github.com:snyk-fixtures/monorepo-simple.git',
-      },
+    (mockClone as any).mockRejectedValue(
+      new Error('Remote branch non-existent not found in upstream origin'),
     );
+
+    const res = await gitClone(SupportedIntegrationTypesUpdateProject.GITHUB, {
+      branch: 'non-existent',
+      archived: false,
+      cloneUrl: 'https://github.com/snyk-fixtures/monorepo-simple.git',
+      sshUrl: 'git@github.com:snyk-fixtures/monorepo-simple.git',
+    });
 
     expect(res).toEqual({
       gitResponse: expect.stringContaining(
@@ -80,7 +76,7 @@ describe('gitClone (mocked simple-git)', () => {
 
     it('successfully clones a repo (GHE)', async () => {
       process.env.SNYK_LOG_PATH = __dirname;
-  (mockClone as any).mockResolvedValue('');
+      (mockClone as any).mockResolvedValue('');
 
       const res = await gitClone(SupportedIntegrationTypesUpdateProject.GHE, {
         branch: 'master',
@@ -99,7 +95,9 @@ describe('gitClone (mocked simple-git)', () => {
 
     it('fails to clone a repo for non-existent branch (GHE)', async () => {
       process.env.SNYK_LOG_PATH = __dirname;
-  (mockClone as any).mockRejectedValue(new Error('Remote branch non-existent not found in upstream origin'));
+      (mockClone as any).mockRejectedValue(
+        new Error('Remote branch non-existent not found in upstream origin'),
+      );
 
       const res = await gitClone(SupportedIntegrationTypesUpdateProject.GHE, {
         branch: 'non-existent',
@@ -119,7 +117,7 @@ describe('gitClone (mocked simple-git)', () => {
     it('fails to clone a repo with invalid token (GHE)', async () => {
       process.env.SNYK_LOG_PATH = __dirname;
       process.env.GITHUB_TOKEN = 'bad-token';
-  (mockClone as any).mockRejectedValue(new Error('Authentication failed'));
+      (mockClone as any).mockRejectedValue(new Error('Authentication failed'));
 
       const res = await gitClone(SupportedIntegrationTypesUpdateProject.GHE, {
         branch: 'non-existent',

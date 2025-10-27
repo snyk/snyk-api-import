@@ -1,6 +1,6 @@
 import 'source-map-support/register';
-import * as needle from 'needle';
-import * as debugLib from 'debug';
+import needle from 'needle';
+import debugLib from 'debug';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
 import type { requestsManager } from 'snyk-request-manager';
@@ -31,13 +31,13 @@ export async function deleteProjects(
     const body = {
       projects,
     };
+    /* eslint-disable @typescript-eslint/naming-convention */
     const res = await needle(
       'post',
       `${SNYK_API}/org/${orgId.trim()}/projects/bulk-delete`,
       body,
       {
         json: true,
-        // eslint-disable-next-line @typescript-eslint/camelcase
         read_timeout: 30000,
         headers: {
           'content-type': 'application/json',
@@ -45,6 +45,7 @@ export async function deleteProjects(
         },
       },
     );
+    /* eslint-enable @typescript-eslint/naming-convention */
     const statusCode = res.statusCode;
     if (!statusCode || statusCode !== 200) {
       throw new Error(

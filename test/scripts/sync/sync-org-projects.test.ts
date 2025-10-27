@@ -51,7 +51,7 @@ describe('updateTargets', () => {
   let listIntegrationsSpy: jest.SpyInstance;
 
   beforeAll(() => {
-  githubSpy = jest.spyOn(github, 'getGithubRepoMetaData');
+    githubSpy = jest.spyOn(github, 'getGithubRepoMetaData');
     updateProjectsSpy = jest.spyOn(projectApi, 'updateProject');
     deactivateProjectsSpy = jest
       .spyOn(projectApi, 'deactivateProject')
@@ -1102,13 +1102,13 @@ describe('updateOrgTargets', () => {
 
   beforeAll(() => {
     featureFlagsSpy = jest.spyOn(featureFlags, 'getFeatureFlag');
-  listTargetsSpy = jest.spyOn(orgApi, 'listTargets');
-  listProjectsSpy = jest.spyOn(orgApi, 'listProjects');
+    listTargetsSpy = jest.spyOn(orgApi, 'listTargets');
+    listProjectsSpy = jest.spyOn(orgApi, 'listProjects');
     logUpdatedProjectsSpy = jest.spyOn(updateProjectsLog, 'logUpdatedProjects');
     githubSpy = jest.spyOn(github, 'getGithubRepoMetaData');
     updateProjectSpy = jest.spyOn(projectApi, 'updateProject');
     deactivateProjectSpy = jest.spyOn(projectApi, 'deactivateProject');
-  cloneSpy = jest.spyOn(gitCloneMod, 'gitClone');
+    cloneSpy = jest.spyOn(gitCloneMod, 'gitClone');
     cloneAndAnalyzeSpy = jest.spyOn(clone, 'cloneAndAnalyze');
     listIntegrationsSpy = jest
       .spyOn(orgApi, 'listIntegrations')

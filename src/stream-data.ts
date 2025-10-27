@@ -1,7 +1,7 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 
 import * as fs from 'fs';
-import split = require('split');
+import split from 'split';
 
 const debug = debugLib('streamData:load-file');
 const debugSnyk = debugLib('snyk:load-file');

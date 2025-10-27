@@ -2,7 +2,7 @@ import * as bunyan from 'bunyan';
 import { IMPORT_JOB_RESULTS } from './../common';
 
 import { getLoggingPath } from './../lib';
-import { PollImportResponse } from './../lib/types';
+import type { PollImportResponse } from './../lib/types';
 
 export async function logJobResult(
   locationUrl: string,
@@ -21,7 +21,7 @@ export async function logJobResult(
       ],
     });
     log.info({ locationUrl, ...data }, 'Import job result');
-  } catch (e) {
+  } catch {
     // do nothing
   }
 }

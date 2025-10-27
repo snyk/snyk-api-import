@@ -10,7 +10,7 @@
   - [De-activating Snyk projects that represent files that have been renamed/moved/deleted](#de-activating-snyk-projects-that-represent-files-that-have-been-renamedmoveddeleted)
     - [Scenarios](#scenarios)
       - [File renamed/moves/deleted](#file-renamedmovesdeleted)
-      - [node\_modules, tests \& fixtures](#node_modules-tests--fixtures)
+      - [node_modules, tests \& fixtures](#node_modules-tests--fixtures)
   - [Detecting \& importing new files not already monitored in Snyk](#detecting--importing-new-files-not-already-monitored-in-snyk)
   - [Repository is archived](#repository-is-archived)
 - [Kick off sync](#kick-off-sync)
@@ -123,7 +123,6 @@ When `import` is triggered additional import logs will be generated. See [Kickin
 When running `sync` in `--dryRun` mode the logs will have `dryRun` as `true` so these can be separated from live updates.
 
 ## Examples
-
 
 ### Github.com
 

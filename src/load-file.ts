@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 const debug = debugLib('snyk:load-file');
 
 export async function loadFile(name: string): Promise<string> {

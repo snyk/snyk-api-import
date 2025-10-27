@@ -1,5 +1,5 @@
 import * as bunyan from 'bunyan';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as fs from 'fs';
 
 import { getLoggingPath } from './../lib';

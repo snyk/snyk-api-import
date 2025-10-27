@@ -1,7 +1,7 @@
 import 'source-map-support/register';
-import * as pMap from 'p-map';
+import pMap from 'p-map';
 import * as path from 'path';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import type { requestsManager } from 'snyk-request-manager';
 import * as lodash from 'lodash';
 import type { Target, FilePath, ImportTarget } from '../../types';
@@ -66,7 +66,9 @@ export async function importTarget(
       // API base which in some deployments exposes pluralized or alternate
       // paths. Propagate other errors.
       if (e && e.name === 'NotFoundError') {
-        debug('v1 import endpoint returned 404; retrying against REST API base');
+        debug(
+          'v1 import endpoint returned 404; retrying against REST API base',
+        );
         res = await requestWithRateLimitHandling(
           requestManager,
           `/org/${orgId.trim()}/integrations/${integrationId}/import`,
@@ -103,12 +105,20 @@ export async function importTarget(
     }
 
     if (!locationUrl) {
-      throw new Error('No import location url returned. Please re-try the import.');
+      throw new Error(
+        'No import location url returned. Please re-try the import.',
+      );
     }
 
-    debug(`Received locationUrl for ${target.name || 'target'}: ${locationUrl}`);
+    debug(
+      `Received locationUrl for ${target.name || 'target'}: ${locationUrl}`,
+    );
 
-    await logImportedTargets([{ target, integrationId, orgId }], locationUrl, loggingPath);
+    await logImportedTargets(
+      [{ target, integrationId, orgId }],
+      locationUrl,
+      loggingPath,
+    );
 
     return {
       pollingUrl: locationUrl,
@@ -123,24 +133,39 @@ export async function importTarget(
     const res = error && error.response ? error.response : undefined;
     const status = res?.status || res?.statusCode;
     const headers = res?.headers || {};
-    const snykRequestId = headers['snyk-request-id'] || headers['x-request-id'] || headers['request-id'];
-    const bodyInspect = util.inspect(res?.data || error, { depth: 2, breakLength: 120 });
+    const snykRequestId =
+      headers['snyk-request-id'] ||
+      headers['x-request-id'] ||
+      headers['request-id'];
+    const bodyInspect = util.inspect(res?.data || error, {
+      depth: 2,
+      breakLength: 120,
+    });
 
     console.error(
-      `Failed to kick off import for target: ${util.inspect(target, { depth: 1 })}.
+      `Failed to kick off import for target: ${util.inspect(target, {
+        depth: 1,
+      })}.
 ERROR name: ${error?.name} status: ${status} snyk-request-id: ${snykRequestId}
 body: ${bodyInspect}
-See more information in logs located at ${path.join(logPath, orgId)}${FAILED_LOG_NAME} or re-start in DEBUG mode.`,
+See more information in logs located at ${path.join(
+        logPath,
+        orgId,
+      )}${FAILED_LOG_NAME} or re-start in DEBUG mode.`,
     );
 
-    const err: { message?: string | undefined; innerError?: string } = new Error('Could not complete API import');
-    err.innerError = util.inspect({
-      name: error?.name,
-      message: error?.message,
-      status,
-      snykRequestId,
-      body: res?.data,
-    }, { depth: 2 });
+    const err: { message?: string | undefined; innerError?: string } =
+      new Error('Could not complete API import');
+    err.innerError = util.inspect(
+      {
+        name: error?.name,
+        message: error?.message,
+        status,
+        snykRequestId,
+        body: res?.data,
+      },
+      { depth: 2 },
+    );
 
     throw err;
   }

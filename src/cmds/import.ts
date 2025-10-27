@@ -1,5 +1,5 @@
-import * as debugLib from 'debug';
-import * as _ from 'lodash';
+import debugLib from 'debug';
+import * as lodash from 'lodash';
 import * as yargs from 'yargs';
 import type { CommandResult } from '../lib/types';
 
@@ -31,7 +31,7 @@ export async function importFunction(file: string): Promise<CommandResult> {
 
     const projectsMessage =
       projects.length > 0
-        ? `Imported ${_.uniqBy(projects, 'projectUrl').length} project(s)`
+        ? `Imported ${lodash.uniqBy(projects, 'projectUrl').length} project(s)`
         : '⚠ No projects imported!';
 
     const targetsMessage = `\nProcessed ${

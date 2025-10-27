@@ -1,6 +1,6 @@
 ![Snyk logo](https://snyk.io/style/asset/logo/snyk-print.svg)
 
-***
+---
 
 [![Known Vulnerabilities](https://snyk.io/test/github/snyk/snyk-api-import/badge.svg)](https://snyk.io/test/github/snyk/snyk-api-import)
 [![Inactively Maintained](https://img.shields.io/badge/Maintenance%20Level-Inactively%20Maintained-yellowgreen.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
@@ -10,9 +10,11 @@
 Snyk helps you find, fix and monitor for known vulnerabilities in your dependencies, both on an ad hoc basis and as part of your CI (Build) system.
 
 # snyk-api-import
+
 Snyk API project importer. This script is intended to help import projects into Snyk with a controlled pace utilizing available [Snyk APIs](https://snyk.docs.apiary.io/).
 
 What does it offer?
+
 - `rate limiting handling` - the script will pace requests to avoid rate limiting from Github/Gitlab/Bitbucket etc and to provide a stable import.
 - `queue` - requests to Snyk are queued to reduce failures.
 - `retries` - the script will kick off an import in batches, wait for completion and then keep going. Any failed requests will be retried before they are considered a failure and logged.
@@ -20,6 +22,7 @@ What does it offer?
 If you need to adjust concurrency you can stop the script, change the concurrency variable and start again. It will skip previous repos/targets that have been requested for import.
 
 # Table of Contents
+
 - [Installation](#installation)
 - [Usage](#usage)
 - [FAQ](#faq)
@@ -42,6 +45,7 @@ Note: For non-interactive CI usage with Bitbucket Cloud App prefer a confidentia
   - [AWS automation example](docs/example-workflows/aws-automation-example.md)
 
 # Installation
+
 `snyk-api-import` CLI can be installed through multiple channels.
 
 ## Standalone executables (macOS, Linux, Windows)
@@ -70,7 +74,9 @@ yarn global add snyk-api-import
 </details>
 
 # Usage
+
 By default the `import` command will run if no command specified.
+
 - `import` - kick off a an API powered import of repos/targets into existing Snyk orgs defined in [import configuration file](./docs/import.md). 100% support available for all project types supported via [Import API](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets).
 - `help` - show help & all available commands and their options
 - `orgs:data` - util generate data required to create Orgs via API.
@@ -81,6 +87,7 @@ By default the `import` command will run if no command specified.
 The logs can be explored using [Bunyan CLI](http://trentm.com/node-bunyan/bunyan.1.html)
 
 # FAQ
+
 <details>
 <summary>What is the minimum version of Node that the tool supports?</summary>
 <br/>

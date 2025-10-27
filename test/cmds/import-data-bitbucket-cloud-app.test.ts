@@ -7,8 +7,8 @@ describe('CLI import:data --source=bitbucket-cloud-app', () => {
       generateOrgData(
         SupportedIntegrationTypesImportData.BITBUCKET_CLOUD_APP,
         '',
-        ''
-      )
+        '',
+      ),
     ).resolves.toMatchObject({ exitCode: 1 });
   });
 

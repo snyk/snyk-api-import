@@ -1,6 +1,6 @@
 import type { BitbucketRepoData } from './types';
-import * as debugLib from 'debug';
-import * as needle from 'needle';
+import debugLib from 'debug';
+import needle from 'needle';
 import { getBitbucketAppToken } from './get-bitbucket-app-token';
 
 const debug = debugLib('snyk:bitbucket-cloud-app');
@@ -63,7 +63,7 @@ export async function listBitbucketCloudAppRepos(
         fork: !!r.fork_policy || false,
         name: r.slug || r.name,
         // keep upstream field name for convenience
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         full_name: r.full_name,
         owner: r.workspace?.slug || r.workspace?.uuid || workspace,
         branch: r.mainbranch?.name || 'main',

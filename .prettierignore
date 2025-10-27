@@ -2,4 +2,5 @@
 **/fixtures
 **/research/
 
-/test/
+# Ignore the entire test folder — we only want Prettier to format `src/`
+test/**

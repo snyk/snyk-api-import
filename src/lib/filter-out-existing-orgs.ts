@@ -1,8 +1,8 @@
-import * as _ from 'lodash';
+// Removed unused lodash import
 
-import { requestsManager } from 'snyk-request-manager';
+import type { requestsManager } from 'snyk-request-manager';
 import { getAllOrgs } from './api/group';
-import { CreateOrgData, Org } from './types';
+import type { CreateOrgData, Org } from './types';
 
 export async function filterOutExistingOrgs(
   requestManager: requestsManager,

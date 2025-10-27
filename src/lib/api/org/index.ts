@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import type { requestsManager } from 'snyk-request-manager';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as qs from 'querystring';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';

@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as base64 from 'base-64';
 import type { OutgoingHttpHeaders } from 'http2';
 import type { BitbucketCloudWorkspaceData } from './types';

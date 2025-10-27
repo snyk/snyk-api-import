@@ -1,5 +1,5 @@
 import 'source-map-support/register';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import { inspect } from 'util';
 import type { requestsManager } from 'snyk-request-manager';
 
@@ -30,29 +30,44 @@ export async function requestWithRateLimitHandling(
         // allow callers to forward additional request options (e.g. useRESTApi)
         ...(requestOptions || {}),
       });
-      console.log(`[requestWithRateLimitHandling] response: ${inspect(res, { depth: 2 })}`);
+      console.log(
+        `[requestWithRateLimitHandling] response: ${inspect(res, {
+          depth: 2,
+        })}`,
+      );
       break;
     } catch (e: any) {
       res = e;
       // Defensive extraction of status/code since different errors may have
       // different shapes (e.data.code, e.status, e.statusCode, e.response.status)
       const code =
-        (e && (e.data && e.data.code)) || e.status || e.statusCode || (e.response && e.response.status) || undefined;
-  const errMsg = (e && (e.data && e.data.message)) || e.message || inspect(e, { depth: 2 });
+        (e && e.data && e.data.code) ||
+        e.status ||
+        e.statusCode ||
+        (e.response && e.response.status) ||
+        undefined;
+      const errMsg =
+        (e && e.data && e.data.message) ||
+        e.message ||
+        inspect(e, { depth: 2 });
 
-  // Log a sanitized error for diagnostics
-  console.error(`requestWithRateLimitHandling error (code=${code}): ${errMsg}`);
+      // Log a sanitized error for diagnostics
+      console.error(
+        `requestWithRateLimitHandling error (code=${code}): ${errMsg}`,
+      );
 
       if (code === 401) {
-        console.error(`ERROR: ${errMsg}. Please check the token and try again.`);
+        console.error(
+          `ERROR: ${errMsg}. Please check the token and try again.`,
+        );
         break;
       }
       if ([404, 504, 400].includes(code)) {
         break;
       }
-  attempt += 1;
-  // Avoid JSON.stringify on potential circular structures
-  debug('Failed:' + inspect(e, { depth: 2 }));
+      attempt += 1;
+      // Avoid JSON.stringify on potential circular structures
+      debug('Failed:' + inspect(e, { depth: 2 }));
       if (code === 429) {
         const sleepTime = 600_000 * attempt; // 10 mins x attempt with a max of ~ 1hr
         console.error(

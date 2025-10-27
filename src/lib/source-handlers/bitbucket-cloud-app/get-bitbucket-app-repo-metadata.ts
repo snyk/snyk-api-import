@@ -1,8 +1,8 @@
 import type { RepoMetaData, Target } from '../../types';
 import { listBitbucketCloudAppRepos } from './list-repos';
-import * as debugLib from 'debug';
+import debugModule from 'debug';
 
-const debug = debugLib('snyk:bitbucket-cloud-app-metadata');
+const debug = debugModule('snyk:bitbucket-cloud-app-metadata');
 
 /**
  * Given a target (owner + name) attempt to find the repo via the Bitbucket Cloud App API
