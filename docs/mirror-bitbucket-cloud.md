@@ -5,8 +5,13 @@ This document shows the basic flow to import Bitbucket Cloud repositories into S
 ## Prerequisites
 
 - A Snyk API token: `export SNYK_TOKEN=...`
-- Bitbucket Cloud credentials (one of the following — see [Authentication and env vars](#authentication-and-env-vars) below):
-  - username + app password, or
+- username + app password
+
+```bash
+export BITBUCKET_CLOUD_USERNAME=myuser
+export BITBUCKET_CLOUD_PASSWORD=myappassword
+export SNYK_TOKEN=...
+```
 
 ## Quick import steps
 
@@ -40,30 +45,6 @@ To periodically add new repositories that appear in Bitbucket Cloud:
    `snyk-api-import orgs:create --file=orgs.json --noDuplicateNames`
 
 3. Generate import data and run the import as above.
-
-## Authentication and env vars
-
-Supported Bitbucket Cloud auth methods (you may set multiple env vars; the tool will pick by precedence unless overridden):
-
-- username + app password (needed for listing workspaces):
-  - `BITBUCKET_CLOUD_USERNAME`
-  - `BITBUCKET_CLOUD_PASSWORD` (app password)
-
-## Notes
-
-- Empty or whitespace-only env values are ignored.
-- Default precedence when multiple credentials exist: API token -> OAuth token -> username/app password.
-- Some operations (for example, listing workspaces) require username + app password. If a caller needs a specific method, code should request it explicitly; otherwise the app will use the precedence rule.
-- You can force a specific method by setting:
-  - `BITBUCKET_CLOUD_AUTH_METHOD=api|oauth|user`
-
-## Examples
-
-```bash
-export BITBUCKET_CLOUD_USERNAME=myuser
-export BITBUCKET_CLOUD_PASSWORD=myappassword
-export SNYK_TOKEN=...
-```
 
 ## Troubleshooting
 

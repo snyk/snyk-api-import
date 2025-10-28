@@ -24,7 +24,6 @@ Required environment variables
   - Provision a confidential Bitbucket Cloud App (with a client secret) for non-interactive CI automation.
 
 - `SNYK_TOKEN` — Snyk API token used for creating orgs and importing projects (required)
-- `BITBUCKET_APP_API_BASE` — Optional: alternate Bitbucket API base URL (default: `https://api.bitbucket.org/2.0/`)
 
 Quick workflow (Cloud App)
 
@@ -59,45 +58,6 @@ Permissions / scopes
 
 - The OAuth consumer must have permission to list workspaces and read repositories. When creating the consumer in Bitbucket, grant the minimal read-only scopes required for these API operations.
 
-Notes about cloning repositories
-
-- The OAuth client_credentials token used by the cloud-app flow is not a drop-in replacement for git credentials. If the tool needs to `git clone` private repositories, provide separate git credentials (app password or SSH deploy key) or configure your CI's credential helper to supply them.
-- Recommended approaches for private repo cloning:
-  - Configure a CI or local git credential helper that provides an app-password for repository cloning over HTTPS.
-  - Configure SSH deploy keys for repositories and ensure the environment running `snyk-api-import` has access to the corresponding SSH key.
-
-Prefer SSH in CI
-
-- You can force the tool to prefer SSH clone URLs (when available) by setting `BITBUCKET_USE_SSH=true` or by running the process with an active SSH agent (presence of `SSH_AUTH_SOCK`). When SSH is preferred and the repo metadata includes an `sshUrl`, `snyk-api-import` will use that URL for `git clone` instead of the HTTPS clone URL. This avoids embedding credentials into HTTPS clone URLs and leverages deploy keys or the SSH agent.
-
-Example GitHub Actions snippet (using a deploy key):
-
-```yaml
-name: snyk-import
-on: workflow_dispatch
-jobs:
-  import:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.8.1
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
-
-      - name: Run snyk-api-import (use SSH for clones)
-        env:
-          BITBUCKET_APP_CLIENT_ID: ${{ secrets.BITBUCKET_APP_CLIENT_ID }}
-          BITBUCKET_APP_CLIENT_SECRET: ${{ secrets.BITBUCKET_APP_CLIENT_SECRET }}
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          BITBUCKET_USE_SSH: 'true'
-        run: |
-          snyk-api-import orgs:data --source=bitbucket-cloud-app --groupId=mygroup
-          snyk-api-import import:data --source=bitbucket-cloud-app --orgsData=snyk-created-orgs.json
-          snyk-api-import import
-```
 
 Troubleshooting
 

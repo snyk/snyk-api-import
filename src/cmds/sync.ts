@@ -1,5 +1,5 @@
 import debugLib from 'debug';
-import * as yargs from 'yargs';
+// yargs not used here after bundler-friendly exit handling
 const debug = debugLib('snyk:sync-cmd');
 
 import { getLoggingPath } from '../lib/get-logging-path';
@@ -182,7 +182,11 @@ export async function handler(argv: {
     debug('Failed to sync organizations.\n' + res.message);
 
     console.error(res.message);
-    setTimeout(() => yargs.exit(1, new Error(res.message)), 3000);
+    // Avoid yargs.exit - use process.exitCode after a short delay to allow
+    // logs to flush and avoid bundler warnings about named exports.
+    setTimeout(() => {
+      process.exitCode = 1;
+    }, 3000);
   } else {
     console.log(res.message);
   }

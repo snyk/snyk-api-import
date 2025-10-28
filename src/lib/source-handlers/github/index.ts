@@ -18,10 +18,28 @@ import * as types from './types';
 import * as isConfigured from './is-configured';
 import * as gitCloneUrl from './git-clone-url';
 
-Object.assign(module.exports, listOrganizations);
-Object.assign(module.exports, listRepos);
-Object.assign(module.exports, organizationIsEmpty);
-Object.assign(module.exports, getRepoMetadata);
-Object.assign(module.exports, types);
-Object.assign(module.exports, isConfigured);
-Object.assign(module.exports, gitCloneUrl);
+// Copy exported members onto module.exports as plain, configurable properties
+// so test helpers like jest.spyOn can redefine them. We avoid Object.assign
+// because TypeScript's emitted getters can produce non-writable descriptors.
+const copyExports = (target: any, src: Record<string, any>) => {
+  for (const key of Object.keys(src)) {
+    try {
+      Object.defineProperty(target, key, {
+        value: (src as any)[key],
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    } catch {
+      // defensive: ignore failures to define (should be rare)
+    }
+  }
+};
+
+copyExports(module.exports, listOrganizations);
+copyExports(module.exports, listRepos);
+copyExports(module.exports, organizationIsEmpty);
+copyExports(module.exports, getRepoMetadata);
+copyExports(module.exports, types);
+copyExports(module.exports, isConfigured);
+copyExports(module.exports, gitCloneUrl);

@@ -6,28 +6,28 @@
     "snyk-api-import": "dist/index.js"
   },
   "scripts": {
-    "format:check": "prettier --check '{''{src,test}/!(test/**/fixtures)/**/*,*}.{js,ts,json,yml}'",
-    "format": "prettier --write '{''{src,test}/!(test/**/fixtures)/**/*,*}.{js,ts,json,yml}'",
+  "format:check": "prettier --check \"{package.json,tsconfig.json,src/**/*}.{js,ts,json,yml}\"",
+  "format": "prettier --write \"{package.json,tsconfig.json,src/**/*}.{js,ts,json,yml}\"",
     "lint": "npm run format:check && npm run lint:eslint",
-    "lint:eslint": "eslint --cache '{lib,test}/**/*.ts'",
+  "lint:eslint": "eslint --cache 'src/**/*.ts'",
     "test": "npm run lint && npm run build && npm run test:unit",
     "test:unit": "node --max-old-space-size=4096 ./node_modules/.bin/jest --maxWorkers=2 --silent --ci --detectOpenHandles --verbose --testLocationInResults",
     "test:unit:debug": "npm run build && DEBUG=* node --max-old-space-size=4096 ./node_modules/.bin/jest",
     "test:coverage": "npm run test:unit -- --coverage",
     "test:watch": "tsc-watch --onSuccess 'npm run test:unit'",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "build:types": "tsc --emitDeclarationOnly",
-    "bundle": "npx esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.js --sourcemap",
+    "bundle": "node scripts/build.js",
     "build": "npm run clean && tsc",
     "build-watch": "tsc -w",
     "prepare": "npm run build",
     "snyk-test": "snyk test",
-    "pkg-binaries:macos": "npx @yao-pkg/pkg dist/index.js -t node20-macos-x64 -o snyk-api-import-macos",
-    "pkg-binaries:macos-arm": "npx @yao-pkg/pkg dist/index.js -t node20-macos-arm64 -o snyk-api-import-macos-arm",
-    "pkg-binaries:linux": "npx @yao-pkg/pkg dist/index.js -t node20-linux-x64 -o snyk-api-import-linux",
-    "pkg-binaries:alpine": "npx @yao-pkg/pkg dist/index.js -t node20-alpine-x64 -o snyk-api-import-alpine",
-    "pkg-binaries:windows": "npx @yao-pkg/pkg dist/index.js -t node20-win-x64 -o snyk-api-import-win.exe",
-    "pkg:all": "npm run pkg-binaries:macos && npm run pkg-binaries:macos-arm && npm run pkg-binaries:linux && npm run pkg-binaries:alpine && npm run pkg-binaries:windows"
+    "pkg-binaries:macos": "npm run bundle && npx @yao-pkg/pkg dist/index.js -t node20-macos-x64 -o snyk-api-import-macos",
+    "pkg-binaries:macos-arm": "npm run bundle && npx @yao-pkg/pkg dist/index.js -t node20-macos-arm64 -o snyk-api-import-macos-arm",
+    "pkg-binaries:linux": "npm run bundle && npx @yao-pkg/pkg dist/index.js -t node20-linux-x64 -o snyk-api-import-linux",
+    "pkg-binaries:alpine": "npm run bundle && npx @yao-pkg/pkg dist/index.js -t node20-alpine-x64 -o snyk-api-import-alpine",
+    "pkg-binaries:windows": "npm run bundle && npx @yao-pkg/pkg dist/index.js -t node20-win-x64 -o snyk-api-import-win.exe",
+    "pkg:all": "npm run bundle && npm run pkg-binaries:macos && npm run pkg-binaries:macos-arm && npm run pkg-binaries:linux && npm run pkg-binaries:alpine && npm run pkg-binaries:windows"
   },
   "types": "./dist/index.d.ts",
   "repository": {
@@ -107,10 +107,29 @@
   },
   "pkg": {
     "scripts": [
-      "dist/**/*.js"
+      "dist/**/*.js",
+      "dist/**/lib/**/*.js",
+      "node_modules/@octokit/**",
+      "node_modules/@gitbeaker/**",
+      "node_modules/snyk-request-manager/**",
+      "node_modules/**/*"
     ],
     "assets": [
-      "./node_modules/axios/dist/node/axios.cjs"
+      "./node_modules/axios/dist/node/axios.cjs",
+      "./node_modules/snyk-request-manager/**",
+      "./node_modules/@octokit/**",
+      "./node_modules/@gitbeaker/**",
+      "./node_modules/dtrace-provider/**",
+      "./node_modules/nan/**",
+      "config/**/*",
+      "node_modules/config/**/*"
+    ],
+    "targets": [
+      "node20-macos-arm64",
+      "node20-macos-x64",
+      "node20-linux-x64",
+      "node20-alpine-x64",
+      "node20-win-x64"
     ]
   }
 }

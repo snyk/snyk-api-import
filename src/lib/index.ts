@@ -50,27 +50,43 @@ import * as sourceAzure from './source-handlers/azure';
 import * as sourceBitbucketServer from './source-handlers/bitbucket-server';
 import * as sourceBitbucketCloud from './source-handlers/bitbucket-cloud';
 import * as sourceBitbucketCloudApp from './source-handlers/bitbucket-cloud-app';
+// Helper to copy exported members onto module.exports as plain,
+// configurable properties so test helpers like jest.spyOn can redefine them.
+const copyExports = (target: any, src: Record<string, any>) => {
+  for (const key of Object.keys(src)) {
+    try {
+      Object.defineProperty(target, key, {
+        value: (src as any)[key],
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    } catch {
+      // ignore errors defensively
+    }
+  }
+};
 
-Object.assign(module.exports, apiImport);
-Object.assign(module.exports, apiPollImport);
-Object.assign(module.exports, apiProject);
-Object.assign(module.exports, apiGroup);
-Object.assign(module.exports, apiOrg);
+copyExports(module.exports, apiImport);
+copyExports(module.exports, apiPollImport);
+copyExports(module.exports, apiProject);
+copyExports(module.exports, apiGroup);
+copyExports(module.exports, apiOrg);
 
-Object.assign(module.exports, getApiToken);
-Object.assign(module.exports, getConcurrent);
-Object.assign(module.exports, getImportPath);
-Object.assign(module.exports, getLoggingPath);
-Object.assign(module.exports, getSnykHost);
-Object.assign(module.exports, filterOutExistingOrgs);
-Object.assign(module.exports, supportedProjectTypes);
-Object.assign(module.exports, findFiles);
-Object.assign(module.exports, gitClone);
+copyExports(module.exports, getApiToken);
+copyExports(module.exports, getConcurrent);
+copyExports(module.exports, getImportPath);
+copyExports(module.exports, getLoggingPath);
+copyExports(module.exports, getSnykHost);
+copyExports(module.exports, filterOutExistingOrgs);
+copyExports(module.exports, supportedProjectTypes);
+copyExports(module.exports, findFiles);
+copyExports(module.exports, gitClone);
 
-Object.assign(module.exports, sourceGithub);
-Object.assign(module.exports, sourceGitlab);
-Object.assign(module.exports, sourceGithubCloudApp);
-Object.assign(module.exports, sourceAzure);
-Object.assign(module.exports, sourceBitbucketServer);
-Object.assign(module.exports, sourceBitbucketCloud);
-Object.assign(module.exports, sourceBitbucketCloudApp);
+copyExports(module.exports, sourceGithub);
+copyExports(module.exports, sourceGitlab);
+copyExports(module.exports, sourceGithubCloudApp);
+copyExports(module.exports, sourceAzure);
+copyExports(module.exports, sourceBitbucketServer);
+copyExports(module.exports, sourceBitbucketCloud);
+copyExports(module.exports, sourceBitbucketCloudApp);

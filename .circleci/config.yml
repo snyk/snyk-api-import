@@ -78,7 +78,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run: npm install
+      - run: npm ci
       - prodsec/security_scans:
           mode: auto
           release-branch: master # TODO: remove when master branch is renamed
@@ -92,13 +92,13 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-deps-{{ checksum "package.json" }}
-      - run: npm install
+            - v1-deps-{{ checksum "package-lock.json" }}
+      - run: npm ci
       - save_cache:
           paths:
             - node_modules
             - ~/.cache/jest
-          key: v1-deps-{{ checksum "package.json" }}
+          key: v1-deps-{{ checksum "package-lock.json" }}
       - run: npm test
       - run: npx semantic-release
       - notify_slack_on_failure
@@ -110,13 +110,13 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-deps-{{ checksum "package.json" }}
-      - run: npm install
+            - v1-deps-{{ checksum "package-lock.json" }}
+      - run: npm ci
       - save_cache:
           paths:
             - node_modules
             - ~/.cache/jest
-          key: v1-deps-{{ checksum "package.json" }}
+          key: v1-deps-{{ checksum "package-lock.json" }}
       - run: npm test
       - run: npm run pkg-binaries:linux
       - run: ./snyk-api-import-linux help
@@ -128,13 +128,13 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-deps-{{ checksum "package.json" }}
-      - run: npm install
+            - v1-deps-{{ checksum "package-lock.json" }}
+      - run: npm ci
       - save_cache:
           paths:
             - node_modules
             - ~/.cache/jest
-          key: v1-deps-{{ checksum "package.json" }}
+          key: v1-deps-{{ checksum "package-lock.json" }}
       - run: npm test
 
 workflows:

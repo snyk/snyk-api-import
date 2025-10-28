@@ -120,4 +120,18 @@ export default defineConfig([
       '@typescript-eslint/no-var-requires': 'off',
     },
   },
-]);
+    {
+      files: ['eslint.config.mjs'],
+      languageOptions: {
+        sourceType: 'module',
+        ecmaVersion: 2022,
+      },
+      rules: {
+        'check-file/folder-naming-convention': 'off',
+        '@typescript-eslint/naming-convention': 'off',
+        '@typescript-eslint/no-require-imports': 'off',
+        '@typescript-eslint/no-var-requires': 'off',
+        '@typescript-eslint/no-unused-vars': 'off',
+      },
+    },
+  ]);
