@@ -431,14 +431,6 @@ export async function cloneAndAnalyze(
       ...exclusionGlobs,
     ].filter(isSafeGlob);
 
-    // Ensure sanitizedRepoPath is inside allowed directory (e.g., /tmp or working dir)
-    const allowedBaseDir = path.resolve(process.cwd());
-    if (!sanitizedRepoPath.startsWith(allowedBaseDir)) {
-      throw new Error(
-        'Path traversal detected: repoPath is outside allowed directory',
-      );
-    }
-
     const { files: foundFiles } = await find(
       sanitizedRepoPath,
       safeExclusionGlobs,
