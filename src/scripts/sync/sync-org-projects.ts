@@ -156,7 +156,26 @@ export async function updateOrgTargets(
         requestManager,
         publicOrgId,
       );
-      const integrationId = integrationsData[source];
+      // Map CLI/source enum to Snyk's integration key (they differ for some sources)
+      function mapSourceToSnykIntegrationKey(
+        s: SupportedIntegrationTypesUpdateProject,
+      ): string {
+        switch (s) {
+          case SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP:
+            // Snyk represents Bitbucket Cloud App (Connect App) as 'bitbucket-connect-app'
+            return 'bitbucket-connect-app';
+          default:
+            // For other values the enum string matches the Snyk integration key
+            return s as string;
+        }
+      }
+      const integrationKey = mapSourceToSnykIntegrationKey(source);
+      const integrationId = integrationsData[integrationKey];
+      if (!integrationId) {
+        console.warn(
+          `Warning: Could not find integrationId for source ${source} (key: ${integrationKey}). Available integrations: ${Object.keys(integrationsData).join(', ')}`,
+        );
+      }
       console.log(`Syncing targets for source ${source}`);
       const response = await updateTargets(
         requestManager,
