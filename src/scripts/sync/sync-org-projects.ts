@@ -255,7 +255,14 @@ export async function updateTargets(
         );
         updatedProjects.push(...updated);
         failedProjects.push(...failed);
-        processedTargets += 1;
+        
+        // If the target returned failures but no updates, it means the target
+        // failed to sync properly (e.g., cloneAndAnalyze failed). Count it as a failed target.
+        if (failed.length > 0 && updated.length === 0) {
+          failedTargets += 1;
+        } else {
+          processedTargets += 1;
+        }
 
         if (updated.length) {
           await logUpdatedProjects(orgId, updated, loggingPath);

@@ -75,7 +75,7 @@ export async function syncOrg(
           res.failedTargets
         } failed)\nUpdated ${
           res.meta.projects.updated.length
-        } projects\nFind more information in ${res.fileName}${
+        } projects${res.meta.projects.failed.length > 0 ? `\nFailed ${res.meta.projects.failed.length} projects` : ''}\nFind more information in ${res.fileName}${
           res.failedFileName ? ` and ${res.failedFileName}` : ''
         }`;
 

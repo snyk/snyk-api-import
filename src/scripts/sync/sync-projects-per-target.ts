@@ -397,17 +397,31 @@ export async function syncProjectsForTarget(
   } catch (e) {
     debug(e);
     const error = `Cloning and analysing the repo to deactivate projects failed with error: ${e.message}`;
-    projects.map((project) => {
-      failed.add({
-        errorMessage: error,
-        projectPublicId: project.id,
-        from: 'active',
-        to: 'deactivated',
-        type: ProjectUpdateType.DEACTIVATE,
-        dryRun: config.dryRun,
-        target,
+    // Add failures for all projects associated with this target
+    if (projects.length > 0) {
+      projects.forEach((project) => {
+        failed.add({
+          errorMessage: error,
+          projectPublicId: project.id,
+          from: 'active',
+          to: 'deactivated',
+          type: ProjectUpdateType.DEACTIVATE,
+          dryRun: config.dryRun,
+          target,
+        });
       });
-    });
+    } else {
+      // Even if there are no projects, we should still report the error
+      // This ensures target-level failures are tracked
+      debug(
+        `No projects found for target ${target.attributes.displayName}, but error occurred: ${error}`,
+      );
+    }
+    // Return early with failures instead of continuing with potentially invalid state
+    return {
+      updated: Array.from(updated),
+      failed: Array.from(failed),
+    };
   }
 
   // remove any projects that are to be deactivated from other actions
