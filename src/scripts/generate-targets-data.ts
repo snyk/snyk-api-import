@@ -135,7 +135,7 @@ export async function generateTargetsImportDataFile(
           };
         } else {
           throw new Error(
-            'No Bitbucket Cloud authentication env vars found for generating targets data. Please set BITBUCKET_CLOUD_USERNAME and BITBUCKET_CLOUD_PASSWORD, or BITBUCKET_CLOUD_API_TOKEN, or BITBUCKET_CLOUD_OAUTH_TOKEN.',
+            'No Bitbucket Cloud authentication env vars found for generating targets data. Please set BITBUCKET_CLOUD_USERNAME and BITBUCKET_CLOUD_PASSWORD, or BITBUCKET_CLOUD_OAUTH_TOKEN.',
           );
         }
         entities = await listBitbucketCloudRepos(config, topLevelEntity.name);

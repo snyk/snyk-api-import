@@ -30,7 +30,7 @@ export const builder = {
     required: true,
     default: SupportedIntegrationTypesUpdateProject.GITHUB,
     choices: [...Object.values(SupportedIntegrationTypesUpdateProject)],
-    desc: 'List of sources to be synced e.g. Github, Github Enterprise, Gitlab, Bitbucket Server, Bitbucket Cloud',
+    desc: 'List of sources to be synced e.g. Github, Github Enterprise, Gitlab, Bitbucket Cloud',
   },
   dryRun: {
     required: false,
