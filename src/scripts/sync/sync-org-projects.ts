@@ -36,7 +36,6 @@ export function isSourceConfigured(
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]: () => {}, // Add real check if needed
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
       isBitbucketCloudAppConfigured,
-    [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]: () => {}, // Add real check if needed
   };
   return getDefaultBranchGenerators[origin];
 }
