@@ -59,7 +59,7 @@ export function getMetaDataGenerator(
         archived: false,
       }),
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
-      getBitbucketAppRepoMetaData
+      getBitbucketAppRepoMetaData,
   };
   return getDefaultBranchGenerators[origin];
 }

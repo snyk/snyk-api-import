@@ -21,7 +21,6 @@
     "baseUrl": "./src",
     "lib": ["ES2022"]
   },
-  "include": ["src/**/*"]
-  ,
+  "include": ["src/**/*"],
   "exclude": ["test", "node_modules", "dist"]
 }

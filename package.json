@@ -6,10 +6,10 @@
     "snyk-api-import": "dist/index.js"
   },
   "scripts": {
-  "format:check": "prettier --check \"{package.json,tsconfig.json,src/**/*}.{js,ts,json,yml}\"",
-  "format": "prettier --write \"{package.json,tsconfig.json,src/**/*}.{js,ts,json,yml}\"",
+    "format:check": "prettier --check \"{package.json,tsconfig.json,src/**/*}.{js,ts,json,yml}\"",
+    "format": "prettier --write \"{package.json,tsconfig.json,src/**/*}.{js,ts,json,yml}\"",
     "lint": "npm run format:check && npm run lint:eslint",
-  "lint:eslint": "eslint --cache 'src/**/*.ts'",
+    "lint:eslint": "eslint --cache 'src/**/*.ts'",
     "test": "npm run lint && npm run build && npm run test:unit",
     "test:unit": "node --max-old-space-size=4096 ./node_modules/.bin/jest --maxWorkers=2 --silent --ci --detectOpenHandles --verbose --testLocationInResults",
     "test:unit:debug": "npm run build && DEBUG=* node --max-old-space-size=4096 ./node_modules/.bin/jest",

@@ -173,7 +173,9 @@ export async function updateOrgTargets(
       const integrationId = integrationsData[integrationKey];
       if (!integrationId) {
         console.warn(
-          `Warning: Could not find integrationId for source ${source} (key: ${integrationKey}). Available integrations: ${Object.keys(integrationsData).join(', ')}`,
+          `Warning: Could not find integrationId for source ${source} (key: ${integrationKey}). Available integrations: ${Object.keys(
+            integrationsData,
+          ).join(', ')}`,
         );
       }
       console.log(`Syncing targets for source ${source}`);
@@ -255,7 +257,7 @@ export async function updateTargets(
         );
         updatedProjects.push(...updated);
         failedProjects.push(...failed);
-        
+
         // If the target returned failures but no updates, it means the target
         // failed to sync properly (e.g., cloneAndAnalyze failed). Count it as a failed target.
         if (failed.length > 0 && updated.length === 0) {
