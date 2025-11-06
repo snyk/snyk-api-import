@@ -10,6 +10,7 @@ module.exports = {
   },
   collectCoverageFrom: ['lib/**/*.ts'],
   coverageReporters: ['text-summary', 'html'],
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/test/system/'],
   transformIgnorePatterns: ['/node_modules/(?!memfs|nock|@octokit)/'],
   transform: {
     '^.+\\.js$': 'babel-jest',
