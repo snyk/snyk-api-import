@@ -1,8 +1,8 @@
+// Ensure 'fs' is mocked by memfs before importing modules that use it.
+jest.mock('fs', () => require('memfs').fs);
 import { vol } from 'memfs';
 import { createOrgs } from '../../src/scripts/create-orgs';
 import { CREATED_ORG_LOG_NAME } from '../../src/common';
-
-jest.mock('fs', () => require('memfs').fs);
 
 const ORG_NAME = 'snyk-api-import-hello';
 const GROUP_ID = 'test-group-id';
@@ -13,6 +13,20 @@ describe('createOrgs script', () => {
     process.env.SNYK_TOKEN = 'test-token';
     process.env.TEST_ORG_NAME = ORG_NAME;
     process.env.TEST_GROUP_ID = GROUP_ID;
+  });
+
+  // Ensure getLoggingPath uses the test's SNYK_LOG_PATH (memfs) during tests
+  beforeEach(() => {
+    // Avoid redefining properties on the re-exported index module. Instead,
+    // directly override the concrete module that implements getLoggingPath.
+    const glp = require('../../src/lib/get-logging-path');
+    if (glp && typeof glp.getLoggingPath === 'function') {
+      try {
+        glp.getLoggingPath = () => process.env.SNYK_LOG_PATH || '.';
+      } catch (e) {
+        // If overriding fails, tests will fall back to using the real fs.
+      }
+    }
   });
 
   afterAll(() => vol.reset());

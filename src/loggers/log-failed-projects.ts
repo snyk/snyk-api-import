@@ -1,9 +1,10 @@
 import * as bunyan from 'bunyan';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 
 import { FAILED_PROJECTS_LOG_NAME } from './../common';
 import type { Project } from './../lib/types';
 import { getLoggingPath } from './../lib';
+import * as fs from 'fs';
 
 const debug = debugLib('snyk:import-projects-script');
 
@@ -30,6 +31,17 @@ export async function logFailedProjects(
     });
 
     for (const orgId in projectsPerOrg) {
+      try {
+        if (loggingPath) {
+          fs.mkdirSync(loggingPath, { recursive: true } as any);
+        } else {
+          loggingPath = getLoggingPath();
+          fs.mkdirSync(loggingPath, { recursive: true } as any);
+        }
+      } catch {
+        // ignore
+      }
+
       const log = bunyan.createLogger({
         name: 'snyk:import-projects-script',
         level: 'error',
@@ -45,7 +57,7 @@ export async function logFailedProjects(
         log.error({ orgId, ...project }, 'Error importing project');
       });
     }
-  } catch (e) {
+  } catch {
     // do nothing
   }
 }

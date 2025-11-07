@@ -1,3 +1,58 @@
+// Mock source handlers and API calls to avoid real network calls
+jest.mock('../../src/lib', () => ({
+  listGithubRepos: async (orgName: string, sourceUrl?: string) => [
+    {
+      name: 'repo-1',
+      branch: 'main',
+      owner: orgName,
+      fork: false,
+    },
+  ],
+  listGitlabRepos: async (orgName: string, baseUrl?: string) => [
+    {
+      id: 123,
+      branch: 'main',
+      name: 'repo-1',
+      fork: false,
+    },
+  ],
+  listAzureRepos: async () => [],
+  listBitbucketServerRepos: async () => [],
+  getLoggingPath: () => process.env.SNYK_LOG_PATH || '.',
+}));
+
+jest.mock('../../src/lib/source-handlers/bitbucket-cloud/list-repos', () => ({
+  listRepos: async () => [],
+}));
+
+jest.mock('../../src/lib/source-handlers/github-cloud-app', () => ({
+  listGitHubCloudAppRepos: async () => [
+    {
+      name: 'repo-1',
+      branch: 'main',
+      owner: 'app-owner',
+      fork: false,
+    },
+  ],
+}));
+
+jest.mock('../../src/lib/api/org', () => ({
+  listIntegrations: async () => ({
+    github: 'github-********-********-********',
+  }),
+}));
+
+// Provide default TEST_* environment variables so tests run without external setup
+process.env.TEST_GH_ORG_NAME = process.env.TEST_GH_ORG_NAME || 'test-gh-org';
+process.env.TEST_GHE_URL = process.env.TEST_GHE_URL || 'https://ghe.example';
+process.env.TEST_GHE_TOKEN = process.env.TEST_GHE_TOKEN || 'test-ghe-token';
+process.env.TEST_GITLAB_BASE_URL =
+  process.env.TEST_GITLAB_BASE_URL || 'https://gitlab.example';
+process.env.TEST_GITLAB_TOKEN =
+  process.env.TEST_GITLAB_TOKEN || 'test-gitlab-token';
+process.env.TEST_GITLAB_ORG_NAME =
+  process.env.TEST_GITLAB_ORG_NAME || 'test-gitlab-org';
+
 import * as path from 'path';
 import type { CreatedOrg } from '../../src/lib/types';
 import { SupportedIntegrationTypesImportData } from '../../src/lib/types';

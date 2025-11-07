@@ -16,10 +16,14 @@ import type {
 } from '../../../src/lib/types';
 import { ProjectUpdateType } from '../../../src/lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../../src/lib/types';
-import * as lib from '../../../src/lib';
+// Use require for modules that tests spy on so properties are mutable under Jest
+const lib = require('../../../src/lib');
 import * as clone from '../../../src/scripts/sync/clone-and-analyze';
 import * as projectApi from '../../../src/lib/api/project';
-import * as github from '../../../src/lib/source-handlers/github';
+const gitCloneMod = require('../../../src/lib/git-clone');
+// Require the concrete modules that export the functions we want to spy on
+const github = require('../../../src/lib/source-handlers/github/get-repo-metadata');
+const orgApi = require('../../../src/lib/api/org');
 import * as featureFlags from '../../../src/lib/api/feature-flags';
 import * as updateProjectsLog from '../../../src/loggers/log-updated-project';
 import * as importTarget from '../../../src/scripts/sync/import-target';
@@ -50,12 +54,12 @@ describe('updateTargets', () => {
     githubSpy = jest.spyOn(github, 'getGithubRepoMetaData');
     updateProjectsSpy = jest.spyOn(projectApi, 'updateProject');
     deactivateProjectsSpy = jest
-      .spyOn(lib, 'deactivateProject')
+      .spyOn(projectApi, 'deactivateProject')
       .mockImplementation(() => Promise.resolve(true));
-    listProjectsSpy = jest.spyOn(lib, 'listProjects');
-    cloneSpy = jest.spyOn(lib, 'gitClone');
+    listProjectsSpy = jest.spyOn(orgApi, 'listProjects');
+    cloneSpy = jest.spyOn(gitCloneMod, 'gitClone');
     listIntegrationsSpy = jest
-      .spyOn(lib, 'listIntegrations')
+      .spyOn(orgApi, 'listIntegrations')
       .mockResolvedValue({
         github: 'abcw-12456-dafgsdf-ajrgrbz',
         'github-enterprise': 'asffgg-2456-6addf-agg',
@@ -1098,16 +1102,16 @@ describe('updateOrgTargets', () => {
 
   beforeAll(() => {
     featureFlagsSpy = jest.spyOn(featureFlags, 'getFeatureFlag');
-    listTargetsSpy = jest.spyOn(lib, 'listTargets');
-    listProjectsSpy = jest.spyOn(lib, 'listProjects');
+    listTargetsSpy = jest.spyOn(orgApi, 'listTargets');
+    listProjectsSpy = jest.spyOn(orgApi, 'listProjects');
     logUpdatedProjectsSpy = jest.spyOn(updateProjectsLog, 'logUpdatedProjects');
     githubSpy = jest.spyOn(github, 'getGithubRepoMetaData');
     updateProjectSpy = jest.spyOn(projectApi, 'updateProject');
     deactivateProjectSpy = jest.spyOn(projectApi, 'deactivateProject');
-    cloneSpy = jest.spyOn(lib, 'gitClone');
+    cloneSpy = jest.spyOn(gitCloneMod, 'gitClone');
     cloneAndAnalyzeSpy = jest.spyOn(clone, 'cloneAndAnalyze');
     listIntegrationsSpy = jest
-      .spyOn(lib, 'listIntegrations')
+      .spyOn(orgApi, 'listIntegrations')
       .mockResolvedValue({
         github: 'abcw-12456-dafgsdf-ajrgrbz',
         'github-enterprise': 'asffgg-2456-6addf-agg',

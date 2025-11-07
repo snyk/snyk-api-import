@@ -1,5 +1,5 @@
 import type { requestsManager } from 'snyk-request-manager';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 
 import { getGithubRepoMetaData } from '../../lib/source-handlers/github';
 import { getGitHubCloudAppRepoMetadata } from '../../lib/source-handlers/github-cloud-app';
@@ -14,15 +14,21 @@ import type {
 import { ProjectUpdateType } from '../../lib/types';
 import { SupportedIntegrationTypesUpdateProject } from '../../lib/types';
 import { deactivateProject, listProjects } from '../../lib';
-import pMap = require('p-map');
+import pMap from 'p-map';
 import { cloneAndAnalyze } from './clone-and-analyze';
+import { getBitbucketCloudAuth } from '../../lib/source-handlers/bitbucket-cloud/get-bitbucket-cloud-auth';
+import type {
+  BitbucketAuth,
+  BitbucketAuthType,
+} from '../../lib/source-handlers/bitbucket-cloud/sync-client';
+import { getBitbucketAppRepoMetaData } from '../../lib/source-handlers/bitbucket-cloud-app/get-bitbucket-app-repo-metadata';
+import { getBitbucketAppToken } from '../../lib/source-handlers/bitbucket-cloud-app/get-bitbucket-app-token';
 import { importSingleTarget } from './import-target';
 const debug = debugLib('snyk:sync-projects-per-target');
 
 // Wrapper function for GitHub Cloud App to match the expected signature
 async function getGitHubCloudAppRepoMetaData(
   target: Target,
-  host?: string,
 ): Promise<RepoMetaData> {
   if (!target.owner || !target.name) {
     throw new Error(
@@ -35,11 +41,25 @@ async function getGitHubCloudAppRepoMetaData(
 export function getMetaDataGenerator(
   origin: SupportedIntegrationTypesUpdateProject,
 ): (target: Target, host?: string | undefined) => Promise<RepoMetaData> {
-  const getDefaultBranchGenerators = {
+  const getDefaultBranchGenerators: Record<
+    SupportedIntegrationTypesUpdateProject,
+    (target: Target, host?: string | undefined) => Promise<RepoMetaData>
+  > = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]: getGithubRepoMetaData,
     [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
       getGitHubCloudAppRepoMetaData,
     [SupportedIntegrationTypesUpdateProject.GHE]: getGithubRepoMetaData,
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]: async (
+      target: Target,
+    ) =>
+      Promise.resolve({
+        branch: typeof target.branch === 'string' ? target.branch : '',
+        cloneUrl: '',
+        sshUrl: '',
+        archived: false,
+      }),
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
+      getBitbucketAppRepoMetaData,
   };
   return getDefaultBranchGenerators[origin];
 }
@@ -47,11 +67,18 @@ export function getMetaDataGenerator(
 export function getTargetConverter(
   origin: SupportedIntegrationTypesUpdateProject,
 ): (target: SnykTarget) => Target {
-  const getTargetConverter = {
+  const getTargetConverter: Record<
+    SupportedIntegrationTypesUpdateProject,
+    (target: SnykTarget) => Target
+  > = {
     [SupportedIntegrationTypesUpdateProject.GITHUB]: snykTargetConverter,
     [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
       snykTargetConverter,
     [SupportedIntegrationTypesUpdateProject.GHE]: snykTargetConverter,
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]:
+      snykTargetConverter,
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
+      snykTargetConverter,
   };
   return getTargetConverter[origin];
 }
@@ -78,54 +105,231 @@ export async function syncProjectsForTarget(
 
   debug(`Syncing projects for target ${target.attributes.displayName}`);
   let targetMeta: RepoMetaData;
-  const origin = target.attributes
-    .origin as SupportedIntegrationTypesUpdateProject;
-  const targetData = getTargetConverter(origin)(target);
-
-  try {
-    targetMeta = await getMetaDataGenerator(origin)(targetData, host);
-  } catch (e) {
-    //TODO: if repo is deleted, deactivate all projects
-    debug(e);
-    const error = `Getting default branch via ${origin} API failed with error: ${e.message}`;
-    projects.map((project) => {
-      failed.add({
-        errorMessage: error,
-        projectPublicId: project.id,
-        type: ProjectUpdateType.BRANCH,
-        from: project.branch!,
-        to: targetMeta.branch,
-        dryRun: config.dryRun,
-        target,
-      });
-    });
+  // Map Snyk origin strings to our SupportedIntegrationTypesUpdateProject enum
+  function mapSnykOriginToUpdateProject(
+    s: string | undefined,
+  ): SupportedIntegrationTypesUpdateProject {
+    if (!s) {
+      throw new Error('Target origin is missing');
+    }
+    switch (s) {
+      case 'bitbucket-connect-app':
+        return SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP;
+      case 'bitbucket-cloud':
+        return SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD;
+      case 'github-cloud-app':
+        return SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP;
+      case 'github':
+        return SupportedIntegrationTypesUpdateProject.GITHUB;
+      case 'github-enterprise':
+        return SupportedIntegrationTypesUpdateProject.GHE;
+      default:
+        // Fallback: assume the value matches our enum string
+        return s as SupportedIntegrationTypesUpdateProject;
+    }
   }
 
-  const deactivate = [];
-  const createProjects = [];
+  const origin = mapSnykOriginToUpdateProject(
+    (target as any).attributes?.origin ||
+      (target as any).relationships?.integration?.attributes?.integration_type,
+  );
+  const targetData = getTargetConverter(origin)(target);
 
-  if (targetMeta!.archived) {
-    deactivate.push(...projects);
-  } else {
-    try {
-      const res = await cloneAndAnalyze(origin, targetMeta!, projects, {
-        exclusionGlobs: config.exclusionGlobs,
-        entitlements: config.entitlements,
-        manifestTypes: config.manifestTypes,
-      });
+  // Bitbucket Cloud/Server support
+  let deactivate: SnykProject[] = [];
+  let createProjects: string[] = [];
+  // removed unused bitbucketAuth variable
+  try {
+    if (origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD) {
+      // Choose Bitbucket Cloud auth explicitly. Prefer API token, then OAuth,
+      // then fall back to username/appPassword (Basic) when no token is present.
+      let rawAuth;
+      try {
+        rawAuth = getBitbucketCloudAuth('api');
+      } catch {
+        try {
+          rawAuth = getBitbucketCloudAuth('oauth');
+        } catch {
+          rawAuth = getBitbucketCloudAuth('user');
+        }
+      }
+      // Convert BitbucketCloudAuthMethod to BitbucketAuth for sync client
+      let bitbucketAuth: BitbucketAuth;
+      if (rawAuth.type === 'user') {
+        bitbucketAuth = {
+          type: 'user',
+          username: rawAuth.username,
+          appPassword: rawAuth.appPassword || rawAuth.password,
+        };
+      } else if (rawAuth.type === 'api' || rawAuth.type === 'oauth') {
+        bitbucketAuth = {
+          type: rawAuth.type as BitbucketAuthType,
+          token: rawAuth.token,
+        };
+      } else {
+        throw new Error('Unsupported Bitbucket Cloud auth type');
+      }
+      targetMeta = {
+        branch: '', // Let cloneAndAnalyze determine the correct branch
+        cloneUrl: '',
+        sshUrl: '',
+        archived: false,
+      };
+      const res = await cloneAndAnalyze(
+        origin,
+        targetMeta,
+        projects,
+        {
+          exclusionGlobs: config.exclusionGlobs,
+          entitlements: config.entitlements,
+          manifestTypes: config.manifestTypes,
+        },
+        'cloud',
+        bitbucketAuth,
+        targetData,
+      );
       debug(
-        'Analysis finished',
+        `[Bitbucket Cloud] Analysis finished for branch: ${res.branch}`,
         JSON.stringify({
+          branch: res.branch,
           remove: res.remove.length,
           import: res.import.length,
         }),
       );
-      deactivate.push(...res.remove);
-      createProjects.push(...res.import);
-    } catch (e) {
-      debug(e);
-      const error = `Cloning and analysing the repo to deactivate projects failed with error: ${e.message}`;
-      projects.map((project) => {
+      // Verbose per-target logging for debugging
+      console.log(
+        '[syncProjectsForTarget] Target:',
+        target.attributes.displayName,
+      );
+      console.log(
+        '[syncProjectsForTarget] Snyk monitored projects:',
+        projects.map((p: SnykProject) => p.name),
+      );
+      console.log(
+        '[syncProjectsForTarget] Detected imports (files to import):',
+        res.import,
+      );
+      console.log(
+        '[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):',
+        res.remove.map((p: SnykProject) => p.name),
+      );
+      // Propagate branch from analysis result
+      if (res.branch) {
+        targetMeta.branch = res.branch;
+      }
+      // Only deactivate projects whose branch does not match the detected default branch
+      const detectedBranch = targetMeta.branch;
+      deactivate = res.remove.filter(
+        (p: SnykProject) => p.branch !== detectedBranch,
+      );
+      createProjects = res.import;
+    } else if (
+      origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP
+    ) {
+      // Use app token (client_credentials) to access workspace-scoped repos via API
+      const token = await getBitbucketAppToken();
+      const bitbucketAuth: BitbucketAuth = {
+        type: 'oauth',
+        token,
+      } as BitbucketAuth;
+
+      targetMeta = {
+        branch: '',
+        cloneUrl: '',
+        sshUrl: '',
+        archived: false,
+      };
+
+      const res = await cloneAndAnalyze(
+        origin,
+        targetMeta,
+        projects,
+        {
+          exclusionGlobs: config.exclusionGlobs,
+          entitlements: config.entitlements,
+          manifestTypes: config.manifestTypes,
+        },
+        'cloud',
+        bitbucketAuth,
+        targetData,
+      );
+      debug(
+        `[Bitbucket Cloud App] Analysis finished for branch: ${res.branch}`,
+        JSON.stringify({
+          branch: res.branch,
+          remove: res.remove.length,
+          import: res.import.length,
+        }),
+      );
+      // Verbose per-target logging for debugging
+      console.log(
+        '[syncProjectsForTarget] Target:',
+        target.attributes.displayName,
+      );
+      console.log(
+        '[syncProjectsForTarget] Snyk monitored projects:',
+        projects.map((p: SnykProject) => p.name),
+      );
+      console.log(
+        '[syncProjectsForTarget] Detected imports (files to import):',
+        res.import,
+      );
+      console.log(
+        '[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):',
+        res.remove.map((p: SnykProject) => p.name),
+      );
+      if (res.branch) {
+        targetMeta.branch = res.branch;
+      }
+      const detectedBranchApp = targetMeta.branch;
+      deactivate = res.remove.filter(
+        (p: SnykProject) => p.branch !== detectedBranchApp,
+      );
+      createProjects = res.import;
+    } else {
+      targetMeta = await getMetaDataGenerator(origin)(targetData, host);
+      if (targetMeta!.archived) {
+        deactivate = [...projects];
+      } else {
+        const res = await cloneAndAnalyze(origin, targetMeta!, projects, {
+          exclusionGlobs: config.exclusionGlobs,
+          entitlements: config.entitlements,
+          manifestTypes: config.manifestTypes,
+        });
+        debug(
+          'Analysis finished',
+          JSON.stringify({
+            remove: res.remove.length,
+            import: res.import.length,
+          }),
+        );
+        // Verbose per-target logging for debugging (non-bitbucket paths)
+        console.log(
+          '[syncProjectsForTarget] Target:',
+          target.attributes.displayName,
+        );
+        console.log(
+          '[syncProjectsForTarget] Snyk monitored projects:',
+          projects.map((p) => p.name),
+        );
+        console.log(
+          '[syncProjectsForTarget] Detected imports (files to import):',
+          res.import,
+        );
+        console.log(
+          '[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):',
+          res.remove.map((p) => p.name),
+        );
+        deactivate = res.remove;
+        createProjects = res.import;
+      }
+    }
+  } catch (e) {
+    debug(e);
+    const error = `Cloning and analysing the repo to deactivate projects failed with error: ${e.message}`;
+    // Add failures for all projects associated with this target
+    if (projects.length > 0) {
+      projects.forEach((project) => {
         failed.add({
           errorMessage: error,
           projectPublicId: project.id,
@@ -136,7 +340,18 @@ export async function syncProjectsForTarget(
           target,
         });
       });
+    } else {
+      // Even if there are no projects, we should still report the error
+      // This ensures target-level failures are tracked
+      debug(
+        `No projects found for target ${target.attributes.displayName}, but error occurred: ${error}`,
+      );
     }
+    // Return early with failures instead of continuing with potentially invalid state
+    return {
+      updated: Array.from(updated),
+      failed: Array.from(failed),
+    };
   }
 
   // remove any projects that are to be deactivated from other actions
@@ -153,7 +368,7 @@ export async function syncProjectsForTarget(
       requestManager,
       orgId,
       branchUpdateProjects,
-      targetMeta!.branch,
+      targetMeta!.branch ?? '',
       config.dryRun,
     ),
     bulkDeactivateProjects(requestManager, orgId, deactivate, config.dryRun),
@@ -162,7 +377,7 @@ export async function syncProjectsForTarget(
       orgId,
       createProjects,
       integrationId,
-      { ...targetData, branch: targetMeta!.branch },
+      { ...targetData, branch: targetMeta!.branch ?? '' },
       config.dryRun,
     ),
   ];
@@ -211,7 +426,7 @@ export async function bulkUpdateProjectsBranch(
 ): Promise<{ updated: ProjectUpdate[]; failed: ProjectUpdateFailure[] }> {
   const updatedProjects: ProjectUpdate[] = [];
   const failedProjects: ProjectUpdateFailure[] = [];
-  await pMap(
+  await (pMap as any)(
     projects,
     async (project: SnykProject) => {
       try {
@@ -234,9 +449,11 @@ export async function bulkUpdateProjectsBranch(
             dryRun,
           });
           debug(
-            `Default branch updated from ${project.branch!} to ${branch} for ${
+            `[Branch Update] Project: ${project.name} (ID: ${
               project.id
-            }`,
+            }) - Branch changed from '${project.branch!}' to '${branch}' for integration '${
+              project.origin
+            }'`,
           );
         }
       } catch (e) {
@@ -268,7 +485,7 @@ export async function bulkDeactivateProjects(
     return { updated, failed };
   }
   debug(`De-activating projects: ${projects.map((p) => p.id).join(',')}`);
-  await pMap(
+  await (pMap as any)(
     projects,
     async (project: SnykProject) => {
       if (!dryRun) {

@@ -1,13 +1,13 @@
 import { Octokit } from '@octokit/rest';
-import { retry } from '@octokit/plugin-retry';
-import * as parseLinkHeader from 'parse-link-header';
-import * as debugLib from 'debug';
+// retry plugin intentionally not used here; keep Octokit plain
+import parseLinkHeader from 'parse-link-header';
+import debugModule from 'debug';
 
 import { getGithubBaseUrl } from './github-base-url';
-import { GithubOrgData, SnykOrgData } from './types';
+import type { GithubOrgData, SnykOrgData } from './types';
 import { getGithubToken } from './get-github-token';
 
-const debug = debugLib('snyk:github');
+const debug = debugModule('snyk:github');
 
 async function fetchOrgsForPage(
   octokit: Octokit,
@@ -20,6 +20,7 @@ async function fetchOrgsForPage(
   since?: number;
 }> {
   const orgsData: GithubOrgData[] = [];
+
   const params = {
     per_page: 100,
     page: pageNumber,

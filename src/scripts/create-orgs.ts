@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -135,7 +135,7 @@ export async function createOrgs(
   }
   try {
     orgsData = await streamData<CreateOrgData>(orgsFilePath, 'orgs');
-  } catch (e) {
+  } catch {
     throw new Error(`Failed to parse organizations from ${filePath}`);
   }
   debug(`Loaded ${orgsData.length} organizations to create ${Date.now()}`);
@@ -162,6 +162,7 @@ export async function createOrgs(
   for (const groupId in orgsPerGroup) {
     let orgsToCreate = orgsPerGroup[groupId];
     debug(`Finding existing organizations in group ${groupId}`);
+    // (debug logging removed)
 
     const { newOrgs, existingOrgs } = await separateExistingOrganizations(
       loggingPath,
@@ -212,7 +213,6 @@ export async function createOrgs(
     );
   }
   debug(`Getting existing ${allExistingOrgs.length} orgs data`);
-  const allOrgs: Partial<NewOrExistingOrg>[] = [...createdOrgs];
   let existing: Partial<NewOrExistingOrg>[] = [];
 
   if (includeExistingOrgsInOutput) {
@@ -221,8 +221,15 @@ export async function createOrgs(
     existing = res.existing;
   }
 
-  // Only save newly created orgs to prevent duplicates on subsequent runs
-  const fileName = await saveCreatedOrgData(createdOrgs);
+  // Determine what to save: when includeExistingOrgsInOutput is true, save
+  // both created and existing orgs requested by the run. Otherwise save
+  // only the newly created orgs.
+  const toSave = includeExistingOrgsInOutput
+    ? [...createdOrgs, ...existing]
+    : [];
+  const fileName = await saveCreatedOrgData(
+    toSave as Partial<NewOrExistingOrg>[],
+  );
   return {
     orgs: createdOrgs,
     existing,
@@ -240,17 +247,17 @@ async function separateExistingOrganizations(
 ): Promise<{ existingOrgs: Org[]; newOrgs: CreateOrgData[] }> {
   try {
     return await filterOutExistingOrgs(requestManager, orgsPerGroup, groupId);
-  } catch (e) {
+  } catch (_e) {
+    const err: any = _e;
+    const humanMessage =
+      err && typeof err === 'object'
+        ? err.data?.message ?? err.message ?? String(err)
+        : String(err);
+    const finalMessage =
+      humanMessage || 'Failed to create org, please try again in DEBUG mode.';
     for (const org of orgsPerGroup) {
       const { name } = org;
-      await logFailedOrg(
-        groupId,
-        name,
-        e.data
-          ? e.data.message
-          : e.message ||
-              'Failed to create org, please try again in DEBUG mode.',
-      );
+      await logFailedOrg(groupId, name, finalMessage);
     }
     throw new Error(
       `All requested organizations failed to be created. Review the errors in ${path.resolve(

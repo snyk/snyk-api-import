@@ -1,6 +1,6 @@
-import * as debugLib from 'debug';
-import * as _ from 'lodash';
-import * as yargs from 'yargs';
+import debugLib from 'debug';
+import * as lodash from 'lodash';
+// yargs import intentionally omitted here; handlers use process.exitCode instead
 import type { CommandResult } from '../lib/types';
 
 const debug = debugLib('snyk:import-projects-script');
@@ -31,7 +31,7 @@ export async function importFunction(file: string): Promise<CommandResult> {
 
     const projectsMessage =
       projects.length > 0
-        ? `Imported ${_.uniqBy(projects, 'projectUrl').length} project(s)`
+        ? `Imported ${lodash.uniqBy(projects, 'projectUrl').length} project(s)`
         : '⚠ No projects imported!';
 
     const targetsMessage = `\nProcessed ${
@@ -70,7 +70,10 @@ export async function handler(argv: { file: string }): Promise<void> {
     debug('Failed to import projects.\n' + res.message);
 
     console.error(res.message);
-    yargs.exit(1, new Error(res.message));
+    // Use process.exitCode instead of yargs.exit so bundlers/packers
+    // don't warn about missing named exports from yargs.
+    process.exitCode = 1;
+    return;
   } else {
     console.log(res.message);
   }

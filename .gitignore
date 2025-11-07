@@ -6,7 +6,6 @@ dist
 *.log
 .dccache
 *import-job-results.json
-package-lock.json
 yarn.lock
 .eslintcache
 local.*
@@ -14,3 +13,6 @@ test/research
 .idea
 *.pem
 .env
+.github/api/*
+.github/docs/*
+tsconfig.tsbuildinfo

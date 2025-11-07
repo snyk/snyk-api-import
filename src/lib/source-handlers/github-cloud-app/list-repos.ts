@@ -1,9 +1,5 @@
-import { Octokit } from '@octokit/rest';
-import { retry } from '@octokit/plugin-retry';
 import { createGitHubAppClient } from './get-github-app-token';
-import { GitHubCloudAppRepoData } from './types';
-
-const githubClient = Octokit.plugin(retry as any);
+import type { GitHubCloudAppRepoData } from './types';
 
 /**
  * Lists all repositories accessible to the GitHub App for a specific organization
@@ -22,6 +18,7 @@ export async function listGitHubCloudAppRepos(
       const response = await octokit.repos.listForOrg({
         org: orgName,
         type: 'all', // Include both public and private repos
+
         per_page: perPage,
         page,
         sort: 'updated',
@@ -80,6 +77,7 @@ export async function listReposForInstallation(
     while (true) {
       const response = await octokit.apps.listReposAccessibleToInstallation({
         installation_id: installationId,
+
         per_page: perPage,
         page,
       });

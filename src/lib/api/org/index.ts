@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import type { requestsManager } from 'snyk-request-manager';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as qs from 'querystring';
 import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
@@ -48,6 +48,7 @@ export async function listIntegrations(
   return res.data || {};
 }
 
+/* eslint-disable @typescript-eslint/naming-convention */
 const defaultDisabledSettings = {
   'new-issues-remediations': {
     enabled: false,
@@ -64,6 +65,7 @@ const defaultDisabledSettings = {
     enabled: false,
   },
 };
+/* eslint-enable @typescript-eslint/naming-convention */
 
 interface NotificationSettings {
   [name: string]: {
@@ -222,9 +224,15 @@ async function listAllProjects(
       } = await getProjectsPage(requestManager, orgId, filters, nextPageLink);
 
       projectsList.push(...projects);
-      next
-        ? ((lastPage = false), (nextPageLink = next))
-        : ((lastPage = true), (nextPageLink = ''));
+      if (next) {
+        lastPage = false;
+        nextPageLink = next;
+      } else {
+        lastPage = true;
+        // Use undefined to indicate there's no next page; an empty string
+        // would be treated as a valid URL later (and cause malformed requests).
+        nextPageLink = undefined;
+      }
       pageCount++;
     } catch (e) {
       debug('Failed to get projects for ', orgId, e);
@@ -295,11 +303,11 @@ export interface TargetFilters {
   displayName?: string;
   excludeEmpty?: boolean;
 }
-export async function listTargets(
+export const listTargets = async (
   requestManager: requestsManager,
   orgId: string,
   config?: TargetFilters,
-): Promise<{ targets: SnykTarget[] }> {
+): Promise<{ targets: SnykTarget[] }> => {
   getApiToken();
   getSnykHost();
   debug(`Listing all targets for org: ${orgId}`);
@@ -314,7 +322,7 @@ export async function listTargets(
   const targets = await listAllSnykTargets(requestManager, orgId, config);
 
   return { targets };
-}
+};
 
 export async function listAllSnykTargets(
   requestManager: requestsManager,
@@ -332,9 +340,13 @@ export async function listAllSnykTargets(
         await getSnykTarget(requestManager, orgId, nextPageLink, config);
 
       targetsList.push(...targets);
-      next
-        ? ((lastPage = false), (nextPageLink = next))
-        : ((lastPage = true), (nextPageLink = undefined));
+      if (next) {
+        lastPage = false;
+        nextPageLink = next;
+      } else {
+        lastPage = true;
+        nextPageLink = undefined;
+      }
       pageCount++;
     } catch (e) {
       debug('Failed to get targets for ', orgId, e);

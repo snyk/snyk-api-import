@@ -1,5 +1,7 @@
 # Import
+
 ## Table of Contents
+
 - [Import](#import)
   - [Table of Contents](#table-of-contents)
   - [Prerequisites](#prerequisites)
@@ -18,9 +20,10 @@
   - [Check how many projects successfully imported](#check-how-many-projects-successfully-imported)
   - [Check how many projects failed to import\& why](#check-how-many-projects-failed-to-import-why)
 
-
 ## Prerequisites
+
 You will need to have setup in advance:
+
 - your [Snyk organizations](docs/orgs.md) should be setup before running an import
 - your Snyk organizations configured with some connection to SCM (Github/Gitlab/Bitbucket etc) as you will need the `integrationId` to generate the import files.
 - you will need your Snyk API token, with correct scope & [admin access for all Organizations](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets) you are importing to. **Github Integration Note**: As Github is both an auth & integration, how the integration is done has an effect on usage:
@@ -32,6 +35,7 @@ You will need to have setup in advance:
 Any logs will be generated at `SNYK_LOG_PATH` directory.
 
 # Kick off an import
+
 ## 1. Create the `import-projects.json` file
 
 The file is expected to have a **required** `targets` top level key which is an array of **import targets**.
@@ -197,9 +201,11 @@ If you have any tests ot fixtures that should be ignored, please set the `exclus
 Grab a binary from the [releases page](https://github.com/snyk/snyk-api-import/releases) and run with `DEBUG=snyk* snyk-api-import-macos import --file=path/to/imported-targets.json`
 
 ## 4. Review logs
+
 When import is started via Snyk API, many files & targets will be added to an import job. This job when complete will provide logs of what projects could be detected, which failed and any errors that were encountered. For more details see [Import API documentation](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets)
 
 `import` command will generate several logs:
+
 - `<public_org_id>.failed-polls.log` - contains errors received when polling an import job for status (complete / pending)
 - `<public_org_id>.failed-projects.log` - contains entry per project that was identified but failed to be created
 - `<public_org_id>.imported_projects.log` - contains entry per projects of all projects that were successfully created in Snyk
@@ -207,6 +213,7 @@ When import is started via Snyk API, many files & targets will be added to an im
 - `imported-targets.log` - contains information on which targets have been requested for processing.
 
 # Tips
+
 ## Skip all previously imported targets
 
 This can be used to skip previously imported targets (repos) so only remaining targets will be imported.
@@ -244,9 +251,11 @@ Supported integration types:
 - Azure repos `azure-repos`
 
 ## Check how many projects successfully imported
+
 We recommend you use [jq](https://stedolan.github.io/jq/download/), which is a lightweight and flexible command-line JSON processor:
 `jq -s length snyk-log/$SNYK_ORG_ID.imported-projects.log`
 
 ## Check how many projects failed to import& why
+
 We recommend you use [jq](https://stedolan.github.io/jq/download/), which is a lightweight and flexible command-line JSON processor:
 `jq . snyk-log/$SNYK_ORG_ID.failed-projects.log`

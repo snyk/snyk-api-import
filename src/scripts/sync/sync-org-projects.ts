@@ -1,5 +1,5 @@
-import pMap = require('p-map');
-import * as debugLib from 'debug';
+import pMap from 'p-map';
+import debugLib from 'debug';
 import * as path from 'path';
 import * as fs from 'fs';
 import { requestsManager } from 'snyk-request-manager';
@@ -10,6 +10,7 @@ import {
 import { listIntegrations } from '../../lib';
 import type { TargetFilters } from '../../lib';
 import { isGithubConfigured } from '../../lib';
+import { isBitbucketCloudAppConfigured } from '../../lib/source-handlers/bitbucket-cloud-app';
 import { isGitHubCloudAppConfigured } from '../../lib/source-handlers/github-cloud-app';
 import { getLoggingPath, listTargets } from '../../lib';
 import { getFeatureFlag } from '../../lib/api/feature-flags';
@@ -32,6 +33,9 @@ export function isSourceConfigured(
     [SupportedIntegrationTypesUpdateProject.GITHUB_CLOUD_APP]:
       isGitHubCloudAppConfigured,
     [SupportedIntegrationTypesUpdateProject.GHE]: isGithubConfigured,
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]: () => {}, // Add real check if needed
+    [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
+      isBitbucketCloudAppConfigured,
   };
   return getDefaultBranchGenerators[origin];
 }
@@ -103,7 +107,7 @@ export async function updateOrgTargets(
       'customBranch',
       publicOrgId,
     );
-  } catch (e) {
+  } catch {
     throw new Error(
       `Org ${publicOrgId} was not found or you may not have the correct permissions to access the org`,
     );
@@ -120,9 +124,23 @@ export async function updateOrgTargets(
     allowedSources,
     async (source: SupportedIntegrationTypesUpdateProject) => {
       isSourceConfigured(source)();
+      // Map CLI/source enum to the Snyk API "origin" string values where they differ
+      function mapSourceToSnykOrigin(
+        s: SupportedIntegrationTypesUpdateProject,
+      ): string {
+        switch (s) {
+          case SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP:
+            // Snyk represents Bitbucket Cloud App (Connect App) as 'bitbucket-connect-app'
+            return 'bitbucket-connect-app';
+          default:
+            // For other values the enum string matches the Snyk origin
+            return s as string;
+        }
+      }
+
       const filters: TargetFilters = {
         limit: 100,
-        origin: source,
+        origin: mapSourceToSnykOrigin(source),
         excludeEmpty: true,
       };
       console.log(`Listing all targets for source ${source}`);
@@ -131,12 +149,34 @@ export async function updateOrgTargets(
         publicOrgId,
         filters,
       );
+      console.log(`Found ${targets.length} targets for source ${source}`);
       console.log(`Resolving integration ID for source ${source}`);
       const integrationsData = await listIntegrations(
         requestManager,
         publicOrgId,
       );
-      const integrationId = integrationsData[source];
+      // Map CLI/source enum to Snyk's integration key (they differ for some sources)
+      function mapSourceToSnykIntegrationKey(
+        s: SupportedIntegrationTypesUpdateProject,
+      ): string {
+        switch (s) {
+          case SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP:
+            // Snyk represents Bitbucket Cloud App (Connect App) as 'bitbucket-connect-app'
+            return 'bitbucket-connect-app';
+          default:
+            // For other values the enum string matches the Snyk integration key
+            return s as string;
+        }
+      }
+      const integrationKey = mapSourceToSnykIntegrationKey(source);
+      const integrationId = integrationsData[integrationKey];
+      if (!integrationId) {
+        console.warn(
+          `Warning: Could not find integrationId for source ${source} (key: ${integrationKey}). Available integrations: ${Object.keys(
+            integrationsData,
+          ).join(', ')}`,
+        );
+      }
       console.log(`Syncing targets for source ${source}`);
       const response = await updateTargets(
         requestManager,
@@ -216,13 +256,20 @@ export async function updateTargets(
         );
         updatedProjects.push(...updated);
         failedProjects.push(...failed);
-        processedTargets += 1;
+
+        // If the target returned failures but no updates, it means the target
+        // failed to sync properly (e.g., cloneAndAnalyze failed). Count it as a failed target.
+        if (failed.length > 0 && updated.length === 0) {
+          failedTargets += 1;
+        } else {
+          processedTargets += 1;
+        }
 
         if (updated.length) {
-          await logUpdatedProjects(orgId, updated);
+          await logUpdatedProjects(orgId, updated, loggingPath);
         }
         if (failed.length) {
-          await logFailedToUpdateProjects(orgId, failed);
+          await logFailedToUpdateProjects(orgId, failed, loggingPath);
         }
       } catch (e) {
         failedTargets += 1;

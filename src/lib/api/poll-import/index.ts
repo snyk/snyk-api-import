@@ -1,10 +1,10 @@
 import 'source-map-support/register';
 import * as url from 'url';
 import type { requestsManager } from 'snyk-request-manager';
-import * as sleep from 'sleep-promise';
-import * as debugLib from 'debug';
-import * as _ from 'lodash';
-import * as pMap from 'p-map';
+import sleep from 'sleep-promise';
+import debugLib from 'debug';
+import lodash from 'lodash';
+import pMap from 'p-map';
 import type { PollImportResponse, Project } from '../../types';
 import { getApiToken } from '../../get-api-token';
 import type { FailedProject } from '../../../loggers/log-failed-projects';
@@ -85,7 +85,7 @@ export async function pollImportUrls(
       'Missing required parameters. Please ensure you have provided: locationUrls.',
     );
   }
-  const uniqueLocationUrls = _.uniq(locationUrls);
+  const uniqueLocationUrls = lodash.uniq(locationUrls);
   const projectsArray: Project[] = [];
   const allFailedProjects: FailedProject[] = [];
   await pMap(
@@ -95,15 +95,15 @@ export async function pollImportUrls(
         const importJobId = locationUrl.split('import/')[1];
         console.log(`Checking status for import job id: ${importJobId}`);
         const res = await pollImportUrl(requestManager, locationUrl);
-        const [failedProjects, projects] = _.partition(
+        const [failedProjects, projects] = lodash.partition(
           res.projects,
           (p: Project) => !p.success,
         );
         console.log(
           `Discovered ${
-            _.uniqBy(projects, 'projectUrl').length
+            lodash.uniqBy(projects, 'projectUrl').length
           } projects from import job id: ${importJobId}${
-            _.uniqBy(projects, 'projectUrl').length
+            lodash.uniqBy(projects, 'projectUrl').length
               ? `. ${failedProjects.length} project(s) failed to finish importing.`
               : ''
           }`,
@@ -119,7 +119,7 @@ export async function pollImportUrls(
       } catch (error: any) {
         await logFailedPollUrls(locationUrl, {
           errorMessage:
-            _.get(error, 'innerError.message') ||
+            lodash.get(error, 'innerError.message') ||
             error.innerError ||
             error.message ||
             error,

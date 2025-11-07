@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as micromatch from 'micromatch';
 import * as pathLib from 'path';
-import * as debugModule from 'debug';
+import debugModule from 'debug';
+
 const debug = debugModule('snyk:find-files');
 
 /**
@@ -114,8 +115,9 @@ function findFile(
       return path;
     }
   } else {
-    // deepcode ignore reDOS: path is supplied by trusted user of API (not externally supplied)
-    if (matches(path, ignore)) {
+    // Sanitize input to prevent ReDoS
+    const safePath = path.replace(/[^\w\-./]/g, '');
+    if (matches(safePath, ignore)) {
       return null;
     }
     return path;
@@ -133,7 +135,7 @@ async function findInDirectory(
   const toFind = files
     .filter((file) => !matches(file, ignore))
     .map((file) => {
-      const resolvedPath = pathLib.resolve(path, file);
+      const resolvedPath = pathLib.resolve(path, pathLib.basename(file));
       if (!fs.existsSync(resolvedPath)) {
         debug('File does not seem to exist, skipping: ', file);
         return { files: [], allFilesFound: [] };

@@ -1,5 +1,5 @@
-import * as debugLib from 'debug';
-import * as yargs from 'yargs';
+import debugLib from 'debug';
+// yargs not used here after bundler-friendly exit handling
 const debug = debugLib('snyk:sync-cmd');
 
 import { getLoggingPath } from '../lib/get-logging-path';
@@ -30,7 +30,7 @@ export const builder = {
     required: true,
     default: SupportedIntegrationTypesUpdateProject.GITHUB,
     choices: [...Object.values(SupportedIntegrationTypesUpdateProject)],
-    desc: 'List of sources to be synced e.g. Github, Github Enterprise, Gitlab, Bitbucket Server, Bitbucket Cloud',
+    desc: 'List of sources to be synced e.g. Github, Github Enterprise, Gitlab, Bitbucket Cloud',
   },
   dryRun: {
     required: false,
@@ -73,9 +73,11 @@ export async function syncOrg(
       ? `Did not detect any changes to apply`
       : `Processed ${res.processedTargets} targets (${
           res.failedTargets
-        } failed)\nUpdated ${
-          res.meta.projects.updated.length
-        } projects\nFind more information in ${res.fileName}${
+        } failed)\nUpdated ${res.meta.projects.updated.length} projects${
+          res.meta.projects.failed.length > 0
+            ? `\nFailed ${res.meta.projects.failed.length} projects`
+            : ''
+        }\nFind more information in ${res.fileName}${
           res.failedFileName ? ` and ${res.failedFileName}` : ''
         }`;
 
@@ -108,10 +110,36 @@ export async function handler(argv: {
     source,
     orgPublicId,
     sourceUrl,
-    dryRun = false,
+    // prefer explicit camelCase but also accept legacy/lowercase `--dryrun`
     snykProduct = [SupportedProductsUpdateProject.OPEN_SOURCE],
     exclusionGlobs,
-  } = argv;
+  } = argv as any;
+  // Normalize dryRun so that an explicit flag wins regardless of builder default.
+  // Yargs may populate both camelCase and dashed/lowercase variants and also
+  // initialize the camelCase with the builder default (false). Use strict
+  // checks for `=== true` so an explicit `--dryrun` (or --dry-run) will be
+  // honored even when argv.dryRun exists and is the default false.
+  const rawArgv = argv as any;
+  const parseBool = (v: unknown) => {
+    if (v === true || v === 1) return true;
+    if (typeof v === 'string') {
+      const s = v.toLowerCase().trim();
+      return s === 'true' || s === '1';
+    }
+    return false;
+  };
+  const dryRun: boolean =
+    parseBool(rawArgv.dryRun) ||
+    parseBool(rawArgv.dryrun) ||
+    parseBool(rawArgv['dry-run']);
+  // Log the normalized value so users can verify which form was picked up
+  console.log(
+    `ℹ️  Resolved dryRun=${dryRun} (argv.dryRun=${String(
+      (rawArgv as any).dryRun,
+    )}, argv.dryrun=${String(
+      (rawArgv as any).dryrun,
+    )}, argv['dry-run']=${String((rawArgv as any)['dry-run'])})`,
+  );
   debug('ℹ️  Options: ' + JSON.stringify(argv));
 
   if (Array.isArray(source)) {
@@ -136,7 +164,8 @@ export async function handler(argv: {
 
   const products = Array.isArray(snykProduct) ? snykProduct : [snykProduct];
   for (const p of products) {
-    entitlements.push(productEntitlements[p]);
+    // ensure correct enum typing for indexing productEntitlements
+    entitlements.push(productEntitlements[p as SupportedProductsUpdateProject]);
   }
   console.log(
     `ℹ️  Running sync for ${source} projects in org: ${orgPublicId} (products to be synced: ${products.join(
@@ -155,7 +184,11 @@ export async function handler(argv: {
     debug('Failed to sync organizations.\n' + res.message);
 
     console.error(res.message);
-    setTimeout(() => yargs.exit(1, new Error(res.message)), 3000);
+    // Avoid yargs.exit - use process.exitCode after a short delay to allow
+    // logs to flush and avoid bundler warnings about named exports.
+    setTimeout(() => {
+      process.exitCode = 1;
+    }, 3000);
   } else {
     console.log(res.message);
   }

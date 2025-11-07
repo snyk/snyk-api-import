@@ -1,5 +1,5 @@
 import type { requestsManager } from 'snyk-request-manager';
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import { defaultExclusionGlobs } from '../../common';
 import { importTarget, pollImportUrls } from '../../lib';
 

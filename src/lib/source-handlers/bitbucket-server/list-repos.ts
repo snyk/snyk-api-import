@@ -1,6 +1,6 @@
-import * as debugLib from 'debug';
-import { OutgoingHttpHeaders } from 'http2';
-import { BitbucketServerRepoData } from './types';
+import debugLib from 'debug';
+import type { OutgoingHttpHeaders } from 'http2';
+import type { BitbucketServerRepoData } from './types';
 import { getBitbucketServerToken } from './get-bitbucket-server-token';
 import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
 import { limiterForScm } from '../../limiters';
@@ -61,18 +61,22 @@ const getRepos = async (
 }> => {
   let start = 0;
   const repos: BitbucketServerRepoData[] = [];
-  const headers: OutgoingHttpHeaders = { Authorization: `Bearer ${token}` };
+  const headers: OutgoingHttpHeaders = {
+    authorization: `Bearer ${token}`,
+  } as any;
   const limiter = await limiterForScm(1, 1000, 1000, 1000, 1000 * 3600);
+  // Encode projectName for query string safety
+  const encProjectName = encodeURIComponent(decodeURIComponent(projectName));
   const { body, statusCode } =
     await limiterWithRateLimitRetries<BitbucketServeRepoData>(
       'get',
-      `${url}/rest/api/1.0/repos?projectname=${projectName}&state=AVAILABLE&start=${startFrom}&limit=${limit}`,
+      `${url}/rest/api/1.0/repos?projectname=${encProjectName}&state=AVAILABLE&start=${startFrom}&limit=${limit}`,
       headers,
       limiter,
       60000,
     );
   if (statusCode != 200) {
-    throw new Error(`Failed to fetch repos for ${url}/rest/api/1.0/repos?projectname=${projectName}&state=AVAILABLE&start=${startFrom}&limit=${limit}\n
+    throw new Error(`Failed to fetch repos for ${url}/rest/api/1.0/repos?projectname=${encProjectName}&state=AVAILABLE&start=${startFrom}&limit=${limit}\n
     Status Code: ${statusCode}\n
     Response body: ${JSON.stringify(body)}`);
   }

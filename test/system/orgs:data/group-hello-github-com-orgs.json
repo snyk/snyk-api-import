@@ -1,1 +1,9 @@
-{"orgs":[{"name":"snyk-playground","groupId":"hello"},{"name":"snyk-labs","groupId":"hello"},{"name":"automata-devops-io","groupId":"hello"},{"name":"DFWSupras","groupId":"hello"}]}
+{
+  "orgs": [
+    { "name": "snyk", "groupId": "hello" },
+    { "name": "snyk-playground", "groupId": "hello" },
+    { "name": "snyk-labs", "groupId": "hello" },
+    { "name": "automata-devops-io", "groupId": "hello" },
+    { "name": "DFWSupras", "groupId": "hello" }
+  ]
+}

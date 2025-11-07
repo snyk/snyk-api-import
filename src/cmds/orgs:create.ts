@@ -1,5 +1,5 @@
-import * as debugLib from 'debug';
-import * as yargs from 'yargs';
+import debugLib from 'debug';
+// yargs not used here after bundler-friendly exit handling
 const debug = debugLib('snyk:orgs-create-script');
 
 import { getLoggingPath } from '../lib';
@@ -76,7 +76,10 @@ export async function handler(argv: {
     debug('Failed to create organizations.\n' + res.message);
 
     console.error(res.message);
-    setTimeout(() => yargs.exit(1, new Error(res.message)), 3000);
+    // Avoid yargs.exit; set exitCode after small delay so logs flush
+    setTimeout(() => {
+      process.exitCode = 1;
+    }, 3000);
   } else {
     console.log(res.message);
   }

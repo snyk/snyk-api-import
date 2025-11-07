@@ -1,12 +1,12 @@
-import * as debugLib from 'debug';
+import debugModule from 'debug';
 import { Gitlab } from '@gitbeaker/node';
-import * as types from '@gitbeaker/core';
+import type * as types from '@gitbeaker/core';
 
 import { getToken } from './get-token';
 import { getBaseUrl } from './get-base-url';
-import { GitlabGroupData } from './types';
+import type { GitlabGroupData } from './types';
 
-const debug = debugLib('snyk:github');
+const debug = debugModule('snyk:github');
 
 async function fetchOrgsForPage(
   client: types.Gitlab,

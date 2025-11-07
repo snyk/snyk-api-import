@@ -1,9 +1,9 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as path from 'path';
 import { requestsManager } from 'snyk-request-manager';
-import * as pMap from 'p-map';
+import pMap from 'p-map';
 import * as fs from 'fs';
-import split = require('split');
+import split from 'split';
 import {
   importTargets,
   pollImportUrls,
@@ -80,7 +80,7 @@ export async function filterOutImportedTargets(
       throw new Error(`File not found ${importedTargetsFilePath}`);
     }
     importedTargets = await parseLogIntoTargetIds(importedTargetsFilePath);
-  } catch (e) {
+  } catch {
     console.log(
       `Could not load previously imported targets file: ${IMPORT_LOG_NAME}.\nThis could be because it doesn't exist or it is malformed. Either way continuing without checking for previously imported targets.`,
     );
@@ -182,7 +182,7 @@ export async function importProjects(
     const batchProgressMessages = `Importing batch ${currentTargets} - ${currentBatchEnd} out of ${fullTargetsNumber} ${
       skippedTargets > 0 ? `(skipped ${skippedTargets})` : ''
     }`;
-    logFile = await logImportedBatch(batchProgressMessages);
+    logFile = await logImportedBatch(batchProgressMessages, loggingPath);
     const pollingUrlsAndContext = await importTargets(
       requestManager,
       batch,

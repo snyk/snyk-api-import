@@ -1,14 +1,14 @@
-import { AzureRepoData } from './types';
-import base64 = require('base-64');
-import * as debugLib from 'debug';
-import { OutgoingHttpHeaders } from 'http2';
+import type { AzureRepoData } from './types';
+import base64 from 'base-64';
+import debugModule from 'debug';
+import type { OutgoingHttpHeaders } from 'http2';
 import { getAzureToken } from './get-azure-token';
 import { listAzureProjects } from './list-projects';
 import { getBaseUrl } from './get-base-url';
 import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
 import { limiterForScm } from '../../limiters';
 
-const debug = debugLib('snyk:azure');
+const debug = debugModule('snyk:azure');
 
 interface AzureReposResponse {
   value: {
@@ -44,9 +44,11 @@ async function getRepos(
   token: string,
 ): Promise<AzureRepoData[]> {
   const repoList: AzureRepoData[] = [];
+
   const headers: OutgoingHttpHeaders = {
     Authorization: `Basic ${base64.encode(':' + token)}`,
   };
+
   const limiter = await limiterForScm(1, 500);
   const { body, statusCode } =
     await limiterWithRateLimitRetries<AzureReposResponse>(

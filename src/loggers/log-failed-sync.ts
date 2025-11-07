@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as bunyan from 'bunyan';
 
 import { getLoggingPath } from '../lib';
@@ -25,7 +25,7 @@ export async function logFailedSync(
   });
   try {
     log.error({ orgId, target, errorMessage }, `Failed to sync target`);
-  } catch (e) {
+  } catch {
     debug('Failed to log failed sync', { orgId, target, errorMessage });
     // do nothing
   }

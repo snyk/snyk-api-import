@@ -1,16 +1,11 @@
-import * as debugLib from 'debug';
-import * as yargs from 'yargs';
+import debugLib from 'debug';
+// yargs not used here after bundler-friendly exit handling
 const debug = debugLib('snyk:orgs-data-script');
 
 import { getLoggingPath } from '../lib/get-logging-path';
-import {
-  CommandResult,
-  SupportedIntegrationTypesImportOrgData,
-} from '../lib/types';
-import {
-  entityName,
-  generateOrgImportDataFile,
-} from '../scripts/generate-org-data';
+import type { CommandResult } from '../lib/types';
+import { SupportedIntegrationTypesImportOrgData } from '../lib/types';
+import { entityName, generateOrgData } from '../scripts/generate-org-data';
 
 export const command = ['orgs:data'];
 export const desc =
@@ -53,7 +48,7 @@ export async function generateOrgImportData(
   try {
     getLoggingPath();
 
-    const res = await generateOrgImportDataFile(
+    const res = await generateOrgData(
       source,
       groupId,
       sourceOrgPublicId,
@@ -108,7 +103,10 @@ export async function handler(argv: {
     debug('Failed to create organizations.\n' + res.message);
 
     console.error(res.message);
-    setTimeout(() => yargs.exit(1, new Error(res.message)), 3000);
+    // Avoid yargs.exit; set exit code after a delay so logs are flushed
+    setTimeout(() => {
+      process.exitCode = 1;
+    }, 3000);
   } else {
     console.log(res.message);
   }

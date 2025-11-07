@@ -1,4 +1,4 @@
-import { deleteProjects } from "../src/lib";
+import { deleteProjects } from '../src/lib';
 import type { Project } from '../src/lib/types';
 
 export async function deleteTestProjects(

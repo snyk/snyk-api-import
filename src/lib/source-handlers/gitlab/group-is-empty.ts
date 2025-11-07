@@ -1,6 +1,6 @@
 import { Gitlab } from '@gitbeaker/node';
 
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import { fetchGitlabReposForPage } from './list-repos';
 import { getBaseUrl } from './get-base-url';
 import { getToken } from './get-token';

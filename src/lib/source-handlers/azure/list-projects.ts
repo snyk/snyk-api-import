@@ -1,10 +1,10 @@
 import * as qs from 'querystring';
-import base64 = require('base-64');
-import * as debugLib from 'debug';
-import { OutgoingHttpHeaders } from 'http2';
+import base64 from 'base-64';
+import debugLib from 'debug';
+import type { OutgoingHttpHeaders } from 'http2';
 import { getAzureToken } from './get-azure-token';
 import { getBaseUrl } from './get-base-url';
-import { AzureProjectData } from './types';
+import type { AzureProjectData } from './types';
 import { limiterWithRateLimitRetries } from '../../request-with-rate-limit';
 import { limiterForScm } from '../../limiters';
 
@@ -58,15 +58,19 @@ async function getProjects(
   continueFrom?: string;
 }> {
   const azureToken = getAzureToken();
+
   const params = {
     stateFilter: 'wellFormed',
     continuationToken: continueFrom,
     'api-version': '4.1',
   };
+
   const query = qs.stringify(params);
+
   const headers: OutgoingHttpHeaders = {
     Authorization: `Basic ${base64.encode(':' + azureToken)}`,
   };
+
   const limiter = await limiterForScm(1, 500);
   const {
     body,

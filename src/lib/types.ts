@@ -82,23 +82,26 @@ export enum SupportedIntegrationTypesImportData {
   AZURE_REPOS = 'azure-repos',
   BITBUCKET_SERVER = 'bitbucket-server',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
+  BITBUCKET_CLOUD_APP = 'bitbucket-cloud-app',
 }
 
 // used to generate import data by connecting to the source via API
 // and listing all orgs
 export enum SupportedIntegrationTypesImportOrgData {
   GITHUB = 'github',
-  GITHUB_CLOUD_APP = 'github-cloud-app',
   GHE = 'github-enterprise',
   GITLAB = 'gitlab',
   BITBUCKET_SERVER = 'bitbucket-server',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
+  BITBUCKET_CLOUD_APP = 'bitbucket-cloud-app',
 }
 
 export enum SupportedIntegrationTypesUpdateProject {
   GITHUB = 'github',
   GITHUB_CLOUD_APP = 'github-cloud-app',
   GHE = 'github-enterprise',
+  BITBUCKET_CLOUD = 'bitbucket-cloud',
+  BITBUCKET_CLOUD_APP = 'bitbucket-cloud-app',
 }
 
 export enum SupportedProductsUpdateProject {
@@ -217,7 +220,8 @@ export interface SnykTargetRelationships {
 }
 
 export interface RepoMetaData {
-  branch: string;
+  // branch may be undefined when unknown; callers should handle default behavior
+  branch?: string;
   cloneUrl: string;
   sshUrl: string;
   archived: boolean;

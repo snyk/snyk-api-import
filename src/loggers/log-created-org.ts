@@ -1,4 +1,4 @@
-import * as debugLib from 'debug';
+import debugLib from 'debug';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -24,7 +24,7 @@ export async function logCreatedOrg(
     const integrations = Object.keys(integrationsData).map(
       (i) => `${i}:${integrationsData[i]}`,
     );
-    const { id, name, created } = orgData;
+    const { id, created } = orgData;
 
     // Add to in-memory collection
     if (!createdOrgsMap[groupId]) {
