@@ -89,6 +89,7 @@ export enum SupportedIntegrationTypesImportData {
 // and listing all orgs
 export enum SupportedIntegrationTypesImportOrgData {
   GITHUB = 'github',
+  GITHUB_CLOUD_APP = 'github-cloud-app',
   GHE = 'github-enterprise',
   GITLAB = 'gitlab',
   BITBUCKET_SERVER = 'bitbucket-server',
@@ -124,6 +125,7 @@ export enum SupportedIntegrationTypesToListSnykTargets {
   GITHUB_CLOUD_APP = 'github-cloud-app',
   GHE = 'github-enterprise',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
+  BITBUCKET_CLOUD_APP = 'bitbucket-cloud-app',
   GCR = 'gcr',
   DOCKER_HUB = 'docker-hub',
   GITLAB = 'gitlab',

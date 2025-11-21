@@ -82,16 +82,10 @@ Set the following environment variables in your shell or CI/CD environment:
 export GITHUB_APP_ID="123456"
 
 # Required: Your GitHub App private key (PEM format)
-export GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
-your awesome token info
-...
------END RSA PRIVATE KEY-----"
-```
-
-**Optional configuration:**
+export GITHUB_APP_PRIVATE_KEY="$(cat ${SNYK_LOG_PATH}/your-private-key.pem)"
 
 ```bash
-# Optional: Target specific installation (if you have multiple)
+# Required: Target specific installation this is found on the GitHub App installation page under the apps configuration in in the end of the url(if you have multiple)
 export GITHUB_APP_INSTALLATION_ID="789012"
 ```
 

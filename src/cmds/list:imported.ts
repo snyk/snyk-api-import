@@ -38,6 +38,7 @@ const entityName: {
   'github-cloud-app': 'repo',
   'github-enterprise': 'repo',
   'bitbucket-cloud': 'repo',
+  'bitbucket-cloud-app': 'repo',
   gcr: 'images',
   'docker-hub': 'images',
   gitlab: 'repo',

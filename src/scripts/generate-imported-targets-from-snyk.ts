@@ -75,6 +75,8 @@ export const targetGenerators = {
     gitlabProjectToImportLogTarget,
   [SupportedIntegrationTypesToListSnykTargets.GHE]: projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD]: projectToTarget,
+  [SupportedIntegrationTypesToListSnykTargets.BITBUCKET_CLOUD_APP]:
+    projectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.GCR]: imageProjectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.DOCKER_HUB]: imageProjectToTarget,
   [SupportedIntegrationTypesToListSnykTargets.AZURE_REPOS]: projectToTarget,
