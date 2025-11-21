@@ -60,15 +60,6 @@ export function getMetaDataGenerator(
       }),
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
       getBitbucketAppRepoMetaData,
-    [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]: async (
-      target: Target,
-    ) =>
-      Promise.resolve({
-        branch: typeof target.branch === 'string' ? target.branch : '',
-        cloneUrl: '',
-        sshUrl: '',
-        archived: false,
-      }),
   };
   return getDefaultBranchGenerators[origin];
 }
@@ -87,8 +78,6 @@ export function getTargetConverter(
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]:
       snykTargetConverter,
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
-      snykTargetConverter,
-    [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]:
       snykTargetConverter,
   };
   return getTargetConverter[origin];
@@ -134,8 +123,6 @@ export async function syncProjectsForTarget(
         return SupportedIntegrationTypesUpdateProject.GITHUB;
       case 'github-enterprise':
         return SupportedIntegrationTypesUpdateProject.GHE;
-      case 'bitbucket-server':
-        return SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER;
       default:
         // Fallback: assume the value matches our enum string
         return s as SupportedIntegrationTypesUpdateProject;
@@ -299,63 +286,6 @@ export async function syncProjectsForTarget(
         (p: SnykProject) => p.branch !== detectedBranchApp,
       );
       createProjects = res.import;
-    } else if (
-      origin === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER
-    ) {
-      // TODO: Replace with actual Data Center auth
-      const sourceUrl = process.env.BITBUCKET_SERVER_URL;
-      const token = process.env.BITBUCKET_SERVER_TOKEN;
-      if (!sourceUrl || !token) {
-        throw new Error(
-          'BITBUCKET_SERVER_URL and BITBUCKET_SERVER_TOKEN must be set for Bitbucket Server sync',
-        );
-      }
-      const datacenterAuth = { sourceUrl, token };
-      targetMeta = {
-        branch: '', // Let cloneAndAnalyze determine the correct branch
-        cloneUrl: '',
-        sshUrl: '',
-        archived: false,
-      };
-      const res = await cloneAndAnalyze(
-        origin,
-        targetMeta,
-        projects,
-        {
-          exclusionGlobs: config.exclusionGlobs,
-          entitlements: config.entitlements,
-          manifestTypes: config.manifestTypes,
-        },
-        'server',
-        datacenterAuth,
-        targetData,
-      );
-      debug(
-        'Bitbucket Data Center analysis finished',
-        JSON.stringify({
-          remove: res.remove.length,
-          import: res.import.length,
-        }),
-      );
-      // Verbose per-target logging for debugging
-      console.log(
-        '[syncProjectsForTarget] Target:',
-        target.attributes.displayName,
-      );
-      console.log(
-        '[syncProjectsForTarget] Snyk monitored projects:',
-        projects.map((p: SnykProject) => p.name),
-      );
-      console.log(
-        '[syncProjectsForTarget] Detected imports (files to import):',
-        res.import,
-      );
-      console.log(
-        '[syncProjectsForTarget] Detected removals (Snyk projects to deactivate):',
-        res.remove.map((p: SnykProject) => p.name),
-      );
-      deactivate = res.remove;
-      createProjects = res.import;
     } else {
       targetMeta = await getMetaDataGenerator(origin)(targetData, host);
       if (targetMeta!.archived) {
@@ -397,17 +327,31 @@ export async function syncProjectsForTarget(
   } catch (e) {
     debug(e);
     const error = `Cloning and analysing the repo to deactivate projects failed with error: ${e.message}`;
-    projects.map((project) => {
-      failed.add({
-        errorMessage: error,
-        projectPublicId: project.id,
-        from: 'active',
-        to: 'deactivated',
-        type: ProjectUpdateType.DEACTIVATE,
-        dryRun: config.dryRun,
-        target,
+    // Add failures for all projects associated with this target
+    if (projects.length > 0) {
+      projects.forEach((project) => {
+        failed.add({
+          errorMessage: error,
+          projectPublicId: project.id,
+          from: 'active',
+          to: 'deactivated',
+          type: ProjectUpdateType.DEACTIVATE,
+          dryRun: config.dryRun,
+          target,
+        });
       });
-    });
+    } else {
+      // Even if there are no projects, we should still report the error
+      // This ensures target-level failures are tracked
+      debug(
+        `No projects found for target ${target.attributes.displayName}, but error occurred: ${error}`,
+      );
+    }
+    // Return early with failures instead of continuing with potentially invalid state
+    return {
+      updated: Array.from(updated),
+      failed: Array.from(failed),
+    };
   }
 
   // remove any projects that are to be deactivated from other actions

@@ -30,7 +30,7 @@ export const builder = {
     required: true,
     default: SupportedIntegrationTypesUpdateProject.GITHUB,
     choices: [...Object.values(SupportedIntegrationTypesUpdateProject)],
-    desc: 'List of sources to be synced e.g. Github, Github Enterprise, Gitlab, Bitbucket Server, Bitbucket Cloud',
+    desc: 'List of sources to be synced e.g. Github, Github Enterprise, Gitlab, Bitbucket Cloud',
   },
   dryRun: {
     required: false,
@@ -73,9 +73,11 @@ export async function syncOrg(
       ? `Did not detect any changes to apply`
       : `Processed ${res.processedTargets} targets (${
           res.failedTargets
-        } failed)\nUpdated ${
-          res.meta.projects.updated.length
-        } projects\nFind more information in ${res.fileName}${
+        } failed)\nUpdated ${res.meta.projects.updated.length} projects${
+          res.meta.projects.failed.length > 0
+            ? `\nFailed ${res.meta.projects.failed.length} projects`
+            : ''
+        }\nFind more information in ${res.fileName}${
           res.failedFileName ? ` and ${res.failedFileName}` : ''
         }`;
 

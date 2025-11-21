@@ -36,7 +36,6 @@ export function isSourceConfigured(
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD]: () => {}, // Add real check if needed
     [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
       isBitbucketCloudAppConfigured,
-    [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]: () => {}, // Add real check if needed
   };
   return getDefaultBranchGenerators[origin];
 }
@@ -173,7 +172,9 @@ export async function updateOrgTargets(
       const integrationId = integrationsData[integrationKey];
       if (!integrationId) {
         console.warn(
-          `Warning: Could not find integrationId for source ${source} (key: ${integrationKey}). Available integrations: ${Object.keys(integrationsData).join(', ')}`,
+          `Warning: Could not find integrationId for source ${source} (key: ${integrationKey}). Available integrations: ${Object.keys(
+            integrationsData,
+          ).join(', ')}`,
         );
       }
       console.log(`Syncing targets for source ${source}`);
@@ -255,7 +256,14 @@ export async function updateTargets(
         );
         updatedProjects.push(...updated);
         failedProjects.push(...failed);
-        processedTargets += 1;
+
+        // If the target returned failures but no updates, it means the target
+        // failed to sync properly (e.g., cloneAndAnalyze failed). Count it as a failed target.
+        if (failed.length > 0 && updated.length === 0) {
+          failedTargets += 1;
+        } else {
+          processedTargets += 1;
+        }
 
         if (updated.length) {
           await logUpdatedProjects(orgId, updated, loggingPath);

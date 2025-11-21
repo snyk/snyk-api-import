@@ -19,11 +19,6 @@ function buildBitbucketCloudCloneUrl(meta: RepoMetaData): string {
   return chooseCloneUrl(meta);
 }
 
-// Wrapper function for Bitbucket Server to match the expected signature
-function buildBitbucketServerCloneUrl(meta: RepoMetaData): string {
-  return chooseCloneUrl(meta);
-}
-
 /**
  * Choose the best clone URL for a repo metadata record.
  * Prefers SSH when BITBUCKET_USE_SSH is true or an SSH agent is present.
@@ -65,8 +60,6 @@ const urlGenerators = {
     buildBitbucketCloudCloneUrl,
   [SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP]:
     buildBitbucketCloudCloneUrl,
-  [SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER]:
-    buildBitbucketServerCloneUrl,
 };
 
 interface GitCloneResponse {

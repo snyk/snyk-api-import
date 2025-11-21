@@ -12,6 +12,11 @@
       "cmd": "npm run pkg-binaries:macos"
     },
     {
+      "//": "build the macos-arm",
+      "path": "@semantic-release/exec",
+      "cmd": "npm run pkg-binaries:macos-arm"
+    },
+    {
       "//": "build the linux",
       "path": "@semantic-release/exec",
       "cmd": "npm run pkg-binaries:linux"
@@ -29,7 +34,7 @@
     {
       "//": "shasum all binaries",
       "path": "@semantic-release/exec",
-      "cmd": "shasum -a 256 snyk-api-import-linux > snyk-api-import-linux.sha256 && shasum -a 256 snyk-api-import-macos > snyk-api-import-macos.sha256 && shasum -a 256 snyk-api-import-win.exe > snyk-api-import-win.exe.sha256 && shasum -a 256 snyk-api-import-alpine > snyk-api-import-alpine.sha256"
+      "cmd": "shasum -a 256 snyk-api-import-linux > snyk-api-import-linux.sha256 && shasum -a 256 snyk-api-import-macos > snyk-api-import-macos.sha256 && shasum -a 256 snyk-api-import-macos-arm > snyk-api-import-macos-arm.sha256 && shasum -a 256 snyk-api-import-win.exe > snyk-api-import-win.exe.sha256 && shasum -a 256 snyk-api-import-alpine > snyk-api-import-alpine.sha256"
     },
     {
       "//": "removes the file we use to identify a build as a standalone binary",
@@ -71,6 +76,16 @@
           "path": "./snyk-api-import-macos.sha256",
           "name": "snyk-api-import-macos.sha256",
           "label": "snyk-api-import-macos.sha256"
+        },
+        {
+          "path": "./snyk-api-import-macos-arm",
+          "name": "snyk-api-import-macos-arm",
+          "label": "snyk-api-import-macos-arm"
+        },
+        {
+          "path": "./snyk-api-import-macos-arm.sha256",
+          "name": "snyk-api-import-macos-arm.sha256",
+          "label": "snyk-api-import-macos-arm.sha256"
         },
         {
           "path": "./snyk-api-import-win.exe",

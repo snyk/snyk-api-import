@@ -102,7 +102,6 @@ export enum SupportedIntegrationTypesUpdateProject {
   GHE = 'github-enterprise',
   BITBUCKET_CLOUD = 'bitbucket-cloud',
   BITBUCKET_CLOUD_APP = 'bitbucket-cloud-app',
-  BITBUCKET_SERVER = 'bitbucket-server',
 }
 
 export enum SupportedProductsUpdateProject {

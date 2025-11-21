@@ -62,8 +62,7 @@ export async function cloneAndAnalyze(
     integrationType ===
       SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD ||
     integrationType ===
-      SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP ||
-    integrationType === SupportedIntegrationTypesUpdateProject.BITBUCKET_SERVER
+      SupportedIntegrationTypesUpdateProject.BITBUCKET_CLOUD_APP
   ) {
     let files: string[] = [];
     if (clientType === 'cloud') {

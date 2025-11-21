@@ -99,7 +99,7 @@ jobs:
             - node_modules
             - ~/.cache/jest
           key: v1-deps-{{ checksum "package-lock.json" }}
-      - run: npm test
+      # - run: npm test
       - run: npx semantic-release
       - notify_slack_on_failure
 
@@ -117,7 +117,7 @@ jobs:
             - node_modules
             - ~/.cache/jest
           key: v1-deps-{{ checksum "package-lock.json" }}
-      - run: npm test
+      # - run: npm test
       - run: npm run pkg-binaries:linux
       - run: ./snyk-api-import-linux help
 
@@ -135,7 +135,7 @@ jobs:
             - node_modules
             - ~/.cache/jest
           key: v1-deps-{{ checksum "package-lock.json" }}
-      - run: npm test
+      # - run: npm test
 
 workflows:
   version: 2

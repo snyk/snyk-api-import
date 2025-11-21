@@ -58,7 +58,6 @@ Permissions / scopes
 
 - The OAuth consumer must have permission to list workspaces and read repositories. When creating the consumer in Bitbucket, grant the minimal read-only scopes required for these API operations.
 
-
 Troubleshooting
 
 - 401 / 403 when calling Bitbucket API:
