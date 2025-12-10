@@ -48,7 +48,7 @@
     "@gitbeaker/core": "35.7.0",
     "@gitbeaker/node": "35.7.0",
     "@octokit/auth-app": "^8.1.1",
-    "@octokit/plugin-retry": "4.0.3",
+    "@octokit/plugin-retry": "4.1.6",
     "@octokit/rest": "^22.0.0",
     "base-64": "^1.0.0",
     "bottleneck": "2.19.5",
