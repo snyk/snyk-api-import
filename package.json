@@ -45,7 +45,7 @@
   ],
   "homepage": "https://github.com/snyk/snyk-api-import#readme",
   "dependencies": {
-    "@gitbeaker/core": "35.7.0",
+    "@gitbeaker/core": "35.8.1",
     "@gitbeaker/node": "35.7.0",
     "@octokit/auth-app": "^8.1.1",
     "@octokit/plugin-retry": "4.0.3",
