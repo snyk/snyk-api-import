@@ -54,7 +54,7 @@
     "bottleneck": "2.19.5",
     "bunyan": "1.8.15",
     "debug": "4.3.4",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "micromatch": "4.0.8",
     "needle": "2.9.1",
     "p-map": "4.0.0",
