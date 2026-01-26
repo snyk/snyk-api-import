@@ -45,16 +45,16 @@
   ],
   "homepage": "https://github.com/snyk/snyk-api-import#readme",
   "dependencies": {
-    "@gitbeaker/core": "35.7.0",
-    "@gitbeaker/node": "35.7.0",
+    "@gitbeaker/core": "35.8.1",
+    "@gitbeaker/node": "35.8.1",
     "@octokit/auth-app": "^8.1.1",
     "@octokit/plugin-retry": "4.0.3",
-    "@octokit/rest": "^22.0.0",
+    "@octokit/rest": "^22.0.1",
     "base-64": "^1.0.0",
     "bottleneck": "2.19.5",
     "bunyan": "1.8.15",
     "debug": "4.3.4",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "micromatch": "4.0.8",
     "needle": "2.9.1",
     "p-map": "4.0.0",
@@ -103,7 +103,9 @@
   "overrides": {
     "snyk-request-manager": {
       "axios": "^1.11.0"
-    }
+    },
+    "glob": "^10.5.0",
+    "qs": "^6.14.1"
   },
   "pkg": {
     "scripts": [
