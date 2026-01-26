@@ -137,17 +137,19 @@ export async function importTarget(
       headers['snyk-request-id'] ||
       headers['x-request-id'] ||
       headers['request-id'];
-    const bodyInspect = util.inspect(res?.data || error, {
-      depth: 2,
-      breakLength: 120,
-    });
+    // Avoid logging full response body which may contain credentials
+    const bodyMessage =
+      (res?.data && typeof res?.data === 'object' && res?.data.message) ||
+      (res?.data && typeof res?.data === 'string' ? res?.data : undefined) ||
+      error?.message ||
+      'Unknown error';
 
     console.error(
       `Failed to kick off import for target: ${util.inspect(target, {
         depth: 1,
       })}.
 ERROR name: ${error?.name} status: ${status} snyk-request-id: ${snykRequestId}
-body: ${bodyInspect}
+message: ${bodyMessage}
 See more information in logs located at ${path.join(
         logPath,
         orgId,
@@ -156,13 +158,14 @@ See more information in logs located at ${path.join(
 
     const err: { message?: string | undefined; innerError?: string } =
       new Error('Could not complete API import');
+    // Reuse bodyMessage from above to avoid logging full response body which may contain credentials
     err.innerError = util.inspect(
       {
         name: error?.name,
         message: error?.message,
         status,
         snykRequestId,
-        body: res?.data,
+        bodyMessage,
       },
       { depth: 2 },
     );

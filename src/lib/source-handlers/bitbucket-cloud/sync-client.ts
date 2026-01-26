@@ -436,15 +436,31 @@ export class BitbucketCloudSyncClient {
         try {
           const respData = err.response?.data;
           const respHeaders = err.response?.headers;
+          // Log response body message but avoid logging full body which may contain credentials
+          const bodyMessage =
+            (respData && typeof respData === 'object' && respData.message) ||
+            (typeof respData === 'string' ? respData : 'No message');
           console.error(
-            `[BitbucketCloudSyncClient] 404 response body for ${workspace}/${repoSlug}:`,
-            typeof respData === 'string'
-              ? respData
-              : JSON.stringify(respData, null, 2),
+            `[BitbucketCloudSyncClient] 404 response message for ${workspace}/${repoSlug}:`,
+            bodyMessage,
           );
+          // Sanitize headers to remove potentially sensitive auth headers
+          const sanitizedHeaders: Record<string, unknown> = {};
+          if (respHeaders) {
+            for (const [key, value] of Object.entries(respHeaders)) {
+              // Skip auth-related headers that might contain tokens
+              if (
+                !key.toLowerCase().includes('auth') &&
+                !key.toLowerCase().includes('token') &&
+                !key.toLowerCase().includes('authorization')
+              ) {
+                sanitizedHeaders[key] = value;
+              }
+            }
+          }
           console.error(
-            `[BitbucketCloudSyncClient] 404 response headers for ${workspace}/${repoSlug}:`,
-            JSON.stringify(respHeaders || {}, null, 2),
+            `[BitbucketCloudSyncClient] 404 response headers (sanitized) for ${workspace}/${repoSlug}:`,
+            JSON.stringify(sanitizedHeaders, null, 2),
           );
         } catch (dumpErr) {
           console.error(
