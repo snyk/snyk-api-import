@@ -45,10 +45,13 @@ export async function limiterWithRateLimitRetries<ResponseType>(
       break;
     }
     if (data.statusCode === 401) {
+      // Avoid logging response body which may contain credentials
+      const body = data.body as any;
+      const errorMessage =
+        (body && typeof body === 'object' && body.message) ||
+        (typeof body === 'string' ? body : 'Unauthorized');
       console.error(
-        `ERROR: ${JSON.stringify(
-          data.body,
-        )}. Please check the token and try again.`,
+        `ERROR: ${errorMessage}. Please check the token and try again.`,
       );
       break;
     }

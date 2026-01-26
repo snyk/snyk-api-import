@@ -1,6 +1,5 @@
 import 'source-map-support/register';
 import debugLib from 'debug';
-import { inspect } from 'util';
 import type { requestsManager } from 'snyk-request-manager';
 
 const debug = debugLib('snyk:api-import');
@@ -19,10 +18,6 @@ export async function requestWithRateLimitHandling(
 
   while (attempt < maxRetries) {
     try {
-      // Log the outgoing request for debugging in tests
-      console.log(
-        `[requestWithRateLimitHandling] ${verb.toUpperCase()} ${url}`,
-      );
       res = await requestManager.request({
         verb,
         url,
@@ -30,11 +25,6 @@ export async function requestWithRateLimitHandling(
         // allow callers to forward additional request options (e.g. useRESTApi)
         ...(requestOptions || {}),
       });
-      console.log(
-        `[requestWithRateLimitHandling] response: ${inspect(res, {
-          depth: 2,
-        })}`,
-      );
       break;
     } catch (e: any) {
       res = e;
@@ -49,7 +39,7 @@ export async function requestWithRateLimitHandling(
       const errMsg =
         (e && e.data && e.data.message) ||
         e.message ||
-        inspect(e, { depth: 2 });
+        'Unknown error';
 
       // Log a sanitized error for diagnostics
       console.error(
@@ -66,8 +56,8 @@ export async function requestWithRateLimitHandling(
         break;
       }
       attempt += 1;
-      // Avoid JSON.stringify on potential circular structures
-      debug('Failed:' + inspect(e, { depth: 2 }));
+      // Avoid logging full error object which may contain credentials
+      debug(`Failed: ${errMsg}`);
       if (code === 429) {
         const sleepTime = 600_000 * attempt; // 10 mins x attempt with a max of ~ 1hr
         console.error(
