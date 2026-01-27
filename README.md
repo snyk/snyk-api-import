@@ -50,7 +50,7 @@ Note: For non-interactive CI usage with Bitbucket Cloud App prefer a confidentia
 
 ## Standalone executables (macOS, Linux, Windows)
 
-Use [GitHub Releases](https://github.com/snyk/snyk-api-import/releases) to download a standalone executable of Snyk CLI for your platform.
+Use [GitHub Releases](https://github.com/snyk/snyk-api-import/releases) to download a standalone executable of Snyk CLI for your platform. For windows, this the only supported installation method.
 
 ## More installation methods
 
