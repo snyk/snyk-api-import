@@ -37,9 +37,7 @@ export async function requestWithRateLimitHandling(
         (e.response && e.response.status) ||
         undefined;
       const errMsg =
-        (e && e.data && e.data.message) ||
-        e.message ||
-        'Unknown error';
+        (e && e.data && e.data.message) || e.message || 'Unknown error';
 
       // Log a sanitized error for diagnostics
       console.error(
