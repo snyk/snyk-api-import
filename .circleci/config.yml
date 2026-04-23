@@ -101,10 +101,10 @@ jobs:
           key: v1-deps-{{ checksum "package-lock.json" }}
       # - run: npm test
       - run:
-          name: Generate npm OIDC Token
+          name: Run semantic-release with npm OIDC
           command: |
-            echo 'export NPM_ID_TOKEN=$(circleci run oidc get --claims '\''{"aud": "npm:registry.npmjs.org"}'\'')' >> $BASH_ENV
-      - run: npx semantic-release
+            export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
+            npx semantic-release
       - notify_slack_on_failure
 
   build-test:
