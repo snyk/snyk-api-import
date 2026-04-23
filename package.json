@@ -32,7 +32,7 @@
   "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/snyk/snyk-api-import"
+    "url": "git+https://github.com/snyk/snyk-api-import.git"
   },
   "author": "Snyk Tech Services",
   "license": "Apache-2.0",
@@ -135,5 +135,6 @@
       "node20-alpine-x64",
       "node20-win-x64"
     ]
-  }
+  },
+  "version": ""
 }
