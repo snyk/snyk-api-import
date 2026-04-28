@@ -5,6 +5,7 @@ import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
 import type { requestsManager } from 'snyk-request-manager';
 import type { SnykProject } from '../../types';
+import type { SnykHttpResponse } from '../../snyk-http-response';
 const debug = debugLib('snyk:api-project');
 
 interface BulkProjectUpdateResponse {
@@ -82,12 +83,12 @@ export async function deactivateProject(
   debug(`De-activating project: ${projectPublicId}`);
   const url = `/org/${orgId.trim()}/project/${projectPublicId}/deactivate`;
 
-  const res = await requestManager.request({
+  const res = (await requestManager.request({
     verb: 'post',
     url: url,
     body: JSON.stringify({}),
     useRESTApi: false,
-  });
+  })) as SnykHttpResponse<unknown>;
 
   const statusCode = res.statusCode || res.status;
   if (!statusCode || statusCode !== 200) {
@@ -122,12 +123,12 @@ export async function updateProject(
   };
 
   const url = `/org/${orgId.trim()}/project/${projectId.trim()}`;
-  const res = await requestManager.request({
+  const res = (await requestManager.request({
     verb: 'put',
     url: url,
     body: JSON.stringify(body),
     useRESTApi: false,
-  });
+  })) as SnykHttpResponse<SnykProject>;
 
   const statusCode = res.statusCode || res.status;
   if (!statusCode || statusCode !== 200) {

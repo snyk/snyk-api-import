@@ -5,6 +5,7 @@ import { getApiToken } from '../../get-api-token';
 import { getSnykHost } from '../../get-snyk-host';
 import type { requestsManager } from 'snyk-request-manager';
 import type { Org } from '../../types';
+import type { SnykHttpResponse } from '../../snyk-http-response';
 
 const debug = debugLib('snyk:api-group');
 
@@ -39,12 +40,12 @@ export async function createOrg(
     groupId,
     sourceOrgId,
   };
-  const res = await requestManager.request({
+  const res = (await requestManager.request({
     verb: 'post',
     // For v1 the OpenAPI spec defines POST /org (singular)
     url: `/org`,
     body: JSON.stringify(body),
-  });
+  })) as SnykHttpResponse<CreatedOrgResponse>;
   // If v1 doesn't expose the create endpoint (404), try the REST plural path
   // which some deployments may expose under the REST base.
   try {
@@ -61,12 +62,12 @@ export async function createOrg(
       debug(
         'v1 create org returned 404; retrying POST /orgs against REST API base',
       );
-      const res2 = await requestManager.request({
+      const res2 = (await requestManager.request({
         verb: 'post',
         url: `/orgs`,
         body: JSON.stringify(body),
         useRESTApi: true,
-      });
+      })) as SnykHttpResponse<CreatedOrgResponse>;
       const statusCode2 = res2.statusCode || res2.status;
       if (!statusCode2 || statusCode2 !== 201) {
         throw new Error(
@@ -108,27 +109,27 @@ export async function listOrgs(
   }
   const query = qs.stringify(params);
 
-  let res;
+  let res: SnykHttpResponse<ListOrgsResponse>;
   try {
     debug('Requesting group orgs via v1 api');
-    res = await requestManager.request({
+    res = (await requestManager.request({
       verb: 'get',
       // Follow the v1 OpenAPI spec: group resource is singular '/group/{group_id}/orgs'
       url: `/group/${groupId}/orgs?${query}`,
       body: JSON.stringify({}),
       useRESTApi: false,
-    });
+    })) as SnykHttpResponse<ListOrgsResponse>;
   } catch (e: any) {
     // If the v1 endpoint is not found, retry against the REST API base (/rest)
     // since some deployments host group endpoints under the REST API.
     if (e && e.name === 'NotFoundError') {
       debug('v1 group orgs returned 404; retrying against REST API base');
-      res = await requestManager.request({
+      res = (await requestManager.request({
         verb: 'get',
         url: `/groups/${groupId}/orgs?${query}`,
         body: JSON.stringify({}),
         useRESTApi: true,
-      });
+      })) as SnykHttpResponse<ListOrgsResponse>;
     } else {
       throw e;
     }

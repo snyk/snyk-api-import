@@ -6,6 +6,7 @@ import debugLib from 'debug';
 import lodash from 'lodash';
 import pMap from 'p-map';
 import type { PollImportResponse, Project } from '../../types';
+import type { SnykHttpResponse } from '../../snyk-http-response';
 import { getApiToken } from '../../get-api-token';
 import type { FailedProject } from '../../../loggers/log-failed-projects';
 import { logFailedProjects } from '../../../loggers/log-failed-projects';
@@ -33,11 +34,11 @@ export async function pollImportUrl(
   }
   try {
     const { pathname = '' } = url.parse(locationUrl);
-    const res = await requestManager.request({
+    const res = (await requestManager.request({
       verb: 'get',
       url: (pathname as string).split('/api/v1/')[1],
       body: JSON.stringify({}),
-    });
+    })) as SnykHttpResponse<PollImportResponse>;
     const importStatus: PollImportResponse = res.data;
     const statusCode = res.statusCode || res.status;
 
