@@ -1,9 +1,25 @@
 import * as fs from 'fs';
-import * as micromatch from 'micromatch';
 import * as pathLib from 'path';
 import debugModule from 'debug';
+import { isSafeGlobPattern, safeGlobIsMatch } from './safe-glob-pattern';
 
 const debug = debugModule('snyk:find-files');
+
+function sanitizeGlobs(globs: string[], kind: 'ignore' | 'filter'): string[] {
+  const out: string[] = [];
+  for (const g of globs) {
+    if (isSafeGlobPattern(g)) {
+      out.push(g);
+    } else {
+      debug(
+        `Skipping unsafe ${kind} glob (${g.length} chars): ${g.slice(0, 64)}${
+          g.length > 64 ? '...' : ''
+        }`,
+      );
+    }
+  }
+  return out;
+}
 
 /**
  * Returns files inside given file path.
@@ -63,10 +79,12 @@ export async function find(
   if (path.endsWith('node_modules')) {
     return { files: found, allFilesFound: foundAll };
   }
-  // ensure node_modules is always ignored
-  if (!ignore.includes('node_modules')) {
-    ignore.push('node_modules');
+  const ignoreList = [...ignore];
+  if (!ignoreList.includes('node_modules')) {
+    ignoreList.push('node_modules');
   }
+  const safeIgnore = sanitizeGlobs(ignoreList, 'ignore');
+  const safeFilter = sanitizeGlobs(filter, 'filter');
   try {
     if (levelsDeep < 0) {
       return { files: found, allFilesFound: foundAll };
@@ -77,14 +95,14 @@ export async function find(
     if (fileStats.isDirectory()) {
       const { files, allFilesFound } = await findInDirectory(
         path,
-        ignore,
-        filter,
+        safeIgnore,
+        safeFilter,
         levelsDeep,
       );
       found.push(...files);
       foundAll.push(...allFilesFound);
     } else if (fileStats.isFile()) {
-      const fileFound = findFile(path, filter, ignore);
+      const fileFound = findFile(path, safeFilter, safeIgnore);
       if (fileFound) {
         found.push(fileFound);
         foundAll.push(fileFound);
@@ -111,13 +129,17 @@ function findFile(
 ): string | null {
   if (filter.length > 0) {
     const filename = pathLib.basename(path);
-    if (matches(filename, filter) || matches(path, filter)) {
+    if (
+      entryMatchesGlobList(filename, filter) ||
+      entryMatchesGlobList(path, filter)
+    ) {
       return path;
     }
   } else {
-    // Sanitize input to prevent ReDoS
-    const safePath = path.replace(/[^\w\-./]/g, '');
-    if (matches(safePath, ignore)) {
+    if (
+      entryMatchesGlobList(pathLib.basename(path), ignore) ||
+      entryMatchesGlobList(path, ignore)
+    ) {
       return null;
     }
     return path;
@@ -133,7 +155,7 @@ async function findInDirectory(
 ): Promise<FindFilesRes> {
   const files = await readDirectory(path);
   const toFind = files
-    .filter((file) => !matches(file, ignore))
+    .filter((file) => !entryMatchesGlobList(file, ignore))
     .map((file) => {
       const resolvedPath = pathLib.resolve(path, pathLib.basename(file));
       if (!fs.existsSync(resolvedPath)) {
@@ -156,6 +178,9 @@ async function findInDirectory(
   };
 }
 
-function matches(filePath: string, globs: string[]): boolean {
-  return globs.some((glob) => micromatch.isMatch(filePath, '**/' + glob));
+/** Glob matching with bounded linear-time logic (see safe-glob-pattern). */
+function entryMatchesGlobList(filePath: string, globs: string[]): boolean {
+  return globs.some(
+    (glob) => isSafeGlobPattern(glob) && safeGlobIsMatch(filePath, glob),
+  );
 }

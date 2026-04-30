@@ -3,8 +3,11 @@ import * as path from 'path';
 import axios from 'axios';
 import { defaultExclusionGlobs } from '../../common';
 import { find, getSCMSupportedManifests, gitClone } from '../../lib';
+import {
+  isSafeGlobPattern,
+  safeGlobIsMatch,
+} from '../../lib/safe-glob-pattern';
 import { getSCMSupportedProjectTypes } from '../../lib/supported-project-types/supported-manifests';
-import * as micromatch from 'micromatch';
 import type {
   RepoMetaData,
   SnykProject,
@@ -32,16 +35,6 @@ export async function cloneAndAnalyze(
   remove: SnykProject[];
   branch?: string;
 }> {
-  // Validate exclusionGlobs to prevent ReDoS
-  function isSafeGlob(glob: string): boolean {
-    // Only allow globs with safe characters (alphanumeric, *, ?, ., /, -, _)
-    // Disallow consecutive * and overly long patterns
-    if (!/^[\w\-*?./]+$/.test(glob)) return false;
-    if (glob.length > 128) return false;
-    // Allow standard double-star globs ("**/path") but disallow three or more consecutive stars which are suspicious
-    if (/\*{3,}/.test(glob)) return false;
-    return true;
-  }
   const {
     manifestTypes,
     entitlements = ['openSource'],
@@ -282,21 +275,13 @@ export async function cloneAndAnalyze(
           return false;
         }
         // Match against file patterns (supports exact filenames and globs)
-        return filePatterns.some((pattern: string) =>
-          // micromatch expects just the path part after the ':' if present
-          (() => {
-            const candidate = file.includes(':') ? file.split(':')[1] : file;
-            try {
-              return (
-                micromatch.isMatch(candidate, pattern) ||
-                candidate.endsWith(pattern)
-              );
-            } catch {
-              // on invalid pattern fall back to simple endsWith
-              return candidate.endsWith(pattern);
-            }
-          })(),
-        );
+        return filePatterns.some((pattern: string) => {
+          const candidate = file.includes(':') ? file.split(':')[1] : file;
+          return (
+            safeGlobIsMatch(candidate, pattern) ||
+            candidate.endsWith(pattern)
+          );
+        });
       });
       debug('[cloneAndAnalyze] Filtered Bitbucket files:', filteredFiles);
       if (!filteredFiles || filteredFiles.length === 0) {
@@ -375,14 +360,10 @@ export async function cloneAndAnalyze(
         }
         const candidate = file.includes(':') ? file.split(':')[1] : file;
         return filePatterns.some((pattern: string) => {
-          try {
-            return (
-              micromatch.isMatch(candidate, pattern) ||
-              candidate.endsWith(pattern)
-            );
-          } catch {
-            return candidate.endsWith(pattern);
-          }
+          return (
+            safeGlobIsMatch(candidate, pattern) ||
+            candidate.endsWith(pattern)
+          );
         });
       });
       console.log(
@@ -428,7 +409,7 @@ export async function cloneAndAnalyze(
     const safeExclusionGlobs = [
       ...defaultExclusionGlobs,
       ...exclusionGlobs,
-    ].filter(isSafeGlob);
+    ].filter(isSafeGlobPattern);
 
     const { files: foundFiles } = await find(
       sanitizedRepoPath,
