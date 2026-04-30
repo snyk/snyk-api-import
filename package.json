@@ -62,7 +62,7 @@
     "rimraf": "6.1.1",
     "simple-git": "3.36.0",
     "sleep-promise": "8.0.1",
-    "snyk-request-manager": "1.9.2",
+    "snyk-request-manager": "1.9.3",
     "source-map-support": "^0.5.16",
     "split": "1.0.1",
     "tslib": "^2.6.0",
@@ -133,5 +133,5 @@
       "node20-win-x64"
     ]
   },
-  "version": ""
+  "version": "2.23.1"
 }
