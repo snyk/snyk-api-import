@@ -6,10 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sam1el/snyk-api-import-go/cmd"
-	"github.com/sam1el/snyk-api-import-go/internal"
-	"github.com/sam1el/snyk-api-import-go/internal/buildinfo"
-	"github.com/sam1el/snyk-api-import-go/internal/logging"
+	"github.com/snyk/snyk-api-import/cmd"
+	"github.com/snyk/snyk-api-import/internal"
+	"github.com/snyk/snyk-api-import/internal/buildinfo"
+	"github.com/snyk/snyk-api-import/internal/logging"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sam1el/snyk-api-import-go/internal"
+	"github.com/snyk/snyk-api-import/internal"
 )
 
 // TestSyncCmd_SourceUrlFlag verifies that custom source URLs are correctly

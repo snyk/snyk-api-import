@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sam1el/snyk-api-import-go/internal/security"
+	"github.com/snyk/snyk-api-import/internal/security"
 )
 
 // SyncAzure performs sync for Azure DevOps using API-first manifest discovery

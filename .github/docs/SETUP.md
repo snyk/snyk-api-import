@@ -8,7 +8,7 @@ Get up and running with automated releases in 5 minutes.
 
 ```bash
 # Clone your repository
-git clone https://github.com/sam1el/snyk-api-import-go
+git clone https://github.com/snyk/snyk-api-import
 cd snyk-api-import-go
 
 # Verify workflow files exist

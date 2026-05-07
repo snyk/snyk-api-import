@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/sam1el/snyk-api-import-go/internal"
-	"github.com/sam1el/snyk-api-import-go/internal/logging"
-	"github.com/sam1el/snyk-api-import-go/internal/utils"
+	"github.com/snyk/snyk-api-import/internal"
+	"github.com/snyk/snyk-api-import/internal/logging"
+	"github.com/snyk/snyk-api-import/internal/utils"
 )
 
 // ImportDataCmd generates import targets from orgs data

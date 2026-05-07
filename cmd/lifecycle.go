@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sam1el/snyk-api-import-go/internal/logging"
+	"github.com/snyk/snyk-api-import/internal/logging"
 )
 
 // RunWithLifecycleWithSigChan runs the provided function with a cancellable

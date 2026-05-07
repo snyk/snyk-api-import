@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sam1el/snyk-api-import-go/internal/utils"
+	"github.com/snyk/snyk-api-import/internal/utils"
 )
 
 type fakeOutputDest2 struct {

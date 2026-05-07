@@ -24,13 +24,13 @@ the original TypeScript version.
 ### Option 1: Download Pre-built Binary (Recommended)
 
 Download the latest release for your platform from the
-[GitHub Releases](https://github.com/sam1el/snyk-api-import-go/releases) page.
+[GitHub Releases](https://github.com/snyk/snyk-api-import/releases) page.
 
 **macOS:**
 
 ```bash
 # Download and install
-curl -Lo snyk-api-import https://github.com/sam1el/snyk-api-import-go/releases/latest/download/snyk-api-import-darwin-amd64
+curl -Lo snyk-api-import https://github.com/snyk/snyk-api-import/releases/latest/download/snyk-api-import-darwin-amd64
 chmod +x snyk-api-import
 sudo mv snyk-api-import /usr/local/bin/
 ```
@@ -39,7 +39,7 @@ sudo mv snyk-api-import /usr/local/bin/
 
 ```bash
 # Download and install
-curl -Lo snyk-api-import https://github.com/sam1el/snyk-api-import-go/releases/latest/download/snyk-api-import-linux-amd64
+curl -Lo snyk-api-import https://github.com/snyk/snyk-api-import/releases/latest/download/snyk-api-import-linux-amd64
 chmod +x snyk-api-import
 sudo mv snyk-api-import /usr/local/bin/
 ```
@@ -53,7 +53,7 @@ Download the `.exe` file from the releases page and add it to your PATH.
 Requires Go 1.23 or later:
 
 ```bash
-git clone https://github.com/sam1el/snyk-api-import-go.git
+git clone https://github.com/snyk/snyk-api-import.git
 cd snyk-api-import-go
 go build -o snyk-api-import
 ```

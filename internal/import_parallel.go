@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sam1el/snyk-api-import-go/internal/security"
-	"github.com/sam1el/snyk-api-import-go/internal/utils"
+	"github.com/snyk/snyk-api-import/internal/security"
+	"github.com/snyk/snyk-api-import/internal/utils"
 )
 
 // ParallelImportConfig holds configuration for parallel imports

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sam1el/snyk-api-import-go/internal/security"
+	"github.com/snyk/snyk-api-import/internal/security"
 )
 
 // SyncGitLab performs sync for GitLab using API-first manifest discovery

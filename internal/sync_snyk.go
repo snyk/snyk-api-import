@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/sam1el/snyk-api-import-go/internal/network"
+	"github.com/snyk/snyk-api-import/internal/network"
 )
 
 // FetchSnykProjects fetches all projects for a Snyk org, including manifest file info.

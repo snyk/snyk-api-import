@@ -8,9 +8,9 @@ builds:
     binary: snyk-api-import
     ldflags:
       - "-s -w"
-      - "-X=github.com/sam1el/snyk-api-import-go/internal/buildinfo.Version={{ .Version }}"
-      - "-X=github.com/sam1el/snyk-api-import-go/internal/buildinfo.GitCommit={{ .Commit }}"
-      - "-X=github.com/sam1el/snyk-api-import-go/internal/buildinfo.BuildDate={{ .Date }}"
+      - "-X=github.com/snyk/snyk-api-import/internal/buildinfo.Version={{ .Version }}"
+      - "-X=github.com/snyk/snyk-api-import/internal/buildinfo.GitCommit={{ .Commit }}"
+      - "-X=github.com/snyk/snyk-api-import/internal/buildinfo.BuildDate={{ .Date }}"
     env:
       - CGO_ENABLED=0
     goos:

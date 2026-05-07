@@ -5,7 +5,7 @@
 This project uses **semantic versioning** (SemVer) and automated releases via GitHub Actions and **[GoReleaser](https://goreleaser.com/)**. When you push a version tag, the system automatically:
 
 1. ✅ Validates semantic version format
-2. ✅ Runs **golangci-lint** and **`go test ./...`** (same gate style as [snyk-api](https://github.com/sam1el/snyk-api/blob/main/.github/workflows/release.yaml))
+2. ✅ Runs **golangci-lint** and **`go test ./...`** before GoReleaser (workflow: `.github/workflows/release.yml`)
 3. ✅ Builds via **`.goreleaser.yml`**: linux/darwin/windows × amd64/arm64 (`CGO_ENABLED=0`)
 4. ✅ Packages **archives** (default `.tar.gz` / Windows `.zip`) with `LICENSE` and `README.md`, plus `checksums.txt`
 5. ✅ Creates the GitHub release and uploads assets
@@ -47,7 +47,7 @@ This project uses **semantic versioning** (SemVer) and automated releases via Gi
 
 ## Supported Platforms
 
-GoReleaser builds **one matrix** (same pattern as [snyk-api `.goreleaser.yml`](https://github.com/sam1el/snyk-api/blob/main/.goreleaser.yml)): **linux**, **darwin**, **windows** × **amd64**, **arm64**. Each release archive contains the `snyk-api-import` binary (plus `LICENSE` and `README.md`). Linux binaries use **`CGO_ENABLED=0`** (statically linked, suitable for typical containers including Alpine).
+GoReleaser builds **one matrix** defined in **`.goreleaser.yml`**: **linux**, **darwin**, **windows** × **amd64**, **arm64**. Each release archive contains the `snyk-api-import` binary (plus `LICENSE` and `README.md`). Linux binaries use **`CGO_ENABLED=0`** (statically linked, suitable for typical containers including Alpine).
 
 Configuration lives in **`.goreleaser.yml`**. For a local snapshot (requires [`goreleaser`](https://goreleaser.com/install/) v2 on your `PATH`):
 
@@ -128,7 +128,7 @@ Watch the GitHub Actions workflow:
 
 ```bash
 # URL format
-https://github.com/sam1el/snyk-api-import-go/actions
+https://github.com/snyk/snyk-api-import/actions
 ```
 
 **Workflow Steps:**
@@ -147,8 +147,8 @@ After workflow completes:
 
 ```bash
 # Download and verify (example for macOS)
-wget https://github.com/sam1el/snyk-api-import-go/releases/download/v1.6.0/snyk-api-import-darwin-arm64
-wget https://github.com/sam1el/snyk-api-import-go/releases/download/v1.6.0/checksums.txt
+wget https://github.com/snyk/snyk-api-import/releases/download/v1.6.0/snyk-api-import-darwin-arm64
+wget https://github.com/snyk/snyk-api-import/releases/download/v1.6.0/checksums.txt
 
 # Verify checksum
 sha256sum -c checksums.txt --ignore-missing
@@ -252,7 +252,7 @@ git tag -a v1.6.0 -m "Release v1.6.0 - Add Azure DevOps support"
 git push origin v1.6.0
 
 # Wait for Actions to complete (~5 minutes)
-# Check release: https://github.com/sam1el/snyk-api-import-go/releases/tag/v1.6.0
+# Check release: https://github.com/snyk/snyk-api-import/releases/tag/v1.6.0
 ```
 
 ### Example 2: Hotfix Release
@@ -311,7 +311,7 @@ git push origin v1.0.0
 
 ```bash
 # View GitHub Actions logs
-https://github.com/sam1el/snyk-api-import-go/actions
+https://github.com/snyk/snyk-api-import/actions
 ```
 
 **Common issues:**
@@ -503,9 +503,9 @@ The release process is fully automated via `.github/workflows/release.yml`.
 
 For issues with the release process:
 
-1. Check [GitHub Actions logs](https://github.com/sam1el/snyk-api-import-go/actions)
-2. Review [release workflow](.github/workflows/release.yml)
-3. Check [CHANGELOG.md](../CHANGELOG.md) for recent changes
+1. Check [GitHub Actions logs](https://github.com/snyk/snyk-api-import/actions)
+2. Review `.github/workflows/release.yml`
+3. Check `CHANGELOG.md` at the repository root for recent changes
 4. Open an issue with `release` label
 
 ---

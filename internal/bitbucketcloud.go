@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
-	"github.com/sam1el/snyk-api-import-go/internal/security"
+	"github.com/snyk/snyk-api-import/internal/security"
 )
 
 // BitbucketCloudAuth represents authentication configuration for Bitbucket Cloud

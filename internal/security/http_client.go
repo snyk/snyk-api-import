@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sam1el/snyk-api-import-go/internal/buildinfo"
+	"github.com/snyk/snyk-api-import/internal/buildinfo"
 )
 
 // appendDebugJSONLine appends a JSON line to path. This is a lightweight,

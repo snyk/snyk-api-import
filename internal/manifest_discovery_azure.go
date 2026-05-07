@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sam1el/snyk-api-import-go/internal/security"
+	"github.com/snyk/snyk-api-import/internal/security"
 )
 
 // AzureFileTreeResult contains the results of tree-based file discovery for Azure DevOps

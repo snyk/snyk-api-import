@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/sam1el/snyk-api-import-go/internal"
-	"github.com/sam1el/snyk-api-import-go/internal/logging"
+	"github.com/snyk/snyk-api-import/internal"
+	"github.com/snyk/snyk-api-import/internal/logging"
 )
 
 // SyncCmd syncs orgs/projects with source control systems (Bitbucket, GitHub, GitLab, Azure DevOps).

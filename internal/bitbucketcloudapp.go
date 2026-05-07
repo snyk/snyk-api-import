@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/sam1el/snyk-api-import-go/internal/security"
+	"github.com/snyk/snyk-api-import/internal/security"
 )
 
 // FetchBitbucketRepoDefaultBranch fetches the default branch name for a repo.

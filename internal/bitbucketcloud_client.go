@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sam1el/snyk-api-import-go/internal/security"
+	"github.com/snyk/snyk-api-import/internal/security"
 )
 
 // BitbucketClientInterface defines the methods needed for Bitbucket API interactions

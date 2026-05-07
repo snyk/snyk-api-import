@@ -33,7 +33,7 @@ jobs:
       - name: Download snyk-api-import
         run: |
           curl -Lo snyk-api-import \
-            https://github.com/sam1el/snyk-api-import-go/releases/latest/download/snyk-api-import-linux-amd64
+            https://github.com/snyk/snyk-api-import/releases/latest/download/snyk-api-import-linux-amd64
           chmod +x snyk-api-import
           sudo mv snyk-api-import /usr/local/bin/
 
@@ -127,7 +127,7 @@ jobs:
       - name: Download snyk-api-import
         run: |
           curl -Lo snyk-api-import \
-            https://github.com/sam1el/snyk-api-import-go/releases/latest/download/snyk-api-import-linux-amd64
+            https://github.com/snyk/snyk-api-import/releases/latest/download/snyk-api-import-linux-amd64
           chmod +x snyk-api-import
           sudo mv snyk-api-import /usr/local/bin/
 
@@ -169,7 +169,7 @@ jobs:
       - name: Download snyk-api-import
         run: |
           curl -Lo snyk-api-import \
-            https://github.com/sam1el/snyk-api-import-go/releases/latest/download/snyk-api-import-linux-amd64
+            https://github.com/snyk/snyk-api-import/releases/latest/download/snyk-api-import-linux-amd64
           chmod +x snyk-api-import
           sudo mv snyk-api-import /usr/local/bin/
 
@@ -238,7 +238,7 @@ snyk-import:
   before_script:
     - apk add --no-cache curl jq
     - curl -Lo /usr/local/bin/snyk-api-import \
-        https://github.com/sam1el/snyk-api-import-go/releases/latest/download/snyk-api-import-linux-amd64
+        https://github.com/snyk/snyk-api-import/releases/latest/download/snyk-api-import-linux-amd64
     - chmod +x /usr/local/bin/snyk-api-import
     - mkdir -p logs
   script:
@@ -275,7 +275,7 @@ snyk-sync:
   before_script:
     - apk add --no-cache curl jq
     - curl -Lo /usr/local/bin/snyk-api-import \
-        https://github.com/sam1el/snyk-api-import-go/releases/latest/download/snyk-api-import-linux-amd64
+        https://github.com/snyk/snyk-api-import/releases/latest/download/snyk-api-import-linux-amd64
     - chmod +x /usr/local/bin/snyk-api-import
     - mkdir -p logs
   script:
@@ -323,7 +323,7 @@ pipeline {
             steps {
                 sh '''
                     curl -Lo snyk-api-import \
-                        https://github.com/sam1el/snyk-api-import-go/releases/latest/download/snyk-api-import-linux-amd64
+                        https://github.com/snyk/snyk-api-import/releases/latest/download/snyk-api-import-linux-amd64
                     chmod +x snyk-api-import
                     mkdir -p logs
                 '''
@@ -585,7 +585,7 @@ plugins:
 
 custom:
   customBinary:
-    url: https://github.com/sam1el/snyk-api-import-go/releases/latest/download/snyk-api-import-linux-amd64
+    url: https://github.com/snyk/snyk-api-import/releases/latest/download/snyk-api-import-linux-amd64
 ```
 
 ### Lambda Handler Script
@@ -646,7 +646,7 @@ steps:
     targetType: 'inline'
     script: |
       curl -Lo snyk-api-import \
-        https://github.com/sam1el/snyk-api-import-go/releases/latest/download/snyk-api-import-linux-amd64
+        https://github.com/snyk/snyk-api-import/releases/latest/download/snyk-api-import-linux-amd64
       chmod +x snyk-api-import
       mkdir -p $(SNYK_LOG_PATH)
 

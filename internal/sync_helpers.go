@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
-	"github.com/sam1el/snyk-api-import-go/internal/security"
+	"github.com/snyk/snyk-api-import/internal/security"
 )
 
 // getDefaultManifestTypes returns the curated default manifest globs to discover common SCM manifest files.

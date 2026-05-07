@@ -9,7 +9,7 @@ import (
 
 	"gopkg.in/natefinch/lumberjack.v2"
 
-	"github.com/sam1el/snyk-api-import-go/internal"
+	"github.com/snyk/snyk-api-import/internal"
 	"github.com/sirupsen/logrus"
 )
 

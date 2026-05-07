@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sam1el/snyk-api-import-go/internal"
-	"github.com/sam1el/snyk-api-import-go/internal/logging"
-	"github.com/sam1el/snyk-api-import-go/internal/security"
-	"github.com/sam1el/snyk-api-import-go/internal/utils"
+	"github.com/snyk/snyk-api-import/internal"
+	"github.com/snyk/snyk-api-import/internal/logging"
+	"github.com/snyk/snyk-api-import/internal/security"
+	"github.com/snyk/snyk-api-import/internal/utils"
 )
 
 // requireImportAllFlag checks if the --import-all flag is set when importing from workspaces.

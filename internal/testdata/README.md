@@ -50,7 +50,7 @@ testdata/
 ### Option 1: Use helper functions (recommended)
 
 ```go
-import "github.com/sam1el/snyk-api-import-go/internal/testdata"
+import "github.com/snyk/snyk-api-import/internal/testdata"
 
 func TestMyFunction(t *testing.T) {
     // Load raw JSON

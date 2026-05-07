@@ -1,4 +1,4 @@
-module github.com/sam1el/snyk-api-import-go
+module github.com/snyk/snyk-api-import
 
 go 1.24.0
 

@@ -3,7 +3,7 @@ package network
 import (
 	"net/http"
 
-	"github.com/sam1el/snyk-api-import-go/internal/security"
+	"github.com/snyk/snyk-api-import/internal/security"
 )
 
 // Client is a minimal interface used by callers that need to perform HTTP

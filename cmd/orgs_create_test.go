@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sam1el/snyk-api-import-go/internal"
+	"github.com/snyk/snyk-api-import/internal"
 )
 
 func TestOrgsCreateCmd_NoDuplicateNamesFlag(t *testing.T) {

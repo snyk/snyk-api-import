@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/v57/github"
-	"github.com/sam1el/snyk-api-import-go/internal/security"
+	"github.com/snyk/snyk-api-import/internal/security"
 	"golang.org/x/oauth2"
 )
 

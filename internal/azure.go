@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sam1el/snyk-api-import-go/internal/network"
+	"github.com/snyk/snyk-api-import/internal/network"
 )
 
 // AzureConfig holds Azure DevOps configuration

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sam1el/snyk-api-import-go/internal/network"
+	"github.com/snyk/snyk-api-import/internal/network"
 )
 
 func TestFetchSnykProjects_Success(t *testing.T) {

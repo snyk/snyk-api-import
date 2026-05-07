@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sam1el/snyk-api-import-go/internal/security"
-	"github.com/sam1el/snyk-api-import-go/internal/testutil"
+	"github.com/snyk/snyk-api-import/internal/security"
+	"github.com/snyk/snyk-api-import/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

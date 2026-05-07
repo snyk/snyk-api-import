@@ -14,7 +14,7 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/sam1el/snyk-api-import-go/internal/network"
+	"github.com/snyk/snyk-api-import/internal/network"
 )
 
 // ----------------------------------------------------------------------------

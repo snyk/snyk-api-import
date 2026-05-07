@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sam1el/snyk-api-import-go/internal/security"
+	"github.com/snyk/snyk-api-import/internal/security"
 )
 
 // ==============================================================================

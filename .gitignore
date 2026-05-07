@@ -71,7 +71,7 @@ Temporary Items
 *.code-workspace
 snyk-api-import*
 .github/claude.md
-dist/*
+/dist/
 *.out
 *.log
 logs/*
@@ -81,6 +81,6 @@ internal/logs/
 /docs/SYNC_OPTIMIZATION_PLAN_UPDATE.md
 
 # Snyk Security Extension - AI Rules (auto-generated)
-.github/instructions/snyk_rules.instructions.md
+
 .vscode/*
 .cursor/*

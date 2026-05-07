@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sam1el/snyk-api-import-go/cmd"
-	"github.com/sam1el/snyk-api-import-go/internal"
+	"github.com/snyk/snyk-api-import/cmd"
+	"github.com/snyk/snyk-api-import/internal"
 )
 
 // E2EConfig holds configuration for E2E tests

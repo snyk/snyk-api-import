@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/sam1el/snyk-api-import-go/internal/network"
+	"github.com/snyk/snyk-api-import/internal/network"
 )
 
 // GetSnykAPIBaseURL returns the Snyk API base URL from environment or default.

@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sam1el/snyk-api-import-go/internal/security"
-	"github.com/sam1el/snyk-api-import-go/internal/utils"
+	"github.com/snyk/snyk-api-import/internal/security"
+	"github.com/snyk/snyk-api-import/internal/utils"
 )
 
 // ImportTargetsParallel imports repositories from a targets file into Snyk using parallel workers.

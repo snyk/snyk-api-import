@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/sam1el/snyk-api-import-go/internal/buildinfo"
+	"github.com/snyk/snyk-api-import/internal/buildinfo"
 )
 
 // TestNewClient_WithTestHTTPClient verifies that SetTestHTTPClient can inject

@@ -5,7 +5,7 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev
 GIT_COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 BUILD_DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
-BUILDINFO_PKG := github.com/sam1el/snyk-api-import-go/internal/buildinfo
+BUILDINFO_PKG := github.com/snyk/snyk-api-import/internal/buildinfo
 LDFLAGS := -X '$(BUILDINFO_PKG).Version=$(VERSION)' \
            -X '$(BUILDINFO_PKG).GitCommit=$(GIT_COMMIT)' \
            -X '$(BUILDINFO_PKG).BuildDate=$(BUILD_DATE)'

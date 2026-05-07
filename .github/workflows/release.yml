@@ -1,5 +1,5 @@
-# Matches https://github.com/sam1el/snyk-api/blob/main/.github/workflows/release.yaml
-# with extras: workflow_dispatch (auto-tag), semver gate, CHANGELOG commit.
+# Releases https://github.com/snyk/snyk-api-import: GoReleaser artifacts on v* tags or
+# workflow_dispatch, plus semver validation, lint, tests, and CHANGELOG prepending.
 name: release
 
 on:
@@ -191,7 +191,7 @@ jobs:
           else
             echo "### 🎉 Initial Release" >> new_entry.md
             echo "" >> new_entry.md
-            echo "First release of snyk-api-import-go" >> new_entry.md
+            echo "First release of snyk-api-import" >> new_entry.md
             echo "" >> new_entry.md
           fi
 

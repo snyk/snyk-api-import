@@ -2,54 +2,54 @@
 
 
 
-## [v2.1.3](https://github.com/sam1el/snyk-api-import-go/releases/tag/v2.1.3) - 2026-04-30
+## [v2.1.3](https://github.com/snyk/snyk-api-import/releases/tag/v2.1.3) - 2026-04-30
 
 ### 🐛 Bug Fixes
 
-- Merge pull request #34 from sam1el/fix/goreleaser ([#34](https://github.com/sam1el/snyk-api-import-go/pull/34))
-- fixing go releaser ([ff7bf9f](https://github.com/sam1el/snyk-api-import-go/commit/ff7bf9f))
-- Merge pull request #33 from sam1el/fix/user-agent-versioning ([#33](https://github.com/sam1el/snyk-api-import-go/pull/33))
-- fixing go releaser ([f2114e1](https://github.com/sam1el/snyk-api-import-go/commit/f2114e1))
+- Merge pull request #34 from snyk/fix/goreleaser ([#34](https://github.com/snyk/snyk-api-import/pull/34))
+- fixing go releaser ([ff7bf9f](https://github.com/snyk/snyk-api-import/commit/ff7bf9f))
+- Merge pull request #33 from snyk/fix/user-agent-versioning ([#33](https://github.com/snyk/snyk-api-import/pull/33))
+- fixing go releaser ([f2114e1](https://github.com/snyk/snyk-api-import/commit/f2114e1))
 
 <details>
 <summary>🔧 Other Changes</summary>
 
-- chore: remove accidental internal/logs from repo and gitignore ([b3b56e8](https://github.com/sam1el/snyk-api-import-go/commit/b3b56e8))
+- chore: remove accidental internal/logs from repo and gitignore ([b3b56e8](https://github.com/snyk/snyk-api-import/commit/b3b56e8))
 
 </details>
 
-**Full Changelog**: [v2.1.2...v2.1.3](https://github.com/sam1el/snyk-api-import-go/compare/v2.1.2...v2.1.3)
+**Full Changelog**: [v2.1.2...v2.1.3](https://github.com/snyk/snyk-api-import/compare/v2.1.2...v2.1.3)
 
 
 
-## [v2.1.2](https://github.com/sam1el/snyk-api-import-go/releases/tag/v2.1.2) - 2026-04-23
+## [v2.1.2](https://github.com/snyk/snyk-api-import/releases/tag/v2.1.2) - 2026-04-23
 
 ### 🐛 Bug Fixes
 
-- fixing e2e tests for new api issues ([eaaaefe](https://github.com/sam1el/snyk-api-import-go/commit/eaaaefe))
-- Merge pull request #30 from sam1el/chore/spec-updates ([#30](https://github.com/sam1el/snyk-api-import-go/pull/30))
+- fixing e2e tests for new api issues ([eaaaefe](https://github.com/snyk/snyk-api-import/commit/eaaaefe))
+- Merge pull request #30 from snyk/chore/spec-updates ([#30](https://github.com/snyk/snyk-api-import/pull/30))
 
-**Full Changelog**: [v2.1.1...v2.1.2](https://github.com/sam1el/snyk-api-import-go/compare/v2.1.1...v2.1.2)
-
-
-
-## [v2.1.1](https://github.com/sam1el/snyk-api-import-go/releases/tag/v2.1.1) - 2026-02-25
-
-**Full Changelog**: [v2.1.0...v2.1.1](https://github.com/sam1el/snyk-api-import-go/compare/v2.1.0...v2.1.1)
+**Full Changelog**: [v2.1.1...v2.1.2](https://github.com/snyk/snyk-api-import/compare/v2.1.1...v2.1.2)
 
 
 
-## [v2.1.0](https://github.com/sam1el/snyk-api-import-go/releases/tag/v2.1.0) - 2025-12-03
+## [v2.1.1](https://github.com/snyk/snyk-api-import/releases/tag/v2.1.1) - 2026-02-25
+
+**Full Changelog**: [v2.1.0...v2.1.1](https://github.com/snyk/snyk-api-import/compare/v2.1.0...v2.1.1)
+
+
+
+## [v2.1.0](https://github.com/snyk/snyk-api-import/releases/tag/v2.1.0) - 2025-12-03
 
 ### ✨ Features
 
-- Merge pull request #27 from sam1el/feature/centralized-rate-limiting ([#27](https://github.com/sam1el/snyk-api-import-go/pull/27))
+- Merge pull request #27 from snyk/feature/centralized-rate-limiting ([#27](https://github.com/snyk/snyk-api-import/pull/27))
 
 ### 🐛 Bug Fixes
 
-- fix: address polling false failures and simplify rate limiter singleton ([1cc4793](https://github.com/sam1el/snyk-api-import-go/commit/1cc4793))
+- fix: address polling false failures and simplify rate limiter singleton ([1cc4793](https://github.com/snyk/snyk-api-import/commit/1cc4793))
 
-**Full Changelog**: [v2.0.3...v2.1.0](https://github.com/sam1el/snyk-api-import-go/compare/v2.0.3...v2.1.0)
+**Full Changelog**: [v2.0.3...v2.1.0](https://github.com/snyk/snyk-api-import/compare/v2.0.3...v2.1.0)
 
 
 
@@ -60,10 +60,10 @@
 ### Changed
 
 ### Fixed
-- Merge pull request #26 from sam1el/fix/regional-endpoint-support (349fa89)
+- Merge pull request #26 from snyk/fix/regional-endpoint-support (349fa89)
 - fix: add regional Snyk API endpoint support (b13210c)
 ### All Changes
-- Merge pull request #26 from sam1el/fix/regional-endpoint-support (349fa89)
+- Merge pull request #26 from snyk/fix/regional-endpoint-support (349fa89)
 - fix: add regional Snyk API endpoint support (b13210c)
 - chore: update CHANGELOG.md for v2.0.2 (e68104d)
 
@@ -73,15 +73,15 @@
 ### Added
 
 ### Changed
-- Merge pull request #25 from sam1el/refactor/consolidate-bitbucket-implementations (c9dd9b9)
+- Merge pull request #25 from snyk/refactor/consolidate-bitbucket-implementations (c9dd9b9)
 - refactor: consolidate Bitbucket Cloud implementations (0ef182a)
 ### Fixed
 - fix: use type conversion instead of struct literal (2a680d3)
 ### All Changes
-- Merge pull request #25 from sam1el/refactor/consolidate-bitbucket-implementations (c9dd9b9)
+- Merge pull request #25 from snyk/refactor/consolidate-bitbucket-implementations (c9dd9b9)
 - fix: use type conversion instead of struct literal (2a680d3)
 - refactor: consolidate Bitbucket Cloud implementations (0ef182a)
-- Merge pull request #24 from sam1el/docs/update-documentation (75987d4)
+- Merge pull request #24 from snyk/docs/update-documentation (75987d4)
 - docs: update documentation to align with current implementation (3ef4a07)
 - chore: update CHANGELOG.md for v2.0.1 (097e068)
 
@@ -93,10 +93,10 @@
 ### Changed
 
 ### Fixed
-- Merge pull request #23 from sam1el/fix/github-cloud-app-sync-auth (43e165d)
+- Merge pull request #23 from snyk/fix/github-cloud-app-sync-auth (43e165d)
 - fix: require correct authentication for github-cloud-app source (e55cfa6)
 ### All Changes
-- Merge pull request #23 from sam1el/fix/github-cloud-app-sync-auth (43e165d)
+- Merge pull request #23 from snyk/fix/github-cloud-app-sync-auth (43e165d)
 - fix: require correct authentication for github-cloud-app source (e55cfa6)
 - chore: update CHANGELOG.md for v2.0.0 (5d34e8f)
 
@@ -110,7 +110,7 @@
 ### Fixed
 
 ### All Changes
-- Merge pull request #22 from sam1el/refactor/optimize-sync-default (4b0611b)
+- Merge pull request #22 from snyk/refactor/optimize-sync-default (4b0611b)
 - feat: standardize --source default and add import file validation (43a0c9f)
 - test: fix broken tests and improve coverage (125a3ae)
 - docs: clarify git operation approval requirements in .cursorrules (8e38804)
@@ -121,16 +121,16 @@
 ## [v1.1.0] - 2025-11-24
 
 ### Added
-- Merge pull request #21 from sam1el/feat/improve-cli-help-text (5b0b6eb)
+- Merge pull request #21 from snyk/feat/improve-cli-help-text (5b0b6eb)
 - feat: enhance CLI help text with comprehensive command documentation (1c7bf94)
 ### Changed
 
 ### Fixed
 
 ### All Changes
-- Merge pull request #21 from sam1el/feat/improve-cli-help-text (5b0b6eb)
+- Merge pull request #21 from snyk/feat/improve-cli-help-text (5b0b6eb)
 - feat: enhance CLI help text with comprehensive command documentation (1c7bf94)
-- Merge pull request #19 from sam1el/docs/comprehensive-config-example (3a1564a)
+- Merge pull request #19 from snyk/docs/comprehensive-config-example (3a1564a)
 - docs: enhance config.toml.example with comprehensive org_id explanations (f1ae142)
 - chore: update CHANGELOG.md for v1.0.1 (903ea84)
 
@@ -142,11 +142,11 @@
 ### Changed
 
 ### Fixed
-- Merge pull request #18 from sam1el/fix/cli-flag-compatibility (f203dcd)
+- Merge pull request #18 from snyk/fix/cli-flag-compatibility (f203dcd)
 - fix: remove broken installation instructions from release notes (c05a4c0)
 - fix: align CLI flag defaults with TypeScript for customer compatibility (1de9e1a)
 ### All Changes
-- Merge pull request #18 from sam1el/fix/cli-flag-compatibility (f203dcd)
+- Merge pull request #18 from snyk/fix/cli-flag-compatibility (f203dcd)
 - fix: remove broken installation instructions from release notes (c05a4c0)
 - fix: align CLI flag defaults with TypeScript for customer compatibility (1de9e1a)
 - chore: update CHANGELOG.md for v1.0.0 (06d17b7)
@@ -155,7 +155,7 @@
 ## [v1.0.0] - 2025-11-24
 
 ### Added
-- Merge pull request #17 from sam1el/refactor/optimize-and-deduplicate (9110fd0)
+- Merge pull request #17 from snyk/refactor/optimize-and-deduplicate (9110fd0)
 - feat(import): add --import-all safety flag and parallel file imports (7056e8d)
 - feat(config): add per-integration org_id support (4854296)
 - feat: add --concurrency CLI flag for import and sync commands (ea4fc57)
@@ -172,7 +172,7 @@
 - fix: apply integration config from TOML in import command (a4024f8)
 - fix: add SNYK_LOG_PATH to all E2E jobs (076454b)
 ### All Changes
-- Merge pull request #17 from sam1el/refactor/optimize-and-deduplicate (9110fd0)
+- Merge pull request #17 from snyk/refactor/optimize-and-deduplicate (9110fd0)
 - fix: resolve GitHub App auth and Azure optimized sync issues (b284bca)
 - test: improve E2E standalone sync tests with scoped targets (e5dc51f)
 - fix: resolve Azure DevOps optimized sync 404 errors (aadd9e5)
@@ -198,7 +198,7 @@
 ## [v0.4.0] - 2025-11-17
 
 ### Added
-- Merge pull request #16 from sam1el/feature/toml-config (4c043ad)
+- Merge pull request #16 from snyk/feature/toml-config (4c043ad)
 - feat: add TOML configuration file support (9125f1b)
 ### Changed
 
@@ -206,7 +206,7 @@
 - fix: address Copilot PR review feedback (23f1d91)
 - fix: improve TestMergeWithEnv test isolation (7dd1984)
 ### All Changes
-- Merge pull request #16 from sam1el/feature/toml-config (4c043ad)
+- Merge pull request #16 from snyk/feature/toml-config (4c043ad)
 - fix: address Copilot PR review feedback (23f1d91)
 - chore: optimize CI to avoid duplicate runs (b694416)
 - style: apply go fmt to config_toml_test.go (18e07f3)
