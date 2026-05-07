@@ -1,54 +1,73 @@
-# Mirroring Bitbucket Cloud organizations and repos in Snyk
+# Bitbucket Cloud
 
-This document shows the basic flow to import Bitbucket Cloud repositories into Snyk using the provided utilities.
+Import and sync Bitbucket Cloud repositories with Snyk using Atlassian API tokens.
 
-## Prerequisites
+**For OAuth2 authentication, see [Bitbucket Cloud App](mirror-bitbucket-cloud-app.md)**
 
-- A Snyk API token: `export SNYK_TOKEN=...`
-- username + app password
+**For complete setup instructions, see [Getting Started Guide](getting-started.md#bitbucket-cloud)**
+
+## Quick Start
 
 ```bash
-export BITBUCKET_CLOUD_USERNAME=myuser
-export BITBUCKET_CLOUD_PASSWORD=myappassword
-export SNYK_TOKEN=...
+export BITBUCKET_CLOUD_USERNAME=your-username
+export BITBUCKET_CLOUD_PASSWORD=your-api-token  # This is your API token, not a password
+export SNYK_TOKEN=your_snyk_token
+export SNYK_LOG_PATH=./logs
+
+snyk-api-import orgs:data --source=bitbucket-cloud --groupId=<group-id>
+snyk-api-import orgs:create --file=group-<group-id>-bitbucket-cloud-orgs.json
+snyk-api-import import:data --source=bitbucket-cloud --orgsData=snyk-created-orgs.json
+snyk-api-import import
 ```
 
-## Quick import steps
+## Authentication
 
-1. Make sure the required environment variables are set (see examples below).
-2. Generate organization data:
+**Method:** Username + Atlassian API Token
 
-   `snyk-api-import orgs:data --source=bitbucket-cloud --groupId=<snyk_group_id>`
+**Required API Token Scopes:**
 
-3. Create organizations in Snyk:
+- `read:account`
+- `read:project:bitbucket`
+- `read:repository:bitbucket`
+- `read:workspace:bitbucket`
+- `read:user:bitbucket`
 
-   `snyk-api-import orgs:create --file=orgs.json` — this produces `snyk-created-orgs.json` with Snyk org and integration IDs.
+**Create API Token:**
+[Atlassian Account → Security → API tokens](https://id.atlassian.com/manage-profile/security/api-tokens)
 
-4. Generate import data for those orgs:
+**Important:** Despite the environment variable name `BITBUCKET_CLOUD_PASSWORD`,
+you must use an Atlassian API token (not the legacy app password).
 
-   `snyk-api-import import:data --orgsData=snyk-created-orgs.json --source=bitbucket-cloud`
+See [Authentication Guide](authentication.md#bitbucket-cloud-authentication)
+for detailed setup.
 
-5. Run the import (use DEBUG for verbose output):
+## Important Notes
 
-   `DEBUG=*snyk* snyk-api-import import`
+### Workspace Listing
 
-## Periodic re-import (only new repos/orgs)
+Listing workspaces requires authentication with `BITBUCKET_CLOUD_USERNAME` and
+`BITBUCKET_CLOUD_PASSWORD` (containing your Atlassian API token).
 
-To periodically add new repositories that appear in Bitbucket Cloud:
+### Re-importing New Repositories
 
-1. Regenerate organization data and skip empty orgs:
+Use the `sync` command to automatically discover and import new repos:
 
-   `snyk-api-import orgs:data --source=bitbucket-cloud --groupId=<snyk_group_id> --skipEmptyOrg`
+```bash
+snyk-api-import sync \
+  --source=bitbucket-cloud \
+  --orgPublicId=<org-id>
+```
 
-2. Create any missing Snyk orgs (skip duplicates):
+See [Advanced Workflows](advanced-workflows.md#re-importing-new-repositories)
+for details.
 
-   `snyk-api-import orgs:create --file=orgs.json --noDuplicateNames`
+## See Also
 
-3. Generate import data and run the import as above.
-
-## Troubleshooting
-
-- If workspace listing fails, ensure `BITBUCKET_CLOUD_USERNAME` and `BITBUCKET_CLOUD_PASSWORD` are set (workspace listing requires app-password Basic auth).
-- If file listing or API calls return 401/403, check the token type and that the environment variable is non-empty (whitespace-only values are ignored).
-
-For more detailed options and examples, see the linked docs in this repository (orgs.md, import-data.md, import.md).
+- [Getting Started Guide](getting-started.md#bitbucket-cloud) -
+  Complete setup walkthrough
+- [Authentication Guide](authentication.md#bitbucket-cloud-authentication) -
+  Token creation
+- [Bitbucket Cloud App](mirror-bitbucket-cloud-app.md) -
+  OAuth2 client credentials flow
+- [Command Reference](command-reference.md) - All available flags
+- [Advanced Workflows](advanced-workflows.md) - Syncing and automation

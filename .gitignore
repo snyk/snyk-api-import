@@ -1,21 +1,86 @@
-node_modules/
-npm-debug.log
-# output
-dist
+# Created by https://www.toptal.com/developers/gitignore/api/go,macos
+# Edit at https://www.toptal.com/developers/gitignore?templates=go,macos
+
+### Go ###
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+
+### macOS ###
+# General
 .DS_Store
-*.log
-.dccache
-*import-job-results.json
-yarn.lock
-.eslintcache
-local.*
-test/research
-.idea
-*.pem
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+### macOS Patch ###
+# iCloud generated files
+*.icloud
+
+# End of https://www.toptal.com/developers/gitignore/api/go,macos
+
+# Custom
+.github/copilot-instructions.md
+.github/api-ref/*
+.github/instructions/*
 .env
-.github/api/*
-.github/docs/*
-tsconfig.tsbuildinfo
+.env.*local
+*.log
 # Snyk Security Extension - AI Rules (auto-generated)
-.cursor/rules/snyk_rules.mdc
+.windsurf/rules/snyk_rules.md
+*.code-workspace
+snyk-api-import*
+.github/claude.md
+dist/*
+*.out
+*.log
+logs/*
+internal/logs/
+*config.toml
+/docs/SYNC_OPTIMIZATION_PLAN.md
+/docs/SYNC_OPTIMIZATION_PLAN_UPDATE.md
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.github/instructions/snyk_rules.instructions.md
 .vscode/*
+.cursor/*

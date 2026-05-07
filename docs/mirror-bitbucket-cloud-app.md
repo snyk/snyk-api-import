@@ -1,87 +1,131 @@
-# Mirroring Bitbucket Cloud (App) organizations and repos in Snyk
+# Bitbucket Cloud App (OAuth2)
 
-This document explains how to use the Bitbucket Cloud _App_ (OAuth2 client credentials) flow with snyk-api-import.
+Import and sync Bitbucket Cloud repositories using OAuth2 client credentials
+(recommended for CI/CD and automation).
 
-Summary
+**For username/API token auth, see [Bitbucket Cloud](mirror-bitbucket-cloud.md)**
 
-- Use `--source=bitbucket-cloud-app` to operate in Cloud App mode.
-- The tool performs an OAuth2 client_credentials exchange (client id/secret) to obtain a Bearer token for Bitbucket API calls.
-- The app-scoped token is for Bitbucket API access only; it does not replace git credentials used by `git clone` over HTTPS.
+**For complete setup instructions, see [Getting Started Guide](getting-started.md#bitbucket-cloud-app)**
 
-Prerequisites
-
-- A Bitbucket OAuth consumer (client ID + client secret) with permissions to list workspaces and read repositories.
-- A Snyk API token: `export SNYK_TOKEN=...`
-
-Required environment variables
-
-- `BITBUCKET_APP_CLIENT_ID` — OAuth client ID (required)
-- `BITBUCKET_APP_CLIENT_SECRET` — OAuth client secret (required)
-
-  Note: This document assumes a confidential (private) Bitbucket Cloud App with a client secret. If you are using a public consumer, the client_credentials flow will fail. In that case, either:
-
-  - Use the `bitbucket-cloud` source (interactive/app-password flows) for interactive workflows, or
-  - Provision a confidential Bitbucket Cloud App (with a client secret) for non-interactive CI automation.
-
-- `SNYK_TOKEN` — Snyk API token used for creating orgs and importing projects (required)
-
-Quick workflow (Cloud App)
-
-1. Export credentials:
+## Quick Start
 
 ```bash
-export BITBUCKET_APP_CLIENT_ID=your_client_id
-export BITBUCKET_APP_CLIENT_SECRET=your_client_secret
-export SNYK_TOKEN=your_snyk_api_token
+export BITBUCKET_APP_CLIENT_ID=your-client-id
+export BITBUCKET_APP_CLIENT_SECRET=your-client-secret
+export SNYK_TOKEN=your_snyk_token
+export SNYK_LOG_PATH=./logs
+
+snyk-api-import orgs:data --source=bitbucket-cloud-app --groupId=<group-id>
+snyk-api-import orgs:create --file=group-<group-id>-bitbucket-cloud-app-orgs.json
+snyk-api-import import:data --source=bitbucket-cloud-app --orgsData=snyk-created-orgs.json
+snyk-api-import import
 ```
 
-1. Generate Snyk organization data using the cloud-app source:
+## Authentication
 
-```bash
-snyk-api-import orgs:data --source=bitbucket-cloud-app --groupId=<snyk_group_id>
+**Method:** OAuth2 Client Credentials (private consumer)
+
+**Required:** Bitbucket OAuth Consumer with client secret
+
+### Creating the OAuth Consumer
+
+1. Go to your Bitbucket workspace Settings → OAuth consumers
+2. Click "Add consumer"
+3. Fill in:
+   - **Name**: `Snyk Import Tool`
+   - **Callback URL**: Not required for client_credentials flow
+4. **Enable "This is a private consumer"** - This enables the
+   client_credentials grant type
+5. Select permissions (minimum required):
+   - **Account**: Read
+   - **Workspace membership**: Read
+   - **Projects**: Read
+   - **Repositories**: Read
+6. Click "Save"
+7. Copy the **Client ID** and **Client Secret**
+
+**Important:** The consumer must be marked as "private" to use the
+client_credentials grant type and receive a client secret.
+
+See [Authentication Guide](authentication.md#bitbucket-cloud-app-authentication)
+for detailed setup.
+
+## How It Works
+
+The tool uses the Bitbucket API and HTTPS to:
+
+1. Discover workspaces and repositories via OAuth2
+2. Fetch repository metadata and manifest files via API
+3. Import projects to Snyk using the Snyk Import API
+
+No git cloning or SSH configuration is required.
+
+## CI/CD Example
+
+```yaml
+# GitHub Actions
+- name: Run snyk-api-import
+  env:
+    BITBUCKET_APP_CLIENT_ID: ${{ secrets.BITBUCKET_APP_CLIENT_ID }}
+    BITBUCKET_APP_CLIENT_SECRET: ${{ secrets.BITBUCKET_APP_CLIENT_SECRET }}
+    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  run: |
+    snyk-api-import orgs:data --source=bitbucket-cloud-app --groupId=<group-id>
+    snyk-api-import orgs:create --file=group-<group-id>-bitbucket-cloud-app-orgs.json
+    snyk-api-import import:data --source=bitbucket-cloud-app --orgsData=snyk-created-orgs.json
+    snyk-api-import import
 ```
 
-1. Create organizations in Snyk using the generated orgs file:
+## Re-importing New Repositories
+
+Use the `sync` command to automatically discover and import new repos:
 
 ```bash
-snyk-api-import orgs:create --file=group-<groupId>-bitbucket-cloud-app-orgs.json
+snyk-api-import sync --source=bitbucket-cloud-app --orgPublicId=<org-id>
 ```
 
-1. Generate import data and run import (same pattern as other sources):
+See [Advanced Workflows](advanced-workflows.md#re-importing-new-repositories)
+for details.
+
+## Troubleshooting
+
+### 401/403 Errors
+
+- Verify `BITBUCKET_APP_CLIENT_ID` and `BITBUCKET_APP_CLIENT_SECRET` are correct
+- Ensure the OAuth consumer has required scopes
+- Confirm the consumer has access to target workspaces
+
+### No Workspaces Returned
+
+Test the OAuth flow manually:
 
 ```bash
-snyk-api-import import:data --orgsData=snyk-created-orgs.json --source=bitbucket-cloud-app
-DEBUG=*snyk* snyk-api-import import
-```
-
-Permissions / scopes
-
-- The OAuth consumer must have permission to list workspaces and read repositories. When creating the consumer in Bitbucket, grant the minimal read-only scopes required for these API operations.
-
-Troubleshooting
-
-- 401 / 403 when calling Bitbucket API:
-
-  - Verify `BITBUCKET_APP_CLIENT_ID` and `BITBUCKET_APP_CLIENT_SECRET` are correct.
-  - Confirm the OAuth consumer has the necessary scopes and access to the target workspaces.
-  - Enable debug logging: `DEBUG=*snyk*` to see the HTTP requests and responses.
-
-- No workspaces or repos returned:
-  - Confirm the app has been granted access to the expected workspaces.
-  - Try a manual token exchange and API call to verify the client credentials flow:
-
-```bash
-# exchange client credentials for access token
+# Get access token
 curl -u "$BITBUCKET_APP_CLIENT_ID:$BITBUCKET_APP_CLIENT_SECRET" \
   -d grant_type=client_credentials \
   https://bitbucket.org/site/oauth2/access_token
 
-# list workspaces using the returned token
-curl -H "Authorization: Bearer <access_token>" https://api.bitbucket.org/2.0/workspaces
+# List workspaces
+curl -H "Authorization: Bearer <token>" \
+  https://api.bitbucket.org/2.0/workspaces
 ```
 
-Other notes
+### API Access Issues
 
-- Tokens obtained via client_credentials are cached briefly to avoid excessive token exchanges.
-- The cloud-app source is intended for automation (service-to-service) use.
-- If you need interactive or admin flows that require username + app-password, use the `bitbucket-cloud` source instead.
+- Verify the OAuth consumer is marked as "private"
+- Confirm the consumer has the required read permissions
+- Check that the consumer has access to the target workspaces
+- Ensure Client ID and Client Secret are correct
+
+## See Also
+
+- [Getting Started Guide](getting-started.md#bitbucket-cloud-app) -
+  Complete setup walkthrough
+- [Authentication Guide](authentication.md#bitbucket-cloud-app-authentication) -
+  OAuth consumer setup
+- [Bitbucket Cloud](mirror-bitbucket-cloud.md) -
+  Username/API token alternative
+- [Command Reference](command-reference.md) - All available flags
+- [Advanced Workflows](advanced-workflows.md) - Syncing and automation
+- [CI/CD Examples](examples/ci-cd-examples.md) -
+  Complete automation examples

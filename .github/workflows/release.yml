@@ -1,0 +1,222 @@
+# Matches https://github.com/sam1el/snyk-api/blob/main/.github/workflows/release.yaml
+# with extras: workflow_dispatch (auto-tag), semver gate, CHANGELOG commit.
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.tag }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/}
+          fi
+          echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version to release: $VERSION"
+
+      - name: Checkout code at tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.version.outputs.tag }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate semantic version
+        id: semver
+        run: |
+          VERSION="${{ steps.version.outputs.tag }}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.]+)?$ ]]; then
+            echo "❌ Invalid semantic version: $VERSION"
+            echo "Expected format: v1.0.0 or v1.0.0-alpha.1"
+            exit 1
+          fi
+
+          if [[ $VERSION =~ -[a-zA-Z] ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+            echo "📦 Pre-release version: $VERSION"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "🚀 Release version: $VERSION"
+          fi
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.6.2
+          args: --timeout=5m
+
+      - name: Test
+        run: go test ./...
+
+      - name: GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: v2.14.3
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update CHANGELOG.md
+        run: |
+          VERSION="${{ steps.semver.outputs.version }}"
+          DATE=$(date -u +"%Y-%m-%d")
+          REPO_URL="https://github.com/${{ github.repository }}"
+
+          if [ ! -f CHANGELOG.md ]; then
+            cat > CHANGELOG.md << 'HEADER'
+          # Changelog
+
+          All notable changes to this project will be documented in this file.
+
+          The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+          and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+          HEADER
+          fi
+
+          echo "" > new_entry.md
+          echo "## [${VERSION}](${REPO_URL}/releases/tag/${VERSION}) - ${DATE}" >> new_entry.md
+          echo "" >> new_entry.md
+
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -n "$PREV_TAG" ]; then
+            format_commits() {
+              local pattern="$1"
+              git log ${PREV_TAG}..HEAD --grep="$pattern" --pretty=format:"%s|%h" 2>/dev/null | while IFS='|' read -r msg hash; do
+                pr_num=$(echo "$msg" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+                clean_msg=$(echo "$msg" | sed -E 's/^Merge pull request #[0-9]+ from [^ ]+ //' | sed -E 's/\(#[0-9]+\)$//')
+                if [ -n "$pr_num" ]; then
+                  echo "- ${clean_msg} ([#${pr_num}](${REPO_URL}/pull/${pr_num}))"
+                else
+                  echo "- ${clean_msg} ([${hash}](${REPO_URL}/commit/${hash}))"
+                fi
+              done
+            }
+
+            breaking=$(git log ${PREV_TAG}..HEAD --grep="BREAKING" --pretty=format:"%s" 2>/dev/null || true)
+            if [ -n "$breaking" ]; then
+              echo "### ⚠️ Breaking Changes" >> new_entry.md
+              echo "" >> new_entry.md
+              format_commits "BREAKING" >> new_entry.md
+              echo "" >> new_entry.md
+            fi
+
+            features=$(format_commits "^feat")
+            if [ -n "$features" ]; then
+              echo "### ✨ Features" >> new_entry.md
+              echo "" >> new_entry.md
+              echo "$features" >> new_entry.md
+              echo "" >> new_entry.md
+            fi
+
+            fixes=$(format_commits "^fix")
+            if [ -n "$fixes" ]; then
+              echo "### 🐛 Bug Fixes" >> new_entry.md
+              echo "" >> new_entry.md
+              echo "$fixes" >> new_entry.md
+              echo "" >> new_entry.md
+            fi
+
+            perf=$(format_commits "^perf")
+            if [ -n "$perf" ]; then
+              echo "### ⚡ Performance" >> new_entry.md
+              echo "" >> new_entry.md
+              echo "$perf" >> new_entry.md
+              echo "" >> new_entry.md
+            fi
+
+            refactor=$(format_commits "^refactor")
+            if [ -n "$refactor" ]; then
+              echo "### ♻️ Refactoring" >> new_entry.md
+              echo "" >> new_entry.md
+              echo "$refactor" >> new_entry.md
+              echo "" >> new_entry.md
+            fi
+
+            docs=$(format_commits "^docs")
+            if [ -n "$docs" ]; then
+              echo "### 📚 Documentation" >> new_entry.md
+              echo "" >> new_entry.md
+              echo "$docs" >> new_entry.md
+              echo "" >> new_entry.md
+            fi
+
+            security=$(format_commits "^security\\|CVE\\|vulnerability")
+            if [ -n "$security" ]; then
+              echo "### 🔒 Security" >> new_entry.md
+              echo "" >> new_entry.md
+              echo "$security" >> new_entry.md
+              echo "" >> new_entry.md
+            fi
+
+            other=$(format_commits "^chore\\|^ci\\|^test\\|^style\\|^build")
+            if [ -n "$other" ]; then
+              echo "<details>" >> new_entry.md
+              echo "<summary>🔧 Other Changes</summary>" >> new_entry.md
+              echo "" >> new_entry.md
+              echo "$other" >> new_entry.md
+              echo "" >> new_entry.md
+              echo "</details>" >> new_entry.md
+              echo "" >> new_entry.md
+            fi
+
+            echo "**Full Changelog**: [${PREV_TAG}...${VERSION}](${REPO_URL}/compare/${PREV_TAG}...${VERSION})" >> new_entry.md
+            echo "" >> new_entry.md
+          else
+            echo "### 🎉 Initial Release" >> new_entry.md
+            echo "" >> new_entry.md
+            echo "First release of snyk-api-import-go" >> new_entry.md
+            echo "" >> new_entry.md
+          fi
+
+          awk '
+            /^# Changelog/ { print; header=1; next }
+            header && /^$/ { print; print ""; system("cat new_entry.md"); header=0; next }
+            { print }
+          ' CHANGELOG.md > CHANGELOG.tmp
+
+          mv CHANGELOG.tmp CHANGELOG.md
+          rm new_entry.md
+
+          echo "✅ Updated CHANGELOG.md"
+
+      - name: Commit CHANGELOG.md
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add CHANGELOG.md
+
+          if git diff --cached --quiet; then
+            echo "No changes to CHANGELOG.md"
+          else
+            git commit -m "chore: update CHANGELOG.md for ${{ steps.semver.outputs.version }}"
+            git push origin HEAD:main
+            echo "✅ Committed and pushed CHANGELOG.md"
+          fi

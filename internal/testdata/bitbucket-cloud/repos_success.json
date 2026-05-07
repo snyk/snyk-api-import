@@ -1,0 +1,67 @@
+{
+  "pagelen": 10,
+  "values": [
+    {
+      "type": "repository",
+      "slug": "web-app",
+      "name": "web-app",
+      "full_name": "my-workspace/web-app",
+      "description": "Web application",
+      "is_private": true,
+      "owner": {
+        "type": "team",
+        "username": "my-workspace",
+        "display_name": "My Workspace"
+      },
+      "mainbranch": {
+        "type": "branch",
+        "name": "main"
+      },
+      "language": "javascript",
+      "links": {
+        "clone": [
+          {
+            "href": "https://bitbucket.org/my-workspace/web-app.git",
+            "name": "https"
+          },
+          {
+            "href": "git@bitbucket.org:my-workspace/web-app.git",
+            "name": "ssh"
+          }
+        ]
+      }
+    },
+    {
+      "type": "repository",
+      "slug": "backend-api",
+      "name": "backend-api",
+      "full_name": "my-workspace/backend-api",
+      "description": "Backend API",
+      "is_private": true,
+      "owner": {
+        "type": "team",
+        "username": "my-workspace",
+        "display_name": "My Workspace"
+      },
+      "mainbranch": {
+        "type": "branch",
+        "name": "main"
+      },
+      "language": "python",
+      "links": {
+        "clone": [
+          {
+            "href": "https://bitbucket.org/my-workspace/backend-api.git",
+            "name": "https"
+          },
+          {
+            "href": "git@bitbucket.org:my-workspace/backend-api.git",
+            "name": "ssh"
+          }
+        ]
+      }
+    }
+  ],
+  "page": 1,
+  "size": 2
+}

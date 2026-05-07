@@ -1,0 +1,37 @@
+name: Setup Repository Labels
+
+on:
+  # Run on push to main (updates labels if .github/labels.yml changes)
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/labels.yml'
+      - '.github/workflows/setup-labels.yml'
+
+  # Run manually if needed
+  workflow_dispatch:
+
+  # Run on repository creation/fork
+  create:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  sync-labels:
+    name: Sync Repository Labels
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Sync labels
+        uses: EndBug/label-sync@v2
+        with:
+          config-file: .github/labels.yml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          delete-other-labels: false
+          dry-run: false

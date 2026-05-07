@@ -1,0 +1,9 @@
+{
+  "$id": "1",
+  "innerException": null,
+  "message": "TF400813: The user '' is not authorized to access this resource.",
+  "typeName": "Microsoft.TeamFoundation.Framework.Server.UnauthorizedRequestException, Microsoft.TeamFoundation.Framework.Server",
+  "typeKey": "UnauthorizedRequestException",
+  "errorCode": 0,
+  "eventId": 3000
+}

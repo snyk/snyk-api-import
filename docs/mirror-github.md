@@ -1,35 +1,81 @@
-# Mirroring Github.com / Github Enterprise organizations and repos in Snyk
+# GitHub & GitHub Enterprise
 
-You will need your Snyk API token, with correct scope & [admin access for all Organizations](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets) you are importing to. As Github is both an auth & integration, how the integration is done has an effect on usage:
+Import and sync GitHub.com and GitHub Enterprise repositories with Snyk.
 
-- For users importing via [Github Snyk integration](https://docs.snyk.io/integrations/git-repository-scm-integrations/github-integration#setting-up-a-github-integration) use your **personal Snyk API token** (Service Accounts are not supported for Github integration imports via API as this is a personal auth token only accessible to the user)
-- For Github Enterprise Snyk integration with a url & token (for Github.com, Github Enterprise Cloud & Github Enterprise hosted) use a **Snyk API service account token**
+**For complete setup instructions, see [Getting Started Guide](getting-started.md#github)**
 
-In order to import the entirety of Github/Github Enterprise repos into Snyk you can use the available utils to make it possible in 4 commands.
-You will need to configure both Github token and Snyk token as environment variable to proceed.
-Please refer to individual documentation pages for more detailed info, however the general steps are:
+## Quick Start
 
-1. `export GITHUB_TOKEN=***` and `export SNYK_TOKEN=***`
-2. Generate organization data e.g. `snyk-api-import orgs:data --source=github --groupId=<snyk_group_id>` [Full instructions](./orgs.md)
-3. Create organizations in Snyk `snyk-api-import orgs:create --file=orgs.json` [Full instructions](./orgs.md) will create a `snyk-created-orgs.json` file with Snyk organization ids and integration ids that are needed for import.
-4. Generate import data `snyk-api-import import:data --orgsData=snyk-created-orgs.json --source=github` [Full instructions](./import-data.md)
-5. Run import `DEBUG=*snyk* snyk-api-import import`[Full instructions](./import.md)
+### GitHub.com
 
-## Re-importing new repos & organizations only while mirroring
+```bash
+export GITHUB_TOKEN=ghp_your_token
+export SNYK_TOKEN=your_snyk_token
+export SNYK_LOG_PATH=./logs
 
-Once initial import is complete you may want to periodically check for new repos and make sure they are added into Snyk. To do this a similar flow to what is described above with a few small changes can be used:
+snyk-api-import orgs:data --source=github --groupId=<group-id>
+snyk-api-import orgs:create --file=group-<group-id>-github-orgs.json
+snyk-api-import import:data --source=github --orgsData=snyk-created-orgs.json
+snyk-api-import import
+```
 
-1. `export GITHUB_TOKEN=***` and `export SNYK_TOKEN=***`
-2. Generate organization data in Snyk and skip any that do not have any repos via `--skipEmptyOrg` `snyk-api-import orgs:data --source=github --groupId=<snyk_group_id> --skipEmptyOrg` [Full instructions](./orgs.md)
-3. Create organizations in Snyk and this time skip any that have been created already with `--noDuplicateNames` parameter `snyk-api-import orgs:create --file=orgs.json --noDuplicateNames` [Full instructions](./orgs.md) will create a `snyk-created-orgs.json` file with Snyk organization ids and integration ids that are needed for import.
-4. Generate import data `snyk-api-import import:data --orgsData=snyk-created-orgs.json --source=github` [Full instructions](./import-data.md)
-5. Generate the previously imported log to skip all previously imported repos in a Group (see full [documentation](./import.md#to-skip-all-previously-imported-targets)):
-   `snyk-api-import-macos list:imported --integrationType=<integration-type> --groupId=<snyk_group_id>`
-6. Run import `DEBUG=*snyk* snyk-api-import import`[Full instructions](./import.md)
+### GitHub Enterprise Server
 
-## Syncing previously imported repos
+```bash
+export GITHUB_TOKEN=ghp_your_token
+export SNYK_TOKEN=your_snyk_token
+export SNYK_LOG_PATH=./logs
 
-For repos already monitored in Snyk use the `sync` command to detect changes and update projects in Snyk.
+snyk-api-import orgs:data \
+  --source=github-enterprise \
+  --sourceUrl=https://github.mycompany.com \
+  --groupId=<group-id>
 
-1. Get a list of Snyk Organizations in the Group by listing all organizations a group admin belongs to via [Snyk Organizations API](https://snyk.docs.apiary.io/#reference/groups/list-all-organizations-in-a-group/list-all-organizations-in-a-group)
-2. For every public Organization ID, run `sync` command [Full instructions](./sync.md)
+snyk-api-import orgs:create --file=group-<group-id>-github-enterprise-orgs.json
+snyk-api-import import:data --source=github-enterprise --orgsData=snyk-created-orgs.json
+snyk-api-import import
+```
+
+## Authentication
+
+**Token Type:** Personal Access Token (PAT)
+
+**Required Scopes:**
+
+- `repo` - Full control of private repositories
+- `read:org` - Read org and team membership
+
+**Create Token:** GitHub Settings → Developer settings →
+Personal access tokens → Tokens (classic)
+
+See [Authentication Guide](authentication.md#github-authentication) for
+detailed setup.
+
+## Important Notes
+
+### Personal vs Service Account Tokens
+
+- **GitHub.com**: Use your personal Snyk API token (service accounts not
+  supported for GitHub integration)
+- **GitHub Enterprise**: Use a Snyk service account token
+
+### Re-importing New Repositories
+
+Use the `sync` command to automatically discover and import new repos:
+
+```bash
+snyk-api-import sync --source=github --orgPublicId=<org-id>
+```
+
+See [Advanced Workflows](advanced-workflows.md#re-importing-new-repositories)
+for details.
+
+## See Also
+
+- [Getting Started Guide](getting-started.md#github) -
+  Complete setup walkthrough
+- [Authentication Guide](authentication.md#github-authentication) -
+  Token creation
+- [Command Reference](command-reference.md) - All available flags
+- [Advanced Workflows](advanced-workflows.md) - Syncing and automation
+- [GitHub Cloud App](github-cloud-app.md) - Alternative authentication method

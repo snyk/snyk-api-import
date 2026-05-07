@@ -1,0 +1,485 @@
+# Snyk API Import Configuration Example
+# Copy this file to one of these locations:
+#   1. ./config.toml (current directory - highest priority)
+#   2. $SNYK_LOG_PATH/config.toml (if SNYK_LOG_PATH is set)
+#   3. ~/.snyk-api-import/config.toml (user home)
+#   4. /etc/snyk-api-import/config.toml (system-wide, Linux/macOS)
+# Or specify with: --config=/path/to/config.toml
+
+# ============================================================================
+# Snyk Configuration (Required)
+# ============================================================================
+#
+# Organization ID Priority (highest to lowest):
+#   1. Command-line flag (--orgPublicId)
+#   2. Integration-specific org_id (integrations.github.org_id)
+#   3. Global default org_id (snyk.org_id)
+#
+# This allows different SCM sources to import into different Snyk orgs.
+# Example: GitHub → Org A, GitLab → Org B, others → default Org C
+#
+# ============================================================================
+
+[snyk]
+# Your Snyk API token (required)
+# Corresponds to SNYK_TOKEN environment variable
+# Get it from: https://app.snyk.io/account
+token = "your-snyk-token-here"
+
+# Snyk API URL (optional)
+# Defaults to https://api.snyk.io (US-01 region)
+# Regional endpoints:
+#   US-01 (default): https://api.snyk.io
+#   US-02:           https://api.us.snyk.io
+#   EU-01:           https://api.eu.snyk.io
+#   AU-01:           https://api.au.snyk.io
+# api_url = "https://api.eu.snyk.io"
+
+# Default Snyk organization public ID (optional)
+# Used by 'sync' command if not specified via --orgPublicId flag
+# Can be overridden per-integration (see integrations.*.org_id below)
+# Find it in: https://app.snyk.io/org/{org-name}/manage/settings
+org_id = ""
+
+# Default Snyk group ID (optional)
+# Used by 'orgs:data' command if not specified via --groupId flag
+# Find it in: https://app.snyk.io/group/{group-name}/manage/settings
+group_id = ""
+
+# Snyk API base URL (optional, defaults to https://api.snyk.io)
+# For Snyk Enterprise (self-hosted): https://your-snyk-instance.com/api
+api_url = "https://api.snyk.io"
+
+# ============================================================================
+# Logging Configuration (Required)
+# ============================================================================
+
+[logging]
+# Directory where log files will be written (required)
+# Corresponds to SNYK_LOG_PATH environment variable
+path = "./logs"
+
+# Log level: debug, info, warn, error (default: info)
+level = "info"
+
+# Maximum log file size in MB before rotation (default: 10)
+max_size_mb = 10
+
+# Number of rotated log files to keep (default: 3)
+max_backups = 3
+
+# Maximum age in days to retain old log files (default: 28)
+max_age_days = 28
+
+# Compress rotated log files (default: false)
+compress = false
+
+# ============================================================================
+# Source Control Integrations
+# Configure the integrations you plan to use
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# GitHub (Personal Access Token)
+# ----------------------------------------------------------------------------
+[integrations.github]
+enabled = true
+
+# GitHub Personal Access Token
+# Required scopes: repo, read:org
+# Create at: https://github.com/settings/tokens
+token = "ghp_your_github_token_here"
+
+# GitHub API URL (optional, for GitHub Enterprise)
+# Default: https://api.github.com
+api_url = "https://api.github.com"
+
+# Default organization (optional)
+default_org = ""
+
+# Snyk organization ID for this integration (optional)
+# Overrides the global snyk.org_id for this specific integration
+org_id = ""
+
+# ----------------------------------------------------------------------------
+# GitHub Cloud App (OAuth)
+# ----------------------------------------------------------------------------
+[integrations.github-cloud-app]
+enabled = false
+
+# GitHub App ID
+app_id = ""
+
+# GitHub App Installation ID
+installation_id = ""
+
+# Path to private key file (recommended)
+private_key_path = "~/.snyk-api-import/github-app-private-key.pem"
+
+# Or inline private key (not recommended for production)
+# private_key = """
+# -----BEGIN RSA PRIVATE KEY-----
+# ...
+# -----END RSA PRIVATE KEY-----
+# """
+
+# GitHub API URL (optional, for GitHub Enterprise)
+# Default: https://api.github.com
+api_url = "https://api.github.com"
+
+# Snyk organization ID for this integration (optional)
+org_id = ""
+
+# ----------------------------------------------------------------------------
+# GitHub Enterprise (Personal Access Token)
+# For self-hosted GitHub Enterprise Server
+# ----------------------------------------------------------------------------
+[integrations.github-enterprise]
+enabled = false
+
+# GitHub Enterprise Personal Access Token
+# Required scopes: repo, read:org
+token = "ghp_your_github_enterprise_token"
+
+# GitHub Enterprise API URL (required)
+# Example: https://github.example.com/api/v3
+api_url = "https://github.example.com/api/v3"
+
+# Default organization (optional)
+default_org = ""
+
+# Snyk organization ID for this integration (optional)
+org_id = ""
+
+# ----------------------------------------------------------------------------
+# GitLab (Personal Access Token or OAuth)
+# ----------------------------------------------------------------------------
+[integrations.gitlab]
+enabled = false
+
+# GitLab Personal Access Token
+# Required scopes: api, read_api, read_repository
+# Create at: https://gitlab.com/-/profile/personal_access_tokens
+token = "glpat-your_gitlab_token_here"
+
+# GitLab base URL (for self-hosted GitLab)
+# Default: https://gitlab.com
+base_url = "https://gitlab.com"
+
+# Default group (optional)
+default_group = ""
+
+# Snyk organization ID for this integration (optional)
+org_id = ""
+
+# ----------------------------------------------------------------------------
+# Bitbucket Cloud (Basic Auth with App Password)
+# ----------------------------------------------------------------------------
+[integrations.bitbucket-cloud]
+enabled = false
+
+# Bitbucket username
+username = "your-bitbucket-username"
+
+# Bitbucket App Password (NOT your account password!)
+# Required permissions: Repositories (Read), Workspace membership (Read)
+# Create at: https://bitbucket.org/account/settings/app-passwords/
+password = "your-app-password"
+
+# Default workspace (optional)
+default_workspace = ""
+
+# Snyk organization ID for this integration (optional)
+org_id = ""
+
+# ----------------------------------------------------------------------------
+# Bitbucket Cloud App (OAuth 2.0)
+# ----------------------------------------------------------------------------
+[integrations.bitbucket-cloud-app]
+enabled = false
+
+# OAuth 2.0 Client ID
+client_id = "your-oauth-client-id"
+
+# OAuth 2.0 Client Secret
+client_secret = "your-oauth-client-secret"
+
+# Default workspace (optional)
+default_workspace = ""
+
+# Snyk organization ID for this integration (optional)
+org_id = ""
+
+# ----------------------------------------------------------------------------
+# Bitbucket Server (Personal Access Token)
+# ----------------------------------------------------------------------------
+[integrations.bitbucket-server]
+enabled = false
+
+# Bitbucket Server Personal Access Token
+# Required permissions: REPO_READ, PROJECT_READ
+token = "your-bitbucket-server-token"
+
+# Bitbucket Server base URL (required)
+base_url = "https://bitbucket.example.com"
+
+# Default project key (optional)
+default_project = ""
+
+# Snyk organization ID for this integration (optional)
+org_id = ""
+
+# ----------------------------------------------------------------------------
+# Azure DevOps (Personal Access Token)
+# ----------------------------------------------------------------------------
+[integrations.azure-repos]
+enabled = false
+
+# Azure DevOps Personal Access Token
+# Required scopes: Code (Read), Project and Team (Read)
+# Create at: https://dev.azure.com/{org}/_usersSettings/tokens
+token = "your-azure-devops-token"
+
+# Azure DevOps base URL (optional, for Azure DevOps Server)
+# Default: https://dev.azure.com
+base_url = "https://dev.azure.com"
+
+# Default organization (optional)
+# Can also be set with --azureOrgs flag
+default_org = ""
+
+# Snyk organization ID for this integration (optional)
+org_id = ""
+
+# ============================================================================
+# Sync Settings (Optional)
+# ============================================================================
+
+[sync]
+# Default dry run mode (can be overridden with --dryRun flag)
+# When true, shows planned actions without executing them
+dry_run = false
+
+# Enable branch update fallback
+# If true, deactivate+import if PATCH branch update fails
+enable_branch_update_fallback = false
+
+# Number of concurrent imports (default: 5)
+# Increase for faster imports, decrease if hitting rate limits
+concurrent_imports = 5
+
+# Skip organizations with no repositories (default: false)
+skip_empty_orgs = false
+
+# Enable API-first manifest discovery with caching (default: false)
+# Faster for large repos, uses SCM APIs instead of git clone
+use_cache = false
+
+# ============================================================================
+# Import Settings (Optional)
+# ============================================================================
+
+[import]
+# Number of concurrent imports (default: 10)
+# Increase for faster imports, decrease if hitting rate limits
+concurrency = 10
+
+# Poll timeout in minutes (default: 5)
+# Maximum time to wait for import jobs to complete
+poll_timeout_minutes = 5
+
+# Manifest types to discover
+# Supported types: package.json, pom.xml, build.gradle, requirements.txt, etc.
+manifest_types = [
+    # JavaScript/TypeScript
+    "package.json",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+
+    # Java
+    "pom.xml",
+    "build.gradle",
+    "build.gradle.kts",
+    "gradle.lockfile",
+
+    # Python
+    "requirements.txt",
+    "setup.py",
+    "Pipfile",
+    "Pipfile.lock",
+    "pyproject.toml",
+    "poetry.lock",
+
+    # Go
+    "go.mod",
+    "go.sum",
+    "Gopkg.toml",
+    "Gopkg.lock",
+
+    # Ruby
+    "Gemfile",
+    "Gemfile.lock",
+
+    # PHP
+    "composer.json",
+    "composer.lock",
+
+    # Rust
+    "Cargo.toml",
+    "Cargo.lock",
+
+    # .NET
+    "*.csproj",
+    "*.fsproj",
+    "*.vbproj",
+    "packages.config",
+    "project.assets.json",
+    "project.json",
+    "paket.dependencies",
+    "paket.lock",
+
+    # Scala
+    "build.sbt",
+
+    # Elixir
+    "mix.exs",
+    "mix.lock",
+
+    # C/C++
+    "conanfile.txt",
+    "conanfile.py",
+
+    # Swift
+    "Package.swift",
+    "Package.resolved",
+
+    # Dart/Flutter
+    "pubspec.yaml",
+    "pubspec.lock",
+]
+
+# Exclusion globs for manifest discovery
+# Files/directories matching these patterns will be skipped
+exclusion_globs = [
+    # Dependencies
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/bower_components/**",
+
+    # Version control
+    "**/.git/**",
+    "**/.svn/**",
+    "**/.hg/**",
+
+    # Build outputs
+    "**/dist/**",
+    "**/build/**",
+    "**/target/**",
+    "**/out/**",
+    "**/bin/**",
+    "**/obj/**",
+    "**/.next/**",
+    "**/.nuxt/**",
+
+    # Test directories
+    "**/test/**",
+    "**/tests/**",
+    "**/spec/**",
+    "**/__tests__/**",
+    "**/fixtures/**",
+    "**/__fixtures__/**",
+    "**/mocks/**",
+    "**/__mocks__/**",
+
+    # IDE/Editor
+    "**/.vscode/**",
+    "**/.idea/**",
+    "**/.vs/**",
+
+    # Temporary
+    "**/tmp/**",
+    "**/temp/**",
+    "**/.tmp/**",
+
+    # Documentation
+    "**/docs/**",
+    "**/doc/**",
+    "**/documentation/**",
+
+    # Examples
+    "**/examples/**",
+    "**/example/**",
+    "**/samples/**",
+]
+
+# ============================================================================
+# Cache Settings (Optional)
+# ============================================================================
+
+[cache]
+# Enable caching for faster re-syncs (default: false)
+# When enabled, manifest discovery results are cached
+enabled = false
+
+# Cache directory (default: ~/.snyk-api-import/cache)
+path = "~/.snyk-api-import/cache"
+
+# Cache TTL in hours (default: 24)
+# Cached entries older than this will be invalidated
+ttl_hours = 24
+
+# ============================================================================
+# Rate Limiting Settings (Optional)
+# ============================================================================
+
+[rate_limit]
+# API requests per second (default: 2.0)
+# The sustained rate at which API calls are made
+# Increase with caution - may trigger Snyk's rate limiter
+requests_per_second = 2.0
+
+# Burst size (default: 10)
+# Maximum number of requests allowed in a burst
+# Allows short bursts above the sustained rate
+burst_size = 10
+
+# Maximum retry attempts (default: 5)
+# How many times to retry failed requests (429, 5xx)
+max_retries = 5
+
+# Initial backoff in milliseconds (default: 1000)
+# Wait time before first retry, doubles on each retry
+initial_backoff_ms = 1000
+
+# Maximum backoff in milliseconds (default: 30000)
+# Cap on the exponential backoff growth
+max_backoff_ms = 30000
+
+# ============================================================================
+# Additional Notes
+# ============================================================================
+#
+# Command-Line Flags:
+#   Most settings in this file can be overridden via CLI flags.
+#
+#   --orgPublicId: Target Snyk organization for import operations
+#                  Priority: CLI flag > integration.*.org_id > snyk.org_id
+#
+#   --sourceOrgPublicId: Used by 'orgs:data' command to specify which SCM
+#                        organization/group to scan (e.g., GitHub org name)
+#                        This is NOT configurable in config.toml - must be
+#                        passed via CLI flag or set via integration's default_org
+#
+#   --groupId: Snyk group ID for organization operations
+#              Priority: CLI flag > snyk.group_id
+#
+# Configuration File Search Locations:
+#   1. ./config.toml (current directory)
+#   2. ~/.snyk-api-import/config.toml (user home)
+#   3. /etc/snyk-api-import/config.toml (system-wide, Linux/macOS)
+#   4. C:\ProgramData\snyk-api-import\config.toml (system-wide, Windows)
+#
+# Environment Variables:
+#   All settings can also be set via environment variables.
+#   Priority: CLI flags > Environment variables > config.toml > defaults

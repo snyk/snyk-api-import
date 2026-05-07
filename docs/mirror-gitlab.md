@@ -1,23 +1,77 @@
-# Mirroring Gitlab organizations and repos in Snyk
+# GitLab
 
-In order to import the entirety of Gitlab repos into Snyk you can use the available utils to make it possible in 4 commands.
-You will need to configure both Gitlab token and Snyk token as environment variable to proceed.
-Please refer to individual documentation pages for more detailed info, however the general steps are:
+Import and sync GitLab.com and self-managed GitLab repositories with Snyk.
 
-1. `export GITLAB_TOKEN=***` and `export SNYK_TOKEN=***`
-2. Generate organization data e.g. `snyk-api-import orgs:data --source=gitlab --groupId=<snyk_group_id>` [Full instructions](./orgs.md)
-3. Create organizations in Snyk `snyk-api-import orgs:create --file=orgs.json` [Full instructions](./orgs.md) will create a `snyk-created-orgs.json` file with Snyk organization ids and integration ids that are needed for import.
-4. Generate import data `snyk-api-import import:data --orgsData=snyk-created-orgs.json --source=gitlab --integrationType=gitlab` [Full instructions](./import-data.md)
-5. Run import `DEBUG=*snyk* snyk-api-import import`[Full instructions](./import.md)
+**For complete setup instructions, see [Getting Started Guide](getting-started.md#gitlab)**
 
-## Re-importing new repos & orgs only while Mirroring
+## Quick Start
 
-Once initial import is complete you may want to periodically check for new repos and make sure they are added into Snyk. To do this a similar flow to what is described above with a few small changes can be used:
+### GitLab.com
 
-1. `export GITLAB_TOKEN=***` and `export SNYK_TOKEN=***`
-2. Generate organization data in Snyk and skip any that do not have any repos via `--skipEmptyOrg` `snyk-api-import orgs:data --source=gitlab --groupId=<snyk_group_id> --skipEmptyOrg` [Full instructions](./orgs.md)
-3. Create organizations in Snyk and this time skip any that have been created already with `--noDuplicateNames` parameter `snyk-api-import orgs:create --file=orgs.json --noDuplicateNames` [Full instructions](./orgs.md) will create a `snyk-created-orgs.json` file with Snyk organization ids and integration ids that are needed for import.
-4. Generate import data `snyk-api-import import:data --orgsData=snyk-created-orgs.json --source=gitlab` [Full instructions](./import-data.md)
-5. Optional. Generate the previously imported log to skip all previously imported repos a Group (see full [documentation](./import.md#to-skip-all-previously-imported-targets)):
-   `snyk-api-import-macos list:imported --integrationType=gitlab --groupId=<snyk_group_id>`
-6. Run import `DEBUG=*snyk* snyk-api-import import`[Full instructions](./import.md)
+```bash
+export GITLAB_TOKEN=glpat-your_token
+export SNYK_TOKEN=your_snyk_token
+export SNYK_LOG_PATH=./logs
+
+snyk-api-import orgs:data --source=gitlab --groupId=<group-id>
+snyk-api-import orgs:create --file=group-<group-id>-gitlab-orgs.json
+snyk-api-import import:data --source=gitlab --orgsData=snyk-created-orgs.json
+snyk-api-import import
+```
+
+### Self-Managed GitLab
+
+```bash
+export GITLAB_TOKEN=glpat-your_token
+export GITLAB_BASE_URL=https://gitlab.mycompany.com
+export SNYK_TOKEN=your_snyk_token
+export SNYK_LOG_PATH=./logs
+
+snyk-api-import orgs:data \
+  --source=gitlab \
+  --sourceUrl=$GITLAB_BASE_URL \
+  --groupId=<group-id>
+
+snyk-api-import orgs:create --file=group-<group-id>-gitlab-orgs.json
+snyk-api-import import:data --source=gitlab --sourceUrl=$GITLAB_BASE_URL --orgsData=snyk-created-orgs.json
+snyk-api-import import
+```
+
+## Authentication
+
+**Token Type:** Personal Access Token (PAT)
+
+**Required Scopes:**
+
+- `api` - Full API access
+- `read_repository` - Read repository data
+
+**Create Token:** GitLab → User Settings → Access Tokens
+
+See [Authentication Guide](authentication.md#gitlab-authentication) for
+detailed setup.
+
+## GitLab Groups
+
+The tool imports GitLab **Groups** as Snyk Organizations. Both top-level
+groups and subgroups are supported.
+
+## Re-importing New Repositories
+
+Use the `sync` command to automatically discover and import new repos:
+
+```bash
+snyk-api-import sync --source=gitlab --orgPublicId=<org-id>
+```
+
+See [Advanced Workflows](advanced-workflows.md#re-importing-new-repositories)
+for details.
+
+## See Also
+
+- [Getting Started Guide](getting-started.md#gitlab) -
+  Complete setup walkthrough
+- [Authentication Guide](authentication.md#gitlab-authentication) -
+  Token creation
+- [Command Reference](command-reference.md) - All available flags
+- [Advanced Workflows](advanced-workflows.md) - Syncing and automation

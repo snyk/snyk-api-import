@@ -1,0 +1,9 @@
+{
+  "orgs": [
+    {
+      "name": "example-org",
+      "groupId": "group-123",
+      "sourceOrgId": "source-abc"
+    }
+  ]
+}

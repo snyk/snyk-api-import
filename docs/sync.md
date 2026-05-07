@@ -10,7 +10,7 @@
   - [De-activating Snyk projects that represent files that have been renamed/moved/deleted](#de-activating-snyk-projects-that-represent-files-that-have-been-renamedmoveddeleted)
     - [Scenarios](#scenarios)
       - [File renamed/moves/deleted](#file-renamedmovesdeleted)
-      - [node_modules, tests \& fixtures](#node_modules-tests--fixtures)
+      - [node\_modules, tests \& fixtures](#node_modules-tests--fixtures)
   - [Detecting \& importing new files not already monitored in Snyk](#detecting--importing-new-files-not-already-monitored-in-snyk)
   - [Repository is archived](#repository-is-archived)
 - [Kick off sync](#kick-off-sync)
@@ -33,7 +33,7 @@ You will need to have setup in advance:
 
 - your [Snyk organizations](docs/orgs.md) should exist and have projects
   - your Snyk organizations configured with some connection to SCM (Github, Github Enterprise, Bitbucket Cloud, or Bitbucket Server) as you will need to provide which integration sync should use to update projects.
-- you will need your Snyk API token, with correct scope & [admin access for all Organizations](https://snyk.docs.apiary.io/#reference/import-projects/import/import-targets). This command will perform project changes on users behalf (import, update project branch, deactivate projects). **Github Integration Note**: As Github is both an auth & integration, how the integration is done has an effect on usage:
+- you will need your Snyk API token, with correct scope & [admin access for all Organizations](https://docs.snyk.io/snyk-api/reference/import-projects-v1). This command will perform project changes on users behalf (import, update project branch, deactivate projects). **Github Integration Note**: As Github is both an auth & integration, how the integration is done has an effect on usage:
   - For users importing via [Github Snyk integration](https://docs.snyk.io/integrations/git-repository-scm-integrations/github-integration#setting-up-a-github-integration) use your **personal Snyk API token** (Service Accounts are not supported for Github integration imports via API as this is a personal auth token only accessible to the user)
   - For Github Enterprise Snyk integration with a url & token (for Github.com, Github Enterprise Cloud & Github Enterprise hosted) use a **Snyk API service account token**
 
@@ -50,7 +50,9 @@ Updating the project branch in Snyk to match the default branch of the repo in t
 
 ## De-activating Snyk projects that represent files that have been renamed/moved/deleted
 
-During sync a shallow clone of a repo will be done to find all files in the repo and compare them to files monitored by Snyk. If any file is no longer found in the repo, the corresponding Snyk project will be deactivated.
+During sync, the tool uses an optimized manifest discovery process to find all files in the repo and compare them to files monitored by Snyk. If any file is no longer found in the repo, the corresponding Snyk project will be deactivated.
+
+**Performance Note:** The tool maintains a manifest cache (`.manifest-cache-<orgId>.json` in `SNYK_LOG_PATH`) to avoid re-scanning repositories on subsequent sync runs. This significantly improves performance for large organizations.
 
 ### Scenarios
 
@@ -74,8 +76,9 @@ Any projects that were imported but match the default exclusions list (deemed to
 
 ## Detecting & importing new files not already monitored in Snyk
 
-While analyzing each target known to Snyk any new Snyk supported files found in the repo that do not have a corresponding project in Snyk will be imported in batches. Any files matching the default or user provided `exclusionGlobs` will be ignored.
-If a file has a corresponding de-activated project in Snyk, it will not be brought in again. Activate manually or via API if it should be active.
+While analyzing each target known to Snyk, any new Snyk-supported files found in the repo that do not have a corresponding project in Snyk will be imported. The concurrency for these imports is controlled by the `--concurrency` flag or `IMPORT_CONCURRENCY` environment variable (default: 10).
+
+Any files matching the default or user-provided `exclusionGlobs` will be ignored. If a file has a corresponding deactivated project in Snyk, it will not be re-imported automatically. Activate manually or via API if it should be active.
 
 ## Repository is archived
 
@@ -95,12 +98,12 @@ The command will produce detailed logs for projects that were `updated` and thos
 - `SNYK_LOG_PATH` - the path to folder where all logs should be saved,it is recommended creating a dedicated logs folder per import you have running. (Note: all logs will append)
 - `SNYK_API` (optional) defaults to `https://api.snyk.io/v1`
 - `GITHUB_TOKEN` - SCM token that has read level or similar permissions to see information about repos like default branch & can list files in a repo
-- `BITBUCKET_USERNAME` - Bitbucket username for API access (Bitbucket Cloud/Server)
-- `BITBUCKET_APP_PASSWORD` - Bitbucket app password for API access (Bitbucket Cloud/Server)
-- `BITBUCKET_USE_SSH` - Optional. When set to `1`, `true`, or `yes` (case-insensitive) the tool will prefer SSH clone URLs when available. The tool will also prefer SSH automatically if an SSH agent is detected via `SSH_AUTH_SOCK`.
+- `BITBUCKET_CLOUD_USERNAME` - Bitbucket Cloud username for API access
+- `BITBUCKET_CLOUD_PASSWORD` - Bitbucket Cloud API token (see [Authentication Guide](authentication.md#bitbucket-cloud-authentication))
+- `BITBUCKET_APP_CLIENT_ID` - Bitbucket Cloud App OAuth client ID (for `bitbucket-cloud-app` source)
+- `BITBUCKET_APP_CLIENT_SECRET` - Bitbucket Cloud App OAuth client secret (for `bitbucket-cloud-app` source)
 
-- Note: When using the `bitbucket-cloud-app` source, the tool will perform `git clone` operations using the clone URL returned in repository metadata. Private repositories require clone credentials (HTTPS credentials or SSH access via deploy keys). Make sure the environment running `sync` has appropriate Git credentials or SSH keys available.
-  - Tip: To prefer SSH clones (and avoid embedding credentials into HTTPS URLs) set `BITBUCKET_USE_SSH=true` or run the process with an SSH agent (presence of `SSH_AUTH_SOCK`). When SSH is preferred and the repo metadata includes an `sshUrl`, the tool will use that URL for `git clone`.
+**Note:** The `bitbucket-cloud-app` source uses API-based repository discovery and manifest detection. No git cloning or SSH configuration is required.
 
 ## 2. Download & run
 
@@ -147,6 +150,16 @@ In dry-run mode:
 
 Live mode:
 `DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise`
+
+### Bitbucket Cloud App
+
+In dry-run mode:
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=bitbucket-cloud-app --dryRun=true`
+
+Live mode:
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=bitbucket-cloud-app`
+
+Note: The Bitbucket Cloud App sync command reads `BITBUCKET_APP_CLIENT_ID` and `BITBUCKET_APP_CLIENT_SECRET` from the environment, not from CLI arguments. Set these environment variables before running the command.
 
 ### Bitbucket Cloud
 

@@ -1,0 +1,23 @@
+{
+  "value": [
+    {
+      "id": "proj-123",
+      "name": "my-project",
+      "description": "Main project for development",
+      "url": "https://dev.azure.com/my-org/_apis/projects/proj-123",
+      "state": "wellFormed",
+      "revision": 5,
+      "visibility": "private"
+    },
+    {
+      "id": "proj-456",
+      "name": "infrastructure",
+      "description": "Infrastructure and DevOps",
+      "url": "https://dev.azure.com/my-org/_apis/projects/proj-456",
+      "state": "wellFormed",
+      "revision": 3,
+      "visibility": "private"
+    }
+  ],
+  "count": 2
+}

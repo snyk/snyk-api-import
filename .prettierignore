@@ -1,6 +1,0 @@
-/node_modules/
-**/fixtures
-**/research/
-
-# Ignore the entire test folder — we only want Prettier to format `src/`
-test/**

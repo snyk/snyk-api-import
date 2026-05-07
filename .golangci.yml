@@ -1,0 +1,57 @@
+version: "2"
+run:
+  modules-download-mode: readonly
+  tests: false
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+  settings:
+    errcheck:
+      check-type-assertions: false
+      check-blank: false
+    govet:
+      enable:
+        - assign
+        - atomic
+        - bools
+        - copylocks
+        - nilfunc
+        - printf
+        - unmarshal
+      enable-all: false
+    staticcheck:
+      checks:
+        - all
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - staticcheck
+        text: QF1003
+      - linters:
+          - errcheck
+        path: main\.go
+        text: Error return value of .os\.Setenv. is not checked
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 3
+  new: false
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

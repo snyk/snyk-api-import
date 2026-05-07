@@ -1,8 +1,14 @@
 [[allowlists]]
-description = "Allow specific paths"
+description = "Allow specific paths as these will only contain fake credentials"
 paths = [
   '''test/''',
   '''readme.md''',
   '''gitleaks.toml''',
   '''docs/''',
+  '''.gitignore''',
+  '''.gitkeep''',
+  '''.gitmodules''',
+  '''.gitignore''',
+  '''.gitkeep''',
+  '''.gitmodules''',
 ]

@@ -1,0 +1,11 @@
+{
+  "owner": "my-org",
+  "name": "infrastructure",
+  "branch": "main",
+  "manifests": [
+    "main.tf",
+    "variables.tf",
+    "Dockerfile"
+  ],
+  "projectTypes": ["terraform", "docker"]
+}

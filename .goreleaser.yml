@@ -1,0 +1,41 @@
+version: 2
+
+project_name: snyk-api-import
+
+builds:
+  - id: snyk-api-import
+    main: .
+    binary: snyk-api-import
+    ldflags:
+      - "-s -w"
+      - "-X=github.com/sam1el/snyk-api-import-go/internal/buildinfo.Version={{ .Version }}"
+      - "-X=github.com/sam1el/snyk-api-import-go/internal/buildinfo.GitCommit={{ .Commit }}"
+      - "-X=github.com/sam1el/snyk-api-import-go/internal/buildinfo.BuildDate={{ .Date }}"
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^chore:"
+
+release:
+  draft: false
+  prerelease: auto

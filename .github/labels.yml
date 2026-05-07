@@ -1,0 +1,26 @@
+# Release Labels Configuration
+# These labels are automatically synced by the setup-labels workflow
+
+- name: "release:major"
+  color: "d73a4a"
+  description: "Create a major release (breaking changes) - v1.0.0 → v2.0.0"
+
+- name: "release:minor"
+  color: "0e8a16"
+  description: "Create a minor release (new features) - v1.0.0 → v1.1.0"
+
+- name: "release:patch"
+  color: "fbca04"
+  description: "Create a patch release (bug fixes) - v1.0.0 → v1.0.1"
+
+- name: "release:alpha"
+  color: "d876e3"
+  description: "Create an alpha pre-release - v1.0.0 → v1.1.0-alpha.1"
+
+- name: "release:beta"
+  color: "d876e3"
+  description: "Create a beta pre-release - v1.0.0 → v1.1.0-beta.1"
+
+- name: "release:rc"
+  color: "d876e3"
+  description: "Create a release candidate - v1.0.0 → v1.1.0-rc.1"

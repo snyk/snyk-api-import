@@ -1,0 +1,62 @@
+{
+  "org": {
+    "id": "org-123",
+    "name": "My Organization"
+  },
+  "projects": [
+    {
+      "id": "proj-abc-123",
+      "name": "my-org/my-app:package.json",
+      "created": "2023-01-15T10:30:00.000Z",
+      "origin": "github",
+      "type": "npm",
+      "readOnly": false,
+      "testFrequency": "daily",
+      "isMonitored": true,
+      "totalDependencies": 150,
+      "issueCountsBySeverity": {
+        "low": 5,
+        "medium": 10,
+        "high": 3,
+        "critical": 1
+      },
+      "imageTag": null,
+      "lastTestedDate": "2023-06-15T08:00:00.000Z",
+      "browseUrl": "https://app.snyk.io/org/my-org/project/proj-abc-123",
+      "attributes": {
+        "criticality": ["high"],
+        "environment": ["production"],
+        "lifecycle": ["production"],
+        "targetReference": "main"
+      },
+      "tags": []
+    },
+    {
+      "id": "proj-def-456",
+      "name": "my-org/backend-service:pom.xml",
+      "created": "2023-02-20T14:45:00.000Z",
+      "origin": "github",
+      "type": "maven",
+      "readOnly": false,
+      "testFrequency": "daily",
+      "isMonitored": true,
+      "totalDependencies": 85,
+      "issueCountsBySeverity": {
+        "low": 2,
+        "medium": 5,
+        "high": 1,
+        "critical": 0
+      },
+      "imageTag": null,
+      "lastTestedDate": "2023-06-15T09:00:00.000Z",
+      "browseUrl": "https://app.snyk.io/org/my-org/project/proj-def-456",
+      "attributes": {
+        "criticality": ["medium"],
+        "environment": ["production"],
+        "lifecycle": ["production"],
+        "targetReference": "main"
+      },
+      "tags": []
+    }
+  ]
+}

@@ -1,0 +1,265 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]  # Only run on main pushes
+  pull_request:
+    branches: [ main ]  # Run on all PRs to main (includes feature branches)
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # For version tagging
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Install tools
+        run: |
+          go install golang.org/x/tools/cmd/goimports@latest
+
+      - name: Run gofmt check
+        run: |
+          fmt_output=$(gofmt -l .)
+          if [ -n "$fmt_output" ]; then
+            echo "❌ gofmt needs to be run on the following files:"
+            echo "$fmt_output"
+            exit 1
+          fi
+          echo "✅ All files are properly formatted"
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.6.2
+          args: --timeout=5m
+
+      - name: Run tests
+        env:
+          SNYK_LOG_PATH: ${{ runner.temp }}/logs
+          # Provide E2E variables so tests can run integration scenarios
+          SNYK_TOKEN: ${{ secrets.E2E_SNYK_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.E2E_GITHUB_TOKEN }}
+          GITLAB_TOKEN: ${{ secrets.E2E_GITLAB_TOKEN }}
+          AZURE_TOKEN: ${{ secrets.E2E_AZURE_TOKEN }}
+          BITBUCKET_USERNAME: ${{ secrets.E2E_BITBUCKET_USERNAME }}
+          BITBUCKET_PASSWORD: ${{ secrets.E2E_BITBUCKET_PASSWORD }}
+          BITBUCKET_APP_CLIENT_ID: ${{ secrets.E2E_BITBUCKET_APP_CLIENT_ID }}
+          BITBUCKET_APP_CLIENT_SECRET: ${{ secrets.E2E_BITBUCKET_APP_CLIENT_SECRET }}
+          # GitHub App credentials not available - tests will skip/mock
+          # GITHUB_APP_ID: not set
+          # GITHUB_APP_INSTALLATION_ID: not set
+          # GITHUB_APP_PRIVATE_KEY_BASE64: not set
+        run: |
+          mkdir -p $SNYK_LOG_PATH
+          go test ./... -v -race -coverprofile=coverage.out -covermode=atomic 2>&1 | tee test-output.log
+          test_exit_code=${PIPESTATUS[0]}
+          if [ $test_exit_code -ne 0 ]; then
+            echo "❌ Tests failed with exit code $test_exit_code"
+            exit $test_exit_code
+          fi
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f test-output.log ]; then
+            # Extract test counts
+            passed=$(grep -c "^--- PASS:" test-output.log || echo "0")
+            failed=$(grep -c "^--- FAIL:" test-output.log || echo "0")
+            echo "✅ **Passed:** $passed tests" >> $GITHUB_STEP_SUMMARY
+            if [ "$failed" != "0" ]; then
+              echo "❌ **Failed:** $failed tests" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "" >> $GITHUB_STEP_SUMMARY
+            # Show package summaries
+            echo "### Package Coverage" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            grep "coverage:" test-output.log | tail -10 >> $GITHUB_STEP_SUMMARY || echo "No coverage data"
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Generate coverage report
+        run: |
+          go tool cover -func=coverage.out
+          total=$(go tool cover -func=coverage.out | grep total | awk '{print $3}')
+          echo "📊 Total coverage: $total"
+          echo "COVERAGE=$total" >> $GITHUB_ENV
+
+      - name: Check coverage threshold
+        run: |
+          coverage=$(echo $COVERAGE | sed 's/%//')
+          threshold=15.0
+          if (( $(echo "$coverage < $threshold" | bc -l) )); then
+            echo "❌ Coverage $coverage% is below threshold $threshold%"
+            exit 1
+          fi
+          echo "✅ Coverage $coverage% meets threshold"
+
+  e2e-tests:
+    name: E2E Integration Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    # Only run E2E on PRs to main or pushes to main (not feature branches)
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false  # Run all integrations even if one fails
+      matrix:
+        integration: [github, gitlab, bitbucket, bitbucket-app, azure]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Run ${{ matrix.integration }} E2E Tests
+        env:
+          RUN_E2E_TESTS: 'true'
+          E2E_CLEANUP: 'true'
+          E2E_RUN_IMPORT: 'false'  # Skip slow imports in CI
+          SNYK_TOKEN: ${{ secrets.E2E_SNYK_TOKEN }}
+          SNYK_TEST_GROUP_ID: ${{ secrets.E2E_SNYK_TEST_GROUP_ID }}
+          SNYK_TEST_ORG_ID: ${{ secrets.E2E_SNYK_TEST_ORG_ID }}
+          SNYK_LOG_PATH: ${{ runner.temp }}/logs
+          # GitHub-specific
+          GITHUB_TOKEN: ${{ matrix.integration == 'github' && secrets.E2E_GITHUB_TOKEN || '' }}
+          GITHUB_TEST_ORG: ${{ matrix.integration == 'github' && secrets.E2E_GITHUB_TEST_ORG || '' }}
+          GITHUB_TEST_ORG_PUBLIC_ID: ${{ matrix.integration == 'github' && secrets.E2E_GITHUB_TEST_ORG_PUBLIC_ID || '' }}
+          # GitLab-specific
+          GITLAB_TOKEN: ${{ matrix.integration == 'gitlab' && secrets.E2E_GITLAB_TOKEN || '' }}
+          GITLAB_TEST_GROUP: ${{ matrix.integration == 'gitlab' && secrets.E2E_GITLAB_TEST_GROUP || '' }}
+          GITLAB_TEST_ORG_PUBLIC_ID: ${{ matrix.integration == 'gitlab' && secrets.E2E_GITLAB_TEST_ORG_PUBLIC_ID || '' }}
+          # Bitbucket Cloud (basic auth)
+          BITBUCKET_CLOUD_USERNAME: ${{ matrix.integration == 'bitbucket' && secrets.E2E_BITBUCKET_USERNAME || '' }}
+          BITBUCKET_CLOUD_PASSWORD: ${{ matrix.integration == 'bitbucket' && secrets.E2E_BITBUCKET_PASSWORD || '' }}
+          BITBUCKET_TEST_WORKSPACE: ${{ matrix.integration == 'bitbucket' && secrets.E2E_BITBUCKET_TEST_WORKSPACE || '' }}
+          BITBUCKET_TEST_ORG_PUBLIC_ID: ${{ matrix.integration == 'bitbucket' && secrets.E2E_BITBUCKET_TEST_ORG_PUBLIC_ID || '' }}
+          # Bitbucket Cloud App (OAuth)
+          BITBUCKET_APP_CLIENT_ID: ${{ matrix.integration == 'bitbucket-app' && secrets.E2E_BITBUCKET_APP_CLIENT_ID || '' }}
+          BITBUCKET_APP_CLIENT_SECRET: ${{ matrix.integration == 'bitbucket-app' && secrets.E2E_BITBUCKET_APP_CLIENT_SECRET || '' }}
+          BITBUCKET_APP_TEST_WORKSPACE: ${{ matrix.integration == 'bitbucket-app' && secrets.E2E_BITBUCKET_APP_TEST_WORKSPACE || '' }}
+          BITBUCKET_APP_TEST_ORG_PUBLIC_ID: ${{ matrix.integration == 'bitbucket-app' && secrets.E2E_BITBUCKET_APP_TEST_ORG_PUBLIC_ID || '' }}
+          # Azure-specific
+          AZURE_TOKEN: ${{ matrix.integration == 'azure' && secrets.E2E_AZURE_TOKEN || '' }}
+          AZURE_TEST_ORG: ${{ matrix.integration == 'azure' && secrets.E2E_AZURE_TEST_ORG || '' }}
+          AZURE_BASE_URL: ${{ matrix.integration == 'azure' && secrets.E2E_AZURE_BASE_URL || 'https://dev.azure.com' }}
+          AZURE_TEST_ORG_PUBLIC_ID: ${{ matrix.integration == 'azure' && secrets.E2E_AZURE_TEST_ORG_PUBLIC_ID || '' }}
+        run: |
+          mkdir -p $SNYK_LOG_PATH
+          # Convert integration name to test function name format
+          case "${{ matrix.integration }}" in
+            "github")
+              integration_test="GitHub"
+              ;;
+            "gitlab")
+              integration_test="GitLab"
+              ;;
+            "bitbucket")
+              integration_test="Bitbucket"
+              ;;
+            "bitbucket-app")
+              integration_test="BitbucketApp"
+              ;;
+            "azure")
+              integration_test="Azure"
+              ;;
+            *)
+              echo "❌ Unknown integration: ${{ matrix.integration }}"
+              exit 1
+              ;;
+          esac
+
+          echo "🧪 Running $integration_test E2E tests..."
+
+          # Run tests with verbose output (shows test names and logs)
+          # Save both verbose output and JSON for artifacts
+          go test ./internal/e2e \
+            -run "TestE2E_${integration_test}_FullWorkflow" \
+            -v \
+            -timeout=30m 2>&1 | tee ${{ matrix.integration }}-output.log
+
+          # Capture exit code
+          test_exit_code=${PIPESTATUS[0]}
+
+          # Show summary
+          echo ""
+          echo "📊 Test Summary for $integration_test:"
+          if [ $test_exit_code -eq 0 ]; then
+            echo "✅ All tests passed"
+          else
+            echo "❌ Some tests failed (exit code: $test_exit_code)"
+          fi
+
+          # Exit with the test exit code
+          exit $test_exit_code
+
+      - name: Upload test results
+        if: failure()  # Only upload on failure to save storage
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-${{ matrix.integration }}
+          path: |
+            ${{ matrix.integration }}-output.log
+            ${{ runner.temp }}/logs/**/*.log
+            ${{ runner.temp }}/logs/**/*.json
+          retention-days: 7
+
+  security-scans:
+    name: Security Scans
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Check Snyk Token
+        run: |
+          if [ -z "${{ secrets.E2E_SNYK_TOKEN }}" ]; then
+            echo "❌ E2E_SNYK_TOKEN secret is not configured"
+            echo "Please add E2E_SNYK_TOKEN to repository secrets"
+            exit 1
+          fi
+          echo "✅ Snyk token is configured"
+
+      # NOTE: Snyk Code (SAST) scan disabled - requires Snyk Code to be enabled
+      # in the organization settings. Enable at: Settings > Snyk Code
+      # - name: Run Snyk Code Scan (SAST)
+      #   uses: snyk/actions/golang@master
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.E2E_SNYK_TOKEN }}
+      #   with:
+      #     args: --severity-threshold=high
+      #     command: code test
+
+      - name: Run Snyk Open Source Scan
+        uses: snyk/actions/golang@master
+        env:
+          SNYK_TOKEN: ${{ secrets.E2E_SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+          command: test
