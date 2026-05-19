@@ -10,6 +10,7 @@ import type {
   RESTProjectData,
   SnykTarget,
 } from '../../types';
+import type { SnykHttpResponse } from '../../snyk-http-response';
 
 const debug = debugLib('snyk:api-group');
 
@@ -32,11 +33,11 @@ export async function listIntegrations(
     );
   }
 
-  const res = await requestManager.request({
+  const res = (await requestManager.request({
     verb: 'get',
     url: `/org/${orgId.trim()}/integrations`,
     body: JSON.stringify({}),
-  });
+  })) as SnykHttpResponse<IntegrationsListResponse>;
 
   const statusCode = res.statusCode || res.status;
   if (!statusCode || statusCode !== 200) {
@@ -92,11 +93,11 @@ export async function setNotificationPreferences(
     );
   }
   try {
-    const res = await requestManager.request({
+    const res = (await requestManager.request({
       verb: 'put',
       url: `/org/${orgId.trim()}/notification-settings`,
       body: JSON.stringify(settings),
-    });
+    })) as SnykHttpResponse<IntegrationsListResponse>;
 
     const statusCode = res.statusCode || res.status;
     if (!statusCode || statusCode !== 200) {
@@ -126,11 +127,11 @@ export async function deleteOrg(
       \nFor more information see: https://snyk.docs.apiary.io/#reference/organizations/manage-organization/remove-organization`,
     );
   }
-  const res = await requestManager.request({
+  const res = (await requestManager.request({
     verb: 'delete',
     url: `/org/${orgId}`,
     body: JSON.stringify({}),
-  });
+  })) as SnykHttpResponse<unknown>;
   const statusCode = res.statusCode || res.status;
   if (!statusCode || statusCode !== 204) {
     throw new Error(
@@ -255,11 +256,11 @@ async function getProjectsPage(
 
   const url = nextPageLink ?? `/orgs/${orgId.trim()}/projects?${query}`;
 
-  const res = await requestManager.request({
+  const res = (await requestManager.request({
     verb: 'get',
     url: url,
     useRESTApi: true,
-  });
+  })) as SnykHttpResponse<RESTProjectsResponse>;
 
   const statusCode = res.statusCode || res.status;
   if (!statusCode || statusCode !== 200) {
@@ -269,7 +270,7 @@ async function getProjectsPage(
     );
   }
 
-  const response = res.data as RESTProjectsResponse;
+  const response = res.data;
 
   const projects = convertToSnykProject(response.data);
   const next = response.links.next;
@@ -375,12 +376,12 @@ export async function getSnykTarget(
   });
   const url = nextPageLink ?? `/orgs/${orgId.trim()}/targets?${query}`;
 
-  const res = await requestManager.request({
+  const res = (await requestManager.request({
     verb: 'get',
     url: url,
     body: undefined,
     useRESTApi: true,
-  });
+  })) as SnykHttpResponse<RESTTargetResponse>;
 
   const statusCode = res.statusCode || res.status;
   if (!statusCode || statusCode !== 200) {
@@ -390,7 +391,7 @@ export async function getSnykTarget(
     );
   }
 
-  const responseData = res.data as RESTTargetResponse;
+  const responseData = res.data;
   const targets = responseData.data;
   const { next } = responseData.links;
 

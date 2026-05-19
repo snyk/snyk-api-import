@@ -1,5 +1,6 @@
 import type { requestsManager } from 'snyk-request-manager';
 import debugLib from 'debug';
+import type { SnykHttpResponse } from '../../snyk-http-response';
 
 const debug = debugLib('snyk:get-feature-flag');
 
@@ -13,11 +14,11 @@ export async function getFeatureFlag(
   );
   try {
     const url = `cli-config/feature-flags/${featureFlagName}?org=${orgId}`;
-    const res = await requestManager.request({
+    const res = (await requestManager.request({
       verb: 'get',
       url: url,
       useRESTApi: false,
-    });
+    })) as SnykHttpResponse<{ ok: boolean }>;
 
     debug(`Feature flag ${featureFlagName} is enabled for Org ${orgId}`);
 

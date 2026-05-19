@@ -3,8 +3,8 @@ import * as path from 'path';
 import axios from 'axios';
 import { defaultExclusionGlobs } from '../../common';
 import { find, getSCMSupportedManifests, gitClone } from '../../lib';
-import { getSCMSupportedProjectTypes } from '../../lib/supported-project-types/supported-manifests';
 import * as micromatch from 'micromatch';
+import { getSCMSupportedProjectTypes } from '../../lib/supported-project-types/supported-manifests';
 import type {
   RepoMetaData,
   SnykProject,
@@ -34,11 +34,8 @@ export async function cloneAndAnalyze(
 }> {
   // Validate exclusionGlobs to prevent ReDoS
   function isSafeGlob(glob: string): boolean {
-    // Only allow globs with safe characters (alphanumeric, *, ?, ., /, -, _)
-    // Disallow consecutive * and overly long patterns
     if (!/^[\w\-*?./]+$/.test(glob)) return false;
     if (glob.length > 128) return false;
-    // Allow standard double-star globs ("**/path") but disallow three or more consecutive stars which are suspicious
     if (/\*{3,}/.test(glob)) return false;
     return true;
   }
@@ -283,7 +280,6 @@ export async function cloneAndAnalyze(
         }
         // Match against file patterns (supports exact filenames and globs)
         return filePatterns.some((pattern: string) =>
-          // micromatch expects just the path part after the ':' if present
           (() => {
             const candidate = file.includes(':') ? file.split(':')[1] : file;
             try {
@@ -292,7 +288,6 @@ export async function cloneAndAnalyze(
                 candidate.endsWith(pattern)
               );
             } catch {
-              // on invalid pattern fall back to simple endsWith
               return candidate.endsWith(pattern);
             }
           })(),

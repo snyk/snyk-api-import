@@ -45,7 +45,7 @@ interface FindFilesRes {
 /**
  * Find all files in given search path. Returns paths to files found.
  *
- * @param path file path to search.
+ * @param path file path.
  * @param ignore (optional) globs to ignore. Will always ignore node_modules.
  * @param filter (optional) file names to find. If not provided all files are returned.
  * @param levelsDeep (optional) how many levels deep to search, defaults to 5, this path and one sub directory.
