@@ -63,19 +63,31 @@ Each **import target** has the following keys:
 - `orgId` - Can be found in https://app.snyk.io/org/YOUR_ORG/manage/settings
 - `integrationId` - Can be found in Integrations menu for each SCM https://app.snyk.io/org/YOUR_ORG/manage/settings
 - `target`, `files`, `exclusionGlobs` - see our [Import API documentation](https://docs.snyk.io/snyk-api/reference/import-projects-v1) for more info
-  - `exclusionGlobs` a comma-separated list of up to 10 folder names to exclude from scanning (each folder name must not exceed 100 characters). If not specified, it will default to "fixtures, tests, **tests**, node_modules". If an empty string is provided - no folders will be excluded
-  - `files` is an object array, each path must be the full relative path to file from the root of the target. Only those files will be imported if located at that location.
+  - `exclusionGlobs` — comma-separated list of up to 10 folder names to exclude from scanning (each name must not exceed 100 characters). See [behavior below](#exclusionglobs-and-files-on-bulk-import).
+  - `files` — array of objects with `path`; each path is the full relative path from the repo root. When set, only those files are imported from the target.
 
 _Note_: For a repo that may have 200+ manifest files it is recommended to split this import into multiple by targeting specific files. Importing hundreds of files at once from 1 repo can cause the import to result in some errors/failures.
 _Note_: Keep in mind there is a [limit on the # or projects per Organization in Snyk](https://docs.snyk.io/getting-started/introduction-to-snyk-projects/maximum-number-of-projects-in-an-organsation).
 To reduce the chances of reaching this limit use multiple Organizations in Snyk instead of adding many repos into 1.
 Splitting it to target some files, or some folders only will benefit from the re-tries and yield a smaller load on the source control management system being used. Populate the the `files` property to accomplish this in the import JSON.
 
-If you have any tests ot fixtures that should be ignored, please set the `exclusionGLobs` property:
+If you have any tests or fixtures that should be ignored during a bulk import, set the `exclusionGlobs` property on that target (see below).
 
-> a comma-separated list of up to 10 folder names to exclude from scanning. If not specified, it will default to "fixtures, tests, **tests**, node_modules". If an empty string is provided - no folders will be excluded
+### `exclusionGlobs` and `files` on bulk import
 
-**Note: snyk-api-import supports 100% of the same integration types and project sources as the [Import API documentation](https://docs.snyk.io/snyk-api/reference/import-projects-v1). If an example is not present below for your use case please see the API documentation**
+The `import` command forwards optional fields from your JSON to the [Import API](https://docs.snyk.io/snyk-api/reference/import-projects-v1) as-is:
+
+| JSON value | Sent to Snyk API? | Effect |
+|------------|-------------------|--------|
+| Field omitted | No | Snyk applies its own default exclusions |
+| `""` (empty string) | Yes | No folders excluded |
+| Non-empty string | Yes | Your comma-separated list is used |
+
+The tool does **not** merge its built-in default exclusions into bulk `import` requests. To exclude test/fixture folders explicitly, set `exclusionGlobs` on each target (for example `"fixtures, test, node_modules"`).
+
+For ongoing discovery and re-import of new manifests, use [`sync`](sync.md) — sync applies different exclusion rules during discovery and when importing missing files.
+
+**Note:** snyk-api-import supports 100% of the same integration types and project sources as the [Import API documentation](https://docs.snyk.io/snyk-api/reference/import-projects-v1). If an example is not present below for your use case please see the API documentation
 
 ### Example: Gitlab
 

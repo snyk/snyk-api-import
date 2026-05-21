@@ -9,8 +9,8 @@ import (
 
 	"gopkg.in/natefinch/lumberjack.v2"
 
-	"github.com/snyk/snyk-api-import/internal"
 	"github.com/sirupsen/logrus"
+	"github.com/snyk/snyk-api-import/internal"
 )
 
 // Interface is the minimal logging interface used by the adapter.

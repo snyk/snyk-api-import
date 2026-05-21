@@ -136,18 +136,27 @@ snyk-api-import sync \
 **Note:** The fallback is optional and disabled by default. Discuss with your
 team before enabling in production.
 
-### Excluding Files from Sync
+### Excluding files and folders
 
-Use the `--exclusionGlobs` flag to exclude specific patterns from sync operations:
+Behavior depends on which command you use:
+
+| Command | How to exclude | Default exclusions merged? |
+|---------|----------------|----------------------------|
+| `import --file` | Per-target `exclusionGlobs` in JSON | No — omit field for Snyk API defaults; set explicitly to control |
+| `sync` (discovery) | `--exclusionGlobs`, `EXCLUSION_GLOBS`, or `[import] exclusion_globs` in `config.toml` | Yes — combined with built-in list below |
+| `sync` (new file import) | Same as discovery | Yes — sent on every per-manifest import |
+
+**Sync discovery example** (prefer simple folder names; matching is substring-based):
 
 ```bash
 snyk-api-import sync \
   --source=github \
   --orgPublicId=<org-id> \
-  --exclusionGlobs="**/test/**,**/fixtures/**,**/examples/**"
+  --exclusionGlobs="test,fixtures,examples,logs"
 ```
 
-The tool automatically excludes common test directories:
+Built-in defaults always included during sync (discovery and re-import):
+
 - `node_modules`
 - `test`, `tests`, `__tests__`, `__test__`
 - `fixtures`
@@ -463,9 +472,13 @@ Manually create multiple target files:
 }
 ```
 
-**Option 2: Use exclusionGlobs**
+**Option 2: Use `exclusionGlobs` in import JSON**
 
-**Note:** To filter what gets imported, use the `--exclusionGlobs` flag during the `sync` command. The `import:data` command discovers all available manifests, and filtering happens at sync time.
+For bulk `import --file`, add `exclusionGlobs` on each target in `import-projects.json` (see [import.md](import.md)). The value is forwarded to the Import API; omit the field to use Snyk defaults.
+
+**Option 3: Use `sync` for ongoing filtering**
+
+`import:data` generates targets without exclusion fields. Use `sync` to discover manifests with `--exclusionGlobs` / config exclusions, and to import new files with merged defaults. Do not rely on `sync` alone to filter a one-time bulk import — set `exclusionGlobs` in the JSON for that.
 
 ### Monitoring Progress
 

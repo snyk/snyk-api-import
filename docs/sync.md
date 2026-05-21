@@ -78,7 +78,20 @@ Any projects that were imported but match the default exclusions list (deemed to
 
 While analyzing each target known to Snyk, any new Snyk-supported files found in the repo that do not have a corresponding project in Snyk will be imported. The concurrency for these imports is controlled by the `--concurrency` flag or `IMPORT_CONCURRENCY` environment variable (default: 10).
 
-Any files matching the default or user-provided `exclusionGlobs` will be ignored. If a file has a corresponding deactivated project in Snyk, it will not be re-imported automatically. Activate manually or via API if it should be active.
+Each missing manifest is imported in a **separate** Import API call with `files: [{ "path": "<manifest>" }]` and merged `exclusionGlobs` (your exclusions plus the default list above). This matches Snyk UI import behavior for new files discovered during sync.
+
+Paths matching exclusion patterns are skipped during **manifest discovery** (before import). If a file has a corresponding deactivated project in Snyk, it will not be re-imported automatically. Activate manually or via API if it should be active.
+
+### Exclusion globs during sync
+
+| Stage | Where configured | Defaults merged? |
+|-------|------------------|------------------|
+| Manifest discovery | `--exclusionGlobs`, `EXCLUSION_GLOBS` env, or `config.toml` `[import] exclusion_globs` | Yes — user patterns are combined with the default list above |
+| Re-import of new files | Same sources as discovery | Yes — always sent on each per-manifest import POST |
+
+Discovery matching uses **substring** checks on lowercased paths (same approach as the TypeScript tool). Simple folder names such as `fixtures`, `logs`, or `system-test` work reliably. Patterns like `**/node_modules/**` may still match when the path contains that substring, but prefer short names for predictable results.
+
+Unsafe patterns (overly long or exotic characters) are dropped with a warning in logs.
 
 ## Repository is archived
 
@@ -130,7 +143,7 @@ When running `sync` in `--dryRun` mode the logs will have `dryRun` as `true` so 
 ### Github.com
 
 In dry-run mode:
-`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github --exclusionGlobs=**/package.json,logs --dryRun=true`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github --exclusionGlobs=logs,fixtures --dryRun=true`
 
 Live mode:
 `DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github`
@@ -141,7 +154,7 @@ In dry-run mode:
 `DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com --dryRun=true`
 
 Live mode:
-`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com --exclusionGlobs=**/*.yaml,logs`
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --sourceUrl=https://custom.ghe.com --exclusionGlobs=logs,fixtures`
 
 ### GitHub Enterprise Cloud
 
@@ -188,7 +201,13 @@ Live mode:
 
 ### Exclude from syncing certain files & directories
 
-`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=open-source --snykProduct=iac --exclusionGlobs=**/*.yaml,logs,system-test`
+Comma-separated patterns apply to discovery and to exclusions sent on sync-driven imports:
+
+`DEBUG=*snyk* SNYK_TOKEN=xxxx snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github-enterprise --snykProduct=open-source --snykProduct=iac --exclusionGlobs=logs,system-test,fixtures`
+
+Equivalent via environment variable:
+
+`EXCLUSION_GLOBS=logs,system-test snyk-api-import sync --orgPublicId=<snyk_org_public_id> --source=github`
 
 ## Known limitations
 

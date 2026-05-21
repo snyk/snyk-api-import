@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 // SyncBitbucketServer syncs organizations and projects with Bitbucket Server (Data Center).
@@ -156,19 +155,23 @@ func SyncBitbucketServerContext(ctx context.Context, orgID, orgsFile, targetsFil
 		if len(discoveredManifests) == 0 {
 			// No manifests found - add repo without manifest so it can match generic Snyk projects
 			entry := map[string]interface{}{
-				"name":   repoSlug,
-				"owner":  slugifiedName,
-				"branch": branch,
+				"name":       repoSlug,
+				"owner":      slugifiedName,
+				"branch":     branch,
+				"projectKey": projectKey,
+				"repoSlug":   repoSlug,
 			}
 			bitbucketRepos = append(bitbucketRepos, entry)
 		} else {
 			// Add one entry per discovered manifest
 			for _, manifest := range discoveredManifests {
 				entry := map[string]interface{}{
-					"name":     repoSlug,
-					"owner":    slugifiedName,
-					"branch":   branch,
-					"manifest": manifest,
+					"name":       repoSlug,
+					"owner":      slugifiedName,
+					"branch":     branch,
+					"manifest":   manifest,
+					"projectKey": projectKey,
+					"repoSlug":   repoSlug,
 				}
 				bitbucketRepos = append(bitbucketRepos, entry)
 			}
@@ -411,44 +414,7 @@ func SyncBitbucketServerContext(ctx context.Context, orgID, orgsFile, targetsFil
 			return fmt.Errorf("no Bitbucket Server integration found for org %s", orgID)
 		}
 
-		// Build import targets for missing repos
-		importTargets := []ImportTarget{}
-		for _, r := range result.Missing {
-			projectKey := fmt.Sprintf("%v", r["projectKey"])
-			repoSlug := fmt.Sprintf("%v", r["repoSlug"])
-			branch := fmt.Sprintf("%v", r["branch"])
-
-			target := ImportTarget{
-				Target: Target{
-					ProjectKey: projectKey,
-					RepoSlug:   repoSlug,
-					Branch:     branch,
-				},
-				OrgID:         orgID,
-				IntegrationID: integrationID,
-			}
-			importTargets = append(importTargets, target)
-		}
-
-		// Write temporary import targets file
-		tmpFile := filepath.Join(snykLogPath, fmt.Sprintf("bitbucket-server-sync-import-%d.json", time.Now().Unix()))
-		wrapper := struct {
-			Targets []ImportTarget `json:"targets"`
-		}{Targets: importTargets}
-
-		data, err := json.MarshalIndent(wrapper, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal import targets: %w", err)
-		}
-
-		if err := os.WriteFile(tmpFile, data, 0600); err != nil {
-			return fmt.Errorf("write import targets: %w", err)
-		}
-
-		Logger.Infof("Wrote import targets to: %s", tmpFile)
-
-		// Execute parallel import
-		if err := ImportTargetsParallel(ctx, tmpFile, "bitbucket-server"); err != nil {
+		if _, err := ParallelImportSyncMaps(ctx, result.Missing, orgID, integrationID, "bitbucket-server"); err != nil {
 			return fmt.Errorf("import targets: %w", err)
 		}
 

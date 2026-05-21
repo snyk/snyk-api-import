@@ -248,6 +248,15 @@ snyk-api-import import [flags]
 | `--source` | string | No | Source type - validates that import file matches this integration (default: `github`) |
 | `--concurrency` | int | No | Max concurrent imports (default: 10) |
 
+**Import targets JSON (optional fields):**
+
+| Field | Description |
+|-------|-------------|
+| `files` | `[{"path": "package.json"}]` — import only these paths from the target |
+| `exclusionGlobs` | Comma-separated folder names for the Import API. Omitted → field not sent (Snyk defaults). `""` → no exclusions. Non-empty → sent as written. Bulk import does **not** merge tool default exclusions. |
+
+See [import.md](import.md) for examples.
+
 **Important:** When using `--file` with a custom filename, you should also specify `--source` to ensure the import file's `integrationId` matches the intended integration. The tool will validate this against the Snyk API.
 
 **Output:**
@@ -305,7 +314,7 @@ snyk-api-import sync [flags]
 | `--source` | string | No | Source type (default: `github`) |
 | `--sourceUrl` | string | No | Custom SCM base URL (for GitHub Enterprise, self-hosted GitLab, Bitbucket Server, Azure DevOps Server) |
 | `--snykProduct` | string | No | Filter by Snyk product: `openSource`, `container`, or `iac` |
-| `--exclusionGlobs` | string | No | Comma-separated glob patterns to exclude from manifest discovery |
+| `--exclusionGlobs` | string | No | Comma-separated patterns for sync manifest discovery (also sets `EXCLUSION_GLOBS`). Combined with built-in defaults. Does not affect bulk `import --file` (use per-target `exclusionGlobs` in JSON). |
 | `--dryRun` | boolean | No | Preview changes without executing |
 | `--verbose` | boolean | No | Enable verbose logging |
 | `--enableBranchUpdateFallback` | boolean | No | Fallback to deactivate+import if branch update fails |
@@ -315,8 +324,10 @@ snyk-api-import sync [flags]
 
 1. **Update Branches**: Updates monitored branch to match default branch in SCM
 2. **Deactivate Stale Projects**: Removes projects for deleted/renamed files
-3. **Import New Files**: Adds newly discovered manifest files (respects `--concurrency` setting)
+3. **Import New Files**: One Import API call per missing manifest, with `files: [{path}]` and merged `exclusionGlobs` (user + defaults; respects `--concurrency`)
 4. **Handle Archived Repos**: Deactivates all projects for archived repos
+
+**Exclusion configuration (sync only):** `--exclusionGlobs` flag, `EXCLUSION_GLOBS` environment variable, or `exclusion_globs` in `config.toml` under `[import]`. Discovery uses substring matching; prefer simple names like `fixtures` or `logs`.
 
 **Performance:** Sync uses an optimized manifest cache to avoid re-cloning repositories on subsequent runs. The cache is stored in `SNYK_LOG_PATH` and is automatically managed.
 
@@ -368,11 +379,11 @@ snyk-api-import sync \
   --orgPublicId=org-123 \
   --snykProduct=openSource
 
-# Exclude test directories and fixtures
+# Exclude paths during discovery (simple names recommended)
 snyk-api-import sync \
   --source=github \
   --orgPublicId=org-123 \
-  --exclusionGlobs="**/test/**,**/fixtures/**,**/node_modules/**"
+  --exclusionGlobs="test,fixtures,logs"
 ```
 
 **Integration-Specific Environment Variables:**

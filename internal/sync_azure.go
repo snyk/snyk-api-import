@@ -512,9 +512,9 @@ func SyncAzureContext(ctx context.Context, orgID, source, orgsFile, targetsFile 
 	return nil
 }
 
-// performAzureImportsOptimized performs the actual import of Azure repositories into Snyk
+// performAzureImportsOptimized imports each missing manifest into Snyk (per-file + exclusions).
 func performAzureImportsOptimized(ctx context.Context, targets []map[string]interface{}, orgID, snykToken string) error {
-	// Get integration ID for Azure DevOps using shared ListIntegrations function
+	_ = snykToken
 	integrations, err := ListIntegrations(ctx, orgID)
 	if err != nil {
 		return fmt.Errorf("list integrations: %w", err)
@@ -528,45 +528,11 @@ func performAzureImportsOptimized(ctx context.Context, targets []map[string]inte
 
 	Logger.Infof("Using Azure DevOps integration ID: %s", integrationID)
 
-	// Convert map targets to ImportTarget structs for ParallelImport
-	importTargets := make([]ImportTarget, 0, len(targets))
-	for _, t := range targets {
-		name, _ := t["name"].(string)
-		owner, _ := t["owner"].(string)
-		branch, _ := t["branch"].(string)
-
-		importTargets = append(importTargets, ImportTarget{
-			Target: Target{
-				Name:   name,
-				Owner:  owner,
-				Branch: branch,
-			},
-			OrgID:         orgID,
-			IntegrationID: integrationID,
-		})
-	}
-
-	// Use parallel import
-	config := ParallelImportConfig{
-		OrgID:         orgID,
-		IntegrationID: integrationID,
-		Source:        "azure-repos",
-		Concurrency:   GetImportConcurrency(0),
-		SnykToken:     snykToken,
-		PollTimeout:   GetPollTimeout(),
-		DryRun:        false,
-	}
-
-	Logger.Infof("Starting parallel Azure DevOps imports: %d targets, concurrency=%d", len(importTargets), config.Concurrency)
-
-	results, err := ParallelImport(ctx, importTargets, config)
+	results, err := ParallelImportSyncMaps(ctx, targets, orgID, integrationID, integrationKey)
 	if err != nil {
-		return fmt.Errorf("parallel import: %w", err)
+		return err
 	}
-
-	// Log summary
 	imported, failed, skipped := results.GetCounts()
 	Logger.Infof("Azure DevOps import complete: %d imported, %d failed, %d skipped", imported, failed, skipped)
-
 	return nil
 }

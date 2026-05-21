@@ -359,8 +359,9 @@ manifest_types = [
     "pubspec.lock",
 ]
 
-# Exclusion globs for manifest discovery
-# Files/directories matching these patterns will be skipped
+# Exclusion globs for sync manifest discovery (and sync re-import API payloads).
+# Resolution: EXCLUSION_GLOBS env overrides this list. Simple names (fixtures, logs)
+# work best; discovery uses substring matching on paths.
 exclusion_globs = [
     # Dependencies
     "**/node_modules/**",

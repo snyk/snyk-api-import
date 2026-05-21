@@ -27,23 +27,9 @@ func ImportTargetsParallel(ctx context.Context, targetsFile string, source strin
 		Logger.Debugf("Using SNYK_TOKEN as Snyk API token")
 	}
 
-	// Read targets file using secure reader
-	const maxTargetsFile = 20 << 20 // 20MB
-	data, err := security.SafeReadFile(targetsFile, maxTargetsFile)
+	targets, err := LoadImportTargetsFromFile(targetsFile)
 	if err != nil {
-		return fmt.Errorf("read targets file: %w", err)
-	}
-
-	var targets []ImportTarget
-	// Accept either top-level array or {targets:[]} object
-	if err := json.Unmarshal(data, &targets); err != nil {
-		var wrapper struct {
-			Targets []ImportTarget `json:"targets"`
-		}
-		if err2 := json.Unmarshal(data, &wrapper); err2 != nil {
-			return fmt.Errorf("unmarshal targets: %w", err)
-		}
-		targets = wrapper.Targets
+		return err
 	}
 
 	if len(targets) == 0 {
@@ -116,10 +102,43 @@ func ImportBitbucketCloudAppTargets(ctx context.Context, targetsFile string, sou
 	return ImportTargetsParallel(ctx, targetsFile, source)
 }
 
+// FilePath is a single manifest path for scoped import (Snyk API files[]).
+type FilePath struct {
+	Path string `json:"path"`
+}
+
 type ImportTarget struct {
-	Target        Target `json:"target"`
-	OrgID         string `json:"orgId"`         // Note: Snyk API uses camelCase with lowercase 'i'
-	IntegrationID string `json:"integrationId"` // Note: Snyk API uses camelCase with lowercase 'i'
+	Target        Target     `json:"target"`
+	OrgID         string     `json:"orgId"`         // Note: Snyk API uses camelCase with lowercase 'i'
+	IntegrationID string     `json:"integrationId"` // Note: Snyk API uses camelCase with lowercase 'i'
+	Files         []FilePath `json:"files,omitempty"`
+	// ExclusionGlobs: nil = omit from import API (Snyk defaults); non-nil sends value (including "").
+	ExclusionGlobs *string `json:"exclusionGlobs,omitempty"`
+}
+
+// LoadImportTargetsFromFile reads and parses an import targets JSON file.
+func LoadImportTargetsFromFile(targetsFile string) ([]ImportTarget, error) {
+	const maxTargetsFile = 20 << 20 // 20MB
+	data, err := security.SafeReadFile(targetsFile, maxTargetsFile)
+	if err != nil {
+		return nil, fmt.Errorf("read targets file: %w", err)
+	}
+	return ParseImportTargetsJSON(data)
+}
+
+// ParseImportTargetsJSON parses import targets from JSON (array or {"targets":[]}).
+func ParseImportTargetsJSON(data []byte) ([]ImportTarget, error) {
+	var targets []ImportTarget
+	if err := json.Unmarshal(data, &targets); err == nil {
+		return targets, nil
+	}
+	var wrapper struct {
+		Targets []ImportTarget `json:"targets"`
+	}
+	if err := json.Unmarshal(data, &wrapper); err != nil {
+		return nil, fmt.Errorf("unmarshal targets: %w", err)
+	}
+	return wrapper.Targets, nil
 }
 
 type Target struct {

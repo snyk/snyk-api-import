@@ -151,12 +151,7 @@ func performSingleImport(ctx context.Context, client *security.Client, target Im
 	orgID := strings.TrimSpace(target.OrgID)
 	integrationID := strings.TrimSpace(target.IntegrationID)
 
-	// Build import payload
-	targetMap := buildImportPayload(target, config.Source)
-
-	importBody := map[string]interface{}{
-		"target": targetMap,
-	}
+	importBody := buildImportRequestBody(target, config.Source)
 
 	bodyBytes, err := json.Marshal(importBody)
 	if err != nil {
@@ -284,7 +279,22 @@ func performSingleImport(ctx context.Context, client *security.Client, target Im
 	return fmt.Errorf("status %d: %s", resp.StatusCode, string(body))
 }
 
-// buildImportPayload constructs the import payload based on SCM type
+// buildImportRequestBody constructs the Snyk import API POST body (target + optional files/exclusionGlobs).
+// Bulk import does not merge default exclusions; nil ExclusionGlobs omits the key (Snyk API defaults).
+func buildImportRequestBody(target ImportTarget, scmType string) map[string]interface{} {
+	body := map[string]interface{}{
+		"target": buildImportPayload(target, scmType),
+	}
+	if len(target.Files) > 0 {
+		body["files"] = target.Files
+	}
+	if target.ExclusionGlobs != nil {
+		body["exclusionGlobs"] = *target.ExclusionGlobs
+	}
+	return body
+}
+
+// buildImportPayload constructs the target object inside the import payload based on SCM type.
 func buildImportPayload(target ImportTarget, scmType string) map[string]interface{} {
 	targetMap := make(map[string]interface{})
 
@@ -318,23 +328,24 @@ func buildImportPayload(target ImportTarget, scmType string) map[string]interfac
 
 // getTargetDisplayName returns a human-readable name for the target
 func getTargetDisplayName(target ImportTarget, scmType string) string {
+	var base string
+
 	// For GitLab, use full_name if available
 	if target.Target.FullName != "" {
-		return target.Target.FullName
+		base = target.Target.FullName
+	} else if scmType == "bitbucket-server" && target.Target.ProjectKey != "" && target.Target.RepoSlug != "" {
+		base = target.Target.ProjectKey + "/" + target.Target.RepoSlug
+	} else if scmType == "azure-repos" && target.Target.Owner != "" {
+		base = target.Target.Owner + "/" + target.Target.Name
+	} else {
+		base = target.Target.Owner + "/" + target.Target.Name
 	}
 
-	// For Bitbucket Server, use projectKey/repoSlug
-	if scmType == "bitbucket-server" && target.Target.ProjectKey != "" && target.Target.RepoSlug != "" {
-		return target.Target.ProjectKey + "/" + target.Target.RepoSlug
+	// Sync per-manifest imports: dedupe by manifest path, not repo alone
+	if len(target.Files) > 0 && target.Files[0].Path != "" {
+		return base + "@" + target.Files[0].Path
 	}
-
-	// For Azure, include organization if available
-	if scmType == "azure-repos" && target.Target.Owner != "" {
-		return target.Target.Owner + "/" + target.Target.Name
-	}
-
-	// Default: owner/name
-	return target.Target.Owner + "/" + target.Target.Name
+	return base
 }
 
 // GetImportConcurrency returns the concurrency setting with precedence:

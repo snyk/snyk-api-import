@@ -3,7 +3,6 @@ package internal
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/google/go-github/v57/github"
@@ -88,22 +87,7 @@ func DiscoverFilesViaTree(ctx context.Context, client *github.Client, owner, rep
 			continue
 		}
 
-		lowerPath := strings.ToLower(path)
-
-		// Exclude common directories that should not be scanned
-		if strings.Contains(lowerPath, "node_modules/") ||
-			strings.Contains(lowerPath, "vendor/") ||
-			strings.Contains(lowerPath, ".git/") ||
-			strings.Contains(lowerPath, "test/") ||
-			strings.Contains(lowerPath, "tests/") ||
-			strings.Contains(lowerPath, "__tests__/") ||
-			strings.Contains(lowerPath, "fixtures/") ||
-			strings.Contains(lowerPath, "examples/") ||
-			strings.Contains(lowerPath, ".venv/") ||
-			strings.Contains(lowerPath, "venv/") ||
-			strings.Contains(lowerPath, "dist/") ||
-			strings.Contains(lowerPath, "build/") ||
-			strings.Contains(lowerPath, ".terraform/") {
+		if PathExcludedByDiscovery(path, DiscoveryExclusionGlobs()) {
 			continue
 		}
 

@@ -449,13 +449,12 @@ func SyncGitLabContext(ctx context.Context, orgID, source, orgsFile, targetsFile
 
 // performGitLabImportsOptimized performs the actual import of GitLab repositories into Snyk
 func performGitLabImportsOptimized(ctx context.Context, targets []map[string]interface{}, orgID, snykToken, gitlabURL string) error {
-	// Get integration ID for GitLab using shared ListIntegrations function
+	_ = snykToken
 	integrations, err := ListIntegrations(ctx, orgID)
 	if err != nil {
 		return fmt.Errorf("list integrations: %w", err)
 	}
 
-	// Determine integration key based on GitLab URL
 	integrationKey := "gitlab"
 	if !strings.Contains(gitlabURL, "gitlab.com") {
 		integrationKey = "gitlab-enterprise"
@@ -468,46 +467,11 @@ func performGitLabImportsOptimized(ctx context.Context, targets []map[string]int
 
 	Logger.Infof("Using GitLab integration ID: %s", integrationID)
 
-	// Convert map targets to ImportTarget structs for ParallelImport
-	importTargets := make([]ImportTarget, 0, len(targets))
-	for _, t := range targets {
-		name, _ := t["name"].(string)
-		owner, _ := t["owner"].(string)
-		branch, _ := t["branch"].(string)
-		// Note: manifest field is not used in parallel import (Snyk auto-detects)
-
-		importTargets = append(importTargets, ImportTarget{
-			Target: Target{
-				Name:   name,
-				Owner:  owner,
-				Branch: branch,
-			},
-			OrgID:         orgID,
-			IntegrationID: integrationID,
-		})
-	}
-
-	// Use parallel import
-	config := ParallelImportConfig{
-		OrgID:         orgID,
-		IntegrationID: integrationID,
-		Source:        "gitlab",
-		Concurrency:   GetImportConcurrency(0),
-		SnykToken:     snykToken,
-		PollTimeout:   GetPollTimeout(),
-		DryRun:        false,
-	}
-
-	Logger.Infof("Starting parallel GitLab imports: %d targets, concurrency=%d", len(importTargets), config.Concurrency)
-
-	results, err := ParallelImport(ctx, importTargets, config)
+	results, err := ParallelImportSyncMaps(ctx, targets, orgID, integrationID, integrationKey)
 	if err != nil {
-		return fmt.Errorf("parallel import: %w", err)
+		return err
 	}
-
-	// Log summary
 	imported, failed, skipped := results.GetCounts()
 	Logger.Infof("GitLab import complete: %d imported, %d failed, %d skipped", imported, failed, skipped)
-
 	return nil
 }

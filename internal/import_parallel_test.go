@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -290,6 +291,15 @@ func TestGetTargetDisplayName(t *testing.T) {
 			scmType:  "azure-repos",
 			expected: "azure-org/test-repo",
 		},
+		{
+			name: "Sync per-manifest import dedupe key",
+			target: ImportTarget{
+				Target: Target{Owner: "org", Name: "repo"},
+				Files:  []FilePath{{Path: "package.json"}},
+			},
+			scmType:  "github",
+			expected: "org/repo@package.json",
+		},
 	}
 
 	for _, tt := range tests {
@@ -298,6 +308,53 @@ func TestGetTargetDisplayName(t *testing.T) {
 			assert.Equal(t, tt.expected, result)
 		})
 	}
+}
+
+func TestPerformSingleImport_IncludesExclusionGlobsAndFiles(t *testing.T) {
+	var lastBody map[string]interface{}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && strings.Contains(r.URL.Path, "/import") {
+			_ = json.NewDecoder(r.Body).Decode(&lastBody)
+			w.Header().Set("Location", "/api/v1/org/test-org/integrations/test-int/import/job-123")
+			w.WriteHeader(http.StatusCreated)
+		}
+	}))
+	defer server.Close()
+
+	serverURL := strings.TrimPrefix(server.URL, "http://")
+	os.Setenv("SNYK_API", server.URL)
+	os.Setenv("SNYK_SKIP_POLL", "1")
+	os.Setenv("SNYK_TEST_SKIP_URL_VALIDATION", "1")
+	defer os.Unsetenv("SNYK_API")
+	defer os.Unsetenv("SNYK_SKIP_POLL")
+	defer os.Unsetenv("SNYK_TEST_SKIP_URL_VALIDATION")
+
+	excl := "fixtures,test"
+	target := ImportTarget{
+		Target:         Target{Name: "repo1", Owner: "org1", Branch: "main"},
+		OrgID:          "test-org",
+		IntegrationID:  "test-int",
+		ExclusionGlobs: &excl,
+		Files:          []FilePath{{Path: "package.json"}},
+	}
+	config := ParallelImportConfig{
+		OrgID: "test-org", IntegrationID: "test-int", Source: "github",
+		Concurrency: 1, SnykToken: "test-token", PollTimeout: time.Second,
+	}
+	mockClient := &http.Client{Timeout: 10 * time.Second}
+	restore := security.SetTestHTTPClient(mockClient, []string{serverURL})
+	defer restore()
+
+	_, err := ParallelImport(context.Background(), []ImportTarget{target}, config)
+	require.NoError(t, err)
+	require.NotNil(t, lastBody)
+	assert.Equal(t, "fixtures,test", lastBody["exclusionGlobs"])
+	files, ok := lastBody["files"].([]interface{})
+	require.True(t, ok)
+	require.Len(t, files, 1)
+	file0, ok := files[0].(map[string]interface{})
+	require.True(t, ok)
+	assert.Equal(t, "package.json", file0["path"])
 }
 
 func TestParallelImport_Success(t *testing.T) {

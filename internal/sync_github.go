@@ -544,54 +544,13 @@ func SyncGitHubContext(ctx context.Context, orgID, source, orgsFile, targetsFile
 	return nil
 }
 
-// performGitHubImports executes the actual Snyk import API calls for GitHub targets
+// performGitHubImports executes Snyk import API calls for each missing manifest (per-file + exclusions).
 func performGitHubImports(ctx context.Context, targets []map[string]interface{}, orgID, integrationID string) error {
-	snykToken := os.Getenv("SNYK_TOKEN")
-	if snykToken == "" {
-		return fmt.Errorf("SNYK_TOKEN environment variable is required")
-	}
-
-	// Convert map targets to ImportTarget structs for ParallelImport
-	importTargets := make([]ImportTarget, 0, len(targets))
-	for _, t := range targets {
-		owner, _ := t["owner"].(string)
-		name, _ := t["name"].(string)
-		branch, _ := t["branch"].(string)
-		// Note: manifest field is not used in parallel import (Snyk auto-detects)
-		// The original sequential code also didn't use it effectively
-
-		importTargets = append(importTargets, ImportTarget{
-			Target: Target{
-				Name:   name,
-				Owner:  owner,
-				Branch: branch,
-			},
-			OrgID:         orgID,
-			IntegrationID: integrationID,
-		})
-	}
-
-	// Use parallel import
-	config := ParallelImportConfig{
-		OrgID:         orgID,
-		IntegrationID: integrationID,
-		Source:        "github",
-		Concurrency:   GetImportConcurrency(0),
-		SnykToken:     snykToken,
-		PollTimeout:   GetPollTimeout(),
-		DryRun:        false,
-	}
-
-	Logger.Infof("Starting parallel GitHub imports: %d targets, concurrency=%d", len(importTargets), config.Concurrency)
-
-	results, err := ParallelImport(ctx, importTargets, config)
+	results, err := ParallelImportSyncMaps(ctx, targets, orgID, integrationID, "github")
 	if err != nil {
-		return fmt.Errorf("parallel import: %w", err)
+		return err
 	}
-
-	// Log summary
 	imported, failed, skipped := results.GetCounts()
 	Logger.Infof("GitHub import complete: %d imported, %d failed, %d skipped", imported, failed, skipped)
-
 	return nil
 }

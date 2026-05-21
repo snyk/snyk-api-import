@@ -337,6 +337,8 @@ func FetchBitbucketCloudReposWithCache(ctx context.Context, auth *BitbucketCloud
 		lastRequestTime = time.Now()
 	}
 
+	discoveryGlobs := DiscoveryExclusionGlobs()
+
 	base := "https://api.bitbucket.org/2.0"
 	listURL := fmt.Sprintf("%s/repositories/%s", base, url.PathEscape(workspace))
 	var repos []map[string]string
@@ -474,47 +476,6 @@ func FetchBitbucketCloudReposWithCache(ctx context.Context, auth *BitbucketCloud
 			var scaFiles, iacFiles, containerFiles []string
 			var filesChecked int
 
-			// Directories to skip (client-side filtering)
-			skipDirs := map[string]bool{
-				"node_modules":  true,
-				".git":          true,
-				"vendor":        true,
-				"dist":          true,
-				"build":         true,
-				"target":        true,
-				"bin":           true,
-				"obj":           true,
-				".idea":         true,
-				".vscode":       true,
-				"examples":      true,
-				"coverage":      true,
-				"tmp":           true,
-				"temp":          true,
-				"cache":         true,
-				"logs":          true,
-				"test":          true,
-				"tests":         true,
-				"fixtures":      true,
-				"__tests__":     true,
-				"spec":          true,
-				".github":       true,
-				".gitlab":       true,
-				"__pycache__":   true,
-				".pytest_cache": true,
-				".terraform":    true,
-			}
-
-			// Helper function to check if a path contains excluded directories
-			containsExcludedDir := func(path string, skipDirs map[string]bool) bool {
-				parts := strings.Split(path, "/")
-				for _, part := range parts {
-					if skipDirs[part] {
-						return true
-					}
-				}
-				return false
-			}
-
 			// Use max_depth parameter for single API call (optimized approach)
 			// Also use pagelen=100 to reduce pagination calls (max allowed by Bitbucket API)
 			maxDepth := 10
@@ -601,9 +562,8 @@ func FetchBitbucketCloudReposWithCache(ctx context.Context, auth *BitbucketCloud
 
 						filesChecked++
 
-						// Skip files in excluded directories (client-side filtering)
-						if containsExcludedDir(f.Path, skipDirs) {
-							Logger.Debugf("Repo %s: skipping file %s (in excluded directory)", r.Name, f.Path)
+						if PathExcludedByDiscovery(f.Path, discoveryGlobs) {
+							Logger.Debugf("Repo %s: skipping file %s (exclusion glob match)", r.Name, f.Path)
 							continue
 						}
 
@@ -727,6 +687,8 @@ func FetchBitbucketCloudRepos(ctx context.Context, auth *BitbucketCloudAuth, wor
 		lastRequestTime = time.Now()
 	}
 
+	discoveryGlobs := DiscoveryExclusionGlobs()
+
 	base := "https://api.bitbucket.org/2.0"
 	listURL := fmt.Sprintf("%s/repositories/%s", base, url.PathEscape(workspace))
 	var repos []map[string]string
@@ -823,36 +785,6 @@ func FetchBitbucketCloudRepos(ctx context.Context, auth *BitbucketCloudAuth, wor
 			var filesChecked int
 			const maxDepth = 5 // Limit traversal depth to avoid deep nested directories
 
-			// Directories to skip (common dirs that rarely contain manifest files)
-			skipDirs := map[string]bool{
-				"node_modules":  true,
-				".git":          true,
-				"vendor":        true,
-				"dist":          true,
-				"build":         true,
-				"target":        true,
-				"bin":           true,
-				"obj":           true,
-				".idea":         true,
-				".vscode":       true,
-				"examples":      true,
-				"coverage":      true,
-				"tmp":           true,
-				"temp":          true,
-				"cache":         true,
-				"logs":          true,
-				"test":          true, // Skip test directories
-				"tests":         true, // Skip tests directories
-				"fixtures":      true, // Skip fixture directories
-				"__tests__":     true, // Skip Jest test directories
-				"spec":          true, // Skip spec directories
-				".github":       true, // Skip GitHub workflows
-				".gitlab":       true, // Skip GitLab CI
-				"__pycache__":   true, // Skip Python cache
-				".pytest_cache": true, // Skip pytest cache
-				".terraform":    true, // Skip Terraform state
-			}
-
 			var traverse func(path string, depth int)
 			traverse = func(path string, depth int) {
 				if depth > maxDepth {
@@ -916,6 +848,9 @@ func FetchBitbucketCloudRepos(ctx context.Context, auth *BitbucketCloudAuth, wor
 						Logger.Debugf("Repo %s path '%s': found %d entries", r.Name, path, len(filesResult.Values))
 						for _, f := range filesResult.Values {
 							filesChecked++
+							if f.Type == "commit_file" && PathExcludedByDiscovery(f.Path, discoveryGlobs) {
+								continue
+							}
 							// Check if file matches any manifest pattern
 							matched := false
 							for _, mt := range manifestTypes {
@@ -927,20 +862,10 @@ func FetchBitbucketCloudRepos(ctx context.Context, auth *BitbucketCloudAuth, wor
 								}
 							}
 
-							// Recurse into directories (but skip common non-manifest directories)
+							// Recurse into directories unless path matches exclusion globs
 							if f.Type == "commit_directory" {
-								// Check if any part of the path contains an excluded directory
-								shouldSkip := false
-								parts := strings.Split(f.Path, "/")
-								for _, part := range parts {
-									if skipDirs[part] {
-										shouldSkip = true
-										break
-									}
-								}
-
-								if shouldSkip {
-									Logger.Debugf("Repo %s: skipping directory %s (contains excluded dir)", r.Name, f.Path)
+								if PathExcludedByDiscovery(f.Path, discoveryGlobs) {
+									Logger.Debugf("Repo %s: skipping directory %s (exclusion glob match)", r.Name, f.Path)
 								} else {
 									Logger.Debugf("Repo %s: recursing into directory %s", r.Name, f.Path)
 									traverse(f.Path, depth+1)

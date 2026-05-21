@@ -85,23 +85,16 @@ func ImportCmd(ctx context.Context, appCfg internal.AppConfig) {
 	// bitbucket-cloud-app flow which uses client_id/client_secret.
 	// Only auto-infer if --source was NOT explicitly provided.
 	if *importData != "" && !sourceExplicitlyProvided {
-		// Read the import data file securely
-		const maxFileSize = 10 << 20 // 10MB
-		data, err := security.SafeReadFile(*importData, maxFileSize)
+		resolved, err := internal.ResolveSafePath(*importData)
 		if err != nil {
-			logging.Debugf("Could not read importData file for inference: %v", err)
-		} else {
-			// Parse the import data to check for integration type
-			var targets []struct {
-				IntegrationID string `json:"integrationID"`
-			}
-			if err := json.Unmarshal(data, &targets); err == nil {
-				for _, t := range targets {
-					if t.IntegrationID == "bitbucket-connect-app" {
-						logging.Infof("Detected bitbucket-connect-app integration, using bitbucket-cloud-app source")
-						*source = "bitbucket-cloud-app"
-						break
-					}
+			logging.Debugf("Could not resolve importData path for inference: %v", err)
+		} else if targets, err := internal.LoadImportTargetsFromFile(resolved); err != nil {
+			logging.Debugf("Could not parse importData file for inference: %v", err)
+		} else if len(targets) > 0 && targets[0].OrgID != "" && targets[0].IntegrationID != "" {
+			if integrations, err := internal.ListIntegrations(ctx, targets[0].OrgID); err == nil {
+				if id, ok := integrations["bitbucket-connect-app"]; ok && id == targets[0].IntegrationID {
+					logging.Infof("Detected bitbucket-connect-app integration, using bitbucket-cloud-app source")
+					*source = "bitbucket-cloud-app"
 				}
 			}
 		}
@@ -1026,16 +1019,8 @@ func writeResults(path string, results map[string]interface{}) {
 // validateImportFileMatchesSource validates that the import targets file contains
 // integration IDs that match the expected source type
 func validateImportFileMatchesSource(ctx context.Context, importFile, source string) error {
-	// Read the import file
-	const maxFileSize = 10 << 20 // 10MB
-	data, err := security.SafeReadFile(importFile, maxFileSize)
+	targets, err := internal.LoadImportTargetsFromFile(importFile)
 	if err != nil {
-		return fmt.Errorf("failed to read import file: %w", err)
-	}
-
-	// Parse the targets to get orgID and integrationID
-	var targets []internal.ImportTarget
-	if err := json.Unmarshal(data, &targets); err != nil {
 		return fmt.Errorf("failed to parse import file: %w", err)
 	}
 
