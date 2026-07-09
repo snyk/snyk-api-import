@@ -1,17 +1,14 @@
 package security
 
 import (
-	"crypto/tls"
 	"fmt"
 	"io"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // TestingModeEnv is the environment variable to enable testing mode
@@ -50,27 +47,6 @@ var DefaultAllowedHosts = []string{
 	"visualstudio.com",       // covers app.vssps.visualstudio.com and on-premise instances
 	"dev.azure.com",          // Azure DevOps Services
 	"vssps.visualstudio.com", // Visual Studio Profile Service
-}
-
-// SafeHTTPClient returns a configured HTTP client with security best practices
-func SafeHTTPClient() *http.Client {
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			MinVersion: tls.VersionTLS12,
-		},
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ResponseHeaderTimeout: 10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-	}
-
-	return &http.Client{
-		Timeout:   30 * time.Second,
-		Transport: transport,
-	}
 }
 
 // IsSafeURL validates that a URL is safe to access

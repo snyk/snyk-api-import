@@ -217,25 +217,6 @@ func AssertFileExists(t *testing.T, path string, message string) {
 	}
 }
 
-// WithTimeout runs a function with a timeout
-func WithTimeout(t *testing.T, timeout time.Duration, fn func(context.Context)) {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
-	done := make(chan struct{})
-	go func() {
-		fn(ctx)
-		close(done)
-	}()
-
-	select {
-	case <-done:
-		// Success
-	case <-ctx.Done():
-		t.Fatalf("Test timed out after %v", timeout)
-	}
-}
-
 // getEnvOrDefault returns environment variable value or default
 func getEnvOrDefault(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
@@ -318,15 +299,6 @@ func LogTestProgress(t *testing.T, format string, args ...interface{}) {
 	t.Logf("[%s] %s", timestamp, message)
 }
 
-// MustGetEnv gets an environment variable or fails the test
-func MustGetEnv(t *testing.T, key string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		t.Fatalf("Required environment variable %s is not set", key)
-	}
-	return value
-}
-
 // TestOrg represents a test organization structure
 type TestOrg struct {
 	Name        string `json:"name"`
@@ -367,11 +339,6 @@ func NewCleanupTestResources(t *testing.T, cfg *E2EConfig) *CleanupTestResources
 	}
 
 	return c
-}
-
-// AddCleanup adds a cleanup function
-func (c *CleanupTestResources) AddCleanup(fn func() error) {
-	c.resources = append(c.resources, fn)
 }
 
 // RunCleanup runs all cleanup functions

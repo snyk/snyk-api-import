@@ -9,12 +9,6 @@ import (
 	"strings"
 )
 
-// SyncBitbucketServer syncs organizations and projects with Bitbucket Server (Data Center).
-func SyncBitbucketServer(orgID, source, orgsFile, targetsFile string, dryRun bool, snykLogPath string, enableBranchUpdateFallback bool) error {
-	ctx := context.Background()
-	return SyncBitbucketServerContext(ctx, orgID, orgsFile, targetsFile, dryRun, snykLogPath, enableBranchUpdateFallback)
-}
-
 // SyncBitbucketServerContext syncs organizations and projects with Bitbucket Server with context support.
 func SyncBitbucketServerContext(ctx context.Context, orgID, orgsFile, targetsFile string, dryRun bool, snykLogPath string, enableBranchUpdateFallback bool) error {
 	// Validate SNYK_LOG_PATH

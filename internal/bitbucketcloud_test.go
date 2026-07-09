@@ -162,17 +162,6 @@ func TestBitbucketAuthMethod_OAuth(t *testing.T) {
 	assert.Contains(t, authHeader, "oauth-token-xyz")
 }
 
-func TestBitbucketOrgStruct(t *testing.T) {
-	// Test that Org struct can be created and used
-	org := Org{
-		Username:    "test-org",
-		DisplayName: "Test Organization",
-	}
-
-	assert.Equal(t, "test-org", org.Username)
-	assert.Equal(t, "Test Organization", org.DisplayName)
-}
-
 func TestBitbucketRepoStruct(t *testing.T) {
 	// Test that Repo struct can be created and used
 	repo := Repo{
@@ -196,85 +185,6 @@ func TestBitbucketRepoStruct(t *testing.T) {
 // to use dependency injection with an interface. The functions currently use hardcoded
 // https://api.bitbucket.org URLs which cannot be easily mocked.
 //
-// Recommended refactoring approach:
-// 1. Create BitbucketClientInterface with methods for each API call
-// 2. Create wrapper functions like FetchOrgsWithClient, FetchReposWithClient
-// 3. Maintain backward compatibility with original functions
-// 4. Write comprehensive tests using mock implementations
-//
-// For now, we've created tests for:
-// - Auth header setting (✓ Testable)
-// - Data structures (✓ Testable)
-// - Setup helper for future tests (✓ Ready)
-//
-// Functions that need refactoring for full testability:
-// - FetchOrgs
+// Functions that still use hardcoded API URLs and may benefit from further
+// dependency-injection refactoring for full testability:
 // - FetchRepos
-// - FetchBitbucketCloudWorkspaces
-// - FetchBitbucketCloudRepoDefaultBranch
-// - FetchBitbucketCloudRepos
-
-// ==============================================================================
-// matchManifest Tests
-// ==============================================================================
-
-func TestMatchManifest_ExactMatch(t *testing.T) {
-	assert.True(t, matchManifest("package.json", "package.json"))
-	assert.True(t, matchManifest("pom.xml", "pom.xml"))
-	assert.True(t, matchManifest("Gemfile", "Gemfile"))
-}
-
-func TestMatchManifest_ExactMatchWithPath(t *testing.T) {
-	assert.True(t, matchManifest("src/package.json", "package.json"))
-	assert.True(t, matchManifest("app/Gemfile", "Gemfile"))
-}
-
-func TestMatchManifest_GlobPattern(t *testing.T) {
-	assert.True(t, matchManifest("package.json", "*.json"))
-	assert.True(t, matchManifest("yarn.lock", "*.lock"))
-	assert.True(t, matchManifest("requirements.txt", "*.txt"))
-}
-
-func TestMatchManifest_GlobPatternWithPath(t *testing.T) {
-	assert.True(t, matchManifest("src/package.json", "*.json"))
-	assert.True(t, matchManifest("app/yarn.lock", "*.lock"))
-}
-
-func TestMatchManifest_FullPathGlob(t *testing.T) {
-	assert.True(t, matchManifest("src/package.json", "src/*.json"))
-	assert.True(t, matchManifest("app/Gemfile", "app/*"))
-}
-
-func TestMatchManifest_DoubleStarGlob(t *testing.T) {
-	assert.True(t, matchManifest("src/nested/package.json", "**/package.json"))
-	assert.True(t, matchManifest("deep/path/to/pom.xml", "**/pom.xml"))
-}
-
-func TestMatchManifest_NoMatch(t *testing.T) {
-	assert.False(t, matchManifest("package.json", "pom.xml"))
-	assert.False(t, matchManifest("yarn.lock", "*.json"))
-	assert.False(t, matchManifest("src/file.txt", "app/*.txt"))
-}
-
-func TestMatchManifest_EmptyPath(t *testing.T) {
-	assert.False(t, matchManifest("", "package.json"))
-}
-
-func TestMatchManifest_EmptyPattern(t *testing.T) {
-	assert.False(t, matchManifest("package.json", ""))
-}
-
-func TestMatchManifest_BothEmpty(t *testing.T) {
-	assert.True(t, matchManifest("", "")) // Empty equals empty
-}
-
-func TestMatchManifest_ComplexPath(t *testing.T) {
-	assert.True(t, matchManifest("src/main/java/pom.xml", "pom.xml"))
-	assert.True(t, matchManifest("frontend/node_modules/package.json", "*.json"))
-}
-
-func TestMatchManifest_CaseSensitive(t *testing.T) {
-	// Go's doublestar is case-sensitive by default
-	assert.False(t, matchManifest("Package.json", "package.json"))
-	assert.True(t, matchManifest("Package.json", "*.json"))
-}

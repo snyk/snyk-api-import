@@ -79,23 +79,6 @@ func SetupTestServer(t *testing.T, config ServerConfig) (*httptest.Server, func(
 	return server, cleanup
 }
 
-// SetupSnykTestServer is a convenience wrapper for Snyk API test servers
-// It sets up common Snyk environment variables and client configuration
-func SetupSnykTestServer(t *testing.T, handler http.HandlerFunc) (*httptest.Server, func()) {
-	t.Helper()
-
-	return SetupTestServer(t, ServerConfig{
-		Handler:             handler,
-		SetupSecurityClient: true,
-		SetupNetworkClient:  true,
-		EnvVars: map[string]string{
-			"SNYK_TOKEN":                    "test-token",
-			"SNYK_SKIP_POLL":                "1",
-			"SNYK_TEST_SKIP_URL_VALIDATION": "1",
-		},
-	})
-}
-
 // SetupImportTestServer is a convenience wrapper for import test servers
 // It includes all necessary environment variables for import tests
 func SetupImportTestServer(t *testing.T, handler http.HandlerFunc) (*httptest.Server, func()) {
@@ -108,60 +91,6 @@ func SetupImportTestServer(t *testing.T, handler http.HandlerFunc) (*httptest.Se
 		EnvVars: map[string]string{
 			"SNYK_TOKEN":                    "test-token",
 			"SNYK_SKIP_POLL":                "1",
-			"SNYK_TEST_SKIP_URL_VALIDATION": "1",
-		},
-	})
-}
-
-// SetupAzureTestServer is a convenience wrapper for Azure DevOps test servers
-func SetupAzureTestServer(t *testing.T, handler http.HandlerFunc) (*httptest.Server, func()) {
-	t.Helper()
-
-	return SetupTestServer(t, ServerConfig{
-		Handler:             handler,
-		SetupSecurityClient: false, // Azure tests don't use security client
-		SetupNetworkClient:  true,
-		EnvVars:             map[string]string{},
-	})
-}
-
-// SetupBitbucketTestServer is a convenience wrapper for Bitbucket test servers
-func SetupBitbucketTestServer(t *testing.T, handler http.HandlerFunc) (*httptest.Server, func()) {
-	t.Helper()
-
-	return SetupTestServer(t, ServerConfig{
-		Handler:             handler,
-		SetupSecurityClient: true,
-		SetupNetworkClient:  true,
-		EnvVars: map[string]string{
-			"SNYK_TEST_SKIP_URL_VALIDATION": "1",
-		},
-	})
-}
-
-// SetupGitHubTestServer is a convenience wrapper for GitHub test servers
-func SetupGitHubTestServer(t *testing.T, handler http.HandlerFunc) (*httptest.Server, func()) {
-	t.Helper()
-
-	return SetupTestServer(t, ServerConfig{
-		Handler:             handler,
-		SetupSecurityClient: true,
-		SetupNetworkClient:  true,
-		EnvVars: map[string]string{
-			"SNYK_TEST_SKIP_URL_VALIDATION": "1",
-		},
-	})
-}
-
-// SetupGitLabTestServer is a convenience wrapper for GitLab test servers
-func SetupGitLabTestServer(t *testing.T, handler http.HandlerFunc) (*httptest.Server, func()) {
-	t.Helper()
-
-	return SetupTestServer(t, ServerConfig{
-		Handler:             handler,
-		SetupSecurityClient: true,
-		SetupNetworkClient:  true,
-		EnvVars: map[string]string{
 			"SNYK_TEST_SKIP_URL_VALIDATION": "1",
 		},
 	})

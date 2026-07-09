@@ -173,18 +173,6 @@ func deriveManifestProjectTypes(globs []string) []string {
 	return out
 }
 
-// escapePathSegments escapes each segment of a path but preserves '/' separators.
-func escapePathSegments(p string) string {
-	if p == "" {
-		return ""
-	}
-	parts := strings.Split(p, "/")
-	for i, s := range parts {
-		parts[i] = url.PathEscape(s)
-	}
-	return strings.Join(parts, "/")
-}
-
 // normalizeSnykAttributes normalizes Snyk project attributes to consistent
 // branch/manifest values used by the rest of the code. It accepts both
 // camelCase and snake_case keys (e.g. targetReference / target_reference,

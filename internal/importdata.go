@@ -96,12 +96,6 @@ func ImportBitbucketCloudTargets(ctx context.Context, targetsFile string) error 
 	return ImportTargetsParallel(ctx, targetsFile, "bitbucket-cloud")
 }
 
-// ImportBitbucketCloudAppTargets is deprecated. Use ImportTargetsParallel instead.
-// Kept for backward compatibility.
-func ImportBitbucketCloudAppTargets(ctx context.Context, targetsFile string, source string) error {
-	return ImportTargetsParallel(ctx, targetsFile, source)
-}
-
 // FilePath is a single manifest path for scoped import (Snyk API files[]).
 type FilePath struct {
 	Path string `json:"path"`

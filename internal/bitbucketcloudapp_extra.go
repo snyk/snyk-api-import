@@ -2,9 +2,6 @@ package internal
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/snyk/snyk-api-import/internal/security"
@@ -15,19 +12,6 @@ type BitbucketWorkspace struct {
 	Name        string `json:"name"`
 	Slug        string `json:"slug"`
 	DisplayName string `json:"display_name"`
-}
-
-type BitbucketRepoMetadata struct {
-	Name        string `json:"name"`
-	FullName    string `json:"full_name"`
-	UUID        string `json:"uuid"`
-	Description string `json:"description"`
-	IsPrivate   bool   `json:"is_private"`
-	Links       struct {
-		HTML struct {
-			Href string `json:"href"`
-		} `json:"html"`
-	} `json:"links"`
 }
 
 // ListBitbucketAppWorkspaces lists workspaces for the OAuth token (Bitbucket Cloud App / bearer).
@@ -67,38 +51,4 @@ func ListBitbucketAppWorkspaces(ctx context.Context, token string) ([]BitbucketW
 		}
 	}
 	return out, nil
-}
-
-// GetBitbucketAppRepoMetadata fetches metadata for a specific repo
-func GetBitbucketAppRepoMetadata(ctx context.Context, token, workspace, repoSlug string) (*BitbucketRepoMetadata, error) {
-	url := fmt.Sprintf("https://api.bitbucket.org/2.0/repositories/%s/%s", workspace, repoSlug)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("create request: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+token)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("http request: %w", err)
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("unexpected status: %s", resp.Status)
-	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read body: %w", err)
-	}
-	var meta BitbucketRepoMetadata
-	if err := json.Unmarshal(body, &meta); err != nil {
-		return nil, fmt.Errorf("unmarshal: %w", err)
-	}
-	return &meta, nil
-}
-
-// IsBitbucketAppConfigured checks if required env vars are set
-func IsBitbucketAppConfigured() bool {
-	return GetEnv("BITBUCKET_APP_CLIENT_ID") != "" && GetEnv("BITBUCKET_APP_CLIENT_SECRET") != ""
 }

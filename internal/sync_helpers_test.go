@@ -142,82 +142,6 @@ func TestIsAllowedNextURL_InvalidCases(t *testing.T) {
 	}
 }
 
-func TestEscapePathSegments(t *testing.T) {
-	tests := []struct {
-		name string
-		path string
-		want string
-	}{
-		{
-			name: "simple path",
-			path: "owner/repo",
-			want: "owner/repo",
-		},
-		{
-			name: "path with spaces",
-			path: "owner name/repo name",
-			want: "owner%20name/repo%20name",
-		},
-		{
-			name: "path with special characters",
-			path: "owner@123/repo#456",
-			want: "owner@123/repo%23456", // @ not escaped by url.PathEscape, # is escaped
-		},
-		{
-			name: "path with plus",
-			path: "c++/library",
-			want: "c++/library", // + not escaped by url.PathEscape
-		},
-		{
-			name: "empty path",
-			path: "",
-			want: "",
-		},
-		{
-			name: "path with unicode",
-			path: "user/日本語",
-			want: "user/%E6%97%A5%E6%9C%AC%E8%AA%9E",
-		},
-		{
-			name: "nested path",
-			path: "org/team/subteam/project",
-			want: "org/team/subteam/project",
-		},
-		{
-			name: "path with dots",
-			path: "user.name/repo.name",
-			want: "user.name/repo.name",
-		},
-		{
-			name: "path with ampersand",
-			path: "owner/repo&branch",
-			want: "owner/repo&branch", // & not escaped by url.PathEscape in path context
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := escapePathSegments(tt.path)
-			if got != tt.want {
-				t.Errorf("escapePathSegments(%q) = %q, want %q", tt.path, got, tt.want)
-			}
-		})
-	}
-}
-
-func TestEscapePathSegments_PreservesSlashes(t *testing.T) {
-	path := "owner/sub/repo"
-	got := escapePathSegments(path)
-
-	// Count slashes - should be preserved
-	wantSlashes := 2
-	gotSlashes := strings.Count(got, "/")
-
-	if gotSlashes != wantSlashes {
-		t.Errorf("escapePathSegments(%q) should preserve slashes, want %d, got %d", path, wantSlashes, gotSlashes)
-	}
-}
-
 func TestNormalizeSnykAttributes_Branch(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -500,27 +424,6 @@ func TestGetDefaultManifestTypes_Completeness(t *testing.T) {
 		if !strings.Contains(manifestsStr, pattern) {
 			t.Errorf("Default manifests missing pattern for %s ecosystem (expected: %s)", ecosystem, pattern)
 		}
-	}
-}
-
-func TestEscapePathSegments_DoubleEscape(t *testing.T) {
-	// Test that escaping already-escaped strings causes double-escaping (expected behavior)
-	original := "owner test/repo name"
-	first := escapePathSegments(original)
-	second := escapePathSegments(first)
-
-	// First should escape spaces
-	if !strings.Contains(first, "%20") {
-		t.Errorf("First escape should contain escaped space: %q", first)
-	}
-
-	// Second should double-escape (% becomes %25)
-	if first == second {
-		t.Errorf("Expected double-escaping on second call, but got same result: %q", second)
-	}
-
-	if !strings.Contains(second, "%2520") { // %20 becomes %2520
-		t.Errorf("Second escape should double-escape space: %q", second)
 	}
 }
 
