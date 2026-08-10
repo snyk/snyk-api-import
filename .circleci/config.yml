@@ -148,11 +148,15 @@ workflows:
     jobs:
       - security-scans:
           name: Security Scans
-          context: cs-engineers-org-tagger
+          context:
+            - cs-engineers-org-tagger
+            - prodsec-orb-runtime
 
       - prodsec/secrets-scan:
           name: Scan repository for secrets
-          context: snyk-bot-slack
+          context:
+            - snyk-bot-slack
+            - prodsec-orb-runtime
           channel: ask-cs-ops
 
   nightly:
