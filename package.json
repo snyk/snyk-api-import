@@ -62,7 +62,7 @@
     "rimraf": "6.1.1",
     "simple-git": "3.36.0",
     "sleep-promise": "8.0.1",
-    "snyk-request-manager": "1.9.3",
+    "snyk-request-manager": "1.9.4",
     "source-map-support": "^0.5.16",
     "split": "1.0.1",
     "tslib": "^2.6.0",
