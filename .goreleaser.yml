@@ -22,9 +22,7 @@ builds:
       - arm64
 
 archives:
-  - files:
-      - LICENSE
-      - README.md
+  - formats: [binary]
 
 checksum:
   name_template: checksums.txt
