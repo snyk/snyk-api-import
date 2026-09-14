@@ -1,6 +1,6 @@
 module github.com/snyk/snyk-api-import
 
-go 1.24.0
+go 1.27.1
 
 require (
 	github.com/BurntSushi/toml v1.5.0
