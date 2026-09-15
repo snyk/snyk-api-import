@@ -1,13 +1,20 @@
+![Snyk logo](https://snyk.io/style/asset/logo/snyk-print.svg)
 
-# snyk-api-import (Go)
+---
 
-Snyk API Import is a powerful command-line tool for bulk importing and syncing
-repositories from various source control systems into Snyk. This Go
-implementation provides enhanced performance and easier deployment compared to
-the original TypeScript version.
+[![Known Vulnerabilities](https://snyk.io/test/github/snyk/snyk-api-import/badge.svg)](https://snyk.io/test/github/snyk/snyk-api-import)
+[![Actively Maintained](https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-green.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
+
+Snyk helps you find, fix and monitor for known vulnerabilities in your dependencies, both on an ad hoc basis and as part of your CI (Build) system.
+
+# snyk-api-import (BETA)
+
+Snyk API Import is a powerful command-line tool for bulk importing and syncing. This new version of the snyk-api-import tool is currently in beta and it is recommended that you validate it against your own use cases. The new version relies on significantly improved logic to dramatically speed up processing. We don't expect to see any difference in outcomes, but some use cases may see different rate limit behavior. This version will only be distributed on the GitHub releases pages and not via NPM.
+
+All existing workflows and flags should remain the same, however you should be aware that we plan in the near future to deprecate the sync behavior in favor Snyk's now built in [Content Repo Sync](https://docs.snyk.io/scan-fix-and-prevent/scan-with-snyk/snyk-projects/import-project-repository/snyk-repo-content-sync).
 
 **Original TypeScript version:**
-<https://github.com/snyk/snyk-api-import>
+The original type script version is being deprecated in favor of this golang reimplementation. However, you can find the legacy version under [this branch](https://github.com/snyk/snyk-api-import/tree/master-v2). The type script implementation will continue to be available on npm, but will stop receiving any security updates in the near future. It is recommended to update your pipelines to get snyk-api-import from the github releases pages here.
 
 ## Table of Contents
 
@@ -50,7 +57,7 @@ Download the `.exe` file from the releases page and add it to your PATH.
 
 ### Option 2: Build from Source
 
-Requires Go 1.23 or later:
+Requires Go 1.27 or later:
 
 ```bash
 git clone https://github.com/snyk/snyk-api-import.git
