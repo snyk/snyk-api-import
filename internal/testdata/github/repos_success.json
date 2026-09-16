@@ -1,0 +1,59 @@
+[
+  {
+    "id": 123456,
+    "name": "my-app",
+    "full_name": "my-org/my-app",
+    "owner": {
+      "login": "my-org",
+      "id": 789,
+      "type": "Organization"
+    },
+    "private": false,
+    "description": "A sample application",
+    "fork": false,
+    "default_branch": "main",
+    "clone_url": "https://github.com/my-org/my-app.git",
+    "ssh_url": "git@github.com:my-org/my-app.git",
+    "language": "JavaScript",
+    "archived": false,
+    "disabled": false
+  },
+  {
+    "id": 123457,
+    "name": "backend-service",
+    "full_name": "my-org/backend-service",
+    "owner": {
+      "login": "my-org",
+      "id": 789,
+      "type": "Organization"
+    },
+    "private": true,
+    "description": "Backend API service",
+    "fork": false,
+    "default_branch": "main",
+    "clone_url": "https://github.com/my-org/backend-service.git",
+    "ssh_url": "git@github.com:my-org/backend-service.git",
+    "language": "Go",
+    "archived": false,
+    "disabled": false
+  },
+  {
+    "id": 123458,
+    "name": "infrastructure",
+    "full_name": "my-org/infrastructure",
+    "owner": {
+      "login": "my-org",
+      "id": 789,
+      "type": "Organization"
+    },
+    "private": true,
+    "description": "Infrastructure as code",
+    "fork": false,
+    "default_branch": "main",
+    "clone_url": "https://github.com/my-org/infrastructure.git",
+    "ssh_url": "git@github.com:my-org/infrastructure.git",
+    "language": "HCL",
+    "archived": false,
+    "disabled": false
+  }
+]

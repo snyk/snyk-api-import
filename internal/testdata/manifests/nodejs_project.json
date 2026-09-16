@@ -1,0 +1,10 @@
+{
+  "owner": "my-org",
+  "name": "frontend-app",
+  "branch": "main",
+  "manifests": [
+    "package.json",
+    "package-lock.json"
+  ],
+  "projectTypes": ["npm"]
+}

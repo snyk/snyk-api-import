@@ -1,0 +1,40 @@
+[
+  {
+    "id": 1,
+    "name": "frontend-app",
+    "path": "frontend-app",
+    "path_with_namespace": "my-group/frontend-app",
+    "description": "Frontend application",
+    "default_branch": "main",
+    "visibility": "private",
+    "http_url_to_repo": "https://gitlab.com/my-group/frontend-app.git",
+    "ssh_url_to_repo": "git@gitlab.com:my-group/frontend-app.git",
+    "web_url": "https://gitlab.com/my-group/frontend-app",
+    "archived": false,
+    "namespace": {
+      "id": 10,
+      "name": "my-group",
+      "path": "my-group",
+      "kind": "group"
+    }
+  },
+  {
+    "id": 2,
+    "name": "api-service",
+    "path": "api-service",
+    "path_with_namespace": "my-group/api-service",
+    "description": "REST API service",
+    "default_branch": "main",
+    "visibility": "private",
+    "http_url_to_repo": "https://gitlab.com/my-group/api-service.git",
+    "ssh_url_to_repo": "git@gitlab.com:my-group/api-service.git",
+    "web_url": "https://gitlab.com/my-group/api-service",
+    "archived": false,
+    "namespace": {
+      "id": 10,
+      "name": "my-group",
+      "path": "my-group",
+      "kind": "group"
+    }
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "targets": [
+    {
+      "target": {
+        "fork": false,
+        "name": "example-repo",
+        "owner": "example-owner",
+        "branch": "main"
+      },
+      "orgId": "example-org-id",
+      "integrationId": "example-integration-id"
+    }
+  ]
+}

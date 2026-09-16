@@ -1,0 +1,11 @@
+{
+  "owner": "my-org",
+  "name": "ml-service",
+  "branch": "main",
+  "manifests": [
+    "requirements.txt",
+    "Pipfile",
+    "pyproject.toml"
+  ],
+  "projectTypes": ["pip", "pipenv", "poetry"]
+}

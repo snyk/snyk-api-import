@@ -1,0 +1,242 @@
+name: Auto Tag on Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write  # Needed to trigger release workflow
+
+jobs:
+  wait-for-ci:
+    name: Wait for CI to Complete
+    runs-on: ubuntu-latest
+    # Only run if PR was merged (not just closed)
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - name: Wait for CI workflow to complete
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const mergeCommit = context.payload.pull_request.merge_commit_sha;
+
+            console.log(`Waiting for CI to complete for PR #${prNumber}, commit: ${mergeCommit}`);
+
+            // Wait up to 60 minutes for CI to complete
+            const maxWaitTime = 60 * 60 * 1000; // 60 minutes
+            const checkInterval = 30 * 1000; // 30 seconds
+            const startTime = Date.now();
+
+            while (Date.now() - startTime < maxWaitTime) {
+              // Get workflow runs for the merge commit
+              const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head_sha: mergeCommit,
+                event: 'push'
+              });
+
+              // Find the CI workflow run
+              const ciRun = runs.workflow_runs.find(run => run.name === 'CI');
+
+              if (ciRun) {
+                console.log(`CI workflow status: ${ciRun.status}, conclusion: ${ciRun.conclusion}`);
+
+                if (ciRun.status === 'completed') {
+                  if (ciRun.conclusion === 'success') {
+                    console.log('✅ CI completed successfully!');
+                    return;
+                  } else {
+                    throw new Error(`❌ CI failed with conclusion: ${ciRun.conclusion}`);
+                  }
+                }
+              }
+
+              // Wait before checking again
+              await new Promise(resolve => setTimeout(resolve, checkInterval));
+            }
+
+            throw new Error('⏱️ Timeout waiting for CI to complete');
+
+  auto-tag:
+    name: Create Tag Automatically
+    runs-on: ubuntu-latest
+    needs: wait-for-ci
+    # Only run if PR was merged and CI passed
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get latest tag
+        id: latest_tag
+        run: |
+          # Get the latest tag, or use v0.0.0 if no tags exist
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "Latest tag: $LATEST_TAG"
+
+      - name: Determine version bump
+        id: version_bump
+        env:
+          LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+        run: |
+          echo "PR Labels: $LABELS"
+
+          # Check for version bump labels
+          if echo "$LABELS" | grep -q "release:major"; then
+            echo "bump_type=major" >> $GITHUB_OUTPUT
+            echo "🚀 Major version bump detected"
+          elif echo "$LABELS" | grep -q "release:minor"; then
+            echo "bump_type=minor" >> $GITHUB_OUTPUT
+            echo "✨ Minor version bump detected"
+          elif echo "$LABELS" | grep -q "release:patch"; then
+            echo "bump_type=patch" >> $GITHUB_OUTPUT
+            echo "🐛 Patch version bump detected"
+          elif echo "$LABELS" | grep -q "release:alpha"; then
+            echo "bump_type=alpha" >> $GITHUB_OUTPUT
+            echo "🧪 Alpha release detected"
+          elif echo "$LABELS" | grep -q "release:beta"; then
+            echo "bump_type=beta" >> $GITHUB_OUTPUT
+            echo "🧪 Beta release detected"
+          elif echo "$LABELS" | grep -q "release:rc"; then
+            echo "bump_type=rc" >> $GITHUB_OUTPUT
+            echo "🧪 Release candidate detected"
+          else
+            echo "bump_type=none" >> $GITHUB_OUTPUT
+            echo "⏭️  No release label found, skipping tag creation"
+          fi
+
+      - name: Calculate new version
+        id: new_version
+        if: steps.version_bump.outputs.bump_type != 'none'
+        run: |
+          LATEST_TAG="${{ steps.latest_tag.outputs.latest_tag }}"
+          BUMP_TYPE="${{ steps.version_bump.outputs.bump_type }}"
+
+          # Remove 'v' prefix and any pre-release suffix
+          VERSION=${LATEST_TAG#v}
+          VERSION=${VERSION%%-*}
+
+          # Split into major.minor.patch
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          # Bump version based on type
+          case $BUMP_TYPE in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+              ;;
+            alpha)
+              # For pre-releases, bump minor and add alpha suffix
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              # Check if there's already an alpha for this version
+              ALPHA_COUNT=$(git tag -l "v${MAJOR}.${MINOR}.${PATCH}-alpha.*" | wc -l | tr -d ' ')
+              ALPHA_NUM=$((ALPHA_COUNT + 1))
+              NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}-alpha.${ALPHA_NUM}"
+              ;;
+            beta)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              BETA_COUNT=$(git tag -l "v${MAJOR}.${MINOR}.${PATCH}-beta.*" | wc -l | tr -d ' ')
+              BETA_NUM=$((BETA_COUNT + 1))
+              NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}-beta.${BETA_NUM}"
+              ;;
+            rc)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              RC_COUNT=$(git tag -l "v${MAJOR}.${MINOR}.${PATCH}-rc.*" | wc -l | tr -d ' ')
+              RC_NUM=$((RC_COUNT + 1))
+              NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}-rc.${RC_NUM}"
+              ;;
+          esac
+
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "🎉 New version: $NEW_VERSION"
+
+      - name: Create and push tag
+        if: steps.version_bump.outputs.bump_type != 'none'
+        run: |
+          NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create annotated tag
+          git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION
+
+          PR #${PR_NUMBER}: ${PR_TITLE}
+
+          Merged by: ${{ github.event.pull_request.merged_by.login }}"
+
+          # Push tag
+          git push origin "$NEW_VERSION"
+
+          echo "✅ Created and pushed tag: $NEW_VERSION"
+
+      - name: Trigger Release Workflow
+        if: steps.version_bump.outputs.bump_type != 'none'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const newVersion = '${{ steps.new_version.outputs.new_version }}';
+
+            // Trigger the release workflow
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'release.yml',
+              ref: 'main',
+              inputs: {
+                tag: newVersion
+              }
+            });
+
+            console.log(`✅ Triggered release workflow for ${newVersion}`);
+
+      - name: Comment on PR
+        if: steps.version_bump.outputs.bump_type != 'none'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const newVersion = '${{ steps.new_version.outputs.new_version }}';
+            const prNumber = context.payload.pull_request.number;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `🚀 **Release ${newVersion} triggered!**
+
+              This PR has been automatically tagged and will be released shortly.
+
+              - 📦 Tag: ${newVersion}
+              - 🔗 [View Release Workflow](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions)
+              - 📋 CHANGELOG.md will be automatically updated
+
+              The release should be available in ~5 minutes.`
+            });

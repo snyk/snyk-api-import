@@ -1,0 +1,39 @@
+{
+  "value": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "web-frontend",
+      "url": "https://dev.azure.com/my-org/my-project/_apis/git/repositories/a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "project": {
+        "id": "proj-123",
+        "name": "my-project",
+        "description": "Main project",
+        "url": "https://dev.azure.com/my-org/_apis/projects/proj-123",
+        "state": "wellFormed"
+      },
+      "defaultBranch": "refs/heads/main",
+      "size": 1024000,
+      "remoteUrl": "https://dev.azure.com/my-org/my-project/_git/web-frontend",
+      "sshUrl": "git@ssh.dev.azure.com:v3/my-org/my-project/web-frontend",
+      "webUrl": "https://dev.azure.com/my-org/my-project/_git/web-frontend"
+    },
+    {
+      "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "name": "api-backend",
+      "url": "https://dev.azure.com/my-org/my-project/_apis/git/repositories/b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "project": {
+        "id": "proj-123",
+        "name": "my-project",
+        "description": "Main project",
+        "url": "https://dev.azure.com/my-org/_apis/projects/proj-123",
+        "state": "wellFormed"
+      },
+      "defaultBranch": "refs/heads/main",
+      "size": 2048000,
+      "remoteUrl": "https://dev.azure.com/my-org/my-project/_git/api-backend",
+      "sshUrl": "git@ssh.dev.azure.com:v3/my-org/my-project/api-backend",
+      "webUrl": "https://dev.azure.com/my-org/my-project/_git/api-backend"
+    }
+  ],
+  "count": 2
+}

@@ -1,0 +1,10 @@
+{
+  "owner": "my-org",
+  "name": "backend-service",
+  "branch": "main",
+  "manifests": [
+    "pom.xml",
+    "build.gradle"
+  ],
+  "projectTypes": ["maven", "gradle"]
+}

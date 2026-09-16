@@ -1,0 +1,7 @@
+{
+  "github": "integration-id-github-123",
+  "gitlab": "integration-id-gitlab-456",
+  "bitbucket-cloud": "integration-id-bb-cloud-789",
+  "bitbucket-cloud-app": "integration-id-bb-app-012",
+  "azure-repos": "integration-id-azure-345"
+}
