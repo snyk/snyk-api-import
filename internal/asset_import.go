@@ -199,6 +199,39 @@ func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportR
 			continue
 		}
 
+		// No tag of our own yet - fall back to the Assets API's own
+		// `organizations` relationship. It does populate, just with a
+		// multi-hour lag tied to the project's first scan completing (not
+		// the import itself), and it's per-asset only, never filterable in
+		// bulk - see RepositoryAsset's doc comment. This catches a repo
+		// imported by some other means before ever being tagged, and
+		// self-heals by backfilling our tag so future runs take the fast,
+		// lag-free path instead of re-checking this every time.
+		if len(c.asset.Organizations) > 0 {
+			matched := false
+			for _, o := range c.asset.Organizations {
+				if strings.EqualFold(o.Name, c.orgTag) {
+					matched = true
+					break
+				}
+			}
+			if matched {
+				report.skip(SkipAlreadyImported, assetLabel(c.asset)+" (found via organizations relationship, not yet tagged - backfilling)")
+				if !opts.DryRun {
+					if tagErr := UpdateAssetTags(ctx, opts.GroupID, c.asset.ID, map[string]string{AutoImportedTagKey: c.orgTag}); tagErr != nil {
+						report.ImportErrors = append(report.ImportErrors, fmt.Sprintf("backfill tag for %s: %v", assetLabel(c.asset), tagErr))
+					}
+				}
+				continue
+			}
+			names := make([]string, 0, len(c.asset.Organizations))
+			for _, o := range c.asset.Organizations {
+				names = append(names, o.Name)
+			}
+			report.skip(SkipOrgMoved, fmt.Sprintf("%s (already in %v per Assets API, tag now says %q)", assetLabel(c.asset), names, c.orgTag))
+			continue
+		}
+
 		var integrationID string
 		if orgID == dryRunPendingOrgID {
 			// The destination org doesn't exist yet (dry-run only), so there

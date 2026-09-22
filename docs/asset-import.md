@@ -28,15 +28,24 @@ single `SNYK_TOKEN` and nothing else.
 2. **Organizations**: any tag value that doesn't match an existing Organization
    name in the Group gets one created. Re-running creates nothing new for
    Organizations that already exist (idempotent).
-3. **Already imported?** The Assets API doesn't reliably expose this (see the
-   findings doc). Instead, `asset-import` tags each asset it successfully imports
-   with `__snyk_auto_imported__=<org>`. On the next run, that tag is compared
-   against the current destination-org tag:
-   - absent → not yet imported, proceed.
-   - matches the current destination-org tag → already imported, skip.
-   - present but different → the destination tag changed since the import
-     (repo moved, renamed, or retagged) - this is surfaced as a warning, not
+3. **Already imported?** The Assets API's own `organizations` relationship
+   does eventually reflect this, but only after a lag of hours (tied to the
+   new project's first scan completing, not the import itself), and it can't
+   be filtered on in bulk - only read per-asset (see the findings doc). So
+   `asset-import` tags each asset it successfully imports with
+   `__snyk_auto_imported__=<org>` as the primary, lag-free signal. On each
+   run, per asset:
+   - the tag matches the current destination-org tag → already imported, skip.
+   - the tag is present but different → the destination tag changed since the
+     import (repo moved, renamed, or retagged) - surfaced as a warning, not
      acted on automatically.
+   - the tag is absent, but the Assets API's `organizations` relationship
+     already names the destination Org → treated as already imported (no
+     second import attempt), and the tag is backfilled so the next run takes
+     the fast path. This catches a repo imported by hand, or by a run that
+     predates this tag.
+   - the tag is absent and `organizations` names a *different* Org (or is
+     empty) → not yet imported, proceed.
 4. **Integration resolution**: the asset's `sources` field only ever narrows to
    a provider *family* (github vs gitlab, etc.) - it cannot tell `github` from
    `github-enterprise` on the destination Org, because assets are discovered

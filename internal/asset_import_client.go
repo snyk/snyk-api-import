@@ -22,11 +22,33 @@ const AssetsAPIVersion = "2026-03-25"
 
 const defaultAssetsPageLimit = 100 // Phase 0 confirmed the API's own max page size.
 
+// AssetOrgRef is one Organization an asset's `organizations` relationship
+// names it as already belonging to.
+type AssetOrgRef struct {
+	ID   string
+	Name string
+}
+
 // RepositoryAsset is the subset of a Snyk Assets API repository asset this
 // tool needs. Field presence was verified empirically in Phase 0 across a
 // 100-asset sample: default_branch_name, repository_url and name were
 // present on 100/100; there is no dedicated SCM-owner field, so callers must
 // parse it out of RepositoryURL.
+//
+// Organizations comes from the `relationships.organizations.data` embed.
+// Phase 0 found this absent immediately after import and still absent
+// several minutes later; a later check (same asset, ~13 hours after import)
+// found it populated, apparently once Snyk's own scan of the newly created
+// project completes - not on any fixed schedule tied to the import itself.
+// It is empty for anything never imported (confirmed against an untouched
+// asset at the same later check). It is NOT filterable server-side: the
+// `attribute: "organizations"` search filter still returns zero matches even
+// once this field is populated on the individual asset payload - so this can
+// only be read per-asset, never queried in bulk. Given the multi-hour lag,
+// this is used as a secondary, self-healing check (catches a repo imported
+// by some other means before ever being tagged), not the primary "already
+// imported" signal - AutoImportedTagKey remains that, since it's correct
+// immediately, with no lag.
 type RepositoryAsset struct {
 	ID                string
 	Sources           []string
@@ -34,6 +56,7 @@ type RepositoryAsset struct {
 	RepositoryURL     string
 	DefaultBranchName string
 	Tags              map[string]string
+	Organizations     []AssetOrgRef
 }
 
 // assetSearchResponse mirrors the JSON:API shape returned by
@@ -49,6 +72,16 @@ type assetSearchResponse struct {
 			DefaultBranchName string            `json:"default_branch_name"`
 			Tags              map[string]string `json:"tags"`
 		} `json:"attributes"`
+		Relationships struct {
+			Organizations struct {
+				Data []struct {
+					ID         string `json:"id"`
+					Attributes struct {
+						Name string `json:"name"`
+					} `json:"attributes"`
+				} `json:"data"`
+			} `json:"organizations"`
+		} `json:"relationships"`
 	} `json:"data"`
 	Links struct {
 		Next string `json:"next"`
@@ -130,6 +163,10 @@ func SearchRepositoryAssets(ctx context.Context, groupID string) ([]RepositoryAs
 		}
 
 		for _, d := range parsed.Data {
+			var orgs []AssetOrgRef
+			for _, o := range d.Relationships.Organizations.Data {
+				orgs = append(orgs, AssetOrgRef{ID: o.ID, Name: o.Attributes.Name})
+			}
 			assets = append(assets, RepositoryAsset{
 				ID:                d.ID,
 				Sources:           d.Attributes.Sources,
@@ -137,6 +174,7 @@ func SearchRepositoryAssets(ctx context.Context, groupID string) ([]RepositoryAs
 				RepositoryURL:     d.Attributes.RepositoryURL,
 				DefaultBranchName: d.Attributes.DefaultBranchName,
 				Tags:              d.Attributes.Tags,
+				Organizations:     orgs,
 			})
 		}
 

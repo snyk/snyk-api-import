@@ -102,6 +102,7 @@ type mockAssetImportServer struct {
 	sawCreateOrg     bool
 	sawImport        bool
 	sawTagPatch      bool
+	patchedAssetIDs  []string
 }
 
 func (m *mockAssetImportServer) handler(w http.ResponseWriter, r *http.Request) {
@@ -141,6 +142,8 @@ func (m *mockAssetImportServer) handler(w http.ResponseWriter, r *http.Request) 
 		if m.forbidWrites {
 			m.t.Fatalf("dry-run must not write tags, but got PATCH %s", r.URL.Path)
 		}
+		parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+		m.patchedAssetIDs = append(m.patchedAssetIDs, parts[len(parts)-1])
 		_, _ = w.Write([]byte(`{"data":{}}`))
 
 	default:
@@ -175,7 +178,9 @@ func assetsFixture() string {
 		{"id":"asset-excluded","type":"repository","attributes":{"sources":["github"],"name":"internal-tools","repository_url":"https://github.com/acme/internal-tools","default_branch_name":"main","tags":{"__snyk_destination_org__":"__exclude__"}}},
 		{"id":"asset-untagged","type":"repository","attributes":{"sources":["github"],"name":"mystery-repo","repository_url":"https://github.com/acme/mystery-repo","default_branch_name":"main"}},
 		{"id":"asset-gitlab","type":"repository","attributes":{"sources":["gitlab"],"name":"payments-svc","repository_url":"https://gitlab.com/acme/payments-svc","default_branch_name":"main","tags":{"__snyk_destination_org__":"payments"}}},
-		{"id":"asset-moved","type":"repository","attributes":{"sources":["github"],"name":"moved-repo","repository_url":"https://github.com/acme/moved-repo","default_branch_name":"main","tags":{"__snyk_destination_org__":"checkout","__snyk_auto_imported__":"old-org"}}}
+		{"id":"asset-moved","type":"repository","attributes":{"sources":["github"],"name":"moved-repo","repository_url":"https://github.com/acme/moved-repo","default_branch_name":"main","tags":{"__snyk_destination_org__":"checkout","__snyk_auto_imported__":"old-org"}}},
+		{"id":"asset-backfill","type":"repository","attributes":{"sources":["github"],"name":"legacy-import","repository_url":"https://github.com/acme/legacy-import","default_branch_name":"main","tags":{"__snyk_destination_org__":"checkout"}},"relationships":{"organizations":{"data":[{"id":"org-checkout-existing","type":"organization","attributes":{"name":"checkout"}}]}}},
+		{"id":"asset-org-mismatch","type":"repository","attributes":{"sources":["github"],"name":"surprise-repo","repository_url":"https://github.com/acme/surprise-repo","default_branch_name":"main","tags":{"__snyk_destination_org__":"checkout"}},"relationships":{"organizations":{"data":[{"id":"org-other","type":"organization","attributes":{"name":"some-other-org"}}]}}}
 	],"links":{}}`
 }
 
@@ -208,13 +213,20 @@ func TestRunAssetImport_EndToEnd(t *testing.T) {
 	if !m.sawTagPatch {
 		t.Fatal("expected the newly imported asset to be tagged auto-imported")
 	}
+	wantPatched := map[string]bool{"asset-new": true, "asset-backfill": true}
+	for _, id := range m.patchedAssetIDs {
+		delete(wantPatched, id)
+	}
+	if len(wantPatched) != 0 {
+		t.Fatalf("expected tag PATCH for %v, got patches for %v", []string{"asset-new", "asset-backfill"}, m.patchedAssetIDs)
+	}
 
 	wantSkips := map[string]int{
-		SkipAlreadyImported:     1,
+		SkipAlreadyImported:     2, // asset-already-imported (tag) + asset-backfill (organizations relationship)
 		SkipExcluded:            1,
 		SkipNoTag:               1,
 		SkipUnsupportedProvider: 1,
-		SkipOrgMoved:            1,
+		SkipOrgMoved:            2, // asset-moved (tag) + asset-org-mismatch (organizations relationship)
 	}
 	for reason, count := range wantSkips {
 		if got := len(report.Skipped[reason]); got != count {

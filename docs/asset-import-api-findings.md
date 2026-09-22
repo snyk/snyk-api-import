@@ -99,18 +99,51 @@ regardless of API version tried (2024-10-15, 2025-09-28, 2026-01-01,
 2026-03-25). That endpoint doesn't appear to be deployed, despite the CLI
 shipping a command for it.
 
-**This changes the Phase 3 design as flagged in the original spec: build Phase 3
-assuming no reliable "already imported" signal exists on the asset payload**,
-until Snyk confirms one of:
-- the field/relationship exists but is index-lagged by well over the ~tens of
-  minutes I waited (possible — this may be a low-traffic test Group), or
-- it exists but needs an explicit `fields`/`include` request param not yet tried, or
-- it genuinely isn't populated for repository assets yet.
+**Correction (2026-09-23), found by the person I was working with, not by
+further waiting on my part:** the `organizations` relationship *does*
+populate — it just took far longer than anything I tested. Re-checked the
+same asset (`589eb2eed7502e3c7a342426625e3fa6`) about 13 hours after the
+import, and this time `relationships.organizations.data` was populated
+directly on the search payload:
 
-Recommend asking the Assets API team directly rather than waiting longer —
-three follow-throughs on the documented relationship link, spread over an
-increasing time gap, all coming back empty is a reasonably strong signal this
-isn't just indexing lag.
+```json
+"organizations": {
+  "data": [
+    {"id": "d4add88a-2efd-4c8b-b72e-e5e9315c39ed", "type": "organization",
+     "attributes": {"name": "Asset Import Test Environment-default"}}
+  ]
+}
+```
+
+Cross-checked against an asset that was never imported (`f084d9ecf66612ef8c51136d7832f42a`,
+one of the GitLab repos) at the same point in time — no `organizations` key at
+all, matching the original "absent when not imported" finding. So the field is
+real and reliable; my three-strikes conclusion above was wrong, just under-waited.
+
+Two things this correction does **not** change, both re-confirmed at the same
+13-hour mark:
+- **The lag is on the order of hours, not minutes**, and it looks tied to the
+  new project's *first scan* completing rather than to the import itself —
+  `updated_at`, `coverage_control` and `issues_counts` on the asset all flipped
+  from empty to populated at the same moment `organizations` did. A customer
+  re-running this command shortly after an import would still see nothing
+  here for repos it just imported.
+- **It is still not filterable.** `{"query":{"attributes":{"attribute":"organizations","operator":"in","values":["<org-id>"]}}}`
+  still returns zero matches even now, against the very asset whose individual
+  payload shows the relationship populated. This field can be read per-asset,
+  never queried in bulk — worth reporting to the Assets API team as a
+  filter/index inconsistency independent of anything else here.
+
+**Design decision:** keep `__snyk_auto_imported__` (below) as the primary
+"already imported" signal, since it's correct immediately with no lag — but
+also read `organizations` per-asset as a secondary, self-healing check: if an
+asset has no `__snyk_auto_imported__` tag yet but `organizations` already
+names the intended destination Org, treat it as already imported and backfill
+the tag (catches a repo imported by hand, or by a run predating this tag,
+without needing a second import attempt). If `organizations` names a
+*different* Org than the destination tag, that's the same "moved, don't act
+automatically" case as a tag-detected mismatch. Implemented in
+`internal/asset_import.go`.
 
 ---
 
