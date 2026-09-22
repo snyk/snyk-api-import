@@ -83,6 +83,37 @@ func TestSearchRepositoryAssets_Pagination(t *testing.T) {
 	}
 }
 
+func TestSearchRepositoryAssets_ParsesOrganizationsRelationship(t *testing.T) {
+	body := `{"data":[
+		{"id":"a1","type":"repository","attributes":{"sources":["github"],"name":"repo1","repository_url":"https://github.com/o/repo1","default_branch_name":"main"}},
+		{"id":"a2","type":"repository","attributes":{"sources":["github"],"name":"repo2","repository_url":"https://github.com/o/repo2","default_branch_name":"main"},"relationships":{"organizations":{"data":[{"id":"org-1","type":"organization","attributes":{"name":"checkout"}}]}}}
+	],"links":{}}`
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(body))
+	}))
+	defer srv.Close()
+
+	restoreNet := network.SetTestClient(func() network.Client { return &testClient{c: srv.Client()} })
+	defer restoreNet()
+	os.Setenv("SNYK_API", srv.URL)
+	defer os.Unsetenv("SNYK_API")
+	os.Setenv("SNYK_TOKEN", "tok")
+	defer os.Unsetenv("SNYK_TOKEN")
+
+	assets, err := SearchRepositoryAssets(context.Background(), "g1")
+	if err != nil {
+		t.Fatalf("SearchRepositoryAssets returned error: %v", err)
+	}
+	if len(assets[0].Organizations) != 0 {
+		t.Fatalf("expected asset never imported to have no organizations, got %#v", assets[0].Organizations)
+	}
+	if len(assets[1].Organizations) != 1 || assets[1].Organizations[0].Name != "checkout" || assets[1].Organizations[0].ID != "org-1" {
+		t.Fatalf("expected asset 2's organizations relationship to be parsed, got %#v", assets[1].Organizations)
+	}
+}
+
 func TestUpdateAssetTags_Success(t *testing.T) {
 	var gotBody map[string]interface{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
