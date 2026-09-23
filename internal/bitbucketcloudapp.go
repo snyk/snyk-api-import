@@ -76,7 +76,9 @@ func FetchBitbucketAppToken(ctx context.Context, clientID, clientSecret string) 
 		AccessToken string `json:"access_token"`
 	}
 	if err := json.Unmarshal(body, &result); err != nil {
-		return "", fmt.Errorf("unmarshal: %w; body: %s", err, string(body))
+		// Don't include the body: a 200 response from the token endpoint carries
+		// access_token/refresh_token, and this error is logged at Error level.
+		return "", fmt.Errorf("unmarshal: %w", err)
 	}
 	return result.AccessToken, nil
 }
