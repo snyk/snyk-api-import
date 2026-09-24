@@ -483,6 +483,7 @@ snyk-api-import asset-import [flags]
 | `--dryRun` | bool | No | Compute and print the full delta; create and import nothing |
 | `--exclusionGlobs` | string | No | Comma-separated glob patterns to exclude from each import |
 | `--branch` | string | No | Override the branch to import (default: each repo's default branch) |
+| `--sourceOrgId` | string | No | Template Org's public ID to clone settings from when creating a new Org |
 
 *Can also be set via `SNYK_GROUP_ID`.
 
@@ -497,6 +498,9 @@ snyk-api-import asset-import --groupId=abc123
 
 # An Org has both github and github-enterprise configured - disambiguate
 snyk-api-import asset-import --groupId=abc123 --integrationType=github-enterprise
+
+# Clone settings from an existing template Org onto every newly created Org
+snyk-api-import asset-import --groupId=abc123 --sourceOrgId=template-org-456
 ```
 
 ---

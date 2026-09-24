@@ -9,8 +9,9 @@ It reads those tags back out of Snyk, creates any Organization that doesn't exis
 yet, and bulk-imports each tagged repository that isn't imported yet - in one pass,
 in memory, with no intermediate JSON files.
 
-**GitHub only.** GitLab, Bitbucket, and Azure DevOps are out of scope for this
-command (see [asset-import-api-findings.md](./asset-import-api-findings.md) for why).
+**Supported SCMs:** GitHub ✅
+
+GitHub only currently supported. Other SCMs coming soon.
 
 ## The invariant: this command talks only to Snyk
 
@@ -27,7 +28,9 @@ single `SNYK_TOKEN` and nothing else.
    nobody got to it yet, not that it should be ignored.
 2. **Organizations**: any tag value that doesn't match an existing Organization
    name in the Group gets one created. Re-running creates nothing new for
-   Organizations that already exist (idempotent).
+   Organizations that already exist (idempotent). Pass `--sourceOrgId` to clone
+   settings (integrations, notification settings, etc.) from an existing
+   template Organization on every newly created Org.
 3. **Already imported?** The Assets API's own `organizations` relationship
    does eventually reflect this, but only after a lag of hours (tied to the
    new project's first scan completing, not the import itself), and it can't
@@ -67,6 +70,7 @@ single `SNYK_TOKEN` and nothing else.
   --dryRun           Compute and print the full delta; create and import nothing
   --exclusionGlobs   Comma-separated glob patterns to exclude from each import
   --branch           Override the branch to import (default: each repo's default branch)
+  --sourceOrgId      Template Org's public ID to clone settings from when creating a new Org
 ```
 
 ## Usage
@@ -81,6 +85,9 @@ snyk-api-import asset-import --groupId=<snyk_group_id>
 # Only handle repositories on a specific integration (an Org has both
 # github and github-enterprise configured, for example)
 snyk-api-import asset-import --groupId=<snyk_group_id> --integrationType=github-enterprise
+
+# Clone settings from an existing template Org onto every newly created Org
+snyk-api-import asset-import --groupId=<snyk_group_id> --sourceOrgId=<template_org_id>
 ```
 
 ## Output
