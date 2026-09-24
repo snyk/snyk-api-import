@@ -103,6 +103,7 @@ type mockAssetImportServer struct {
 	sawImport        bool
 	sawTagPatch      bool
 	patchedAssetIDs  []string
+	createOrgBodies  []map[string]interface{}
 }
 
 func (m *mockAssetImportServer) handler(w http.ResponseWriter, r *http.Request) {
@@ -122,6 +123,7 @@ func (m *mockAssetImportServer) handler(w http.ResponseWriter, r *http.Request) 
 		}
 		var body map[string]interface{}
 		_ = json.NewDecoder(r.Body).Decode(&body)
+		m.createOrgBodies = append(m.createOrgBodies, body)
 		w.WriteHeader(http.StatusCreated)
 		_, _ = w.Write([]byte(fmt.Sprintf(`{"id":%q,"name":%q}`, m.createdOrgID, body["name"])))
 
@@ -196,7 +198,7 @@ func TestRunAssetImport_EndToEnd(t *testing.T) {
 	defer srv.Close()
 	setupAssetImportEnv(t, srv.URL)
 
-	report, err := RunAssetImport(context.Background(), AssetImportOptions{GroupID: testGroupID})
+	report, err := RunAssetImport(context.Background(), AssetImportOptions{GroupID: testGroupID, SourceOrgID: "template-org-1"})
 	if err != nil {
 		t.Fatalf("RunAssetImport returned error: %v", err)
 	}
@@ -206,6 +208,9 @@ func TestRunAssetImport_EndToEnd(t *testing.T) {
 	}
 	if len(report.OrgsCreated) != 1 || report.OrgsCreated[0] != "checkout" {
 		t.Fatalf("expected org 'checkout' to be created, got %v", report.OrgsCreated)
+	}
+	if len(m.createOrgBodies) != 1 || m.createOrgBodies[0]["sourceOrgId"] != "template-org-1" {
+		t.Fatalf("expected create-org request to carry sourceOrgId=template-org-1, got %#v", m.createOrgBodies)
 	}
 	if len(report.Imported) != 1 || !strings.Contains(report.Imported[0], "acme/checkout-svc") {
 		t.Fatalf("expected checkout-svc to be imported, got %v", report.Imported)
@@ -249,12 +254,15 @@ func TestRunAssetImport_DryRunMakesNoWrites(t *testing.T) {
 	defer srv.Close()
 	setupAssetImportEnv(t, srv.URL)
 
-	report, err := RunAssetImport(context.Background(), AssetImportOptions{GroupID: testGroupID, DryRun: true})
+	report, err := RunAssetImport(context.Background(), AssetImportOptions{GroupID: testGroupID, DryRun: true, SourceOrgID: "template-org-1"})
 	if err != nil {
 		t.Fatalf("RunAssetImport returned error: %v", err)
 	}
 	if !report.DryRun {
 		t.Fatal("expected report.DryRun to be true")
+	}
+	if len(report.OrgsCreated) != 1 || !strings.Contains(report.OrgsCreated[0], "cloning settings from template-org-1") {
+		t.Fatalf("expected dry-run note to mention the source org template, got %v", report.OrgsCreated)
 	}
 	if m.sawCreateOrg || m.sawImport || m.sawTagPatch {
 		t.Fatalf("dry-run performed a write: createOrg=%v import=%v tagPatch=%v", m.sawCreateOrg, m.sawImport, m.sawTagPatch)

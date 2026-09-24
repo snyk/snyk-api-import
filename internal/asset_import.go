@@ -15,6 +15,7 @@ type AssetImportOptions struct {
 	DryRun          bool
 	ExclusionGlobs  []string
 	BranchOverride  string
+	SourceOrgID     string // template Org to clone settings from when creating a new Org
 }
 
 // Skip reason buckets, used both as map keys in AssetImportReport.Skipped and
@@ -149,14 +150,18 @@ func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportR
 			continue
 		}
 		if opts.DryRun {
-			report.OrgsCreated = append(report.OrgsCreated, name+" (dry-run: would create)")
+			note := "dry-run: would create"
+			if opts.SourceOrgID != "" {
+				note += fmt.Sprintf(", cloning settings from %s", opts.SourceOrgID)
+			}
+			report.OrgsCreated = append(report.OrgsCreated, fmt.Sprintf("%s (%s)", name, note))
 			// Phase 3 still needs a placeholder so candidates destined for a
 			// not-yet-real org are reported as "would import" rather than
 			// silently dropped for lacking an orgID.
 			orgIDByName[name] = dryRunPendingOrgID
 			continue
 		}
-		created, err := CreateOrg(ctx, opts.GroupID, name, "")
+		created, err := CreateOrg(ctx, opts.GroupID, name, opts.SourceOrgID)
 		if err != nil {
 			report.ImportErrors = append(report.ImportErrors, fmt.Sprintf("create org %q: %v", name, err))
 			continue

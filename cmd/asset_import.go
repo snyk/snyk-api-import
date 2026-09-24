@@ -24,6 +24,7 @@ func AssetImportCmd(ctx context.Context, cfg internal.AppConfig) {
 	dryRun := fs.Bool("dryRun", false, "Compute and print the full delta without creating or importing anything")
 	exclusionGlobs := fs.String("exclusionGlobs", "", "Comma-separated list of glob patterns to exclude from each import")
 	branch := fs.String("branch", "", "Override the branch to import (defaults to each repository's default branch)")
+	sourceOrgID := fs.String("sourceOrgId", "", "Template Org's public ID to clone settings from when creating a new Org")
 	if err := fs.Parse(os.Args[2:]); err != nil {
 		logging.Errorf("Error parsing flags: %v", err)
 		return
@@ -53,6 +54,7 @@ func AssetImportCmd(ctx context.Context, cfg internal.AppConfig) {
 		DryRun:          *dryRun,
 		ExclusionGlobs:  globs,
 		BranchOverride:  *branch,
+		SourceOrgID:     *sourceOrgID,
 	}
 
 	report, err := internal.RunAssetImport(ctx, opts)
