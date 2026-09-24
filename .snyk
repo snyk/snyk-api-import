@@ -9,6 +9,29 @@ ignore:
           dep paths; primary Code suppression is exclude.code for find-files).
         expires: 2027-05-14T00:00:00.000Z
         created: 2026-05-14T00:00:00.000Z
+  SNYK-JS-HTTPCACHESEMANTICS-19964064:
+    - '*':
+        reason: >-
+          No fixed version available (4.2.0 is latest). Transitive via
+          @gitbeaker/node > got > cacheable-request; revisit or migrate to
+          @gitbeaker/rest.
+        expires: 2026-11-24T00:00:00.000Z
+        created: 2026-09-24T00:00:00.000Z
+  SNYK-JS-HTTPCACHESEMANTICS-19964068:
+    - '*':
+        reason: >-
+          No fixed version available (4.2.0 is latest). Transitive via
+          @gitbeaker/node > got > cacheable-request; revisit or migrate to
+          @gitbeaker/rest.
+        expires: 2026-11-24T00:00:00.000Z
+        created: 2026-09-24T00:00:00.000Z
+  SNYK-JS-BRACES-19963945:
+    - '*':
+        reason: >-
+          No fixed version available (3.0.3 is latest). Transitive via
+          micromatch@4.0.8; revisit when braces publishes a fix.
+        expires: 2026-11-24T00:00:00.000Z
+        created: 2026-09-24T00:00:00.000Z
   SNYK-JS-INFLIGHT-6095116:
     - '*':
         reason: there is no fix available
