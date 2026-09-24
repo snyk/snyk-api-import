@@ -14,6 +14,7 @@ import { writeFile } from '../write-file';
 import { FAILED_ORG_LOG_NAME } from '../common';
 import { logFailedOrg } from '../loggers/log-failed-org';
 import { streamData } from '../stream-data';
+import { getErrorMessage } from '../lib/get-error-message';
 
 const debug = debugLib('snyk:create-orgs-script');
 interface NewOrExistingOrg extends CreatedOrgResponse {
@@ -64,7 +65,7 @@ async function createNewOrgs(
       await logCreatedOrg(groupId, name, org, integrations, loggingPath);
     } catch (e) {
       failed.push({ groupId, name, sourceOrgId });
-      const errorMessage = e.data ? e.data.message : e.message;
+      const errorMessage = e.data?.message || getErrorMessage(e);
       await logFailedOrg(
         groupId,
         name,
@@ -251,7 +252,7 @@ async function separateExistingOrganizations(
     const err: any = _e;
     const humanMessage =
       err && typeof err === 'object'
-        ? err.data?.message ?? err.message ?? String(err)
+        ? err.data?.message || getErrorMessage(err)
         : String(err);
     const finalMessage =
       humanMessage || 'Failed to create org, please try again in DEBUG mode.';

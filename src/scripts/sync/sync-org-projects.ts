@@ -21,6 +21,7 @@ import type { ProjectUpdateFailure } from './sync-projects-per-target';
 import { syncProjectsForTarget } from './sync-projects-per-target';
 import type { ProjectUpdate } from './sync-projects-per-target';
 import { logFailedSync } from '../../loggers/log-failed-sync';
+import { getErrorMessage } from '../../lib/get-error-message';
 import { logFailedToUpdateProjects } from '../../loggers/log-failed-to-update-projects';
 
 const debug = debugLib('snyk:sync-org-projects');
@@ -274,7 +275,7 @@ export async function updateTargets(
       } catch (e) {
         failedTargets += 1;
         debug(e);
-        const errorMessage: string = e.message;
+        const errorMessage = getErrorMessage(e);
         console.warn(
           `Failed to sync target ${target.attributes.displayName}. ERROR: ${errorMessage}`,
         );

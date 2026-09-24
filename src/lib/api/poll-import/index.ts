@@ -13,6 +13,7 @@ import { logFailedProjects } from '../../../loggers/log-failed-projects';
 import { logFailedPollUrls } from '../../../loggers/log-failed-polls';
 import { logImportedProjects } from '../../../loggers/log-imported-projects';
 import { logJobResult } from '../../../loggers/log-job-result';
+import { getErrorMessage } from '../../get-error-message';
 
 const debug = debugLib('snyk:poll-import');
 const MIN_RETRY_WAIT_TIME = 20000;
@@ -66,13 +67,17 @@ export async function pollImportUrl(
     return { projects };
   } catch (error: any) {
     console.error(
-      `Could not get status update from import job: ${locationUrl}\n ERROR: ${error.message}`,
+      `Could not get status update from import job: ${locationUrl}\n ERROR: ${getErrorMessage(
+        error,
+      )}`,
     );
     const err: {
       message?: string | undefined;
       innerError?: string;
     } = new Error('Could not poll Url');
-    err.innerError = error;
+    // Never keep the raw error: it can carry the request headers, including
+    // the API token, and ends up in the failed polls log.
+    err.innerError = getErrorMessage(error);
     throw err;
   }
 }
@@ -119,11 +124,7 @@ export async function pollImportUrls(
         projectsArray.push(...projects);
       } catch (error: any) {
         await logFailedPollUrls(locationUrl, {
-          errorMessage:
-            lodash.get(error, 'innerError.message') ||
-            error.innerError ||
-            error.message ||
-            error,
+          errorMessage: error?.innerError || getErrorMessage(error),
         });
       }
     },

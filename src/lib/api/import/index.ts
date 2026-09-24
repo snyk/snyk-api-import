@@ -15,6 +15,7 @@ import { getConcurrentImportsNumber } from '../../get-concurrent-imports-number'
 import { FAILED_LOG_NAME, targetProps } from '../../../common';
 import { requestWithRateLimitHandling } from './request-with-rate-limit';
 import * as util from 'util';
+import { getErrorMessage, getErrorResponse } from '../../get-error-message';
 
 const debug = debugLib('snyk:api-import');
 
@@ -130,7 +131,7 @@ export async function importTarget(
     // Sanitize and log useful diagnostics from the thrown error so callers
     // and developers can see HTTP response information (status, headers,
     // and body) without triggering circular structure errors.
-    const res = error && error.response ? error.response : undefined;
+    const res = getErrorResponse(error);
     const status = res?.status || res?.statusCode;
     const headers = res?.headers || {};
     const snykRequestId =
@@ -141,8 +142,7 @@ export async function importTarget(
     const bodyMessage =
       (res?.data && typeof res?.data === 'object' && res?.data.message) ||
       (res?.data && typeof res?.data === 'string' ? res?.data : undefined) ||
-      error?.message ||
-      'Unknown error';
+      getErrorMessage(error);
 
     console.error(
       `Failed to kick off import for target: ${util.inspect(target, {
@@ -158,17 +158,15 @@ See more information in logs located at ${path.join(
 
     const err: { message?: string | undefined; innerError?: string } =
       new Error('Could not complete API import');
-    // Reuse bodyMessage from above to avoid logging full response body which may contain credentials
-    err.innerError = util.inspect(
-      {
-        name: error?.name,
-        message: error?.message,
-        status,
-        snykRequestId,
-        bodyMessage,
-      },
-      { depth: 2 },
-    );
+    // Only log primitive fields: the raw error can carry the request headers,
+    // including the API token (see getErrorMessage).
+    err.innerError = util.inspect({
+      name: error?.name,
+      message: getErrorMessage(error),
+      status,
+      snykRequestId,
+      bodyMessage,
+    });
 
     throw err;
   }
