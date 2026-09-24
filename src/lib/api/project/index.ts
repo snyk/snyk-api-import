@@ -6,6 +6,7 @@ import { getSnykHost } from '../../get-snyk-host';
 import type { requestsManager } from 'snyk-request-manager';
 import type { SnykProject } from '../../types';
 import type { SnykHttpResponse } from '../../snyk-http-response';
+import { getErrorMessage } from '../../get-error-message';
 const debug = debugLib('snyk:api-project');
 
 interface BulkProjectUpdateResponse {
@@ -58,12 +59,14 @@ export async function deleteProjects(
     }
     return res.body;
   } catch (error) {
-    debug('Could not delete project:', error.message || error);
+    debug('Could not delete project:', getErrorMessage(error));
     const err: {
       message?: string | undefined;
       innerError?: string;
     } = new Error('Could not delete project');
-    err.innerError = error;
+    // Never keep the raw error: it can carry the request headers, including
+    // the API token.
+    err.innerError = getErrorMessage(error);
     throw err;
   }
 }

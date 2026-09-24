@@ -24,6 +24,7 @@ import type {
 import { getBitbucketAppRepoMetaData } from '../../lib/source-handlers/bitbucket-cloud-app/get-bitbucket-app-repo-metadata';
 import { getBitbucketAppToken } from '../../lib/source-handlers/bitbucket-cloud-app/get-bitbucket-app-token';
 import { importSingleTarget } from './import-target';
+import { getErrorMessage } from '../../lib/get-error-message';
 const debug = debugLib('snyk:sync-projects-per-target');
 
 // Wrapper function for GitHub Cloud App to match the expected signature
@@ -326,7 +327,9 @@ export async function syncProjectsForTarget(
     }
   } catch (e) {
     debug(e);
-    const error = `Cloning and analysing the repo to deactivate projects failed with error: ${e.message}`;
+    const error = `Cloning and analysing the repo to deactivate projects failed with error: ${getErrorMessage(
+      e,
+    )}`;
     // Add failures for all projects associated with this target
     if (projects.length > 0) {
       projects.forEach((project) => {
@@ -506,7 +509,7 @@ export async function bulkDeactivateProjects(
             from: 'active',
             to: 'deactivated',
             dryRun,
-            errorMessage: `Could not deactivate project: ${e.message}`,
+            errorMessage: `Could not deactivate project: ${getErrorMessage(e)}`,
           });
         }
       } else {

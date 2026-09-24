@@ -1,6 +1,7 @@
 import debug from 'debug';
 import type { requestsManager } from 'snyk-request-manager';
 import { updateProject } from '../api/project';
+import { getErrorMessage } from '../get-error-message';
 
 export async function updateBranch(
   requestManager: requestsManager,
@@ -42,7 +43,9 @@ export async function updateBranch(
     return { updated };
   } catch (e) {
     throw new Error(
-      `Failed to update project ${projectPublicId} via Snyk API. ERROR: ${e.message}`,
+      `Failed to update project ${projectPublicId} via Snyk API. ERROR: ${getErrorMessage(
+        e,
+      )}`,
     );
   }
 }

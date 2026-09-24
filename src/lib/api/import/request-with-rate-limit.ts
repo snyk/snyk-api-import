@@ -1,6 +1,7 @@
 import 'source-map-support/register';
 import debugLib from 'debug';
 import type { requestsManager } from 'snyk-request-manager';
+import { getErrorMessage } from '../../get-error-message';
 
 const debug = debugLib('snyk:api-import');
 
@@ -36,8 +37,7 @@ export async function requestWithRateLimitHandling(
         e.statusCode ||
         (e.response && e.response.status) ||
         undefined;
-      const errMsg =
-        (e && e.data && e.data.message) || e.message || 'Unknown error';
+      const errMsg = (e && e.data && e.data.message) || getErrorMessage(e);
 
       // Log a sanitized error for diagnostics
       console.error(

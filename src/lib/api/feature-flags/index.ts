@@ -1,6 +1,7 @@
 import type { requestsManager } from 'snyk-request-manager';
 import debugLib from 'debug';
 import type { SnykHttpResponse } from '../../snyk-http-response';
+import { getErrorMessage } from '../../get-error-message';
 
 const debug = debugLib('snyk:get-feature-flag');
 
@@ -32,8 +33,7 @@ export async function getFeatureFlag(
       err?.message?.response?.data ||
       err?.message?.response ||
       undefined;
-    const message =
-      res?.userMessage || res?.message || err?.message || err?.toString();
+    const message = res?.userMessage || res?.message || getErrorMessage(err);
 
     // Some Snyk API responses indicate the feature is not enabled (403) with
     // a userMessage like "Org X doesn't have 'custom-branch' feature enabled".
@@ -49,9 +49,7 @@ export async function getFeatureFlag(
     }
 
     debug(
-      `Could not fetch the ${featureFlagName} feature flag for ${orgId}. Error: ${JSON.stringify(
-        err,
-      )}`,
+      `Could not fetch the ${featureFlagName} feature flag for ${orgId}. Error: ${message}`,
     );
     throw new Error(
       `Could not fetch the ${featureFlagName} feature flag for ${orgId}. ${message}`,
