@@ -12,6 +12,7 @@ Complete reference for all `snyk-api-import` commands and flags.
   - [import](#import)
   - [sync](#sync)
   - [list:imported](#listimported)
+  - [asset-import](#asset-import)
   - [help](#help)
 
 ## Global Flags
@@ -454,6 +455,53 @@ snyk-api-import list:imported \
 
 When `imported-targets.log` exists in `SNYK_LOG_PATH`, the `import` command
 automatically skips previously imported targets.
+
+---
+
+### asset-import
+
+Reads Snyk Asset Inventory tags written by
+[`asset-tagger`](https://github.com/snyk-labs/asset-tagger), creates any
+destination Snyk Organization that doesn't exist yet, and bulk-imports each
+tagged GitHub repository that isn't imported yet - one pass, in memory, no
+intermediate JSON files. Talks only to Snyk; never calls GitHub directly. See
+[asset-import.md](./asset-import.md) for the full design and rationale.
+
+**Usage:**
+
+```bash
+snyk-api-import asset-import [flags]
+```
+
+**Flags:**
+
+| Flag | Type | Required | Description |
+|------|------|----------|-------------|
+| `--groupId` | string | Yes* | Snyk group ID |
+| `--tagKey` | string | No | Tag key naming the destination Organization (default: `__snyk_destination_org__`) |
+| `--integrationType` | string | No | Restrict to / disambiguate a specific integration type, e.g. `github-enterprise` |
+| `--dryRun` | bool | No | Compute and print the full delta; create and import nothing |
+| `--exclusionGlobs` | string | No | Comma-separated glob patterns to exclude from each import |
+| `--branch` | string | No | Override the branch to import (default: each repo's default branch) |
+| `--sourceOrgId` | string | No | Template Org's public ID to clone settings from when creating a new Org |
+
+*Can also be set via `SNYK_GROUP_ID`.
+
+**Examples:**
+
+```bash
+# Preview what would happen - creates and imports nothing
+snyk-api-import asset-import --groupId=abc123 --dryRun
+
+# Run it for real
+snyk-api-import asset-import --groupId=abc123
+
+# An Org has both github and github-enterprise configured - disambiguate
+snyk-api-import asset-import --groupId=abc123 --integrationType=github-enterprise
+
+# Clone settings from an existing template Org onto every newly created Org
+snyk-api-import asset-import --groupId=abc123 --sourceOrgId=template-org-456
+```
 
 ---
 

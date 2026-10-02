@@ -85,7 +85,11 @@ func main() {
 			// If file logging cannot be configured, continue but emit a warning.
 			logging.Warnf("failed to configure file logging: %v", err)
 		}
-		if cfg.SnykLogPath == "" {
+		// Help and asset-import (which only talks to Snyk and writes no output
+		// files) don't need a log path; file logging is simply skipped when unset.
+		needsLogPath := len(os.Args) >= 2 &&
+			os.Args[1] != "asset-import" && os.Args[1] != "--help" && os.Args[1] != "help"
+		if needsLogPath && cfg.SnykLogPath == "" {
 			logging.Errorf("Logging path is not configured. Please set SNYK_LOG_PATH in your environment (e.g. 'export SNYK_LOG_PATH=./logs') or configure 'logging.path' in your config.toml file.")
 			os.Exit(1)
 		}
@@ -124,6 +128,11 @@ func main() {
 			logging.Infof("      Lists imported projects from Snyk.")
 			logging.Infof("      Output: <source>-imported-targets.json in $SNYK_LOG_PATH")
 			logging.Infof("")
+			logging.Infof("  asset-import   --groupId <id> [--tagKey <key>] [--integrationType <type>] [--dryRun]")
+			logging.Infof("      Reads Snyk Asset Inventory tags, creates missing Orgs, and bulk-imports")
+			logging.Infof("      tagged GitHub repositories that aren't imported yet. Talks only to Snyk.")
+			logging.Infof("      GitHub only currently supported. Other SCMs coming soon.")
+			logging.Infof("")
 			logging.Infof("Important Notes:")
 			logging.Infof("  • sync command auto-detects integration IDs - no manual lookup needed")
 			logging.Infof("  • import:data can work without --integrationId if the integration is installed")
@@ -155,6 +164,8 @@ func main() {
 			cmd.SyncCmd(ctx, cfg)
 		case "list:imported":
 			cmd.ListImportedCmd(ctx, cfg)
+		case "asset-import":
+			cmd.AssetImportCmd(ctx, cfg)
 		default:
 			logging.Errorf("Unknown command: %s", os.Args[1])
 			os.Exit(1)
