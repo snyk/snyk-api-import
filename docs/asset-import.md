@@ -9,9 +9,9 @@ It reads those tags back out of Snyk, creates any Organization that doesn't exis
 yet, and bulk-imports each tagged repository that isn't imported yet - in one pass,
 in memory, with no intermediate JSON files.
 
-**Supported SCMs:** GitHub ✅
+**Supported SCMs:** GitHub ✅, Azure Repos ✅
 
-GitHub only currently supported. Other SCMs coming soon.
+GitHub and Azure Repos are currently supported. Other SCMs coming soon.
 
 ## The invariant: this command talks only to Snyk
 
@@ -57,6 +57,13 @@ single `SNYK_TOKEN` and nothing else.
    integrations and looks for exactly one GitHub-family match. Zero matches:
    skipped. More than one (e.g. an Org with both `github` and
    `github-enterprise`): skipped unless `--integrationType` disambiguates.
+   Azure Repos assets (`sources` contains `azure-devops`) resolve against the
+   Org's `azure-repos` integration. The Azure Repos *organization* is not part
+   of Snyk's import payload - it's carried by the integration - so the
+   destination Org's `azure-repos` integration must be connected to the ADO
+   organization the repo lives in. Snyk's `owner` is the ADO project, and the
+   project/repo names are taken from the asset's `browse_url` because the
+   Assets API lower-cases `repository_url` and `name` for Azure Repos.
 5. **Import**: whatever's left is bulk-imported.
 
 ## Options

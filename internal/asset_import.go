@@ -67,19 +67,35 @@ func (r *AssetImportReport) skip(reason, detail string) {
 // candidateAsset is a repository asset that has passed ingestion filtering
 // (Phase 1) and carries the destination org name it resolved to.
 type candidateAsset struct {
-	asset  RepositoryAsset
-	orgTag string // lower-cased DestinationOrgTagKey value
-	owner  string
-	repo   string
+	asset    RepositoryAsset
+	provider assetProvider
+	orgTag   string // lower-cased DestinationOrgTagKey value
+	owner    string // GitHub owner, or Azure Repos project
+	repo     string
 }
+
+// assetProvider identifies which SCM family an asset belongs to, and carries
+// what differs between them downstream: the Source value ParallelImport
+// builds its payload from, and the substring that identifies the family's
+// integration types on a destination Org.
+type assetProvider struct {
+	source            string // ParallelImportConfig.Source
+	integrationFamily string // substring of the Org's integration type keys
+}
+
+var (
+	providerGitHub = assetProvider{source: "github", integrationFamily: "github"}
+	providerAzure  = assetProvider{source: "azure-repos", integrationFamily: "azure-repos"}
+)
 
 // RunAssetImport executes the asset-import pipeline end to end: ingest and
 // filter tagged repository assets, diff/create destination Organizations,
 // resolve each asset's integration, bulk-import what isn't already imported,
 // and mark newly-imported assets so a re-run skips them.
 //
-// GitHub only, by design (see package docs / Phase 0 findings): any asset
-// whose provider isn't recognized as GitHub is skipped, not attempted.
+// GitHub and Azure Repos only, by design (see package docs / Phase 0
+// findings): any asset whose provider isn't recognized as one of those is
+// skipped, not attempted.
 func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportReport, error) {
 	if opts.GroupID == "" {
 		return nil, fmt.Errorf("groupID is required")
@@ -113,17 +129,28 @@ func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportR
 			continue
 		}
 
-		if !isGitHubProvider(a) {
+		var (
+			provider    assetProvider
+			owner, repo string
+			ok          bool
+		)
+		switch {
+		case isGitHubProvider(a):
+			provider = providerGitHub
+			owner, repo, ok = ParseGitHubOwnerRepo(a.RepositoryURL)
+		case isAzureProvider(a):
+			provider = providerAzure
+			owner, repo, ok = parseAzureAsset(a)
+		default:
 			report.skip(SkipUnsupportedProvider, assetLabel(a))
 			continue
 		}
-		owner, repo, ok := ParseGitHubOwnerRepo(a.RepositoryURL)
 		if !ok {
 			report.skip(SkipMalformedURL, assetLabel(a))
 			continue
 		}
 
-		candidates = append(candidates, candidateAsset{asset: a, orgTag: tagValue, owner: owner, repo: repo})
+		candidates = append(candidates, candidateAsset{asset: a, provider: provider, orgTag: tagValue, owner: owner, repo: repo})
 	}
 
 	if len(candidates) == 0 {
@@ -180,6 +207,7 @@ func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportR
 	type importJob struct {
 		orgID         string
 		integrationID string
+		source        string
 		target        ImportTarget
 		assetID       string
 		orgTag        string
@@ -255,7 +283,7 @@ func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportR
 				integrationsByOrg[orgID] = integrations
 			}
 
-			resolved, resolveErr := resolveGitHubIntegration(integrations, opts.IntegrationType)
+			resolved, resolveErr := resolveIntegration(integrations, opts.IntegrationType, c.provider.integrationFamily)
 			if resolveErr != nil {
 				report.skip(resolveErr.Error(), assetLabel(c.asset))
 				continue
@@ -265,7 +293,8 @@ func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportR
 
 		branch := opts.BranchOverride
 		if branch == "" {
-			branch = c.asset.DefaultBranchName
+			// Azure Repos reports refs/heads/<name>; Snyk's import wants the bare name.
+			branch = strings.TrimPrefix(c.asset.DefaultBranchName, "refs/heads/")
 		}
 		if branch == "" {
 			report.skip(SkipNoBranch, assetLabel(c.asset))
@@ -289,6 +318,7 @@ func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportR
 		jobs = append(jobs, importJob{
 			orgID:         orgID,
 			integrationID: integrationID,
+			source:        c.provider.source,
 			target:        target,
 			assetID:       c.asset.ID,
 			orgTag:        c.orgTag,
@@ -316,13 +346,14 @@ func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportR
 	// target carries its own), so everything goes through one bucketed run and
 	// the rate limit is global. Results are keyed by display name, so a repo
 	// destined for several orgs is split into rounds where each name is unique.
+	// Rounds are also single-source, since the source shapes the request body.
 	var rounds [][]importJob
 	for _, j := range jobs {
 		placed := false
 		for i := range rounds {
 			clash := false
 			for _, other := range rounds[i] {
-				if other.displayName == j.displayName {
+				if other.displayName == j.displayName || other.source != j.source {
 					clash = true
 					break
 				}
@@ -347,7 +378,7 @@ func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportR
 		}
 
 		config := ParallelImportConfig{
-			Source:      "github",
+			Source:      roundJobs[0].source,
 			Concurrency: GetImportConcurrency(0),
 			SnykToken:   token,
 			PollTimeout: GetPollTimeout(),
@@ -400,12 +431,40 @@ func isGitHubProvider(a RepositoryAsset) bool {
 	return false
 }
 
-// resolveGitHubIntegration implements Rule 1's resolution chain for the
-// GitHub family: narrow the Org's configured integrations to GitHub-family
-// types, then require an --integration-type match, a unique match, or fail
-// with a reason naming which case applied.
-func resolveGitHubIntegration(integrations map[string]string, integrationType string) (string, error) {
-	if integrationType != "" {
+// isAzureProvider reports whether an asset belongs to Azure Repos. Assets
+// report sources ["azure-devops"]; falls back to URL parsing if sources is empty.
+func isAzureProvider(a RepositoryAsset) bool {
+	for _, s := range a.Sources {
+		if strings.EqualFold(s, "azure-devops") {
+			return true
+		}
+	}
+	if len(a.Sources) == 0 {
+		_, _, ok := parseAzureAsset(a)
+		return ok
+	}
+	return false
+}
+
+// parseAzureAsset returns the Azure Repos project and repo for an asset,
+// preferring browse_url because repository_url is lower-cased.
+func parseAzureAsset(a RepositoryAsset) (project, repo string, ok bool) {
+	if a.BrowseURL != "" {
+		if project, repo, ok = ParseAzureProjectRepo(a.BrowseURL); ok {
+			return
+		}
+	}
+	return ParseAzureProjectRepo(a.RepositoryURL)
+}
+
+// resolveIntegration implements Rule 1's resolution chain: narrow the Org's
+// configured integrations to the provider family (a substring identifying that
+// family's integration types), then require an --integration-type match, a
+// unique match, or fail with a reason naming which case applied.
+func resolveIntegration(integrations map[string]string, integrationType, family string) (string, error) {
+	// The override only applies to the family it names, so a mixed-SCM run
+	// passing --integrationType=github still resolves Azure assets by family.
+	if integrationType != "" && strings.Contains(integrationType, family) {
 		id, ok := integrations[integrationType]
 		if !ok {
 			return "", fmt.Errorf("%s (%q not configured on this org)", SkipNoIntegration, integrationType)
@@ -415,7 +474,7 @@ func resolveGitHubIntegration(integrations map[string]string, integrationType st
 
 	candidates := map[string]string{}
 	for typ, id := range integrations {
-		if strings.Contains(typ, "github") {
+		if strings.Contains(typ, family) {
 			candidates[typ] = id
 		}
 	}

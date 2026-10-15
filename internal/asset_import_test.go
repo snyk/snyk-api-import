@@ -34,6 +34,14 @@ func TestIsGitHubProvider(t *testing.T) {
 	}
 }
 
+func TestResolveIntegrationTypeIgnoredForOtherFamily(t *testing.T) {
+	integrations := map[string]string{"github": "g", "azure-repos": "a"}
+	id, err := resolveIntegration(integrations, "github", providerAzure.integrationFamily)
+	if err != nil || id != "a" {
+		t.Fatalf("got %q, %v; want azure integration", id, err)
+	}
+}
+
 func TestResolveGitHubIntegration(t *testing.T) {
 	tests := []struct {
 		name            string
@@ -72,7 +80,7 @@ func TestResolveGitHubIntegration(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			id, err := resolveGitHubIntegration(tt.integrations, tt.integrationType)
+			id, err := resolveIntegration(tt.integrations, tt.integrationType, providerGitHub.integrationFamily)
 			if tt.wantErr != "" {
 				if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
 					t.Fatalf("expected error containing %q, got %v", tt.wantErr, err)
@@ -104,6 +112,7 @@ type mockAssetImportServer struct {
 	sawTagPatch      bool
 	patchedAssetIDs  []string
 	createOrgBodies  []map[string]interface{}
+	importPaths      []string
 }
 
 func (m *mockAssetImportServer) handler(w http.ResponseWriter, r *http.Request) {
@@ -132,6 +141,7 @@ func (m *mockAssetImportServer) handler(w http.ResponseWriter, r *http.Request) 
 
 	case r.Method == http.MethodPost && strings.Contains(r.URL.Path, "/import"):
 		m.sawImport = true
+		m.importPaths = append(m.importPaths, r.URL.Path)
 		if m.forbidWrites {
 			m.t.Fatalf("dry-run must not import, but got POST %s", r.URL.Path)
 		}
@@ -240,6 +250,48 @@ func TestRunAssetImport_EndToEnd(t *testing.T) {
 	}
 }
 
+func TestRunAssetImport_MixedGitHubAndAzure(t *testing.T) {
+	fixture := `{"data":[
+		{"id":"asset-gh","type":"repository","attributes":{"sources":["github"],"name":"checkout-svc","repository_url":"https://github.com/acme/checkout-svc","default_branch_name":"main","tags":{"__snyk_destination_org__":"checkout"}}},
+		{"id":"asset-az","type":"repository","attributes":{"sources":["azure-devops"],"name":"billing","repository_url":"https://dev.azure.com/acme/proj/_git/billing","default_branch_name":"refs/heads/main","tags":{"__snyk_destination_org__":"checkout"}}}
+	],"links":{}}`
+	m := &mockAssetImportServer{
+		t:                t,
+		assetsSearchBody: fixture,
+		existingOrgsJSON: `{"id":"g","name":"g","orgs":[]}`,
+		createdOrgID:     "org-checkout",
+		integrationsJSON: `{"github":"integration-gh","azure-repos":"integration-az"}`,
+	}
+	srv := httptest.NewServer(http.HandlerFunc(m.handler))
+	defer srv.Close()
+	setupAssetImportEnv(t, srv.URL)
+
+	report, err := RunAssetImport(context.Background(), AssetImportOptions{GroupID: testGroupID})
+	if err != nil {
+		t.Fatalf("RunAssetImport returned error: %v", err)
+	}
+	if len(report.ImportErrors) != 0 {
+		t.Fatalf("unexpected import errors: %v", report.ImportErrors)
+	}
+	if len(report.Imported) != 2 {
+		t.Fatalf("expected both repos imported, got %v", report.Imported)
+	}
+	for _, want := range []string{"integrations/integration-gh/import", "integrations/integration-az/import"} {
+		found := false
+		for _, p := range m.importPaths {
+			if strings.Contains(p, want) {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("expected an import request to %s, got %v", want, m.importPaths)
+		}
+	}
+	if len(m.patchedAssetIDs) != 2 {
+		t.Errorf("expected both assets tagged, got %v", m.patchedAssetIDs)
+	}
+}
+
 func TestRunAssetImport_DryRunMakesNoWrites(t *testing.T) {
 	fixture := `{"data":[
 		{"id":"asset-new","type":"repository","attributes":{"sources":["github"],"name":"checkout-svc","repository_url":"https://github.com/acme/checkout-svc","default_branch_name":"main","tags":{"__snyk_destination_org__":"checkout"}}}
@@ -285,5 +337,46 @@ func TestRunAssetImport_RejectsInvalidTagKey(t *testing.T) {
 	_, err := RunAssetImport(context.Background(), AssetImportOptions{GroupID: testGroupID, TagKey: "has a space"})
 	if err == nil || !strings.Contains(err.Error(), "invalid --tag-key") {
 		t.Fatalf("expected invalid tag key error, got %v", err)
+	}
+}
+
+func TestIsAzureProvider(t *testing.T) {
+	tests := []struct {
+		name string
+		a    RepositoryAsset
+		want bool
+	}{
+		{"sources says azure-devops", RepositoryAsset{Sources: []string{"azure-devops", "snyk"}}, true},
+		{"sources says github", RepositoryAsset{Sources: []string{"github"}, RepositoryURL: "https://dev.azure.com/o/p/_git/r"}, false},
+		{"no sources, azure url", RepositoryAsset{RepositoryURL: "https://dev.azure.com/o/p/_git/r"}, true},
+		{"no sources, github url", RepositoryAsset{RepositoryURL: "https://github.com/o/r"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isAzureProvider(tt.a); got != tt.want {
+				t.Errorf("isAzureProvider(%#v) = %v; want %v", tt.a, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseAzureAsset_PrefersBrowseURLForCasing(t *testing.T) {
+	a := RepositoryAsset{
+		RepositoryURL: "https://dev.azure.com/o/juice%20shop/_git/juice%20shop",
+		BrowseURL:     "https://dev.azure.com/o/Juice%20Shop/_git/Juice%20Shop",
+	}
+	p, r, ok := parseAzureAsset(a)
+	if !ok || p != "Juice Shop" || r != "Juice Shop" {
+		t.Errorf("got (%q, %q, %v); want original-case Juice Shop", p, r, ok)
+	}
+}
+
+func TestResolveIntegration_Azure(t *testing.T) {
+	id, err := resolveIntegration(map[string]string{"github": "g", "azure-repos": "a"}, "", providerAzure.integrationFamily)
+	if err != nil || id != "a" {
+		t.Errorf("got (%q, %v); want a", id, err)
+	}
+	if _, err := resolveIntegration(map[string]string{"github": "g"}, "", providerAzure.integrationFamily); err == nil {
+		t.Error("expected no-integration error")
 	}
 }
