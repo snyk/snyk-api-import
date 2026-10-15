@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/snyk/snyk-api-import/internal/security"
@@ -82,8 +83,9 @@ func (r *ImportResults) GetCounts() (imported, failed, skipped int) {
 	return len(r.Imported), len(r.Failed), len(r.Skipped)
 }
 
-// ParallelImport performs parallel imports with concurrency control
-// This replaces the sequential import logic in ImportTargets()
+// ParallelImport imports targets in buckets of config.Concurrency (default 15,
+// max 50). Each bucket is imported in parallel and fully completed (imports
+// kicked off and polled) before the next bucket starts.
 func ParallelImport(ctx context.Context, targets []ImportTarget, config ParallelImportConfig) (*ImportResults, error) {
 	if config.Concurrency <= 0 {
 		config.Concurrency = GetImportConcurrency(0) // Use default
@@ -94,48 +96,82 @@ func ParallelImport(ctx context.Context, targets []ImportTarget, config Parallel
 	}
 
 	results := NewImportResults()
-	sem := make(chan struct{}, config.Concurrency) // Semaphore for concurrency control
-	var wg sync.WaitGroup
-
 	client := security.NewClient()
 
-	Logger.Infof("Starting parallel import: %d targets, concurrency=%d", len(targets), config.Concurrency)
-
-	// Track seen targets to prevent duplicates
+	// Drop duplicates up front so batch sizes reflect real work. Targets may
+	// span several orgs/integrations (each carries its own), so the same repo
+	// destined for two different orgs is not a duplicate.
+	type namedTarget struct {
+		target ImportTarget
+		name   string
+	}
+	unique := make([]namedTarget, 0, len(targets))
 	seen := make(map[string]bool)
-
 	for _, t := range targets {
-		// Get display name for this target
 		fullName := getTargetDisplayName(t, config.Source)
-
-		// Check for duplicates
-		if seen[fullName] {
+		dedupeKey := strings.TrimSpace(t.OrgID) + "|" + strings.TrimSpace(t.IntegrationID) + "|" + fullName
+		if seen[dedupeKey] {
 			results.AddSkipped(fullName)
 			Logger.Debugf("Skipping duplicate: %s", fullName)
 			continue
 		}
-		seen[fullName] = true
-
-		wg.Add(1)
-		sem <- struct{}{} // Acquire semaphore
-
-		go func(target ImportTarget, targetName string) {
-			defer wg.Done()
-			defer func() { <-sem }() // Release semaphore
-
-			// Perform single import
-			err := performSingleImport(ctx, client, target, config, &wg)
-			if err != nil {
-				results.AddFailed(targetName)
-				Logger.Errorf("Import failed for %s: %v", targetName, err)
-			} else {
-				results.AddImported(targetName)
-				Logger.Infof("Import started for %s", targetName)
-			}
-		}(t, fullName)
+		seen[dedupeKey] = true
+		unique = append(unique, namedTarget{target: t, name: fullName})
 	}
 
-	wg.Wait() // Wait for all imports AND polls to complete
+	Logger.Infof("Starting batched import: %d targets, batch size=%d", len(unique), config.Concurrency)
+
+	// Rate limiting by buckets: kick off up to Concurrency imports, wait for
+	// every one of them (including their polling) to finish, then start the
+	// next bucket. This keeps the number of in-flight imports on the Snyk
+	// side bounded rather than just bounding request kick-off.
+	consecutiveFailedBatches := 0
+	for start := 0; start < len(unique); start += config.Concurrency {
+		if err := ctx.Err(); err != nil {
+			return results, err
+		}
+		end := start + config.Concurrency
+		if end > len(unique) {
+			end = len(unique)
+		}
+		batch := unique[start:end]
+		Logger.Infof("Importing batch %d-%d out of %d", start+1, end, len(unique))
+
+		var wg sync.WaitGroup
+		var batchFailed int32
+		for _, nt := range batch {
+			wg.Add(1)
+			go func(target ImportTarget, targetName string) {
+				defer wg.Done()
+
+				// wg is also used for this target's async poll, so the batch
+				// only completes once polling has finished.
+				err := performSingleImport(ctx, client, target, config, &wg)
+				if err != nil {
+					atomic.AddInt32(&batchFailed, 1)
+					results.AddFailed(targetName)
+					Logger.Errorf("Import failed for %s: %v", targetName, err)
+				} else {
+					results.AddImported(targetName)
+					Logger.Infof("Import started for %s", targetName)
+				}
+			}(nt.target, nt.name)
+		}
+		wg.Wait() // Wait for this batch's imports AND polls before the next
+
+		// If every import in consecutive batches failed, something is wrong
+		// with the configuration (token, integration, org...). Stop instead of
+		// hammering the API with the remaining targets.
+		if int(atomic.LoadInt32(&batchFailed)) == len(batch) {
+			consecutiveFailedBatches++
+			if consecutiveFailedBatches >= maxConsecutiveFailedBatches {
+				return results, fmt.Errorf("every import in the last %d batches failed, stopping as this is unexpected; check your configuration and logs, then re-run (%d of %d targets not attempted)",
+					consecutiveFailedBatches, len(unique)-end, len(unique))
+			}
+		} else {
+			consecutiveFailedBatches = 0
+		}
+	}
 
 	imported, failed, skipped := results.GetCounts()
 	Logger.Infof("Import complete: %d imported, %d failed, %d skipped", imported, failed, skipped)
@@ -353,8 +389,26 @@ func getTargetDisplayName(target ImportTarget, scmType string) string {
 // 2. Environment variable SNYK_IMPORT_CONCURRENCY
 // 3. config.toml [import] concurrency
 // 4. config.toml [sync] concurrent_imports (backward compat)
-// 5. Default (10)
+// 5. Default (15)
+// The result is capped at maxImportConcurrency.
 func GetImportConcurrency(cliFlag int) int {
+	n := importConcurrencyUncapped(cliFlag)
+	if n > maxImportConcurrency {
+		return maxImportConcurrency
+	}
+	return n
+}
+
+const (
+	// maxConsecutiveFailedBatches is how many batches in a row may fail
+	// completely before ParallelImport gives up.
+	maxConsecutiveFailedBatches = 2
+
+	defaultImportConcurrency = 15
+	maxImportConcurrency     = 50
+)
+
+func importConcurrencyUncapped(cliFlag int) int {
 	// 1. CLI flag takes highest priority
 	if cliFlag > 0 {
 		return cliFlag
@@ -385,7 +439,7 @@ func GetImportConcurrency(cliFlag int) int {
 	}
 
 	// 5. Default
-	return 10
+	return defaultImportConcurrency
 }
 
 // GetPollTimeout returns the poll timeout with precedence:

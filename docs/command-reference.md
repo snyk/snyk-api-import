@@ -248,7 +248,7 @@ snyk-api-import import [flags]
 |------|------|----------|-------------|
 | `--file` | string | No | Path to import targets file (auto-detected if in `SNYK_LOG_PATH`) |
 | `--source` | string | No | Source type - validates that import file matches this integration (default: `github`) |
-| `--concurrency` | int | No | Max concurrent imports (default: 10) |
+| `--concurrency` | int | No | Max concurrent imports (default: 15, max 50; imports run in batches that finish before the next starts) |
 
 **Import targets JSON (optional fields):**
 
@@ -293,7 +293,7 @@ snyk-api-import import
 |----------|----------|-------------|
 | `SNYK_TOKEN` | Yes | Snyk API token |
 | `SNYK_LOG_PATH` | Recommended | Output directory for logs |
-| `IMPORT_CONCURRENCY` | No | Max concurrent imports (default: 10) |
+| `IMPORT_CONCURRENCY` | No | Max concurrent imports (default: 15, max 50; imports run in batches that finish before the next starts) |
 | `SNYK_IMPORT_CONCURRENCY` | No | Alternative name for import concurrency |
 
 ---
@@ -320,7 +320,7 @@ snyk-api-import sync [flags]
 | `--dryRun` | boolean | No | Preview changes without executing |
 | `--verbose` | boolean | No | Enable verbose logging |
 | `--enableBranchUpdateFallback` | boolean | No | Fallback to deactivate+import if branch update fails |
-| `--concurrency` | int | No | Max concurrent imports for new files (default: 10) |
+| `--concurrency` | int | No | Max concurrent imports for new files (default: 15, max 50; imports run in batches that finish before the next starts) |
 | `--githubRepos` | string | No | Comma-separated repository names to limit the sync to (`github` sources only). Scopes both the SCM discovery and the Snyk projects considered, so unlisted projects are never treated as stale |
 
 **What Sync Does:**

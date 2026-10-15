@@ -91,13 +91,19 @@ func TestGetImportConcurrency_Precedence(t *testing.T) {
 			name:     "Default when no config",
 			cliFlag:  0,
 			envVar:   "",
-			expected: 10,
+			expected: 15,
 		},
 		{
 			name:     "Invalid env var uses default",
 			cliFlag:  0,
 			envVar:   "invalid",
-			expected: 10,
+			expected: 15,
+		},
+		{
+			name:     "Capped at 50",
+			cliFlag:  200,
+			envVar:   "",
+			expected: 50,
 		},
 	}
 
@@ -680,4 +686,108 @@ func TestParallelImport_Concurrency(t *testing.T) {
 	assert.LessOrEqual(t, maxConcurrent, int32(3), "Should respect concurrency limit")
 	assert.GreaterOrEqual(t, maxConcurrent, int32(2), "Should have some concurrency")
 	mu.Unlock()
+}
+
+// TestParallelImport_WaitsForBatchBeforeNext verifies bucket-based rate
+// limiting: with a batch size of 2, the third import must not start until the
+// first two have been fully handled.
+func TestParallelImport_WaitsForBatchBeforeNext(t *testing.T) {
+	var mu sync.Mutex
+	inFlight, maxInFlight, total := 0, 0, 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		inFlight++
+		total++
+		if inFlight > maxInFlight {
+			maxInFlight = inFlight
+		}
+		mu.Unlock()
+		time.Sleep(100 * time.Millisecond)
+		mu.Lock()
+		inFlight--
+		mu.Unlock()
+		w.Header().Set("Location", "/poll/1")
+		w.WriteHeader(http.StatusCreated)
+	}))
+	defer srv.Close()
+
+	t.Setenv("SNYK_SKIP_POLL", "1")
+	t.Setenv("SNYK_API", srv.URL)
+	t.Setenv("SNYK_TEST_SKIP_URL_VALIDATION", "1")
+	t.Setenv("SNYK_LOG_PATH", t.TempDir())
+
+	var targets []ImportTarget
+	for _, n := range []string{"a", "b", "c", "d", "e"} {
+		targets = append(targets, ImportTarget{
+			Target:        Target{Name: n, Owner: "o", Branch: "main"},
+			OrgID:         "org1",
+			IntegrationID: "int1",
+		})
+	}
+	results, err := ParallelImport(context.Background(), targets, ParallelImportConfig{
+		OrgID: "org1", IntegrationID: "int1", Source: "github", Concurrency: 2, SnykToken: "token x",
+	})
+	require.NoError(t, err)
+	assert.Len(t, results.Imported, 5)
+	assert.LessOrEqual(t, maxInFlight, 2)
+	assert.Equal(t, 5, total)
+}
+
+// TestParallelImport_StopsAfterConsecutiveFailedBatches verifies that when
+// every import in two consecutive batches fails, the run aborts.
+func TestParallelImport_StopsAfterConsecutiveFailedBatches(t *testing.T) {
+	var mu sync.Mutex
+	calls := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		calls++
+		mu.Unlock()
+		w.WriteHeader(http.StatusBadRequest)
+	}))
+	defer srv.Close()
+
+	t.Setenv("SNYK_SKIP_POLL", "1")
+	t.Setenv("SNYK_API", srv.URL)
+	t.Setenv("SNYK_TEST_SKIP_URL_VALIDATION", "1")
+	t.Setenv("SNYK_LOG_PATH", t.TempDir())
+
+	var targets []ImportTarget
+	for _, n := range []string{"a", "b", "c", "d", "e", "f"} {
+		targets = append(targets, ImportTarget{
+			Target: Target{Name: n, Owner: "o", Branch: "main"},
+			OrgID:  "org1", IntegrationID: "int1",
+		})
+	}
+	results, err := ParallelImport(context.Background(), targets, ParallelImportConfig{
+		Source: "github", Concurrency: 2, SnykToken: "token x",
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "every import in the last 2 batches failed")
+	assert.Len(t, results.Failed, 4)
+	assert.Equal(t, 4, calls)
+}
+
+// TestParallelImport_SameRepoDifferentOrgsNotDuplicate verifies dedupe is
+// scoped per org/integration now that one call can span several orgs.
+func TestParallelImport_SameRepoDifferentOrgsNotDuplicate(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Location", "/poll/1")
+		w.WriteHeader(http.StatusCreated)
+	}))
+	defer srv.Close()
+
+	t.Setenv("SNYK_SKIP_POLL", "1")
+	t.Setenv("SNYK_API", srv.URL)
+	t.Setenv("SNYK_TEST_SKIP_URL_VALIDATION", "1")
+	t.Setenv("SNYK_LOG_PATH", t.TempDir())
+
+	tgt := Target{Name: "r", Owner: "o", Branch: "main"}
+	results, err := ParallelImport(context.Background(), []ImportTarget{
+		{Target: tgt, OrgID: "org1", IntegrationID: "int1"},
+		{Target: tgt, OrgID: "org2", IntegrationID: "int2"},
+		{Target: tgt, OrgID: "org1", IntegrationID: "int1"},
+	}, ParallelImportConfig{Source: "github", Concurrency: 5, SnykToken: "token x"})
+	require.NoError(t, err)
+	assert.Len(t, results.Imported, 2)
+	assert.Len(t, results.Skipped, 1)
 }

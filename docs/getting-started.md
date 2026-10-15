@@ -395,7 +395,7 @@ Check the logs:
 
 If you hit rate limits:
 
-1. Reduce concurrent imports (default is 10):
+1. Reduce concurrent imports (default is 15, max 50; imports run in batches that finish before the next starts):
    ```bash
    export IMPORT_CONCURRENCY=5
    # or use CLI flag

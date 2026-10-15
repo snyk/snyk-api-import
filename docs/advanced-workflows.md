@@ -415,7 +415,7 @@ workflow examples.
 
 ### Managing Concurrency
 
-The tool defaults to 10 concurrent imports. Adjust based on your needs:
+The tool defaults to batches of 15 imports (max 50); each batch finishes importing and polling before the next starts. Adjust based on your needs:
 
 ```bash
 # Lower concurrency for rate limit sensitivity

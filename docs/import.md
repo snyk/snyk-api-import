@@ -200,7 +200,7 @@ For ongoing discovery and re-import of new manifests, use [`sync`](sync.md) — 
 
 - `SNYK_TOKEN` - your [Snyk api token](https://app.snyk.io/account)
 - `SNYK_LOG_PATH` - the path to folder where all logs should be saved, it is recommended creating a dedicated logs folder per import you have running. (Note: all logs will append)
-- `IMPORT_CONCURRENCY` (optional) defaults to 10 repos at a time. You can also use `SNYK_IMPORT_CONCURRENCY` or set via CLI flag `--concurrency`. Just 1 repo may have many projects inside which can trigger many files at once to be requested from the user's SCM instance and some may have rate limiting in place. This tool aims to help reduce the risk of hitting a rate limit.
+- `IMPORT_CONCURRENCY` (optional) defaults to 15 repos at a time (max 50). Each batch finishes importing before the next starts. You can also use `SNYK_IMPORT_CONCURRENCY` or set via CLI flag `--concurrency`. Just 1 repo may have many projects inside which can trigger many files at once to be requested from the user's SCM instance and some may have rate limiting in place. This tool aims to help reduce the risk of hitting a rate limit.
 - `SNYK_API` (optional) defaults to `https://api.snyk.io/v1`
 
 **Alternative:** Use `config.toml` to set these values permanently. See [Configuration Guide](../README.md#configuration).
