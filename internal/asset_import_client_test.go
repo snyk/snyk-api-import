@@ -157,3 +157,27 @@ func TestUpdateAssetTags_NoChanges(t *testing.T) {
 		t.Fatal("expected error for empty tag changes")
 	}
 }
+
+func TestParseAzureProjectRepo(t *testing.T) {
+	tests := []struct {
+		url           string
+		project, repo string
+		ok            bool
+	}{
+		{"https://dev.azure.com/samueldahlberg/Juice%20Shop/_git/Juice%20Shop", "Juice Shop", "Juice Shop", true},
+		{"https://dev.azure.com/org/Proj/_git/Repo", "Proj", "Repo", true},
+		{"https://org.visualstudio.com/Proj/_git/Repo", "Proj", "Repo", true},
+		{"https://dev.azure.com/org/Proj", "", "", false},
+		{"https://dev.azure.com/org/Proj/_apis/Repo", "", "", false},
+		{"https://github.com/o/r", "", "", false},
+		{"", "", "", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.url, func(t *testing.T) {
+			p, r, ok := ParseAzureProjectRepo(tt.url)
+			if p != tt.project || r != tt.repo || ok != tt.ok {
+				t.Errorf("ParseAzureProjectRepo(%q) = (%q, %q, %v); want (%q, %q, %v)", tt.url, p, r, ok, tt.project, tt.repo, tt.ok)
+			}
+		})
+	}
+}

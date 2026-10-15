@@ -54,6 +54,7 @@ type RepositoryAsset struct {
 	Sources           []string
 	Name              string
 	RepositoryURL     string
+	BrowseURL         string // original-case URL; RepositoryURL is lower-cased for Azure Repos
 	DefaultBranchName string
 	Tags              map[string]string
 	Organizations     []AssetOrgRef
@@ -69,6 +70,7 @@ type assetSearchResponse struct {
 			Sources           []string          `json:"sources"`
 			Name              string            `json:"name"`
 			RepositoryURL     string            `json:"repository_url"`
+			BrowseURL         string            `json:"browse_url"`
 			DefaultBranchName string            `json:"default_branch_name"`
 			Tags              map[string]string `json:"tags"`
 		} `json:"attributes"`
@@ -172,6 +174,7 @@ func SearchRepositoryAssets(ctx context.Context, groupID string) ([]RepositoryAs
 				Sources:           d.Attributes.Sources,
 				Name:              d.Attributes.Name,
 				RepositoryURL:     d.Attributes.RepositoryURL,
+				BrowseURL:         d.Attributes.BrowseURL,
 				DefaultBranchName: d.Attributes.DefaultBranchName,
 				Tags:              d.Attributes.Tags,
 				Organizations:     orgs,
@@ -264,4 +267,48 @@ func ParseGitHubOwnerRepo(repositoryURL string) (owner, repo string, ok bool) {
 		return "", "", false
 	}
 	return parts[0], name, true
+}
+
+// ParseAzureProjectRepo extracts the Azure Repos project and repository name
+// from an Azure Repos repository URL, in either the dev.azure.com form
+// (https://dev.azure.com/{org}/{project}/_git/{repo}) or the legacy
+// https://{org}.visualstudio.com/{project}/_git/{repo} form. Snyk's import API
+// wants the project as "owner" and the repo as "name"; the ADO organization
+// is carried by the integration, not the payload. Like ParseGitHubOwnerRepo
+// this only parses data the Assets API already returned.
+//
+// Pass the asset's browse_url, not repository_url: the Assets API lower-cases
+// repository_url (and name) for Azure Repos, and Snyk's import matches
+// project/repo names by their real casing. Path segments are URL-decoded.
+func ParseAzureProjectRepo(repositoryURL string) (project, repo string, ok bool) {
+	u, err := url.Parse(strings.TrimSpace(repositoryURL))
+	if err != nil || u.Host == "" {
+		return "", "", false
+	}
+	host := strings.ToLower(u.Host)
+	parts := strings.Split(strings.Trim(u.EscapedPath(), "/"), "/")
+	switch {
+	case host == "dev.azure.com":
+		// {org}/{project}/_git/{repo}
+		if len(parts) < 4 {
+			return "", "", false
+		}
+		parts = parts[1:]
+	case strings.HasSuffix(host, ".visualstudio.com"):
+		// {project}/_git/{repo}
+		if len(parts) < 3 {
+			return "", "", false
+		}
+	default:
+		return "", "", false
+	}
+	if parts[1] != "_git" {
+		return "", "", false
+	}
+	project, err1 := url.PathUnescape(parts[0])
+	repo, err2 := url.PathUnescape(parts[2])
+	if err1 != nil || err2 != nil || project == "" || repo == "" {
+		return "", "", false
+	}
+	return project, repo, true
 }
