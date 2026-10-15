@@ -43,50 +43,28 @@ func ImportTargetsParallel(ctx context.Context, targetsFile string, source strin
 			targets[0].OrgID, targets[0].IntegrationID, targets[0].Target.Name)
 	}
 
-	// Group targets by orgID and integrationID to run parallel imports per org
-	type orgKey struct {
-		orgID         string
-		integrationID string
+	// Targets may span several orgs/integrations; each carries its own, so
+	// they all go through a single ParallelImport call. That keeps the
+	// bucket-based rate limit global rather than per org.
+	Logger.Infof("Importing %d targets", len(targets))
+
+	config := ParallelImportConfig{
+		Source:      source,
+		Concurrency: GetImportConcurrency(0),
+		SnykToken:   snykToken,
+		PollTimeout: GetPollTimeout(),
+		DryRun:      false,
 	}
-	targetsByOrg := make(map[orgKey][]ImportTarget)
-	for _, t := range targets {
-		key := orgKey{orgID: t.OrgID, integrationID: t.IntegrationID}
-		targetsByOrg[key] = append(targetsByOrg[key], t)
-	}
 
-	// Run parallel imports for each org
-	totalImported := 0
-	totalFailed := 0
-	totalSkipped := 0
-
-	for key, orgTargets := range targetsByOrg {
-		Logger.Infof("Importing %d targets for org %s", len(orgTargets), key.orgID)
-
-		config := ParallelImportConfig{
-			OrgID:         key.orgID,
-			IntegrationID: key.integrationID,
-			Source:        source,
-			Concurrency:   GetImportConcurrency(0),
-			SnykToken:     snykToken,
-			PollTimeout:   GetPollTimeout(),
-			DryRun:        false,
-		}
-
-		results, err := ParallelImport(ctx, orgTargets, config)
-		if err != nil {
-			Logger.Errorf("Parallel import failed for org %s: %v", key.orgID, err)
-			continue
-		}
-
+	results, err := ParallelImport(ctx, targets, config)
+	if results != nil {
 		imported, failed, skipped := results.GetCounts()
-		totalImported += imported
-		totalFailed += failed
-		totalSkipped += skipped
-
-		Logger.Infof("Org %s: %d imported, %d failed, %d skipped", key.orgID, imported, failed, skipped)
+		Logger.Infof("Total: %d imported, %d failed, %d skipped", imported, failed, skipped)
 	}
-
-	Logger.Infof("Total: %d imported, %d failed, %d skipped", totalImported, totalFailed, totalSkipped)
+	if err != nil {
+		Logger.Errorf("Parallel import failed: %v", err)
+		return err
+	}
 	return nil
 }
 

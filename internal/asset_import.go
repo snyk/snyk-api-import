@@ -307,59 +307,74 @@ func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportR
 		return report, nil
 	}
 
-	// Group jobs by (org, integration) since ParallelImport takes one
-	// OrgID/IntegrationID pair per invocation.
-	type batchKey struct{ orgID, integrationID string }
-	batches := map[batchKey][]importJob{}
-	var batchOrder []batchKey
-	for _, j := range jobs {
-		k := batchKey{j.orgID, j.integrationID}
-		if _, seen := batches[k]; !seen {
-			batchOrder = append(batchOrder, k)
-		}
-		batches[k] = append(batches[k], j)
-	}
-
 	token, err := snykAPIToken()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, k := range batchOrder {
-		batchJobs := batches[k]
-		targets := make([]ImportTarget, 0, len(batchJobs))
+	// ParallelImport takes targets for any mix of orgs/integrations (each
+	// target carries its own), so everything goes through one bucketed run and
+	// the rate limit is global. Results are keyed by display name, so a repo
+	// destined for several orgs is split into rounds where each name is unique.
+	var rounds [][]importJob
+	for _, j := range jobs {
+		placed := false
+		for i := range rounds {
+			clash := false
+			for _, other := range rounds[i] {
+				if other.displayName == j.displayName {
+					clash = true
+					break
+				}
+			}
+			if !clash {
+				rounds[i] = append(rounds[i], j)
+				placed = true
+				break
+			}
+		}
+		if !placed {
+			rounds = append(rounds, []importJob{j})
+		}
+	}
+
+	for _, roundJobs := range rounds {
+		targets := make([]ImportTarget, 0, len(roundJobs))
 		byDisplayName := map[string]importJob{}
-		for _, j := range batchJobs {
+		for _, j := range roundJobs {
 			targets = append(targets, j.target)
 			byDisplayName[j.displayName] = j
 		}
 
 		config := ParallelImportConfig{
-			OrgID:         k.orgID,
-			IntegrationID: k.integrationID,
-			Source:        "github",
-			Concurrency:   GetImportConcurrency(0),
-			SnykToken:     token,
-			PollTimeout:   GetPollTimeout(),
+			Source:      "github",
+			Concurrency: GetImportConcurrency(0),
+			SnykToken:   token,
+			PollTimeout: GetPollTimeout(),
 		}
 		results, err := ParallelImport(ctx, targets, config)
+		if results != nil {
+			for _, name := range results.Imported {
+				j, ok := byDisplayName[name]
+				if !ok {
+					continue
+				}
+				if tagErr := UpdateAssetTags(ctx, opts.GroupID, j.assetID, map[string]string{AutoImportedTagKey: j.orgTag}); tagErr != nil {
+					report.ImportErrors = append(report.ImportErrors, fmt.Sprintf("imported %s but failed to mark it: %v", name, tagErr))
+				}
+				report.Imported = append(report.Imported, fmt.Sprintf("%s -> %s", name, j.orgTag))
+			}
+			for _, name := range results.Failed {
+				if j, ok := byDisplayName[name]; ok {
+					report.ImportErrors = append(report.ImportErrors, fmt.Sprintf("import failed: %s -> %s", name, j.orgTag))
+					continue
+				}
+				report.ImportErrors = append(report.ImportErrors, fmt.Sprintf("import failed: %s", name))
+			}
+		}
 		if err != nil {
-			report.ImportErrors = append(report.ImportErrors, fmt.Sprintf("import batch (org %s): %v", k.orgID, err))
-			continue
-		}
-
-		for _, name := range results.Imported {
-			j, ok := byDisplayName[name]
-			if !ok {
-				continue
-			}
-			if tagErr := UpdateAssetTags(ctx, opts.GroupID, j.assetID, map[string]string{AutoImportedTagKey: j.orgTag}); tagErr != nil {
-				report.ImportErrors = append(report.ImportErrors, fmt.Sprintf("imported %s but failed to mark it: %v", name, tagErr))
-			}
-			report.Imported = append(report.Imported, fmt.Sprintf("%s -> %s", name, j.orgTag))
-		}
-		for _, name := range results.Failed {
-			report.ImportErrors = append(report.ImportErrors, fmt.Sprintf("import failed: %s", name))
+			report.ImportErrors = append(report.ImportErrors, fmt.Sprintf("import stopped: %v", err))
+			break
 		}
 	}
 
