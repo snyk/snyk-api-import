@@ -61,19 +61,29 @@ func TestResolveGitHubIntegration(t *testing.T) {
 			wantErr:      SkipNoIntegration,
 		},
 		{
-			name:         "ambiguous: both github and github-enterprise",
-			integrations: map[string]string{"github": "int-1", "github-enterprise": "int-2"},
+			name:         "plain github is ignored alongside github-cloud-app",
+			integrations: map[string]string{"github": "int-1", "github-cloud-app": "int-2"},
+			wantID:       "int-2",
+		},
+		{
+			name:         "plain github alone is unsupported",
+			integrations: map[string]string{"github": "int-1"},
+			wantErr:      SkipNoIntegration,
+		},
+		{
+			name:         "ambiguous: both github-cloud-app and github-enterprise",
+			integrations: map[string]string{"github-cloud-app": "int-1", "github-enterprise": "int-2"},
 			wantErr:      SkipAmbiguousIntegration,
 		},
 		{
 			name:            "--integration-type disambiguates",
-			integrations:    map[string]string{"github": "int-1", "github-enterprise": "int-2"},
+			integrations:    map[string]string{"github-cloud-app": "int-1", "github-enterprise": "int-2"},
 			integrationType: "github-enterprise",
 			wantID:          "int-2",
 		},
 		{
 			name:            "--integration-type not configured",
-			integrations:    map[string]string{"github": "int-1"},
+			integrations:    map[string]string{"github-cloud-app": "int-1"},
 			integrationType: "github-enterprise",
 			wantErr:         SkipNoIntegration,
 		},
@@ -260,7 +270,7 @@ func TestRunAssetImport_MixedGitHubAndAzure(t *testing.T) {
 		assetsSearchBody: fixture,
 		existingOrgsJSON: `{"id":"g","name":"g","orgs":[]}`,
 		createdOrgID:     "org-checkout",
-		integrationsJSON: `{"github":"integration-gh","azure-repos":"integration-az"}`,
+		integrationsJSON: `{"github-cloud-app":"integration-gh","azure-repos":"integration-az"}`,
 	}
 	srv := httptest.NewServer(http.HandlerFunc(m.handler))
 	defer srv.Close()

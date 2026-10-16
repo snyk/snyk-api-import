@@ -55,8 +55,11 @@ single `SNYK_TOKEN` and nothing else.
    through a separate, group-level mechanism from the org-level import
    integrations. So this command always lists the destination Org's configured
    integrations and looks for exactly one GitHub-family match. Zero matches:
-   skipped. More than one (e.g. an Org with both `github` and
+   skipped. More than one (e.g. an Org with both `github-cloud-app` and
    `github-enterprise`): skipped unless `--integrationType` disambiguates.
+   The legacy plain `github` integration is not supported and is ignored:
+   Snyk lists it alongside `github-cloud-app` even when it isn't configured,
+   so an Org with only `github` is treated as having no matching integration.
    Azure Repos assets (`sources` contains `azure-devops`) resolve against the
    Org's `azure-repos` integration. The Azure Repos *organization* is not part
    of Snyk's import payload - it's carried by the integration - so the
@@ -90,7 +93,7 @@ snyk-api-import asset-import --groupId=<snyk_group_id> --dryRun
 snyk-api-import asset-import --groupId=<snyk_group_id>
 
 # Only handle repositories on a specific integration (an Org has both
-# github and github-enterprise configured, for example)
+# github-cloud-app and github-enterprise configured, for example)
 snyk-api-import asset-import --groupId=<snyk_group_id> --integrationType=github-enterprise
 
 # Clone settings from an existing template Org onto every newly created Org
