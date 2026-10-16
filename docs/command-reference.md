@@ -479,7 +479,7 @@ snyk-api-import asset-import [flags]
 |------|------|----------|-------------|
 | `--groupId` | string | Yes* | Snyk group ID |
 | `--tagKey` | string | No | Tag key naming the destination Organization (default: `__snyk_destination_org__`) |
-| `--integrationType` | string | No | Restrict to / disambiguate a specific integration type, e.g. `github-enterprise` |
+| `--integrationType` | string | No | Restrict to / disambiguate a specific integration type, e.g. `github-enterprise`. Plain `github` is not supported by `asset-import` |
 | `--dryRun` | bool | No | Compute and print the full delta; create and import nothing |
 | `--exclusionGlobs` | string | No | Comma-separated glob patterns to exclude from each import |
 | `--branch` | string | No | Override the branch to import (default: each repo's default branch) |
@@ -496,7 +496,7 @@ snyk-api-import asset-import --groupId=abc123 --dryRun
 # Run it for real
 snyk-api-import asset-import --groupId=abc123
 
-# An Org has both github and github-enterprise configured - disambiguate
+# An Org has both github-cloud-app and github-enterprise configured - disambiguate
 snyk-api-import asset-import --groupId=abc123 --integrationType=github-enterprise
 
 # Clone settings from an existing template Org onto every newly created Org

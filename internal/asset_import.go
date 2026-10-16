@@ -459,6 +459,13 @@ func parseAzureAsset(a RepositoryAsset) (project, repo string, ok bool) {
 	return ParseAzureProjectRepo(a.RepositoryURL)
 }
 
+// supportedIntegrationType excludes the legacy plain "github" integration.
+// Snyk lists it alongside "github-cloud-app" even when it isn't configured,
+// which made every Cloud App org look ambiguous.
+func supportedIntegrationType(typ string) bool {
+	return typ != "github"
+}
+
 // resolveIntegration implements Rule 1's resolution chain: narrow the Org's
 // configured integrations to the provider family (a substring identifying that
 // family's integration types), then require an --integration-type match, a
@@ -468,7 +475,7 @@ func resolveIntegration(integrations map[string]string, integrationType, family 
 	// passing --integrationType=github still resolves Azure assets by family.
 	if integrationType != "" && strings.Contains(integrationType, family) {
 		id, ok := integrations[integrationType]
-		if !ok {
+		if !ok || !supportedIntegrationType(integrationType) {
 			return "", fmt.Errorf("%s (%q not configured on this org)", SkipNoIntegration, integrationType)
 		}
 		return id, nil
@@ -476,7 +483,7 @@ func resolveIntegration(integrations map[string]string, integrationType, family 
 
 	candidates := map[string]string{}
 	for typ, id := range integrations {
-		if strings.Contains(typ, family) {
+		if strings.Contains(typ, family) && supportedIntegrationType(typ) {
 			candidates[typ] = id
 		}
 	}
