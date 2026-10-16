@@ -382,6 +382,8 @@ func RunAssetImport(ctx context.Context, opts AssetImportOptions) (*AssetImportR
 			Concurrency: GetImportConcurrency(0),
 			SnykToken:   token,
 			PollTimeout: GetPollTimeout(),
+			// Only tag assets whose import job actually finished.
+			ConfirmCompletion: true,
 		}
 		results, err := ParallelImport(ctx, targets, config)
 		if results != nil {

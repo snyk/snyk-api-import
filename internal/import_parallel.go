@@ -26,6 +26,10 @@ type ParallelImportConfig struct {
 	SnykToken     string
 	PollTimeout   time.Duration
 	DryRun        bool
+	// ConfirmCompletion makes each import wait for its job to finish and
+	// report a failed or timed-out job as a failed target, instead of
+	// counting the target as imported once Snyk accepts the request.
+	ConfirmCompletion bool
 }
 
 // ImportResults holds thread-safe import results
@@ -266,24 +270,24 @@ func performSingleImport(ctx context.Context, client *security.Client, target Im
 			pollURL = base + location
 		}
 
-		// Check if we should poll synchronously (for tests)
-		pollSync := os.Getenv("SNYK_POLL_SYNC") == "1"
-		skipPoll := os.Getenv("SNYK_SKIP_POLL") == "1"
-
-		if !skipPoll {
-			if pollSync {
-				// Synchronous polling (for tests)
-				_ = pollImportJob(ctx, client, pollURL, orgID, integrationID, target.Target, os.Getenv("SNYK_LOG_PATH"), config.SnykToken, config.PollTimeout)
-			} else {
-				// Asynchronous polling (production)
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					_ = pollImportJob(ctx, client, pollURL, orgID, integrationID, target.Target, os.Getenv("SNYK_LOG_PATH"), config.SnykToken, config.PollTimeout)
-				}()
-			}
+		// SNYK_SKIP_POLL=1 trusts the 201 and does not wait for the job.
+		if os.Getenv("SNYK_SKIP_POLL") == "1" {
+			return nil
 		}
 
+		if config.ConfirmCompletion {
+			if err := pollImportJobOpts(ctx, client, pollURL, orgID, integrationID, target.Target, os.Getenv("SNYK_LOG_PATH"), config.SnykToken, config.PollTimeout, true); err != nil {
+				return fmt.Errorf("import job for '%s' did not complete: %w", fullName, err)
+			}
+			return nil
+		}
+
+		// Best-effort logging poll; the batch still waits for it via wg.
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_ = pollImportJob(ctx, client, pollURL, orgID, integrationID, target.Target, os.Getenv("SNYK_LOG_PATH"), config.SnykToken, config.PollTimeout)
+		}()
 		return nil
 	}
 

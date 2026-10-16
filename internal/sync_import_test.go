@@ -121,3 +121,46 @@ func TestImportTargetFiles_SendsFilesAndExclusions(t *testing.T) {
 	require.True(t, ok)
 	assert.Equal(t, "package.json", file0["path"])
 }
+
+func TestParallelImportSyncMaps_ConfirmsJobCompletion(t *testing.T) {
+	tests := []struct {
+		name         string
+		job          string
+		wantImported int
+		wantFailed   int
+	}{
+		{"completed job counts as imported", `{"status":"complete","logs":[]}`, 1, 0},
+		{"failed job counts as failed", `{"status":"failed","error":"clone failed"}`, 0, 1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch {
+				case r.Method == http.MethodPost && strings.Contains(r.URL.Path, "/import"):
+					w.Header().Set("Location", "/api/v1/org/test-org/integrations/test-int/import/job-1")
+					w.WriteHeader(http.StatusCreated)
+				case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/import/job-1"):
+					_, _ = w.Write([]byte(tt.job))
+				}
+			}))
+			defer server.Close()
+
+			t.Setenv("SNYK_API", server.URL)
+			t.Setenv("SNYK_TOKEN", "test-token")
+			t.Setenv("SNYK_POLL_INTERVAL_MS", "10")
+			t.Setenv("SNYK_SKIP_POLL", "")
+			t.Setenv("SNYK_TEST_SKIP_URL_VALIDATION", "1")
+			restore := security.SetTestHTTPClient(&http.Client{Timeout: 10 * time.Second}, []string{strings.TrimPrefix(server.URL, "http://")})
+			defer restore()
+
+			maps := []map[string]interface{}{
+				{"name": "repo1", "owner": "org1", "branch": "main", "manifest": "package.json"},
+			}
+			results, err := ParallelImportSyncMaps(context.Background(), maps, "test-org", "test-int", "github")
+			require.NoError(t, err)
+			imported, failed, _ := results.GetCounts()
+			assert.Equal(t, tt.wantImported, imported)
+			assert.Equal(t, tt.wantFailed, failed)
+		})
+	}
+}

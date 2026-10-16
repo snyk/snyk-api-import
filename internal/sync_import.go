@@ -29,13 +29,14 @@ func ParallelImportSyncMaps(
 	}
 
 	config := ParallelImportConfig{
-		OrgID:         orgID,
-		IntegrationID: integrationID,
-		Source:        importPayloadSource(source),
-		Concurrency:   GetImportConcurrency(0),
-		SnykToken:     snykToken,
-		PollTimeout:   GetPollTimeout(),
-		DryRun:        false,
+		OrgID:             orgID,
+		IntegrationID:     integrationID,
+		Source:            importPayloadSource(source),
+		Concurrency:       GetImportConcurrency(0),
+		SnykToken:         snykToken,
+		PollTimeout:       GetPollTimeout(),
+		ConfirmCompletion: true,
+		DryRun:            false,
 	}
 
 	Logger.Infof(
