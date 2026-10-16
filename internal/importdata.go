@@ -49,11 +49,12 @@ func ImportTargetsParallel(ctx context.Context, targetsFile string, source strin
 	Logger.Infof("Importing %d targets", len(targets))
 
 	config := ParallelImportConfig{
-		Source:      source,
-		Concurrency: GetImportConcurrency(0),
-		SnykToken:   snykToken,
-		PollTimeout: GetPollTimeout(),
-		DryRun:      false,
+		Source:            source,
+		Concurrency:       GetImportConcurrency(0),
+		SnykToken:         snykToken,
+		PollTimeout:       GetPollTimeout(),
+		ConfirmCompletion: true,
+		DryRun:            false,
 	}
 
 	results, err := ParallelImport(ctx, targets, config)
@@ -794,8 +795,26 @@ func GenerateImportTargetsWithLogPath(ctx context.Context, orgsFile, source, log
 // writes import-job-results and imported/failed-projects logs accordingly.
 // It returns an error on network or unexpected response; logging is best-effort.
 func pollImportJob(ctx context.Context, client *security.Client, pollingURL, orgID, integrationID string, target Target, logPath, token string, timeout time.Duration) error {
-	if pollingURL == "" || logPath == "" {
+	return pollImportJobOpts(ctx, client, pollingURL, orgID, integrationID, target, logPath, token, timeout, false)
+}
+
+// pollImportJobOpts polls an import job until it finishes. Without
+// requireOutcome it is a best-effort logger that skips polling when there is
+// no log path. With requireOutcome the job is always polled (logging only if
+// logPath is set) and a failed job, a job with a failed log entry, or a
+// timeout is returned as an error, so callers can trust a nil result.
+func pollImportJobOpts(ctx context.Context, client *security.Client, pollingURL, orgID, integrationID string, target Target, logPath, token string, timeout time.Duration, requireOutcome bool) error {
+	if pollingURL == "" && requireOutcome {
+		return fmt.Errorf("import accepted but no polling URL returned, cannot confirm completion")
+	}
+	if pollingURL == "" || (logPath == "" && !requireOutcome) {
 		return nil
+	}
+	appendLog := func(file string, level int, msg string, fields map[string]interface{}) {
+		if logPath == "" {
+			return
+		}
+		_ = utils.AppendBunyanJSONLine(fmt.Sprintf("%s/%s.%s", logPath, orgID, file), level, msg, fields)
 	}
 	// Normalize pollingURL: if it's a path (starts with /api/v1 or api/v1) prepend SNYK_API base
 	base := GetSnykAPIBaseURL()
@@ -857,7 +876,7 @@ func pollImportJob(ctx context.Context, client *security.Client, pollingURL, org
 				return err
 			}
 			// Only log as failure after DoWithRetry has exhausted retries
-			_ = utils.AppendBunyanJSONLine(fmt.Sprintf("%s/%s.failed-polls.log", logPath, orgID), 50, "Failed to poll import", map[string]interface{}{
+			appendLog("failed-polls.log", 50, "Failed to poll import", map[string]interface{}{
 				"integrationID": integrationID,
 				"target":        target,
 				"error":         err.Error(),
@@ -887,7 +906,7 @@ func pollImportJob(ctx context.Context, client *security.Client, pollingURL, org
 		// - 4xx (except 429) return immediately as non-retryable errors
 		// If we get here with a non-2xx, it's a 4xx client error that shouldn't be retried
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-			_ = utils.AppendBunyanJSONLine(fmt.Sprintf("%s/%s.failed-polls.log", logPath, orgID), 50, "Failed to poll import", map[string]interface{}{
+			appendLog("failed-polls.log", 50, "Failed to poll import", map[string]interface{}{
 				"integrationID": integrationID,
 				"target":        target,
 				"status":        resp.StatusCode,
@@ -897,7 +916,7 @@ func pollImportJob(ctx context.Context, client *security.Client, pollingURL, org
 			return fmt.Errorf("poll returned status %d", resp.StatusCode)
 		}
 		status, _ := jr["status"].(string)
-		_ = utils.AppendBunyanJSONLine(fmt.Sprintf("%s/%s.import-job-results.log", logPath, orgID), 30, "Import job status", map[string]interface{}{
+		appendLog("import-job-results.log", 30, "Import job status", map[string]interface{}{
 			"integrationID": integrationID,
 			"target":        target,
 			"status":        status,
@@ -908,12 +927,16 @@ func pollImportJob(ctx context.Context, client *security.Client, pollingURL, org
 		// Also handle "completed" for compatibility/testing
 		if status == "complete" || status == "completed" {
 			// Extract projects from logs array (matches TypeScript: importStatus.logs.forEach)
+			failedLogs := 0
 			if logs, ok := jr["logs"].([]interface{}); ok {
 				for _, logItem := range logs {
 					if logMap, ok := logItem.(map[string]interface{}); ok {
+						if st, _ := logMap["status"].(string); st == "failed" || st == "error" {
+							failedLogs++
+						}
 						if projects, ok := logMap["projects"].([]interface{}); ok {
 							for _, proj := range projects {
-								_ = utils.AppendBunyanJSONLine(fmt.Sprintf("%s/%s.imported-projects.log", logPath, orgID), 30, "Project imported", map[string]interface{}{
+								appendLog("imported-projects.log", 30, "Project imported", map[string]interface{}{
 									"integrationID": integrationID,
 									"target":        target,
 									"project":       proj,
@@ -924,6 +947,9 @@ func pollImportJob(ctx context.Context, client *security.Client, pollingURL, org
 					}
 				}
 			}
+			if requireOutcome && failedLogs > 0 {
+				return fmt.Errorf("import job completed with %d failed log entries", failedLogs)
+			}
 			return nil
 		}
 		if status == "failed" || status == "error" {
@@ -931,7 +957,7 @@ func pollImportJob(ctx context.Context, client *security.Client, pollingURL, org
 			if em, ok := jr["error"].(string); ok {
 				errMsg = em
 			}
-			_ = utils.AppendBunyanJSONLine(fmt.Sprintf("%s/%s.failed-projects.log", logPath, orgID), 50, "Project import failed", map[string]interface{}{
+			appendLog("failed-projects.log", 50, "Project import failed", map[string]interface{}{
 				"integrationID": integrationID,
 				"target":        target,
 				"error":         errMsg,
@@ -941,7 +967,7 @@ func pollImportJob(ctx context.Context, client *security.Client, pollingURL, org
 		}
 		time.Sleep(reqInterval)
 	}
-	_ = utils.AppendBunyanJSONLine(fmt.Sprintf("%s/%s.failed-polls.log", logPath, orgID), 50, "Import poll timed out", map[string]interface{}{
+	appendLog("failed-polls.log", 50, "Import poll timed out", map[string]interface{}{
 		"integrationID": integrationID,
 		"target":        target,
 	})

@@ -596,9 +596,6 @@ func TestImportTargets_AppendsPerOrgLogs(t *testing.T) {
 	defer os.Unsetenv("SNYK_TEST_SKIP_URL_VALIDATION")
 	os.Setenv("SNYK_API_TOKEN", "tok")
 	defer os.Unsetenv("SNYK_API_TOKEN")
-	// Enable synchronous polling for tests
-	os.Setenv("SNYK_POLL_SYNC", "1")
-	defer os.Unsetenv("SNYK_POLL_SYNC")
 	// Use fast polling interval for tests
 	os.Setenv("SNYK_POLL_INTERVAL_MS", "100")
 	defer os.Unsetenv("SNYK_POLL_INTERVAL_MS")

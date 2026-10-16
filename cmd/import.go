@@ -312,13 +312,14 @@ func ImportCmd(ctx context.Context, appCfg internal.AppConfig) {
 
 			// Use parallel import
 			config := internal.ParallelImportConfig{
-				OrgID:         orgID,
-				IntegrationID: integrationID,
-				Source:        "bitbucket-cloud",
-				Concurrency:   internal.GetImportConcurrency(*concurrency),
-				SnykToken:     snykToken,
-				PollTimeout:   internal.GetPollTimeout(),
-				DryRun:        false,
+				OrgID:             orgID,
+				IntegrationID:     integrationID,
+				Source:            "bitbucket-cloud",
+				Concurrency:       internal.GetImportConcurrency(*concurrency),
+				SnykToken:         snykToken,
+				PollTimeout:       internal.GetPollTimeout(),
+				ConfirmCompletion: true,
+				DryRun:            false,
 			}
 
 			logging.Infof("Starting parallel Bitbucket Cloud imports: %d targets, concurrency=%d", len(allImportTargets), config.Concurrency)
@@ -441,13 +442,14 @@ func ImportCmd(ctx context.Context, appCfg internal.AppConfig) {
 
 			// Use parallel import
 			config := internal.ParallelImportConfig{
-				OrgID:         orgID,
-				IntegrationID: integrationID,
-				Source:        "bitbucket-cloud",
-				Concurrency:   internal.GetImportConcurrency(*concurrency),
-				SnykToken:     snykToken,
-				PollTimeout:   internal.GetPollTimeout(),
-				DryRun:        false,
+				OrgID:             orgID,
+				IntegrationID:     integrationID,
+				Source:            "bitbucket-cloud",
+				Concurrency:       internal.GetImportConcurrency(*concurrency),
+				SnykToken:         snykToken,
+				PollTimeout:       internal.GetPollTimeout(),
+				ConfirmCompletion: true,
+				DryRun:            false,
 			}
 
 			logging.Infof("Starting parallel Bitbucket Cloud App imports: %d targets, concurrency=%d", len(allImportTargets), config.Concurrency)
@@ -554,13 +556,14 @@ func ImportCmd(ctx context.Context, appCfg internal.AppConfig) {
 
 			// Use parallel import
 			config := internal.ParallelImportConfig{
-				OrgID:         orgID,
-				IntegrationID: integrationID,
-				Source:        "github",
-				Concurrency:   internal.GetImportConcurrency(*concurrency),
-				SnykToken:     snykToken,
-				PollTimeout:   internal.GetPollTimeout(),
-				DryRun:        false,
+				OrgID:             orgID,
+				IntegrationID:     integrationID,
+				Source:            "github",
+				Concurrency:       internal.GetImportConcurrency(*concurrency),
+				SnykToken:         snykToken,
+				PollTimeout:       internal.GetPollTimeout(),
+				ConfirmCompletion: true,
+				DryRun:            false,
 			}
 
 			logging.Infof("Starting parallel GitHub imports: %d targets, concurrency=%d", len(allImportTargets), config.Concurrency)
@@ -667,13 +670,14 @@ func ImportCmd(ctx context.Context, appCfg internal.AppConfig) {
 
 			// Use parallel import
 			config := internal.ParallelImportConfig{
-				OrgID:         orgID,
-				IntegrationID: integrationID,
-				Source:        "github",
-				Concurrency:   internal.GetImportConcurrency(*concurrency),
-				SnykToken:     snykToken,
-				PollTimeout:   internal.GetPollTimeout(),
-				DryRun:        false,
+				OrgID:             orgID,
+				IntegrationID:     integrationID,
+				Source:            "github",
+				Concurrency:       internal.GetImportConcurrency(*concurrency),
+				SnykToken:         snykToken,
+				PollTimeout:       internal.GetPollTimeout(),
+				ConfirmCompletion: true,
+				DryRun:            false,
 			}
 
 			logging.Infof("Starting parallel GitHub App imports: %d targets, concurrency=%d", len(allImportTargets), config.Concurrency)
@@ -770,13 +774,14 @@ func ImportCmd(ctx context.Context, appCfg internal.AppConfig) {
 
 			// Use parallel import
 			config := internal.ParallelImportConfig{
-				OrgID:         orgID,
-				IntegrationID: integrationID,
-				Source:        "gitlab",
-				Concurrency:   internal.GetImportConcurrency(*concurrency),
-				SnykToken:     snykToken,
-				PollTimeout:   internal.GetPollTimeout(),
-				DryRun:        false,
+				OrgID:             orgID,
+				IntegrationID:     integrationID,
+				Source:            "gitlab",
+				Concurrency:       internal.GetImportConcurrency(*concurrency),
+				SnykToken:         snykToken,
+				PollTimeout:       internal.GetPollTimeout(),
+				ConfirmCompletion: true,
+				DryRun:            false,
 			}
 
 			logging.Infof("Starting parallel GitLab imports: %d targets, concurrency=%d", len(allImportTargets), config.Concurrency)
@@ -874,13 +879,14 @@ func ImportCmd(ctx context.Context, appCfg internal.AppConfig) {
 
 			// Use parallel import
 			config := internal.ParallelImportConfig{
-				OrgID:         orgID,
-				IntegrationID: integrationID,
-				Source:        "azure-repos",
-				Concurrency:   internal.GetImportConcurrency(*concurrency),
-				SnykToken:     snykToken,
-				PollTimeout:   internal.GetPollTimeout(),
-				DryRun:        false,
+				OrgID:             orgID,
+				IntegrationID:     integrationID,
+				Source:            "azure-repos",
+				Concurrency:       internal.GetImportConcurrency(*concurrency),
+				SnykToken:         snykToken,
+				PollTimeout:       internal.GetPollTimeout(),
+				ConfirmCompletion: true,
+				DryRun:            false,
 			}
 
 			logging.Infof("Starting parallel Azure DevOps imports: %d targets, concurrency=%d", len(allImportTargets), config.Concurrency)

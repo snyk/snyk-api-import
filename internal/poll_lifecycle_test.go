@@ -245,3 +245,15 @@ func TestPollImportJob_MultiStepLifecycle(t *testing.T) {
 		t.Fatalf("expected imported-projects.log to contain 'multi-proj'; contents=%s", string(pdata))
 	}
 }
+
+// A job that was never polled cannot be confirmed, so requireOutcome must
+// not treat a missing polling URL as success.
+func TestPollImportJobOpts_EmptyPollingURL(t *testing.T) {
+	err := pollImportJobOpts(context.Background(), nil, "", "org", "int", Target{}, "", "token", time.Second, true)
+	if err == nil {
+		t.Fatal("expected an error when requireOutcome is set and there is no polling URL")
+	}
+	if err := pollImportJobOpts(context.Background(), nil, "", "org", "int", Target{}, "", "token", time.Second, false); err != nil {
+		t.Fatalf("best-effort polling should skip quietly, got %v", err)
+	}
+}

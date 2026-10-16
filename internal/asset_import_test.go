@@ -113,6 +113,7 @@ type mockAssetImportServer struct {
 	patchedAssetIDs  []string
 	createOrgBodies  []map[string]interface{}
 	importPaths      []string
+	jobStatusJSON    string // poll response; defaults to a completed job
 }
 
 func (m *mockAssetImportServer) handler(w http.ResponseWriter, r *http.Request) {
@@ -135,6 +136,13 @@ func (m *mockAssetImportServer) handler(w http.ResponseWriter, r *http.Request) 
 		m.createOrgBodies = append(m.createOrgBodies, body)
 		w.WriteHeader(http.StatusCreated)
 		_, _ = w.Write([]byte(fmt.Sprintf(`{"id":%q,"name":%q}`, m.createdOrgID, body["name"])))
+
+	case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/import/job-1"):
+		body := m.jobStatusJSON
+		if body == "" {
+			body = `{"status":"complete","logs":[]}`
+		}
+		_, _ = w.Write([]byte(body))
 
 	case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/integrations") && strings.Contains(r.URL.Path, "/v1/org/"):
 		_, _ = w.Write([]byte(m.integrationsJSON))
@@ -247,6 +255,38 @@ func TestRunAssetImport_EndToEnd(t *testing.T) {
 		if got := len(report.Skipped[reason]); got != count {
 			t.Errorf("skip reason %q: got %d, want %d (all skips: %#v)", reason, got, count, report.Skipped)
 		}
+	}
+}
+
+func TestRunAssetImport_FailedJobIsNotTagged(t *testing.T) {
+	for name, job := range map[string]string{
+		"job failed":          `{"status":"failed","error":"clone failed"}`,
+		"failed log in batch": `{"status":"complete","logs":[{"name":"acme/checkout-svc","status":"failed","projects":[]}]}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			m := &mockAssetImportServer{
+				t:                t,
+				assetsSearchBody: `{"data":[{"id":"asset-new","type":"repository","attributes":{"sources":["github"],"name":"checkout-svc","repository_url":"https://github.com/acme/checkout-svc","default_branch_name":"main","tags":{"__snyk_destination_org__":"checkout"}}}],"links":{}}`,
+				existingOrgsJSON: `{"id":"g","name":"g","orgs":[{"id":"org-checkout","name":"checkout"}]}`,
+				integrationsJSON: `{"github-enterprise":"integration-1"}`,
+				jobStatusJSON:    job,
+			}
+			srv := httptest.NewServer(http.HandlerFunc(m.handler))
+			defer srv.Close()
+			setupAssetImportEnv(t, srv.URL)
+			os.Unsetenv("SNYK_SKIP_POLL") // this test needs the job outcome
+
+			report, err := RunAssetImport(context.Background(), AssetImportOptions{GroupID: testGroupID})
+			if err != nil {
+				t.Fatalf("RunAssetImport returned error: %v", err)
+			}
+			if m.sawTagPatch {
+				t.Fatalf("asset must not be tagged when its import job failed, patched %v", m.patchedAssetIDs)
+			}
+			if len(report.Imported) != 0 || len(report.ImportErrors) == 0 {
+				t.Fatalf("expected an import error and no imports, got imported=%v errors=%v", report.Imported, report.ImportErrors)
+			}
+		})
 	}
 }
 
