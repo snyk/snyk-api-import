@@ -2,8 +2,8 @@ package internal
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -11,7 +11,7 @@ import (
 type AssetImportOptions struct {
 	GroupID         string
 	TagKey          string // defaults to DestinationOrgTagKey if empty
-	IntegrationType string // optional filter/disambiguator, e.g. "github-enterprise"
+	IntegrationType string // optional comma-separated priority list, e.g. "github-cloud-app,github-enterprise"
 	DryRun          bool
 	ExclusionGlobs  []string
 	BranchOverride  string
@@ -22,15 +22,14 @@ type AssetImportOptions struct {
 // as the reasons logged per asset, so a support engineer can read the report
 // and understand what happened without re-running with --debug.
 const (
-	SkipNoTag                = "no destination-org tag"
-	SkipExcluded             = "excluded"
-	SkipUnsupportedProvider  = "unsupported provider (out of scope)"
-	SkipMalformedURL         = "could not parse owner/repo from repository_url"
-	SkipNoBranch             = "no branch available"
-	SkipNoIntegration        = "no matching integration on destination org"
-	SkipAmbiguousIntegration = "multiple matching integrations; use --integration-type"
-	SkipAlreadyImported      = "already imported"
-	SkipOrgMoved             = "destination org tag changed since import (moved) - not re-importing automatically"
+	SkipNoTag               = "no destination-org tag"
+	SkipExcluded            = "excluded"
+	SkipUnsupportedProvider = "unsupported provider (out of scope)"
+	SkipMalformedURL        = "could not parse owner/repo from repository_url"
+	SkipNoBranch            = "no branch available"
+	SkipNoIntegration       = "no matching integration on destination org"
+	SkipAlreadyImported     = "already imported"
+	SkipOrgMoved            = "destination org tag changed since import (moved) - not re-importing automatically"
 
 	// dryRunPendingOrgID/dryRunUnresolvedIntegration are placeholders used only
 	// under --dry-run, for a candidate whose destination Org doesn't exist yet:
@@ -459,43 +458,40 @@ func parseAzureAsset(a RepositoryAsset) (project, repo string, ok bool) {
 	return ParseAzureProjectRepo(a.RepositoryURL)
 }
 
-// supportedIntegrationType excludes the legacy plain "github" integration.
-// Snyk lists it alongside "github-cloud-app" even when it isn't configured,
-// which made every Cloud App org look ambiguous.
-func supportedIntegrationType(typ string) bool {
-	return typ != "github"
+// defaultIntegrationPreference is both the set of integration types asset-import
+// supports per provider family and the priority order used when
+// --integrationType names none of them. The legacy plain "github" type is
+// deliberately absent: Snyk lists it alongside "github-cloud-app" even when it
+// isn't configured.
+var defaultIntegrationPreference = map[string][]string{
+	"github":      {"github-cloud-app", "github-server-app", "github-enterprise"},
+	"azure-repos": {"azure-repos"},
 }
 
-// resolveIntegration implements Rule 1's resolution chain: narrow the Org's
-// configured integrations to the provider family (a substring identifying that
-// family's integration types), then require an --integration-type match, a
-// unique match, or fail with a reason naming which case applied.
+// resolveIntegration picks the Org's integration for a provider family.
+// integrationType is an optional comma-separated priority list (e.g.
+// "github-cloud-app,github-enterprise"); the first listed type configured on
+// the Org wins. Entries that aren't a supported type for the family are
+// ignored, so a mixed-SCM run can pass "github-enterprise,azure-repos". With no
+// usable entry for the family, the family's default preference list applies.
 func resolveIntegration(integrations map[string]string, integrationType, family string) (string, error) {
-	// The override only applies to the family it names, so a mixed-SCM run
-	// passing --integrationType=github still resolves Azure assets by family.
-	if integrationType != "" && strings.Contains(integrationType, family) {
-		id, ok := integrations[integrationType]
-		if !ok || !supportedIntegrationType(integrationType) {
-			return "", fmt.Errorf("%s (%q not configured on this org)", SkipNoIntegration, integrationType)
+	supported := defaultIntegrationPreference[family]
+	var preference []string
+	for _, typ := range strings.Split(integrationType, ",") {
+		if typ = strings.TrimSpace(typ); slices.Contains(supported, typ) {
+			preference = append(preference, typ)
 		}
-		return id, nil
+	}
+	if len(preference) == 0 {
+		preference = supported
 	}
 
-	candidates := map[string]string{}
-	for typ, id := range integrations {
-		if strings.Contains(typ, family) && supportedIntegrationType(typ) {
-			candidates[typ] = id
-		}
-	}
-	switch len(candidates) {
-	case 0:
-		return "", errors.New(SkipNoIntegration)
-	case 1:
-		for _, id := range candidates {
+	for _, typ := range preference {
+		if id, ok := integrations[typ]; ok {
 			return id, nil
 		}
 	}
-	return "", errors.New(SkipAmbiguousIntegration)
+	return "", fmt.Errorf("%s (none of %s configured on this org)", SkipNoIntegration, strings.Join(preference, ", "))
 }
 
 func assetLabel(a RepositoryAsset) string {

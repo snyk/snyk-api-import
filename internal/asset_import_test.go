@@ -35,8 +35,8 @@ func TestIsGitHubProvider(t *testing.T) {
 }
 
 func TestResolveIntegrationTypeIgnoredForOtherFamily(t *testing.T) {
-	integrations := map[string]string{"github": "g", "azure-repos": "a"}
-	id, err := resolveIntegration(integrations, "github", providerAzure.integrationFamily)
+	integrations := map[string]string{"github-cloud-app": "g", "azure-repos": "a"}
+	id, err := resolveIntegration(integrations, "github-cloud-app,github-enterprise", providerAzure.integrationFamily)
 	if err != nil || id != "a" {
 		t.Fatalf("got %q, %v; want azure integration", id, err)
 	}
@@ -71,21 +71,44 @@ func TestResolveGitHubIntegration(t *testing.T) {
 			wantErr:      SkipNoIntegration,
 		},
 		{
-			name:         "ambiguous: both github-cloud-app and github-enterprise",
-			integrations: map[string]string{"github-cloud-app": "int-1", "github-enterprise": "int-2"},
-			wantErr:      SkipAmbiguousIntegration,
+			name:         "default preference: cloud app beats server app and enterprise",
+			integrations: map[string]string{"github-enterprise": "int-1", "github-server-app": "int-2", "github-cloud-app": "int-3"},
+			wantID:       "int-3",
 		},
 		{
-			name:            "--integration-type disambiguates",
+			name:         "default preference: server app beats enterprise",
+			integrations: map[string]string{"github-enterprise": "int-1", "github-server-app": "int-2"},
+			wantID:       "int-2",
+		},
+		{
+			name:            "custom priority list",
 			integrations:    map[string]string{"github-cloud-app": "int-1", "github-enterprise": "int-2"},
-			integrationType: "github-enterprise",
+			integrationType: "github-enterprise,github-cloud-app",
 			wantID:          "int-2",
 		},
 		{
-			name:            "--integration-type not configured",
+			name:            "priority list falls through to the first configured type",
+			integrations:    map[string]string{"github-enterprise": "int-1"},
+			integrationType: "github-cloud-app, github-enterprise",
+			wantID:          "int-1",
+		},
+		{
+			name:            "priority list with nothing configured",
 			integrations:    map[string]string{"github-cloud-app": "int-1"},
-			integrationType: "github-enterprise",
+			integrationType: "github-enterprise,github-server-app",
 			wantErr:         SkipNoIntegration,
+		},
+		{
+			name:            "plain github in the list is still ignored",
+			integrations:    map[string]string{"github": "int-1"},
+			integrationType: "github",
+			wantErr:         SkipNoIntegration,
+		},
+		{
+			name:            "list naming only another family falls back to the default",
+			integrations:    map[string]string{"github-cloud-app": "int-1"},
+			integrationType: "azure-repos",
+			wantID:          "int-1",
 		},
 	}
 	for _, tt := range tests {
