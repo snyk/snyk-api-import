@@ -54,12 +54,13 @@ single `SNYK_TOKEN` and nothing else.
    `github-enterprise` on the destination Org, because assets are discovered
    through a separate, group-level mechanism from the org-level import
    integrations. So this command always lists the destination Org's configured
-   integrations and looks for exactly one GitHub-family match. Zero matches:
-   skipped. More than one (e.g. an Org with both `github-cloud-app` and
-   `github-enterprise`): skipped unless `--integrationType` disambiguates.
-   The legacy plain `github` integration is not supported and is ignored:
-   Snyk lists it alongside `github-cloud-app` even when it isn't configured,
-   so an Org with only `github` is treated as having no matching integration.
+   integrations and takes the first one from a priority list that is
+   configured. For GitHub the default order is `github-cloud-app`,
+   `github-server-app`, `github-enterprise`; `--integrationType` replaces it
+   with your own comma-separated list. If none of the listed types is
+   configured, the repo is skipped. The legacy plain `github` integration is
+   not supported and is always ignored: Snyk lists it alongside
+   `github-cloud-app` even when it isn't configured.
    Azure Repos assets (`sources` contains `azure-devops`) resolve against the
    Org's `azure-repos` integration. The Azure Repos *organization* is not part
    of Snyk's import payload - it's carried by the integration - so the
@@ -75,8 +76,10 @@ single `SNYK_TOKEN` and nothing else.
   --groupId          Snyk group ID                                       [required]
   --tagKey           Tag key naming the destination Organization
                      (default: __snyk_destination_org__)
-  --integrationType  Restrict to / disambiguate a specific integration type,
-                     e.g. github-enterprise
+  --integrationType  Comma-separated integration types in priority order; the
+                     first one configured on the destination Org is used
+                     (default for GitHub: github-cloud-app,
+                     github-server-app,github-enterprise)
   --dryRun           Compute and print the full delta; create and import nothing
   --exclusionGlobs   Comma-separated glob patterns to exclude from each import
   --branch           Override the branch to import (default: each repo's default branch)
@@ -92,9 +95,9 @@ snyk-api-import asset-import --groupId=<snyk_group_id> --dryRun
 # Run it for real
 snyk-api-import asset-import --groupId=<snyk_group_id>
 
-# Only handle repositories on a specific integration (an Org has both
-# github-cloud-app and github-enterprise configured, for example)
-snyk-api-import asset-import --groupId=<snyk_group_id> --integrationType=github-enterprise
+# Override the integration priority order (here, prefer github-enterprise
+# over github-cloud-app on Orgs that have both)
+snyk-api-import asset-import --groupId=<snyk_group_id> --integrationType=github-enterprise,github-cloud-app
 
 # Clone settings from an existing template Org onto every newly created Org
 snyk-api-import asset-import --groupId=<snyk_group_id> --sourceOrgId=<template_org_id>
@@ -104,7 +107,7 @@ snyk-api-import asset-import --groupId=<snyk_group_id> --sourceOrgId=<template_o
 
 A summary is printed: Organizations created, Organizations that already existed,
 repositories imported, and repositories skipped - bucketed by reason (no tag,
-excluded, already imported, moved, no matching integration, ambiguous
+excluded, already imported, moved, no matching integration,
 integration, unsupported provider) so a support engineer can read it and
 understand what happened without re-running anything.
 

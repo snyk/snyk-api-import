@@ -128,7 +128,7 @@ func main() {
 			logging.Infof("      Lists imported projects from Snyk.")
 			logging.Infof("      Output: <source>-imported-targets.json in $SNYK_LOG_PATH")
 			logging.Infof("")
-			logging.Infof("  asset-import   --groupId <id> [--tagKey <key>] [--integrationType <type>] [--dryRun]")
+			logging.Infof("  asset-import   --groupId <id> [--tagKey <key>] [--integrationType <type[,type...]>] [--dryRun]")
 			logging.Infof("      Reads Snyk Asset Inventory tags, creates missing Orgs, and bulk-imports")
 			logging.Infof("      tagged GitHub repositories that aren't imported yet. Talks only to Snyk.")
 			logging.Infof("      GitHub only currently supported. Other SCMs coming soon.")

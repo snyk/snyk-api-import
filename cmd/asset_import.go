@@ -20,7 +20,7 @@ func AssetImportCmd(ctx context.Context, cfg internal.AppConfig) {
 	fs := flag.NewFlagSet("asset-import", flag.ExitOnError)
 	groupID := fs.String("groupId", "", "Snyk group ID (required)")
 	tagKey := fs.String("tagKey", internal.DestinationOrgTagKey, "Tag key whose value names the destination Snyk Organization")
-	integrationType := fs.String("integrationType", "", "Restrict to/disambiguate a specific integration type, e.g. github-enterprise")
+	integrationType := fs.String("integrationType", "", "Comma-separated integration types in priority order; the first one configured on the destination Org is used (default for GitHub: github-cloud-app,github-server-app,github-enterprise)")
 	dryRun := fs.Bool("dryRun", false, "Compute and print the full delta without creating or importing anything")
 	exclusionGlobs := fs.String("exclusionGlobs", "", "Comma-separated list of glob patterns to exclude from each import")
 	branch := fs.String("branch", "", "Override the branch to import (defaults to each repository's default branch)")
